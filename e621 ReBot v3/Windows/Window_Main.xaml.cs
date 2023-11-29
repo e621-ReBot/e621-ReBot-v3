@@ -58,7 +58,7 @@ namespace e621_ReBot_v3
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ReBot_Title.Text = $"e621 ReBot v{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion}";
+            ReBot_Title.Text = $"e621 ReBot v{FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion} Beta";
 
             ReBot_Menu_ListBox.SelectionChanged += ReBot_Menu_SelectionChanged;
             GBU_Upload.IsEnabledChanged += GBU_Upload_IsEnabledChanged;

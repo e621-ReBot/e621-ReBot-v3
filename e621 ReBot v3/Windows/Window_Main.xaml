@@ -17,17 +17,10 @@
             <ColumnDefinition Width="32"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
-        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2"/>
         <Border Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" BorderBrush="Black">
             <TextBlock x:Name="ReBot_Title" Text="e621 ReBot v3.0.0.0" Foreground="{DynamicResource ThemeForeground}" TextWrapping="Wrap" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False" Margin="16,0,0,2"/>
         </Border>
         <Rectangle x:Name="MoverRectangle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Fill="#00000000" Cursor="ScrollAll" MouseLeftButtonDown="MoverRectangle_MouseLeftButtonDown" Focusable="True" FocusVisualStyle="{x:Null}"/>
-
-        <Canvas Grid.Row="0" Grid.Column="0" Width="48" Height="48" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Image Source="/Resources/Browser/BrowserIcon_e621.png" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="48"/>
-            <Polygon x:Name="ReBot_e6Button" Points="1,17 8,5 22,5 29,17 22,29 8,29" Fill="Transparent" Cursor="{StaticResource Cursor_BrowserNav}" ToolTip="Open e621.net" Tag="https://e621.net/" MouseLeftButtonDown="ReBot_e6Button_MouseLeftButtonDown" Margin="8,8,0,0"/>
-        </Canvas>
         <StackPanel x:Name="Credit_StackPanel" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,256,0">
             <StackPanel Orientation="Horizontal" ToolTip="Hourly and total uploads remaining" Background="Transparent">
                 <Image IsHitTestVisible="False" Source="/Resources/MainWindow/Icon_Upload.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="20"/>
@@ -653,6 +646,11 @@
             </TabItem>
 
         </TabControl>
+        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2"/>
+        <Canvas Grid.Row="0" Grid.Column="0" Width="48" Height="48" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Image Source="/Resources/Browser/BrowserIcon_e621.png" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="48"/>
+            <Polygon x:Name="ReBot_e6Button" Points="1,17 8,5 22,5 29,17 22,29 8,29" Fill="Transparent" Cursor="{StaticResource Cursor_BrowserNav}" ToolTip="Open e621.net" Tag="https://e621.net/" MouseLeftButtonDown="ReBot_e6Button_MouseLeftButtonDown" Margin="8,8,0,0"/>
+        </Canvas>
 
     </Grid>
 </Window>

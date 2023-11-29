@@ -9,10 +9,11 @@ using System.Net;
 using HtmlAgilityPack;
 using System;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace e621_ReBot_v3
 {
-    internal static class Module_Updater
+    internal static partial class Module_Updater
     {
         internal static void CreateUpdateZip()
         {
@@ -58,6 +59,9 @@ namespace e621_ReBot_v3
             }
         }
 
+
+        [GeneratedRegex(@"(?:.+/v)(\d\.\d\.\d\.\d)")]
+        private static partial Regex VersionRegex();
         private static CookieContainer CookieContainerGitHub = new CookieContainer();
         internal static void Check4Update()
         {
@@ -82,19 +86,24 @@ namespace e621_ReBot_v3
             if (ReleaseNode != null)
             {
                 string ReleaseTag = ReleaseNode.Attributes["src"].Value.Replace("https://github.com/e621-ReBot/e621-ReBot-v3/releases/expanded_assets/v", null);
-                string[] CVSHolder = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                string[] LVSHolder = ReleaseTag.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                int CurrVerNum = (int)(int.Parse(CVSHolder[1]) * Math.Pow(10, 6) + int.Parse(CVSHolder[2]) * Math.Pow(10, 3) + int.Parse(CVSHolder[3]));
-                int UpdateVerNum = (int)(int.Parse(LVSHolder[1]) * Math.Pow(10, 6) + int.Parse(LVSHolder[2]) * Math.Pow(10, 3) + int.Parse(LVSHolder[3]));
-                if (UpdateVerNum > CurrVerNum)
+                Match MatchResult = VersionRegex().Match(ReleaseTag);
+                if (MatchResult.Success)
                 {
-                    DownloadUpdate(ReleaseNode.Attributes["src"].Value);
+                    ReleaseTag = MatchResult.Value;
+                    string[] CVSHolder = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                    string[] LVSHolder = ReleaseTag.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                    int CurrVerNum = (int)(int.Parse(CVSHolder[1]) * Math.Pow(10, 6) + int.Parse(CVSHolder[2]) * Math.Pow(10, 3) + int.Parse(CVSHolder[3]));
+                    int UpdateVerNum = (int)(int.Parse(LVSHolder[1]) * Math.Pow(10, 6) + int.Parse(LVSHolder[2]) * Math.Pow(10, 3) + int.Parse(LVSHolder[3]));
+                    if (UpdateVerNum > CurrVerNum)
+                    {
+                        DownloadUpdate(ReleaseNode.Attributes["src"].Value);
+                    }
+                    else
+                    {
+                        UpdateNotNeeded();
+                    }
+                    return;
                 }
-                else
-                {
-                    UpdateNotNeeded();
-                }
-                return;
             }
             UpdateError();
         }
