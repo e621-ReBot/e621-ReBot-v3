@@ -73,6 +73,7 @@ namespace e621_ReBot_v3
         {
             if (AppSettings.FirstRun)
             {
+                ReBot_Menu_ListBox.Visibility = Visibility.Visible;
                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "Since this is our first date, would you like to know more about me?", "e621 ReBot Tutorial", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                 {
@@ -87,10 +88,10 @@ namespace e621_ReBot_v3
             else
             {
                 if (!string.IsNullOrEmpty(AppSettings.APIKey)) ThreadPool.QueueUserWorkItem(state => Module_Credit.Credit_CheckAll());
-                ModuleEnabler();
             }
 
             Module_Updater.PreUpdateCheck();
+            ModuleEnabler();
             ErrorReporter();
 
             if (!string.IsNullOrEmpty(AppSettings.Note)) new Window_Notes().ShowDialog();

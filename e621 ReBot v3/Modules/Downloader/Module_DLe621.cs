@@ -308,7 +308,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         GrabAnotherAPIPage:
             Update_APIStatus($"Working on Tags - Page {PageCounter}", true);
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload(PostRequestString));
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PostRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}"));
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);
