@@ -1,0 +1,16 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.CustomControls.MediaSelectItem" 
+             mc:Ignorable="d" Width="202" Height="202" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1" SnapsToDevicePixels="True" UseLayoutRounding="True" Background="Transparent">
+
+    <Border BorderBrush="Black" BorderThickness="1" IsHitTestVisible="False">
+        <Grid IsHitTestVisible="False">
+            <Image x:Name="cThumbnail_Image" Source="/Resources/Window_Main/E6Image_Loading.png" RenderOptions.BitmapScalingMode="HighQuality" IsHitTestVisible="False"/>
+            <Polygon x:Name="cRating_Polygon" Width="24" Height="24" Points="0,0 0,24 24,24" Fill="Red" Stroke="Black" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-1,0,0,-1" IsHitTestVisible="False"/>
+            <local:Custom_TextWithOutline x:Name="cIsUploaded_TextBlock" Text="#1234567" TextAlignment="Center" Fill="Orange" FontSize="16" FontWeight="Bold" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,24" TextWrapping="Wrap" IsHitTestVisible="False"/>
+        </Grid>
+    </Border>
+</UserControl>

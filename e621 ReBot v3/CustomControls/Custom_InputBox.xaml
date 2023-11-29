@@ -1,0 +1,19 @@
+﻿<Window x:Class="e621_ReBot_v3.CustomControls.Custom_InputBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Custom_InputBox" Width="320" Height="80" ResizeMode="NoResize" UseLayoutRounding="True" SnapsToDevicePixels="True" Closed="Window_Closed" ContentRendered="Window_ContentRendered" Cursor="{StaticResource Cursor_Default}">
+
+    <Grid>
+        <Label Height="32" IsHitTestVisible="False" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="1" Margin="2">
+            <TextBlock x:Name="Description_Label" TextWrapping="Wrap" Text="Description"/>
+        </Label>
+
+        <TextBox x:Name="Input_TextBox" Height="24" Text="Title" Background="Transparent" VerticalAlignment="Bottom" BorderBrush="Black" VerticalContentAlignment="Center" AllowDrop="False" KeyDown="TextBox_KeyDown" TabIndex="1" GotKeyboardFocus="Input_TextBox_GotKeyboardFocus" Margin="2,0,33,2"/>
+
+        <Button x:Name="OK_Button" Width="32" Content="🗸" FontSize="16" Foreground="RoyalBlue" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" Click="OK_Button_Click" Margin="0,0,2,2" Height="24"/>
+
+    </Grid>
+</Window>

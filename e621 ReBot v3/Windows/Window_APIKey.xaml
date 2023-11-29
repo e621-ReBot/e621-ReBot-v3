@@ -1,0 +1,12 @@
+﻿<Window x:Class="e621_ReBot_v3.Window_APIKey"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="API key" Height="48" Width="200" WindowStyle="ToolWindow" ResizeMode="NoResize"  WindowStartupLocation="CenterOwner" Closed="Window_Closed" ShowInTaskbar="False">
+    
+    <Grid>
+        <PasswordBox x:Name="API_PasswordBox" MaxLength="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyDown="API_PasswordBox_KeyDown"/>
+    </Grid>
+</Window>

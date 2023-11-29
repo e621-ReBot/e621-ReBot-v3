@@ -1,0 +1,301 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace e621_ReBot_v3
+{
+    internal static class AppSettings
+    {
+        internal static readonly string GlobalUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0";
+        internal static bool DevMode = false;
+        internal static bool FirstRun = true;
+        internal static string AppName = "e621 ReBot";
+        internal static string? UserName;
+        internal static string? UserID;
+        internal static string? APIKey;
+        // - - - - - - - - - - - - - - - -
+        internal static ushort Volume = 25;
+        // - - - - - - - - - - - - - - - -
+        internal static ushort Update_Interval = 1;
+        internal static DateTime Update_LastCheck = DateTime.UtcNow;
+        // - - - - - - - - - - - - - - - -
+        internal static bool Grid_SaveSession = true;
+        // - - - - - - - - - - - - - - - -
+        internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
+        internal static ushort Download_ThreadsCount = 4;
+        // - - - - - - - - - - - - - - - -
+        internal static bool Browser_ClearCache = false;
+        // - - - - - - - - - - - - - - - -
+        internal static bool Upload_DontConvertVideos = true;
+        // - - - - - - - - - - - - - - - -
+        internal static bool Converter_DontConvertVideos = true;
+        // - - - - - - - - - - - - - - - -
+        internal static OrderedDictionary Bookmarks = new OrderedDictionary();
+        internal static List<string> Blacklist = new List<string>();
+        private static Dictionary<string, string> MediaRecords = new Dictionary<string, string>();
+        private static Dictionary<string, string> ArtistAliases = new Dictionary<string, string>();
+        internal static List<PoolItem> PoolWatcher = new List<PoolItem>();
+        internal static Dictionary<string, string> QuickTags = new Dictionary<string, string>();
+        // - - - - - - - - - - - - - - - -
+        internal static string? Note;
+
+        internal static void SaveSettings()
+        {
+            JObject JObjectTemp = new JObject
+            {
+                { "FirstRun",  FirstRun },
+                { "UserName",  UserName },
+                { "UserID",  UserID },
+                { "APIKey",  APIKey },
+                { "Volume", Volume },
+                { "ThemeBackground", ((SolidColorBrush)Application.Current.Resources["ThemeBackground"]).Color.ToString()},
+                { "ThemeForeground", ((SolidColorBrush)Application.Current.Resources["ThemeForeground"]).Color.ToString()},
+                { "ThemeFocus", ((SolidColorBrush)Application.Current.Resources["ThemeFocus"]).Color.ToString()},
+                { "Update_Interval", Update_Interval },
+                { "Update_LastCheck", Update_LastCheck },
+                { "Grid_SaveSession", Grid_SaveSession },
+                { "Downloads_FolderLocation", Download_FolderLocation },
+                { "Download_ThreadsCount", Download_ThreadsCount },
+                { "Browser_ClearCache", Browser_ClearCache },
+                { "Converter_DontConvertVideos", Converter_DontConvertVideos },
+                { "Note", Note }
+            };
+            if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
+            {
+                JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
+                JArray MediaJArray = new JArray();
+                foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
+                {
+                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                    MediaJArray.Last["Grid_ThumbnailDLStart"] = false;
+                }
+                JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
+            }
+            if (Bookmarks.Count > 0) JObjectTemp.Add("Bookmarks", JObject.FromObject(Bookmarks));
+            if (Blacklist.Any()) JObjectTemp.Add("Blacklist", JArray.FromObject(Blacklist));
+            if (MediaRecords.Any()) JObjectTemp.Add("MediaRecords", JObject.FromObject(MediaRecords));
+            if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
+            if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
+            if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JArray.FromObject(PoolWatcher));
+
+            string SaveSettingsString = JsonConvert.SerializeObject(JObjectTemp, Formatting.Indented);
+            File.WriteAllText("settings.json", SaveSettingsString);
+        }
+
+        internal static void LoadSettings()
+        {
+            if (File.Exists("settings.json"))
+            {
+                string LoadSettingsString = File.ReadAllText("settings.json");
+                JObject LoadSettingsJObject = JObject.Parse(LoadSettingsString);
+                foreach (JToken JTokenTemp in LoadSettingsJObject.Children())
+                {
+                    switch (JTokenTemp.Path)
+                    {
+                        case "DevMode":
+                            {
+                                DevMode = LoadSettingsJObject["DevMode"].Value<bool>();
+                                break;
+                            }
+                        case "FirstRun":
+                            {
+                                FirstRun = LoadSettingsJObject["FirstRun"].Value<bool>();
+                                break;
+                            }
+                        case "UserName":
+                            {
+                                UserName = LoadSettingsJObject["UserName"].Value<string>();
+                                AppName = $"e621 ReBot ({UserName})";
+                                Window_Main._RefHolder.STB_AppName.Text = AppName;
+                                break;
+                            }
+                        case "UserID":
+                            {
+                                UserID = LoadSettingsJObject["UserID"].Value<string>();
+                                break;
+                            }
+                        case "APIKey":
+                            {
+                                APIKey = LoadSettingsJObject["APIKey"].Value<string>();
+                                break;
+                            }
+                        case "Volume":
+                            {
+                                Volume = LoadSettingsJObject["Volume"].Value<ushort>();
+                                Window_Main._RefHolder.Settings_VolumeSlider.SetVolume(Volume);
+                                break;
+                            }
+                        case "ThemeBackground":
+                            {
+                                string BackgroundColorHex = LoadSettingsJObject["ThemeBackground"].Value<string>();
+                                Application.Current.Resources["ThemeBackground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(BackgroundColorHex));
+                                Window_Main._RefHolder.ColorBox_Background.Text = BackgroundColorHex.Substring(3);
+                                break;
+                            }
+                        case "ThemeForeground":
+                            {
+                                string ForegroundColorHex = LoadSettingsJObject["ThemeForeground"].Value<string>();
+                                Application.Current.Resources["ThemeForeground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(ForegroundColorHex));
+                                Window_Main._RefHolder.ColorBox_Foreground.Text = ForegroundColorHex.Substring(3);
+                                break;
+                            }
+                        case "ThemeFocus":
+                            {
+                                string FocusColorHex = LoadSettingsJObject["ThemeFocus"].Value<string>();
+                                Application.Current.Resources["ThemeFocus"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(FocusColorHex));
+                                Window_Main._RefHolder.ColorBox_Focus.Text = FocusColorHex.Substring(3);
+                                break;
+                            }
+                        case "Update_Interval":
+                            {
+                                Update_Interval = LoadSettingsJObject["Update_Interval"].Value<ushort>();
+                                ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
+                                break;
+                            }
+                        case "Update_LastCheck":
+                            {
+                                Update_LastCheck = LoadSettingsJObject["Update_LastCheck"].Value<DateTime>();
+                                break;
+                            }
+                        case "Grid_SaveSession":
+                            {
+                                Grid_SaveSession = LoadSettingsJObject["Grid_SaveSession"].Value<bool>();
+                                break;
+                            }
+                        case "Grid_Session":
+                            {
+                                JToken JTokenMedia = LoadSettingsJObject["Grid_Session"];
+                                foreach (JToken MediaItemTemp in JTokenMedia.Children())
+                                {
+                                    Module_Grabber._Grabbed_MediaItems.Add(MediaItemTemp.ToObject<MediaItem>());
+                                    if (MediaItemTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
+                                }
+                                Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
+                                break;
+                            }
+                        case "Download_FolderLocation":
+                            {
+                                Download_FolderLocation = LoadSettingsJObject["Download_FolderLocation"].Value<string>();
+                                break;
+                            }
+                        case "Download_ThreadsCount":
+                            {
+                                Download_ThreadsCount = LoadSettingsJObject["Download_ThreadsCount"].Value<ushort>();
+                                ((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName("RadionButton_DLT" + Download_ThreadsCount)).IsChecked = true;
+                                Module_Downloader.DLThreadsWaiting = Download_ThreadsCount;
+                                Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
+                                for (int i = 0; i < Download_ThreadsCount; i++)
+                                {
+                                    Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
+                                }
+                                break;
+                            }
+                        case "Browser_ClearCache":
+                            {
+                                Browser_ClearCache = LoadSettingsJObject["Browser_ClearCache"].Value<bool>();
+                                (Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
+                                break;
+                            }
+                        case "Converter_DontConvertVideos":
+                            {
+                                Converter_DontConvertVideos = LoadSettingsJObject["Converter_DontConvertVideos"].Value<bool>();
+                                break;
+                            }
+                        case "Blacklist":
+                            {
+                                Blacklist = LoadSettingsJObject["Blacklist"].ToObject<List<string>>();
+                                break;
+                            }
+                        case "Bookmarks":
+                            {
+                                Bookmarks = LoadSettingsJObject["Bookmarks"].ToObject<OrderedDictionary>();
+                                break;
+                            }
+                        case "MediaRecords":
+                            {
+                                MediaRecords = LoadSettingsJObject["MediaRecords"].ToObject<Dictionary<string, string>>();
+                                break;
+                            }
+                        case "ArtistAliases":
+                            {
+                                ArtistAliases = LoadSettingsJObject["ArtistAliases"].ToObject<Dictionary<string, string>>();
+                                break;
+                            }
+                        case "PoolWatcher":
+                            {
+                                PoolWatcher = LoadSettingsJObject["PoolWatcher"].ToObject<List<PoolItem>>();
+                                Window_Main._RefHolder.SettingsButton_PoolWatcher.IsEnabled = PoolWatcher.Any();
+                                break;
+                            }
+                        case "Note":
+                            {
+                                Note = LoadSettingsJObject["Note"].Value<string>();
+                                break;
+                            }
+                        case "QuickTags":
+                            {
+                                QuickTags = LoadSettingsJObject["QuickTags"].ToObject<Dictionary<string, string>>();
+                                break;
+                            }
+                    }
+                }
+
+                if (DevMode) 
+                {
+                    Window_Main._RefHolder.MakeUpdate_WButton.Visibility = Visibility.Visible;
+                    Window_Main._RefHolder.SettingsButton_DLGenders.Visibility = Visibility.Visible;
+                    Window_Main._RefHolder.SettingsButton_DLDNPs.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        internal static void MediaRecord_Check(MediaItem MediaItemRef)
+        {
+            if (MediaRecords.ContainsKey(MediaItemRef.Grab_MediaURL)) MediaItemRef.UP_UploadedID = MediaRecords[MediaItemRef.Grab_MediaURL];
+        }
+
+        internal static void MediaRecord_Add(MediaItem MediaItemRef)
+        {
+            MediaRecords.Add(MediaItemRef.Grab_MediaURL, MediaItemRef.UP_UploadedID);
+        }
+
+        internal static void MediaRecord_Remove(MediaItem MediaItemRef)
+        {
+            if (MediaRecords.ContainsKey(MediaItemRef.Grab_MediaURL)) MediaRecords.Remove(MediaItemRef.Grab_MediaURL);
+        }
+
+        internal static string? ArtistAlias_Check(MediaItem MediaItemRef)
+        {
+            string ArtistNameAtWebsite = $"{MediaItemRef.Grab_Artist}@{new Uri(MediaItemRef.Grab_PageURL).Host}";
+            return ArtistAliases.ContainsKey(ArtistNameAtWebsite) ? ArtistAliases[ArtistNameAtWebsite] : null;
+        }
+
+        internal static void ArtistAlias_Add(MediaItem MediaItemRef, string NewAlias)
+        {
+            string ArtistNameAtWebsite = $"{MediaItemRef.Grab_Artist}@{new Uri(MediaItemRef.Grab_PageURL).Host}";
+            if (ArtistAliases.ContainsKey(ArtistNameAtWebsite))
+            {
+                ArtistAliases[ArtistNameAtWebsite] = NewAlias;
+            }
+            else
+            {
+                ArtistAliases.Add(ArtistNameAtWebsite, NewAlias);
+            }
+        }
+
+        internal static void ArtistAlias_Remove(MediaItem MediaItemRef)
+        {
+            string ArtistNameAtWebsite = $"{MediaItemRef.Grab_Artist}@{new Uri(MediaItemRef.Grab_PageURL).Host}";
+            if (ArtistAliases.ContainsKey(ArtistNameAtWebsite)) ArtistAliases.Remove(ArtistNameAtWebsite);
+        }
+    }
+}

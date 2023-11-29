@@ -1,0 +1,123 @@
+﻿<UserControl x:Name="GridVE_UserControl" x:Class="e621_ReBot_v3.CustomControls.GridVE"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:e621_ReBot_v3.CustomControls"
+             mc:Ignorable="d"
+             Width="200" Height="200" MaxWidth="200" MaxHeight="200" MinWidth="160" MinHeight="160" Margin="2" Background="Transparent" ScrollViewer.VerticalScrollBarVisibility="Disabled" UseLayoutRounding="True" SnapsToDevicePixels="True" IsTabStop="False" MouseLeftButtonDown="GridVE_UserControl_MouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0, 0" ContextMenuOpening="GridVE_UserControl_ContextMenuOpening">
+
+    <UserControl.Resources>
+        <Style x:Key="cCheckBoxUP" TargetType="{x:Type CheckBox}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="Background" Value="DimGray"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Border x:Name="RectangleBackground" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Width="16" Height="16">
+                            <TextBlock x:Name="CheckSymbol" Foreground="{TemplateBinding Foreground}" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="▲" Opacity="0"/>
+                            <!--Text="✔"-->
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="DimGray"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="DimGray"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="LimeGreen"/>
+                                <Setter Property="Opacity" TargetName="CheckSymbol" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="cCheckBoxDL" TargetType="{x:Type CheckBox}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="Background" Value="DimGray"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Border x:Name="RectangleBackground" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Width="16" Height="16">
+                            <TextBlock x:Name="CheckSymbol" Foreground="{TemplateBinding Foreground}" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="▼" Opacity="0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="DimGray"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="DimGray"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" TargetName="RectangleBackground" Value="RoyalBlue"/>
+                                <Setter Property="Opacity" TargetName="CheckSymbol" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Storyboard x:Key="ScaleIn">
+            <DoubleAnimation Storyboard.TargetName="ScaleTransformation" Storyboard.TargetProperty="ScaleX" From="0" To="1" Duration="0:0:0.200"/>
+            <DoubleAnimation Storyboard.TargetName="ScaleTransformation" Storyboard.TargetProperty="ScaleY" From="0" To="1" Duration="0:0:0.200"/>
+        </Storyboard>
+
+        <Storyboard x:Key="ScaleOut" Completed="RemoveControl">
+            <DoubleAnimation Storyboard.TargetName="ScaleTransformation" Storyboard.TargetProperty="ScaleX" From="1" To="0" Duration="0:0:0.300"/>
+            <DoubleAnimation Storyboard.TargetName="ScaleTransformation" Storyboard.TargetProperty="ScaleY" From="1" To="0" Duration="0:0:0.300"/>
+            <DoubleAnimation Storyboard.TargetName="RotateTransformation" Storyboard.TargetProperty="Angle" From="0" To="180" Duration="0:0:0.300"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform x:Name="ScaleTransformation" ScaleX="1" ScaleY="1"/>
+            <RotateTransform x:Name="RotateTransformation" Angle="0"/>
+        </TransformGroup>
+    </UserControl.RenderTransform>
+
+    <UserControl.ContextMenu>
+        <ContextMenu IsTabStop="False">
+            <MenuItem Header="Copy Source URL" Click="MenuItem_Click_Source"/>
+            <MenuItem Header="Copy Media URL" Click="MenuItem_Click_Media"/>
+            <Separator/>
+            <MenuItem Name="MoveUp" Header="Decrease Media's Index" Click="MenuItem_Click_Move" Tag="-1"/>
+            <MenuItem Name="MoveDown" Header="Increase Media's Index" Click="MenuItem_Click_Move" Tag="1"/>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
+    <Grid>
+        <Image x:Name="cThumbnail_Image" IsHitTestVisible="False" Source="/Resources/MainWindow/E6Image_Loading.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"/>
+        
+        <Grid Margin="2">
+            <local:Custom_TextWithOutline x:Name="cTagWarning_TextBlock" Text="T" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontWeight="Black" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="16" Height="28" Margin="0,0,1,16" ToolTip="Media has less than minimum required tags.&#xA;Uploading like this may lead to getting a record." FontSize="20"/>
+
+            <CheckBox x:Name="cDL_CheckBox" Style="{StaticResource cCheckBoxDL}"  Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="1" ClickMode="Press" Focusable="False" Checked="CDL_CheckBox_CheckChanged" Unchecked="CDL_CheckBox_CheckChanged" ToolTip="Select for download."/>
+
+            <CheckBox x:Name="cUpload_CheckBox" Style="{StaticResource cCheckBoxUP}"  Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="1" ClickMode="Press" Focusable="False" Checked="CUpload_CheckBox_CheckChanged" Unchecked="CUpload_CheckBox_CheckChanged" IsEnabledChanged="CUpload_CheckBox_IsEnabledChanged" ToolTip="Select for upload."/>
+
+            <DockPanel x:Name="IsUploaded_DockPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="{StaticResource Cursor_ReBotNav}" Background="Transparent" MouseLeftButtonDown="IsUploaded_DockPanel_MouseLeftButtonDown" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser.">
+                <local:Custom_TextWithOutline x:Name="cIsUploaded_TextBlock" Text="#1234567" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontSize="24" FontWeight="Bold" StrokeThickness="2" IsHitTestVisible="False" Width="120"/>
+            </DockPanel>
+        </Grid>
+        
+        <Border x:Name="BorderHighlight" BorderBrush="RoyalBlue" BorderThickness="1">
+            <Grid>
+                <Polygon x:Name="cRating_Polygon" Width="24" Height="24" Points="0,0 0,24 24,24" Fill="Red" Stroke="Black" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
+                <Polygon x:Name="cIsSuperior_Polygon" Width="24" Height="24" Points="0,0 24,0 0,24" Fill="Orange" Stroke="Black" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="{StaticResource Cursor_ReBotNav}" ToolTip="Click to navigate to post.&amp;#xA;Alt+Click to open in your default browser." MouseLeftButtonDown="CIsSuperior_Polygon_MouseLeftButtonDown"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

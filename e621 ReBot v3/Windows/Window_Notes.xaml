@@ -1,0 +1,14 @@
+﻿<Window x:Class="e621_ReBot_v3.Window_Notes"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Notes" Height="256" Width="512" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded" Closed="Window_Closed" ShowInTaskbar="False">
+
+    <Grid>
+        <TextBox x:Name="Notes_TextBox" Background="Silver" VerticalScrollBarVisibility="Visible" Margin="2,2,2,26" TabIndex="1" TextWrapping="Wrap" KeyDown="Notes_TextBox_KeyDown"/>
+
+        <Button x:Name="DeleteNote_Button" Foreground="Black" Content="Delete Note" Height="24" VerticalAlignment="Bottom" Margin="2,0,2,2" Click="DeleteNote_Button_Click" Cursor="Hand"/>
+    </Grid>
+</Window>

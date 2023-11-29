@@ -1,0 +1,29 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls"
+        x:Class="e621_ReBot_v3.Window_PoolWatcher"
+        mc:Ignorable="d"
+        Title="Pool Watcher" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinHeight="210" MaxHeight="810" MinWidth="172" MaxWidth="648" Loaded="Window_Loaded" SizeToContent="WidthAndHeight" Closed="Window_Closed" ShowInTaskbar="False">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1" >
+            <StackPanel x:Name="SortPoolWatcher_StackPanel" HorizontalAlignment="Left" Orientation="Horizontal" Margin="4,0,4,0">
+                <TextBlock TextWrapping="Wrap" Text="Sort by:" VerticalAlignment="Center"/>
+                <RadioButton Content="#" VerticalAlignment="Center" Margin="4,2,0,0" ClickMode="Press" Tag="0" IsChecked="True" Click="SortRadioButton_Click"/>
+                <RadioButton Content="ID" VerticalAlignment="Center" Margin="4,2,0,0" ClickMode="Press" Tag="1" Click="SortRadioButton_Click"/>
+                <RadioButton Content="Name" VerticalAlignment="Center" Margin="4,2,0,0" ClickMode="Press" Tag="2" Click="SortRadioButton_Click"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <WrapPanel x:Name="PoolWatcher_WrapPanel" Margin="2,2,0,0"/>
+        </ScrollViewer>
+    </Grid>
+</Window>

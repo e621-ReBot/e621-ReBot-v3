@@ -1,0 +1,61 @@
+﻿<Popup x:Class="e621_ReBot_v3.CustomControls.Custom_SuggestBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             MinWidth="16" MinHeight="16" MaxWidth="360" MaxHeight="256" UseLayoutRounding="True" SnapsToDevicePixels="True" PreviewMouseWheel="SuggestBox_PreviewMouseWheel">
+
+    <Grid>
+        <DockPanel>
+            <ListBox Name="SuggestBox" IsTextSearchEnabled="False" LostFocus="SuggestBox_LostFocus" SelectionChanged="SuggestBox_SelectionChanged">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border Name="ListItemBorder" BorderBrush="Transparent" BorderThickness="1">
+                                        
+                                        <StackPanel Name="ListBoxItemPanel" Orientation="Horizontal" Background="Transparent" MouseDown="ListBoxItemPanel_MouseDown" >
+                                            <TextBlock x:Name="ContentText" Text="{TemplateBinding Content}" Padding="2,0,2,0" MinWidth="32" MaxWidth="192" TextTrimming="CharacterEllipsis" IsHitTestVisible="False"/>
+                                            
+                                            <Border Margin="2,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0" Visibility="{Binding ElementName=TagText, Path=Visibility}" IsHitTestVisible="False">
+                                                <TextBlock x:Name="TagText" Text="{TemplateBinding Tag}" Padding="2,0,2,0" MaxWidth="300" TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="Text" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                            
+                                        </StackPanel>
+                                        
+                                    </Border>
+                                    
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ListItemBorder" Property="BorderBrush" Value="{StaticResource ThemeFocus}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter TargetName="ListBoxItemPanel" Property="Background" Value="Silver"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <d:ListBoxItem Content="Test0" Tag="Test000"/>
+                <d:ListBoxItem Content="Test1" Tag="Test111"/>
+                <d:ListBoxItem Content="Test2" Tag="Test222"/>
+            </ListBox>
+            <ScrollBar x:Name="SuggestScrollBar" HorizontalAlignment="Right" Width="8" MinWidth="8" SmallChange="1" LargeChange="14"  Minimum="0" IsTabStop="False" DockPanel.Dock="Right" IsHitTestVisible="False" Maximum="13" Margin="0,-17,0,-17"/>
+        </DockPanel>
+    </Grid>
+</Popup>

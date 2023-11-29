@@ -1,0 +1,658 @@
+﻿<Window x:Class="e621_ReBot_v3.Window_Main"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:customcontrols="clr-namespace:e621_ReBot_v3.CustomControls"
+        mc:Ignorable="av" 
+        Title="e621 ReBot v3" Width="1280" Height="720" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False"
+        Icon="/Resources/ReBot_Icon.ico" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" Closing="Window_Closing" Activated="Window_Activated" >
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="225*"/>
+            <RowDefinition Height="122*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="32"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2"/>
+        <Border Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" BorderBrush="Black">
+            <TextBlock x:Name="ReBot_Title" Text="e621 ReBot v3.0.0.0" Foreground="{DynamicResource ThemeForeground}" TextWrapping="Wrap" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False" Margin="16,0,0,2"/>
+        </Border>
+        <Rectangle x:Name="MoverRectangle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Fill="#00000000" Cursor="ScrollAll" MouseLeftButtonDown="MoverRectangle_MouseLeftButtonDown" Focusable="True" FocusVisualStyle="{x:Null}"/>
+
+        <Canvas Grid.Row="0" Grid.Column="0" Width="48" Height="48" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Image Source="/Resources/Browser/BrowserIcon_e621.png" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="48"/>
+            <Polygon x:Name="ReBot_e6Button" Points="1,17 8,5 22,5 29,17 22,29 8,29" Fill="Transparent" Cursor="{StaticResource Cursor_BrowserNav}" ToolTip="Open e621.net" Tag="https://e621.net/" MouseLeftButtonDown="ReBot_e6Button_MouseLeftButtonDown" Margin="8,8,0,0"/>
+        </Canvas>
+        <StackPanel x:Name="Credit_StackPanel" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,256,0">
+            <StackPanel Orientation="Horizontal" ToolTip="Hourly and total uploads remaining" Background="Transparent">
+                <Image IsHitTestVisible="False" Source="/Resources/MainWindow/Icon_Upload.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="20"/>
+                <TextBlock x:Name="CreditUpload_TextBlock" TextWrapping="Wrap" Text="30/10" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Margin="4,0,0,2"/>
+            </StackPanel>
+            <StackPanel Margin="32,0,0,0" ToolTip="Hourly image flags remaining" Background="Transparent" Orientation="Horizontal">
+                <Image IsHitTestVisible="False" Source="/Resources/MainWindow/Icon_Flag.png" Height="20"/>
+                <TextBlock x:Name="CreditFlags_TextBlock" TextWrapping="Wrap" Text="10" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Margin="2,0,0,2" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="32,0,0,0" ToolTip="Hourly note edits remaining" Background="Transparent">
+                <Image IsHitTestVisible="False" Source="/Resources/MainWindow/Icon_Note.png" VerticalAlignment="Center" HorizontalAlignment="Left" Height="16"/>
+                <TextBlock x:Name="CreditNotes_TextBlock" TextWrapping="Wrap" Text="50" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Margin="4,0,0,2" HorizontalAlignment="Left"/>
+            </StackPanel>
+
+        </StackPanel>
+
+
+
+        <StackPanel x:Name="Menu_StackPanel" Grid.Column="1" Height="23" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft">
+
+            <Button x:Name="WindowButton_Close" Style="{StaticResource ButtonStyle_CloseBtn}" BorderBrush="Black" BorderThickness="0,0,1,0" ToolTip="Close" Click="FormButton_Close_Click" Focusable="True" Width="24">
+                <Image Source="/Resources/MainWindow/Button_Close.png" IsHitTestVisible="False"/>
+            </Button>
+            <Button x:Name="WindowButton_Minimize" Style="{StaticResource ButtonStyle_MinimizeBtn}" BorderThickness="0,0,1,0" ToolTip="Minimize" Click="FormButton_Minimize_Click" Focusable="True" Width="24">
+                <Image Source="/Resources/MainWindow/Button_Minimize.png" IsHitTestVisible="False" Margin="0,0,0,2"/>
+            </Button>
+            <Image Source="/Resources/MainWindow/Banner_Tail.png" IsHitTestVisible="False"/>
+            <Button x:Name="WindowButton_KoFi" Margin="0,0,0,1" VerticalAlignment="Bottom" BorderThickness="0" ToolTip="Support me on Ko-Fi." Tag="https://ko-fi.com/e621rebot" Cursor="Hand" Click="ButtonNavTag_Click" Focusable="True" Height="16">
+                <Image Source="/Resources/MainWindow/Ko-Fi ButtonSmall.png" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
+            </Button>
+
+        </StackPanel>
+
+
+
+        <ListBox x:Name="ReBot_Menu_ListBox" Style="{StaticResource ListBoxStyle_Menu}" Grid.Row="1" Grid.Column="0" Width="32" Margin="0,29,0,0" ItemContainerStyle="{StaticResource ListBoxItemStyle_Menu}" Focusable="False" IsTextSearchEnabled="False" Grid.RowSpan="2">
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Welcome">
+                <Image Source="/Resources/MainWindow/MenuIcon_Welcome.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem x:Name="ListBoxItem_Browser" Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Browser" PreviewMouseLeftButtonDown="ListBoxItem_Browser_PreviewMouseLeftButtonDown">
+                <Image Source="/Resources/MainWindow/MenuIcon_Browser.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Grid">
+                <Image Source="/Resources/MainWindow/MenuIcon_Grid.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Downloads">
+                <Image Source="/Resources/MainWindow/MenuIcon_Downloads.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Jobs">
+                <Image Source="/Resources/MainWindow/MenuIcon_Jobs.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Logs">
+                <Image Source="/Resources/MainWindow/MenuIcon_Logs.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Settings">
+                <Image Source="/Resources/MainWindow/MenuIcon_Settings.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+            <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Information">
+                <Image Source="/Resources/MainWindow/MenuIcon_Information.png" IsHitTestVisible="False"/>
+            </ListBoxItem>
+
+        </ListBox>
+
+
+
+        <TabControl x:Name="ReBot_TabControl" Margin="31,20,-2,-2" Background="Transparent"  SelectedIndex="0" BorderThickness="0" Grid.ColumnSpan="2" Grid.RowSpan="3">
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="{x:Type TabItem}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <TabItem x:Name="ReBot_WelcomeTab" Header="TabItem" Background="Transparent">
+                <Grid>
+                    <Image Width="256" Height="256" Source="/Resources/MainWindow/ReBot_Logo.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button x:Name="Notes_WButton" Content="Open Notes" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,8" Width="128" Height="32" ToolTip="Leave a note for yourself that will appear when application starts." Click="Notes_WButton_Click" Cursor="Hand"/>
+                    <Button x:Name="MakeUpdate_WButton" Content="Make Update" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,48" Width="128" Height="32" Click="MakeUpdate_WButton_Click" Cursor="Hand"/>
+
+                    <TextBlock x:Name="Update_TextBlock" Text="Checking for updates..." Foreground="{DynamicResource ThemeFocus}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" FontSize="16" FontStyle="Italic" FontWeight="Bold"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_BrowserTab" Header="TabItem" Background="Transparent" >
+                <Grid x:Name="BrowserTabGrid">
+                    <customcontrols:BrowserControl x:Name="ReBot_Browser" Visibility="Hidden"/>
+                    <Grid x:Name="BrowserLoadingIcon" Width="200" Height="200" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,260,0,0">
+                        <customcontrols:Custom_TextWithOutline Width="180" Height="32" Text="Initilizing Browser..." FontSize="18" Fill="{DynamicResource ThemeFocus}" Margin="8,0,0,0" FontWeight="Bold" StrokeThickness="2"/>
+                        <Canvas>
+                            <Canvas.RenderTransform>
+                                <RotateTransform x:Name="CanvasTransform" CenterX="100" CenterY="100"/>
+                            </Canvas.RenderTransform>
+                            <Canvas.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Angle" Storyboard.TargetName="CanvasTransform" From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Canvas.Triggers>
+                            <Path Stroke="Black" StrokeThickness="10" Data="M 0,100 A 100,100 0 1 0 100,0"/>
+                            <Path Stroke="{DynamicResource ThemeFocus}" StrokeThickness="8" Data="M 0,100 A 100,100 0 1 0 100,0"/>
+                        </Canvas>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_GridTab" Background="Transparent">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="25"/>
+                    </Grid.RowDefinitions>
+
+                    <WrapPanel Grid.Row="0" x:Name="Grid_GridVEPanel" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="Transparent" Margin="8,8,0,16"/>
+
+                    <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,1,0,0"/>
+                    <Button x:Name="GB_Left" Grid.Row="1" Style="{StaticResource ButtonStyle_Grid}"  Content="◁" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="0,0,1,0" ToolTip="Previous page" IsVisibleChanged="GB_Left_IsVisibleChanged" Click="GB_Left_Click"/>
+                    <Button x:Name="GB_Right" Grid.Row="1" Style="{StaticResource ButtonStyle_Grid}" Content="▷" HorizontalAlignment="Right" VerticalAlignment="Center" BorderThickness="1,0,0,0" ToolTip="Next page" IsVisibleChanged="GB_Right_IsVisibleChanged" Click="GB_Right_Click"/>
+
+                    <DockPanel LastChildFill="False" Grid.Row="1" HorizontalAlignment="Center" Margin="0,1,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button x:Name="GBD_Download" Width="96" Content="▼ Download ▼" BorderThickness="1,0,1,0" Margin="-1,0,0,0" IsEnabled="False" ToolTip="Download all selected media.&#xA;Shift+Click to download selected media on this page only.&#xA;&#xA;Media that is already downloaded will be skipped." Click="GBD_Download_Click">
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Foreground" Value="RoyalBlue"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button x:Name="GBD_Select" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="▼ ✓" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Select_Click" ToolTip="Select media on current page.&#xA;Ctrl+Click to select all media." IsEnabled="False"/>
+                            <Button x:Name="GBD_Inverse" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="✓ ⇄ ✘" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Inverse_Click" ToolTip="Inverse selections on current page.&#xA;Ctrl+Click to inverse selections on all media." IsEnabled="False"/>
+                            <Button x:Name="GBD_Unselect" Width="80" Style="{StaticResource ButtonStyle_Grid}" Content="▼ ✘" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Unselect_Click" ToolTip="Unselect media on current page.&#xA;Ctrl+Click to unselect all media." IsEnabled="False"/>
+                        </StackPanel>
+
+                        <Button x:Name="GB_Clear" Width="128" Content="☠   Clear   ☠" BorderThickness="1,0,1,0" Margin="96,0,96,0" Click="GB_Clear_Click" ToolTip="Remove all media.&#xA;Shift+Click to remove media on current page.&#xA;Ctrl+Click to remove only the media that is already uploaded." IsEnabled="False">
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="True">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="GBU_Unselect" Width="80" Style="{StaticResource ButtonStyle_Grid}" Content="▲ ✘" BorderThickness="1,0,1,0" Margin="0,0,-1,0" Click="GBU_Unselect_Click" ToolTip="Unselect media on current page.&#xA;Ctrl+Click to unselect all media." IsEnabled="False"/>
+                            <Button x:Name="GBU_Inverse" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="✘ ⇆ ✓" BorderThickness="1,0,1,0" Margin="0,0,-1,0" Click="GBU_Inverse_Click" ToolTip="Inverse selections on current page.&#xA;Ctrl+Click to inverse selections on all media." IsEnabled="False"/>
+                            <Button x:Name="GBU_Select" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="▲ ✓" BorderThickness="1,0,1,0" Margin="0,0,-1,0" Click="GBU_Select_Click" ToolTip="Select media on current page.&#xA;Ctrl+Click to select all media." IsEnabled="False"/>
+                            <Button x:Name="GBU_Upload" Width="99" Content="▲ Upload ▲" BorderThickness="1,0,1,0" Margin="0,0,-1,0" IsEnabled="False" ToolTip="Upload all selected media.&#xA;Shift+Click to upload selected media on this page only.&#xA;&#xA;Media that is already uploaded will be skipped." Click="GBU_Upload_Click">
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Foreground" Value="LimeGreen"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <TextBlock x:Name="GBTB_Center" Grid.Row="0" TextWrapping="Wrap" Text="2 / 3" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}" Margin="0,0,0,2"/>
+                    <TextBlock x:Name="GBTB_Left" Grid.Row="1" TextWrapping="Wrap" Text="1" Margin="40,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}"/>
+                    <TextBlock x:Name="GBTB_Right" Grid.Row="1" TextWrapping="Wrap" Text="3" Margin="0,0,40,0" HorizontalAlignment="Right" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}"/>
+
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_DownloadTab" Background="Transparent">
+                <Grid>
+                    <Grid x:Name="Downloader_GridBox" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0" MaxWidth="820" MaxHeight="444" MinWidth="480" MinHeight="240">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1">
+                            <TextBlock Text="Downloader" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0"/>
+                        </Border>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+                        <Grid>
+                            <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="Download Threads:" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,8,0"/>
+                                    <StackPanel x:Name="DLThreads_StackPanel" Orientation="Horizontal" Margin="0,2,0,0">
+                                        <RadioButton x:Name="RadionButton_DLT1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT2" Content="2" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT4" Content="4" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" IsChecked="True" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <Border BorderBrush="Black" HorizontalAlignment="Right" BorderThickness="1,0,0,0">
+                                <Button x:Name="Download_DownloadFolder" BorderThickness="0" Click="Download_DownloadFolder_Click" Height="30" Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal" Margin="4,2,4,2">
+                                        <Image Source="/Resources/MainWindow/FolderIcon.png" />
+                                        <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="Downloads"/>
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                        </Grid>
+                        <WrapPanel x:Name="Download_DownloadVEPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,4,4" IsHitTestVisible="False" LayoutUpdated="Download_DownloadVEPanel_LayoutUpdated">
+                            <customcontrols:DownloadVE Margin="4,4,0,0"/>
+                            <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        </WrapPanel>
+
+                    </Grid>
+                    <Grid x:Name="DownloadQueue_GridBox" HorizontalAlignment="Right" Margin="0,8,8,136" Width="400">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.RowSpan="3" BorderBrush="Black" BorderThickness="1"/>
+
+                        <CheckBox x:Name="DownloadQueue_CheckBox" Grid.Row="0" Style="{DynamicResource CheckBoxStyle_Large}" Content="Download Queue" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Margin="8,0,0,0" IsChecked="True"/>
+                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageUp" Width="24" Content="▲" ToolTip="Show previous page of Download Queue." HorizontalAlignment="Left"  Cursor="Hand" BorderThickness="1,0,1,0" Click="DownloadQueue_DownloadPageUp_Click" IsEnabled="False" />
+                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageDown" Width="24" Content="▼" ToolTip="Show next page of Download Queue." HorizontalAlignment="Left" Cursor="Hand" BorderThickness="1,0,1,0" Margin="23,0,0,0" Click="DownloadQueue_DownloadPageDown_Click" IsEnabled="False" />
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+                        <Button x:Name="DownloadQueue_CancelAPIDL" Content="Cancel" BorderThickness="1,0,1,0" ToolTip="Cancel grabbing further download links from e621 API." HorizontalAlignment="Right" Margin="0,0,31,0" Width="64" Height="32" IsEnabled="False" Click="DownloadQueue_CancelAPIDL_Click"/>
+                        <Button x:Name="DownloadQueue_ReverseDownloadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order" HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
+                        <TextBlock x:Name="DownloadQueue_StatusTextBlock" Text="API DL Status: Suspended." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="52,0,0,0"/>
+                        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+
+                        <customcontrols:Custom_TreeView Grid.Row="2" x:Name="DownloadQueue_TreeView" Padding="4,0,4,0" Margin="0" ContextMenuOpening="DownloadTreeViewContextMenu_Opening">
+                            <customcontrols:Custom_TreeView.Resources>
+                                <ContextMenu x:Key="DownloadTreeViewContextMenu" IsTabStop="False" Opened="DownloadTreeViewContextMenu_Opened" Closed="DownloadTreeViewContextMenu_Closed">
+                                    <MenuItem Header="Remove" Click="DownloadTreeViewContextMenu_Remove"/>
+                                    <MenuItem Header="Remove All" Click="DownloadTreeViewContextMenu_RemoveAll"/>
+                                    <Separator/>
+                                    <MenuItem Header="Expand All" Click="TreeViewContextMenu_ExpandAll"/>
+                                    <MenuItem Header="Collapse All" Click="TreeViewContextMenu_CollapseAll"/>
+                                </ContextMenu>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_DownloaderCustom}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource DownloadTreeViewContextMenu}"/>
+                                </Style>
+                            </customcontrols:Custom_TreeView.Resources>
+                            <customcontrols:Custom_TreeView.Style>
+                                <StaticResource ResourceKey="TreeViewStyle_Custom"/>
+                            </customcontrols:Custom_TreeView.Style>
+                        </customcontrols:Custom_TreeView>
+
+                    </Grid>
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="400" Height="120" Margin="0,0,8,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,1">
+                            <TextBlock Text="Downloader Message Log" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <TextBox x:Name="Download_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="1,1,1,1" VerticalScrollBarVisibility="Auto" UndoLimit="0" HorizontalScrollBarVisibility="Auto" TextWrapping="WrapWithOverflow"/>
+
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_JobsTab" Background="Transparent">
+                <Grid>
+
+                    <Grid x:Name="Grab_GridBox" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Width="610" Height="335">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+                        <Grid IsHitTestVisible="False">
+                            <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                                <TextBlock x:Name="Grab_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Border>
+                            <StackPanel x:Name="Grab_PogressBarPanel" HorizontalAlignment="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Height="32" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Vertical" Value="100" Visibility="Hidden"/>
+                                <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Value="75" Height="32" Orientation="Vertical" Margin="-1,0,0,0" Visibility="Hidden"/>
+                                <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Value="50" Height="32" Orientation="Vertical" Margin="-1,0,0,0" Visibility="Hidden"/>
+                                <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Value="25" Height="32" Orientation="Vertical" Margin="-1,0,0,0" Visibility="Hidden"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <customcontrols:Custom_TreeView Grid.Row="1" x:Name="Grab_TreeView" Margin="1,0,1,1">
+                            <customcontrols:Custom_TreeView.Resources>
+                                <!--https://stackoverflow.com/a/14625366/8810532-->
+                                <ContextMenu x:Key="GrabTreeViewContextMenu" x:Shared="False" IsTabStop="False">
+                                    <MenuItem Header="Remove" Click="GrabTreeViewContextMenu_Remove"/>
+                                    <MenuItem Header="Remove All" Click="GrabTreeViewContextMenu_RemoveAll"/>
+                                    <Separator/>
+                                    <MenuItem Header="Expand All" Click="TreeViewContextMenu_ExpandAll"/>
+                                    <MenuItem Header="Collapse All" Click="TreeViewContextMenu_CollapseAll"/>
+                                </ContextMenu>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_Custom}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource GrabTreeViewContextMenu}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Mode=Self}}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource ThemeFocus}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </customcontrols:Custom_TreeView.Resources>
+                            <customcontrols:Custom_TreeView.Style>
+                                <StaticResource ResourceKey="TreeViewStyle_Custom"/>
+                            </customcontrols:Custom_TreeView.Style>
+                        </customcontrols:Custom_TreeView>
+                    </Grid>
+
+                    <Grid x:Name="Upload_GridBox" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Width="610" Height="335">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                            <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order" HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+
+                        <customcontrols:Custom_TreeView Grid.Row="1" x:Name="Upload_TreeView" Margin="1,0,1,1">
+                            <customcontrols:Custom_TreeView.Resources>
+                                <ContextMenu x:Key="UploadTreeViewContextMenu" x:Shared="False" IsTabStop="False">
+                                    <MenuItem Header="Remove" Click="UploadTreeViewContextMenu_Remove"/>
+                                    <MenuItem Header="Remove All" Click="UploadTreeViewContextMenu_RemoveAll"/>
+                                    <Separator/>
+                                    <MenuItem Header="Expand All" Click="TreeViewContextMenu_ExpandAll"/>
+                                    <MenuItem Header="Collapse All" Click="TreeViewContextMenu_CollapseAll"/>
+                                </ContextMenu>
+                            </customcontrols:Custom_TreeView.Resources>
+                            <customcontrols:Custom_TreeView.Style>
+                                <StaticResource ResourceKey="TreeViewStyle_Custom"/>
+                            </customcontrols:Custom_TreeView.Style>
+                            <!-- Want subnodes without ContextMenu so do it via ItemContainerStyle instead of global-->
+                            <customcontrols:Custom_TreeView.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_Custom}">
+                                    <Setter Property="ItemContainerStyle" Value="{StaticResource TreeViewItemStyle_Custom}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource UploadTreeViewContextMenu}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Mode=Self}}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource ThemeFocus}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </customcontrols:Custom_TreeView.ItemContainerStyle>
+                        </customcontrols:Custom_TreeView>
+
+                    </Grid>
+                    <Grid x:Name="Conversion_GridBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8" Width="610" Height="335">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <CheckBox x:Name="Conversion_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Conversionist" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                            <TextBlock Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+                        <Label x:Name="DragDropConver_Label" Content="Drop Converter" Foreground="{DynamicResource ThemeForeground}" AllowDrop="True" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DragEnter="DragDropConver_Label_DragEnter" Drop="DragDropConver_Label_Drop" Width="128" Height="32"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+
+                        <customcontrols:Custom_TreeView Grid.Row="1" x:Name="TreeView_Convert" Margin="1,0,1,1">
+                            <customcontrols:Custom_TreeView.Resources>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_Custom}"/>
+                            </customcontrols:Custom_TreeView.Resources>
+                            <customcontrols:Custom_TreeView.Style>
+                                <StaticResource ResourceKey="TreeViewStyle_Custom"/>
+                            </customcontrols:Custom_TreeView.Style>
+                        </customcontrols:Custom_TreeView>
+
+                    </Grid>
+
+                    <Grid x:Name="Retry_GridBox" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="8" Width="610" Height="335">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <CheckBox x:Name="Retry_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Retry Queue" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                            <TextBlock Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+
+                        <customcontrols:Custom_TreeView Grid.Row="1" x:Name="TreeView_Retry" Margin="1,0,1,1">
+                            <customcontrols:Custom_TreeView.Resources>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_Custom}"/>
+                            </customcontrols:Custom_TreeView.Resources>
+                            <customcontrols:Custom_TreeView.Style>
+                                <StaticResource ResourceKey="TreeViewStyle_Custom"/>
+                            </customcontrols:Custom_TreeView.Style>
+                        </customcontrols:Custom_TreeView>
+
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_LogsTab" Background="Transparent">
+                <Grid>
+
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="610" Height="335" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,1">
+                            <TextBlock Text="Grabber Message Log" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <TextBox x:Name="Grab_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="4,4,4,4" VerticalScrollBarVisibility="Auto" UndoLimit="0" HorizontalScrollBarVisibility="Disabled" TextWrapping="WrapWithOverflow"/>
+
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="610" Height="335" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,1">
+                            <TextBlock Text="Uploader Message Log" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <TextBox x:Name="Upload_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="4,4,8,4" VerticalScrollBarVisibility="Auto" UndoLimit="0" HorizontalScrollBarVisibility="Disabled" TextWrapping="WrapWithOverflow"/>
+
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="610" Height="335" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,1">
+                            <TextBlock Text="Conversionist Message Log" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <TextBox x:Name="Convert_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="4,4,4,4" VerticalScrollBarVisibility="Auto" UndoLimit="0" TextWrapping="WrapWithOverflow"/>
+
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="610" Height="335" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,1">
+                            <TextBlock Text="Retry Queue Message Log" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Border>
+
+                        <TextBox x:Name="Retry_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="4,4,4,4" VerticalScrollBarVisibility="Auto" UndoLimit="0" TextWrapping="WrapWithOverflow"/>
+
+                    </Grid>
+
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_SettingsTab" Background="Transparent">
+                <Grid>
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="512" Height="32" Margin="16,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="App Name" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
+                        <TextBlock x:Name="STB_AppName" Text="e621 ReBot (&lt;Name&gt;)" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" Grid.Column="1" HorizontalAlignment="Left"/>
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Height="32" Margin="16,64,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="API Key" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
+                        <Button x:Name="SB_APIKey" Content="Add API key" Grid.Column="1" BorderThickness="0" BorderBrush="{x:Null}" Height="28" Margin="1" Cursor="Hand" Click="SB_APIKey_Click" />
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="512" Height="32" Margin="0,16,16,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="Volume" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
+                        <customcontrols:VolumeSlider x:Name="Settings_VolumeSlider" VerticalAlignment="Top" Grid.Column="1" Margin="8,0,8,0"/>
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="320" Height="32" Margin="0,64,16,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="Update Interval" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
+                            <StackPanel x:Name="UpdateInterval_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                <RadioButton x:Name="RadionButton_UI1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" IsChecked="True" Click="RadionButton_UI_Click"/>
+                                <RadioButton x:Name="RadionButton_UI3" Content="3" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click"/>
+                                <RadioButton x:Name="RadionButton_UI7" Content="7" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click"/>
+                                <RadioButton x:Name="RadionButton_UI15" Content="15" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click"/>
+                                <RadioButton x:Name="RadionButton_UI30" Content="30" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,16">
+                        <Border BorderBrush="Black" BorderThickness="1">
+                            <StackPanel Margin="8">
+                                <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
+                                <CheckBox x:Name="SettingsCheckBox_BrowserClearCache" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Browser cache on exit" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clear web browser cache when closing the app." Click="SettingsCheckBox_BrowserClearCache_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Button x:Name="SettingsButton_PoolWatcher" Content="Pool Watcher" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,160" Width="128" Height="32" Cursor="Hand" Click="SettingsButton_PoolWatcher_Click" IsEnabled="False"/>
+                    <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand"/>
+                    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="32"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border BorderBrush="Black" BorderThickness="1,1,0,1" Grid.RowSpan="3" Grid.ColumnSpan="2"/>
+                        <Border BorderBrush="Black" BorderThickness="0,0,0,1" Grid.Row="0" Grid.ColumnSpan="2"/>
+                        <Border BorderBrush="Black" BorderThickness="0,0,0,1" Grid.Row="1" Grid.ColumnSpan="2" />
+                        <Border BorderBrush="Black" BorderThickness="0,0,0,1" Grid.Row="2" Grid.ColumnSpan="2" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Background Color" HorizontalAlignment="Center" Foreground="{DynamicResource ThemeForeground}" Margin="2" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Foreground Color" HorizontalAlignment="Center" Foreground="{DynamicResource ThemeForeground}" Margin="2" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Focus Color" HorizontalAlignment="Center" Foreground="{DynamicResource ThemeForeground}" Margin="2" VerticalAlignment="Center"/>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,2,2,2" Orientation="Horizontal" HorizontalAlignment="Left" >
+                            <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ColorBox_Background" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" KeyDown="ColorBox_KeyDown" Tag="0" PreviewTextInput="ColorBox_PreviewTextInput"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,2,2,2" Orientation="Horizontal">
+                            <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ColorBox_Foreground" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" Tag="1" KeyDown="ColorBox_KeyDown" PreviewTextInput="ColorBox_PreviewTextInput"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,2,2,2" Orientation="Horizontal">
+                            <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ColorBox_Focus" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" Tag="2" KeyDown="ColorBox_KeyDown" PreviewTextInput="ColorBox_PreviewTextInput"/>
+                        </StackPanel>
+                        <Button x:Name="ResetTheme_Button" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Content="⥀" FontSize="24" ToolTip="Reset theme to default." Click="ResetTheme_Button_Click" Cursor="Hand"/>
+                    </Grid>
+                    <Button x:Name="SettingsButton_DLSuggestions" Content="DL Suggestions" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,288,16" Click="SettingsButton_DLSuggestions_Click"/>
+                    <Button x:Name="SettingsButton_DLGenders" Content="DL Genders" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,432,16" Click="SettingsButton_DLGenders_Click"/>
+                    <Button x:Name="SettingsButton_DLDNPs" Content="DL DNPs" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,576,16" Click="SettingsButton_DLDNPs_Click"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ReBot_InfoTab" Background="Transparent">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,16">
+                        <Button Background="Transparent" BorderBrush="Transparent" Tag="https://discord.gg/7ncEzah" ToolTip="https://discord.gg/7ncEzah" Cursor="Hand" Click="ButtonNavTag_Click" Height="64" VerticalAlignment="Bottom" Margin="0,0,16,0">
+                            <Image Source="/Resources/MainWindow/DiscordLogo.png"/>
+                        </Button>
+                        <Button Background="Transparent" BorderBrush="Transparent" Tag="https://github.com/e621-ReBot/e621-ReBot-v3" ToolTip="https://github.com/e621-ReBot/e621-ReBot-v3" Cursor="Hand" Click="ButtonNavTag_Click" Height="96" VerticalAlignment="Bottom">
+                            <Image Source="/Resources/MainWindow/GitHubLogo.png"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+    </Grid>
+</Window>

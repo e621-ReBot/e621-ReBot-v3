@@ -1,0 +1,15 @@
+﻿<Window x:Class="e621_ReBot_v3.Window_MediaSelect"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Window_MediaSelect" ResizeMode="NoResize" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed" MinWidth="204" MinHeight="60" MaxWidth="650" MaxHeight="655" UseLayoutRounding="True" SnapsToDevicePixels="True" SizeToContent="WidthAndHeight" ShowInTaskbar="False">
+
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="1,0,0,0">
+            <WrapPanel Name="ItemPanel"/>
+        </ScrollViewer>
+        <TextBlock x:Name="SearchStatus" TextWrapping="Wrap" Text="Checking Site status..." Margin="0,8,0,8"/>
+    </Grid>
+</Window>

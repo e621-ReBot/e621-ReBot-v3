@@ -1,0 +1,38 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_Tagger"
+        mc:Ignorable="d"
+        Title="Tagger" Height="240" Width="420" SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" ResizeMode="NoResize" Cursor="{StaticResource Cursor_Default}" Closing="Window_Closing" Closed="Window_Closed" Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style x:Key="ButtonTaggerStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="DimGray"/>
+                    <Setter Property="BorderBrush" Value="DimGray"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <TextBox x:Name="Title_TextBox" Height="24" Background="Transparent" VerticalAlignment="Top" Margin="1,1,48,1" BorderBrush="Black" VerticalContentAlignment="Center" Text="Title" AllowDrop="False" IsTabStop="False" KeyDown="Title_TextBox_KeyDown" ToolTip="This is Media's title"/>
+        <Button x:Name="TB_Done" Style="{StaticResource ButtonTaggerStyle}" Content="🗸" FontSize="16" Foreground="RoyalBlue" Margin="0,1,1,0" Click="TB_Done_Click" ToolTip="Click to apply changes and close Tagger.&#xA;Also saves Tagger's position on screen." HorizontalAlignment="Right" Width="48" VerticalAlignment="Top" Height="24"/>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="1,26,1,0">
+            <Button x:Name="TB_Description" Style="{StaticResource ButtonTaggerStyle}" Content="↥ Description" Width="84" Click="TB_Description_Click" ToolTip="Click to show/hide media description.&#xA;Hiding will save any changes.&#xA;&#xA;Ctrl+Click to copy title and description to clipboard."/>
+            <Button x:Name="TB_ArtistAlias" Style="{StaticResource ButtonTaggerStyle}" Content="Artist Alias" Width="84" Margin="1,0,0,0" Click="TB_ArtistAlias_Click" ToolTip="Click to set Artist Alias.&#xA;Artist Alias automaticaly tags media with set artist tag for given Artist.&#xA;&#xA;Ctrl+Click to remove Alias."/>
+            <Button x:Name="TB_QuickTags" Style="{StaticResource ButtonTaggerStyle}" Content="Quick Tags" Width="96" Margin="1,0,0,0" Click="TB_QuickTags_Click" ToolTip="Click to open Quick Tags.&#xA;Quick Tags automatically apply tags that you have set for given Quick Tag."/>
+            <Button x:Name="TB_ParentOffset" Style="{StaticResource ButtonTaggerStyle}" Content="Parent Offset" Width="84" Margin="1,0,0,0" Click="TB_ParentOffset_Click" ToolTip="Click to set Parent Offset.&#xA;Parent Offset automaticaly sets this media as a child of selected.&#xA;Ctrl+Click to remove."/>
+            <Border Width="1" Margin="1,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0"/>
+            <CustomControls:Custom_ToggleSwitch x:Name="SuggestionSwitch" Width="64" OffText="Tags" OnText="Pools" Margin="1,0,0,0" Click="Custom_ToggleSwitch_Click" ToolTip="Autocomplete the selected type." IsChecked="False" IsEnabled="False"/>
+        </StackPanel>
+        <TextBox x:Name="Tags_TextBox" Background="Transparent" Margin="1,51,1,1" BorderBrush="Black" Text="Tags Tags Tags" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" KeyDown="Tags_TextBox_KeyDown" PreviewKeyDown="Tags_TextBox_PreviewKeyDown" ToolTip="Add tags for media here"/>
+        <TextBox x:Name="Description_TextBox" Background="#3F000000" Margin="1,51,1,1" BorderBrush="Black" Text="Description" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True" IsReadOnlyCaretVisible="True" Visibility="Hidden"/>
+    </Grid>
+</Window>

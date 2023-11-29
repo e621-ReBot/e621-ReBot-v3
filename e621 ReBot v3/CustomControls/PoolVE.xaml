@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="e621_ReBot_v3.CustomControls.PoolVE"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Background="Transparent" BorderBrush="Black" BorderThickness="1" Width="150" Height="190" UseLayoutRounding="True" SnapsToDevicePixels="True" Margin="0,0,2,2">
+    
+    <UserControl.ContextMenu>
+        <ContextMenu IsTabStop="False">
+            <MenuItem x:Name="PoolWatcher_RemovePool" Header="Remove Pool" Click="PoolWatcher_RemovePool_Click"/>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
+    <Grid>
+        <Image x:Name="PVE_CoverImage" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True" VerticalAlignment="Top" Height="150" Width="150" IsHitTestVisible="False" Source="/Resources/MainWindow/E6Image_Loading.png"/>
+        <TextBlock x:Name="PVE_Title" Text="Comic Title Comic Title Comic Title" VerticalAlignment="Bottom" TextWrapping="Wrap" Margin="2,0,2,2" MaxHeight="35"/>
+    </Grid>
+</UserControl>

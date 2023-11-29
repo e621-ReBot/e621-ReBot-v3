@@ -1,0 +1,177 @@
+﻿<UserControl x:Class="e621_ReBot_v3.CustomControls.BrowserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:e621_ReBot_v3.CustomControls"
+             mc:Ignorable="d" 
+             d:DesignWidth="1243" d:DesignHeight="693" Background="DimGray" MinWidth="1147" MinHeight="340" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False">
+
+    <Grid x:Name="BrowserGrid" Margin="0,0,0,-1" MinWidth="1140">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel x:Name="BrowserControls_Panel" Height="26" VerticalAlignment="Center" LastChildFill="False" HorizontalAlignment="Left" Margin="1,0,0,0" >
+
+            <Button x:Name="BB_Bookmarks" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="8,0,0,0" ToolTip="Bookmarks" Click="BB_Bookmarks_Click" PreviewMouseLeftButtonDown="BB_Bookmarks_PreviewMouseLeftButtonDown">
+                <TextBlock Text="🔖" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Margin="0,-2,0,0"/>
+            </Button>
+
+            <Button x:Name="BB_Back" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Back" Click="BB_Back_Click">
+                <TextBlock Text="◁" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
+            </Button>
+
+            <Button x:Name="BB_Reload" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Reload" Click="BB_Reload_Click">
+                <TextBlock Text="⟳" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Margin="0,-4,0,0"/>
+            </Button>
+
+            <Button x:Name="BB_Forward" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Forward"  Click="BB_Forward_Click" >
+                <TextBlock Text="▷" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
+            </Button>
+
+            <Button x:Name="BB_Home" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" ToolTip="Quick buttons" Click="BB_Home_Click">
+                <TextBlock Text="⎔" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Margin="0,-2,0,0"/>
+            </Button>
+
+            <Border Width="1" Height="24" Margin="8,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left"/>
+
+            <TextBox x:Name="Url_TextBox" Height="24" Width="720" Margin="8,0,0,0" Text="about:blank"  Background="#FFF0F0F0" BorderBrush="Black" VerticalAlignment="Center" HorizontalAlignment="Left" TextAlignment="Left" VerticalContentAlignment="Center" AllowDrop="False" SelectionOpacity="0.5"  IsTabStop="False" KeyDown="Url_TextBox_KeyDown" GotKeyboardFocus="Url_TextBox_GotKeyboardFocus"/>
+
+            <Button x:Name="BB_Navigate" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Navigate" Margin="1,0,0,0" Click="BB_Navigate_Click"/>
+
+            <Border Width="1" Height="24" Margin="8,0,0,0" BorderBrush="Black" BorderThickness="0,0,1,0" HorizontalAlignment="Left"/>
+
+        </DockPanel>
+
+        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,0,0">
+
+            <Button x:Name="BB_DevTools" Style="{StaticResource ButtonStyle_BrowserControl}" Background="{DynamicResource ThemeFocus}" Width="64" Content="DevTools" Margin="0,0,1,0" Click="BB_DevTools_Click"/>
+
+            <Button x:Name="BB_PoolWatcher" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Watch" Margin="0,0,1,0" Click="BB_PoolWatcher_Click"/>
+
+            <Button x:Name="BB_Download" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Download" Margin="0,0,1,0" Click="BB_Download_Click"/>
+
+            <Button x:Name="BB_GrabAll" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab All" Margin="0,0,1,0"/>
+
+            <Button x:Name="BB_Grab" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab" Margin="0,0,1,0" Click="BB_Grab_Click"/>
+
+        </WrapPanel>
+
+        <Border x:Name="BrowserBorder" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="0,1,0,0" Panel.ZIndex="42" Grid.Row="1" VerticalAlignment="Top" Focusable="True">
+            <ProgressBar x:Name="PageProgressBar" Height="2" Maximum="1" Foreground="{DynamicResource ThemeFocus}" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" IsHitTestVisible="False" IsTabStop="False" Panel.ZIndex="69"/>
+        </Border>
+
+        <Canvas x:Name="BrowserQuickButtons" Grid.Row="1" Width="264" Height="312" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="69">
+            <Canvas.Style>
+                <Style TargetType="{x:Type Canvas}">
+                    <Style.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="Opacity" Value="0">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                        </Trigger>
+                        <Trigger Property="Opacity" Value="1">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Canvas.Style>
+
+            <Button x:Name="testbutton_Copy2" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="96" Visibility="Hidden">
+                <Image Source="/Resources/Window_Main/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="testbutton_Copy3" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="144" Canvas.Top="30" Visibility="Hidden">
+                <Image Source="/Resources/Window_Main/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="testbutton_Copy4" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="60" Canvas.Left="192" Visibility="Hidden">
+                <Image Source="/Resources/Window_Main/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="BQB_SoFurry" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="120" Canvas.Left="192" Tag="https://www.sofurry.com/" ToolTip="SoFurry.com">
+                <Image Source="/Resources/Browser/BrowserIcon_SoFurry.png" IsHitTestVisible="False" Margin="8,0,6,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Weasyl" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="192" Canvas.Top="180" Tag="https://www.weasyl.com/" ToolTip="Weasyl.com">
+                <Image Source="/Resources/Browser/BrowserIcon_Weasyl.png" IsHitTestVisible="False" Margin="8,0,8,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Mastodon" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="144" Canvas.Top="210" Tag="https://mastodon.social/" ToolTip="Mastodon.social">
+                <Image Source="/Resources/Browser/BrowserIcon_Mastodon.png" IsHitTestVisible="False" Margin="8,2,8,0"/>
+            </Button>
+
+            <Button x:Name="BQB_HentaiFoundry" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="96" Canvas.Top="240" Tag="https://www.hentai-foundry.com/" ToolTip="Hentai-Foundry.com">
+                <Image Source="/Resources/Browser/BrowserIcon_HentaiFoundry.png" IsHitTestVisible="False" Margin="10,0,2,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Baraag" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="48" Canvas.Top="210" Tag="https://baraag.net/" ToolTip="Baraag.net">
+                <Image Source="/Resources/Browser/BrowserIcon_Baraag.png" IsHitTestVisible="False" Margin="8,2,8,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Pawoo" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="180" Tag="https://pawoo.net/" ToolTip="Pawoo.net">
+                <Image Source="/Resources/Browser/BrowserIcon_Pawoo.png" IsHitTestVisible="False" Margin="8,2,8,2"/>
+            </Button>
+
+            <Button x:Name="BQB_Plurk" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="120" Tag="https://www.plurk.com/" ToolTip="Plurk.com">
+                <Image Source="/Resources/Browser/BrowserIcon_Plurk.png" IsHitTestVisible="False" Margin="12,2,12,2"/>
+            </Button>
+
+            <Button x:Name="testbutton_Copy" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="60" Visibility="Hidden">
+                <Image Source="/Resources/Window_Main/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="testbutton_Copy1" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Left="48" Canvas.Top="30" Visibility="Hidden">
+                <Image Source="/Resources/Window_Main/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="BQB_FurAffinity" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="60" Canvas.Left="96" Tag="https://www.furaffinity.net/" ToolTip="FurAffinity.net">
+                <Image Source="/Resources/Browser/BrowserIcon_FurAffinity.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="BQB_Inkbunny" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="90" Canvas.Left="144" Tag="https://inkbunny.net/" ToolTip="Inkbunny.net">
+                <Image Source="/Resources/Browser/BrowserIcon_Inkbunny.png" IsHitTestVisible="False" Margin="4,0,0,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Pixiv" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="150" Canvas.Left="144" Tag="https://www.pixiv.net/" ToolTip="Pixiv.net">
+                <Image Source="/Resources/Browser/BrowserIcon_Pixiv.png" IsHitTestVisible="False" Margin="8,0,8,0"/>
+            </Button>
+
+            <Button x:Name="BQB_HicceArs" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="180" Canvas.Left="96" Tag="https://www.hiccears.com/" ToolTip="HicceArs.com">
+                <Image Source="/Resources/Browser/BrowserIcon_HicceArs.png" IsHitTestVisible="False" Margin="6,0,10,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Twitter" Style="{StaticResource ButtonStyle_HexagonalButton}"  Click="BQB_Button_Click" Canvas.Top="150" Canvas.Left="48" Tag="https://twitter.com/" ToolTip="Twitter.com">
+                <Image Source="/Resources/Browser/BrowserIcon_Twitter.png" IsHitTestVisible="False" Margin="12,0,12,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Newgrounds" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="90" Canvas.Left="48" Tag="https://www.newgrounds.com/" ToolTip="Newgrounds.com">
+                <Image Source="/Resources/Browser/BrowserIcon_Newgrounds.png" IsHitTestVisible="False" Margin="10,0,8,0"/>
+            </Button>
+
+            <Button x:Name="BQB_Start" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Canvas.Top="120" Canvas.Left="96" Tag="about:blank" ToolTip="about:blank">
+                <Image Source="/Resources/MainWindow/MenuIcon_Browser.png" IsHitTestVisible="False"/>
+            </Button>
+
+        </Canvas>
+
+        <local:BookmarkControl x:Name="BookmarksMenu" HorizontalAlignment="Left" Margin="7,2,0,0" Grid.Row="1" VerticalAlignment="Top" Panel.ZIndex="69" Visibility="Collapsed"/>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,9 @@
+﻿<Window x:Class="e621_ReBot_v3.CustomControls.Custom_IDBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Width="80" Height="40" UseLayoutRounding="True" SnapsToDevicePixels="True" ShowInTaskbar="False" Title="Enter Post ID" ResizeMode="NoResize" >
+
+    <TextBox x:Name="ID_TextBox" MaxLength="7" MaxLines="1" Background="Transparent" FontSize="16" FontWeight="bold" PreviewKeyDown="ID_TextBox_PreviewKeyDown" GotKeyboardFocus="ID_TextBox_GotKeyboardFocus" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"/>
+</Window>

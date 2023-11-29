@@ -1,0 +1,25 @@
+﻿<Window x:Class="e621_ReBot_v3.Window_QuickTags"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Quick Tags" Width="256" MinHeight="40" MaxHeight="256" WindowStartupLocation="CenterOwner" Closed="Window_Closed" ShowInTaskbar="False" ResizeMode="NoResize" WindowStyle="ToolWindow" UseLayoutRounding="True" SnapsToDevicePixels="True" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" SizeToContent="Height">
+
+    <Window.Resources>
+        <ContextMenu x:Key="QuickTagRemove_ContextMenu" IsTabStop="False">
+            <MenuItem Header="Remove Quick Tag" Click="QuickTagRemove_ContextMenu_Remove"/>
+        </ContextMenu>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="QuickTags_TextBox" Grid.Row="0" Text="Enter Tags here" BorderBrush="Black" TextWrapping="NoWrap" Margin="2,2,25,0" VerticalContentAlignment="Center" GotKeyboardFocus="QuickTags_TextBox_GotKeyboardFocus" TabIndex="1" KeyDown="QuickTags_TextBox_KeyDown" ToolTip="Enter tags you wish to add to Quick Tag button here."/>
+        <Button x:Name="CreateQuickTag_Button" Grid.Row="0" Width="24" Height="24" Content="+" Foreground="Black" HorizontalAlignment="Right" Margin="0,2,2,0" Click="CreateQuickTag_Button_Click" ToolTip="Click to create Quick Tag from inputed tags." Cursor="Hand"/>
+        <WrapPanel x:Name="QuickTags_WrapPanel" Grid.Row="1" Margin="0,2,2,0"/>
+    </Grid>
+</Window>

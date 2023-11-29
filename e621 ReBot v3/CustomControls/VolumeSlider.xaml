@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="e621_ReBot_v3.CustomControls.VolumeSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" MinWidth="256" MinHeight="32" MaxWidth="512" MaxHeight="32" ScrollViewer.VerticalScrollBarVisibility="Disabled" UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+    <Grid>
+        <Slider Name="VolumeSliderX" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" SmallChange="1" LargeChange="5" Cursor="Hand" Foreground="{DynamicResource ThemeForeground}" IsSnapToTickEnabled="True" Value="25" Interval="1" Height="24" ValueChanged="VolumeSliderX_ValueChanged" Loaded="VolumeSliderX_Loaded" Margin="0,0,24,0"/>
+        <Label Content="{Binding ElementName=VolumeSliderX, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="24" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Foreground="{DynamicResource ThemeForeground}" BorderThickness="1,1,1,1" Height="20" Padding="0,0,0,0"/>
+    </Grid>
+</UserControl>
