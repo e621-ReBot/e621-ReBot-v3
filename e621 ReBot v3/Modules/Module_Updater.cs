@@ -85,11 +85,11 @@ namespace e621_ReBot_v3
             HtmlNode ReleaseNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@class='Box-footer']//include-fragment"); //SelectSingleNode(".//turbo-frame[@id='repo-content-turbo-frame']//div[@data-pjax]/section");
             if (ReleaseNode != null)
             {
-                string ReleaseTag = ReleaseNode.Attributes["src"].Value.Replace("https://github.com/e621-ReBot/e621-ReBot-v3/releases/expanded_assets/v", null);
+                string ReleaseTag = ReleaseNode.Attributes["src"].Value;//.Replace("https://github.com/e621-ReBot/e621-ReBot-v3/releases/expanded_assets/v", null);
                 Match MatchResult = VersionRegex().Match(ReleaseTag);
                 if (MatchResult.Success)
                 {
-                    ReleaseTag = MatchResult.Value;
+                    ReleaseTag = MatchResult.Groups[1].Value;
                     string[] CVSHolder = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.Split('.', StringSplitOptions.RemoveEmptyEntries);
                     string[] LVSHolder = ReleaseTag.Split('.', StringSplitOptions.RemoveEmptyEntries);
                     int CurrVerNum = (int)(int.Parse(CVSHolder[1]) * Math.Pow(10, 6) + int.Parse(CVSHolder[2]) * Math.Pow(10, 3) + int.Parse(CVSHolder[3]));
