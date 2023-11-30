@@ -27,6 +27,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_FurAffinity(HtmlNode TextHolderNode)
         {
+            if (TextHolderNode == null) return null;
+
             string? TextString = null;
 
             //remove colors
@@ -175,6 +177,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_Inkbunny(HtmlNode TextHolderNode)
         {
+            if (TextHolderNode == null) return null;
+
             string? TextString = null;
 
             if (TextHolderNode.InnerHtml.Contains("<span"))
@@ -337,6 +341,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_Pixiv(HtmlNode TextHolderNode)
         {
+            if (TextHolderNode == null) return null;
+
             string? TextString = null;
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
@@ -395,12 +401,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_Newgrounds(HtmlNode TextHolderNode)
         {
-            string? TextString = null;
+            if (TextHolderNode == null) return null;
 
-            if (TextHolderNode == null)
-            {
-                return null;
-            }
+            string? TextString = null;
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
             {
@@ -471,12 +474,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_SoFurry(HtmlNode TextHolderNode)
         {
-            string? TextString = null;
+            if (TextHolderNode == null) return null;
 
-            if (TextHolderNode == null)
-            {
-                return null;
-            }
+            string? TextString = null;
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
             {
@@ -530,13 +530,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_Weasyl(HtmlNode TextHolderNode)
         {
+            if (TextHolderNode == null) return null;
+
             string? TextString = null;
-
-
-            if (TextHolderNode == null)
-            {
-                return null;
-            }
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
             {
@@ -597,12 +593,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_Mastodon(HtmlNode TextHolderNode)
         {
-            string? TextString = null;
+            if (TextHolderNode == null) return null;
 
-            if (TextHolderNode == null)
-            {
-                return null;
-            }
+            string? TextString = null;
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
             {
@@ -656,12 +649,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static string? Html2Text_HentaiFoundry(HtmlNode TextHolderNode)
         {
-            string? TextString = null;
+            if (TextHolderNode == null) return null;
 
-            if (TextHolderNode == null)
-            {
-                return null;
-            }
+            string? TextString = null;
 
             foreach (HtmlNode Line in TextHolderNode.ChildNodes)
             {
