@@ -571,7 +571,7 @@
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
                         <TextBlock Text="Update Interval" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
-                            <StackPanel x:Name="UpdateInterval_StackPanel" Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel x:Name="UpdateInterval_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_UI0" Content="0" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every time."/>
                                 <RadioButton x:Name="RadionButton_UI1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" IsChecked="True" ToolTip="Every 1 days."/>
                                 <RadioButton x:Name="RadionButton_UI2" Content="2" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 2 days."/>

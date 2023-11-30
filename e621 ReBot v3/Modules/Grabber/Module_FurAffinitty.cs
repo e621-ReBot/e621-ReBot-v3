@@ -140,7 +140,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             if (Post_TextNode == null) //classic theme selected
             {
                 ///html/body/div[4]/div/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr[2]
-                Post_TextNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//table[@class='maintable']//table[@class='maintable']//td[@class='alt1']"); ;
+                Post_TextNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//table[@class='maintable']//table[@class='maintable']/tbody/tr[2]/td[@class='alt1']"); ;
             }
             string? Post_Text = Module_Html2Text.Html2Text_FurAffinity(Post_TextNode);
 

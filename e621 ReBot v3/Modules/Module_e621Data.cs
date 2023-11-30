@@ -213,18 +213,18 @@ namespace e621_ReBot_v3.Modules
                 File.WriteAllText("pools.txt", string.Join("✄", PoolList));
                 SuccessCount++;
             }
-     
+
             if (SuccessCount == 2)
             {
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
                 Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                 {
+                    if (Window_Tagger.SuggestionPopup != null) Window_Tagger.SuggestionPopup.LoadSuggestionBox();
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "DL Suggestions";
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.IsEnabled = true;
                     MessageBox.Show(Window_Main._RefHolder, "Downloaded all Tags and Pools for tag suggestions.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
                 });
-                if (Window_Tagger.SuggestionPopup != null) Window_Tagger.SuggestionPopup.LoadSuggestionBox();
             }
         }
 
