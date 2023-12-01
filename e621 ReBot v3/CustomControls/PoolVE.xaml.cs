@@ -62,7 +62,7 @@ namespace e621_ReBot_v3.CustomControls
             if (WrapPanelParent.Children.Count == 0)
             {
                 Window_PoolWatcher._RefHolder.Close();
-                Window_Main._RefHolder.SettingsButton_PoolWatcher.IsEnabled = false;
+                Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = false;
                 return;
             }
             Window_PoolWatcher._RefHolder.SortPoolWatcher_StackPanel.IsEnabled = WrapPanelParent.Children.Count > 1;

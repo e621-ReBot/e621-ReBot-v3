@@ -269,9 +269,6 @@
                                 <ContextMenu x:Key="DownloadTreeViewContextMenu" IsTabStop="False" Opened="DownloadTreeViewContextMenu_Opened" Closed="DownloadTreeViewContextMenu_Closed">
                                     <MenuItem Header="Remove" Click="DownloadTreeViewContextMenu_Remove"/>
                                     <MenuItem Header="Remove All" Click="DownloadTreeViewContextMenu_RemoveAll"/>
-                                    <Separator/>
-                                    <MenuItem Header="Expand All" Click="TreeViewContextMenu_ExpandAll"/>
-                                    <MenuItem Header="Collapse All" Click="TreeViewContextMenu_CollapseAll"/>
                                 </ContextMenu>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_DownloaderCustom}">
                                     <Setter Property="ContextMenu" Value="{StaticResource DownloadTreeViewContextMenu}"/>
@@ -283,7 +280,7 @@
                         </customcontrols:Custom_TreeView>
 
                     </Grid>
-                    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="400" Height="120" Margin="0,0,8,8">
+                    <Grid x:Name="DownloadLog_GridBox" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="400" Height="120" Margin="0,0,8,8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>
                             <RowDefinition Height="*"/>
@@ -297,6 +294,40 @@
 
                         <TextBox x:Name="Download_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="1,1,1,1" VerticalScrollBarVisibility="Auto" UndoLimit="0" HorizontalScrollBarVisibility="Auto" TextWrapping="WrapWithOverflow"/>
 
+                    </Grid>
+                    <Button x:Name="Download_PoolWatcher" Content="Pool Watcher" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="128" Height="72" Cursor="Hand" Click="Download_PoolWatcher_Click" IsEnabled="False" Margin="8,0,0,8"/>
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="512" Height="32" Margin="144,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="192"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="e621 media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
+                            <StackPanel x:Name="NamingPattern_e6_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                <RadioButton x:Name="RadionButton_NPe6_0" Content="MD5" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their MD5 hash." IsChecked="True"/>
+                                <RadioButton x:Name="RadionButton_NPe6_1" Content="ID" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their ID."/>
+                                <RadioButton x:Name="RadionButton_NPe6_2" Content="MD5__ID" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their MD5 hash and ID (MD5_ID)."/>
+                                <RadioButton x:Name="RadionButton_NPe6_3" Content="ID__MD5" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their ID and MD5 hash (ID_MD5)."/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="512" Height="32" Margin="144,0,0,48">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="192"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
+                        <TextBlock Text="Web media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
+                            <StackPanel x:Name="NamingPattern_Web_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and 4 characters of original name." IsChecked="True"/>
+                                <RadioButton x:Name="RadionButton_NPWeb_1" Content="Artist__Title__...." Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and 4 characters of original name."/>
+                                <RadioButton x:Name="RadionButton_NPWeb_2" Content="Artist__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its artist and original filename."/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -589,7 +620,6 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Button x:Name="SettingsButton_PoolWatcher" Content="Pool Watcher" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,160" Width="128" Height="32" Cursor="Hand" Click="SettingsButton_PoolWatcher_Click" IsEnabled="False"/>
                     <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand"/>
                     <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
                         <Grid.RowDefinitions>

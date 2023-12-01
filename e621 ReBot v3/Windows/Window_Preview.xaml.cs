@@ -768,7 +768,7 @@ namespace e621_ReBot_v3
                MediaURL: MediaItemHolder.Grab_MediaURL,
                ThumbnailURL: MediaItemHolder.Grab_ThumbnailURL,
                Artist: MediaItemHolder.Grab_Artist,
-               Title: MediaItemHolder.Grab_Artist,
+               Title: MediaItemHolder.Grab_Title,
                MediaFormat: MediaItemHolder.Grid_MediaFormat,
                MediaItemRef: MediaItemHolder);
             PB_Download.IsEnabled = false;

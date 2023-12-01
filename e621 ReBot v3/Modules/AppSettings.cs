@@ -32,6 +32,8 @@ namespace e621_ReBot_v3
         // - - - - - - - - - - - - - - - -
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
+        internal static ushort NamingPattern_e6 = 0;
+        internal static ushort NamingPattern_Web = 0;
         // - - - - - - - - - - - - - - - -
         internal static bool Browser_ClearCache = false;
         // - - - - - - - - - - - - - - - -
@@ -65,6 +67,8 @@ namespace e621_ReBot_v3
                 { "Grid_SaveSession", Grid_SaveSession },
                 { "Downloads_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
+                { "NamingPattern_e6", NamingPattern_e6 },
+                { "NamingPattern_Web", NamingPattern_Web },
                 { "Browser_ClearCache", Browser_ClearCache },
                 { "Converter_DontConvertVideos", Converter_DontConvertVideos },
                 { "Note", Note }
@@ -190,13 +194,25 @@ namespace e621_ReBot_v3
                         case "Download_ThreadsCount":
                             {
                                 Download_ThreadsCount = LoadSettingsJObject["Download_ThreadsCount"].Value<ushort>();
-                                ((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName("RadionButton_DLT" + Download_ThreadsCount)).IsChecked = true;
+                                ((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName($"RadionButton_DLT{Download_ThreadsCount}")).IsChecked = true;
                                 Module_Downloader.DLThreadsWaiting = Download_ThreadsCount;
                                 Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
                                 for (int i = 0; i < Download_ThreadsCount; i++)
                                 {
                                     Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
                                 }
+                                break;
+                            }
+                        case "NamingPattern_e6":
+                            {
+                                NamingPattern_e6 = LoadSettingsJObject["NamingPattern_e6"].Value<ushort>();
+                                ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
+                                break;
+                            }
+                        case "NamingPattern_Web":
+                            {
+                                NamingPattern_Web = LoadSettingsJObject["NamingPattern_Web"].Value<ushort>();
+                                ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
                                 break;
                             }
                         case "Browser_ClearCache":
@@ -233,7 +249,7 @@ namespace e621_ReBot_v3
                         case "PoolWatcher":
                             {
                                 PoolWatcher = LoadSettingsJObject["PoolWatcher"].ToObject<List<PoolItem>>();
-                                Window_Main._RefHolder.SettingsButton_PoolWatcher.IsEnabled = PoolWatcher.Any();
+                                Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = PoolWatcher.Any();
                                 break;
                             }
                         case "Note":

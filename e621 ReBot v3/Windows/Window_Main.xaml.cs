@@ -639,7 +639,7 @@ namespace e621_ReBot_v3
                             MediaURL: MediaItemTemp.Grab_MediaURL,
                             ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
                             Artist: MediaItemTemp.Grab_Artist,
-                            Title: MediaItemTemp.Grab_Artist,
+                            Title: MediaItemTemp.Grab_Title,
                             MediaFormat: MediaItemTemp.Grid_MediaFormat,
                             MediaItemRef: MediaItemTemp);
                     }
@@ -656,7 +656,7 @@ namespace e621_ReBot_v3
                             MediaURL: MediaItemTemp.Grab_MediaURL,
                             ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
                             Artist: MediaItemTemp.Grab_Artist,
-                            Title: MediaItemTemp.Grab_Artist,
+                            Title: MediaItemTemp.Grab_Title,
                             MediaFormat: MediaItemTemp.Grid_MediaFormat,
                             MediaItemRef: MediaItemTemp);
                     }
@@ -909,6 +909,31 @@ namespace e621_ReBot_v3
             }
         }
 
+        private void RadionButton_Naminge6_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton WhichRadioButton = (RadioButton)sender;
+            if (WhichRadioButton.IsChecked == true)
+            {
+                ushort NewValue = ushort.Parse(WhichRadioButton.Name.Substring(WhichRadioButton.Name.Length-1));
+                AppSettings.NamingPattern_e6 = NewValue;
+            }
+        }
+
+        private void RadionButton_NamingWeb_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton WhichRadioButton = (RadioButton)sender;
+            if (WhichRadioButton.IsChecked == true)
+            {
+                ushort NewValue = ushort.Parse(WhichRadioButton.Name.Substring(WhichRadioButton.Name.Length - 1));
+                AppSettings.NamingPattern_Web = NewValue;
+            }
+        }
+
+        private void Download_PoolWatcher_Click(object sender, RoutedEventArgs e)
+        {
+            new Window_PoolWatcher().ShowDialog();
+        }
+
         #endregion
 
         // - - - - - - - - - - - - - - - -
@@ -1115,11 +1140,6 @@ namespace e621_ReBot_v3
         private void SettingsCheckBox_BrowserClearCache_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Browser_ClearCache = ((CheckBox)sender).IsChecked ?? false;
-        }
-
-        private void SettingsButton_PoolWatcher_Click(object sender, RoutedEventArgs e)
-        {
-            new Window_PoolWatcher().ShowDialog();
         }
 
         private void SettingsButton_Blacklist_Click(object sender, RoutedEventArgs e)

@@ -132,44 +132,38 @@ namespace e621_ReBot_v3.Modules
 
         internal static string MediaFile_RenameFileName(string FileName, DownloadItem DownloadItemRef)
         {
-            //string NewFileName = (string)DataRowPass["Artist"] + "_";
-            //string FileFormat = FileName.Substring(FileName.LastIndexOf(".") + 1);
+            string NewFileName = FileName;
 
-            //switch (Properties.Settings.Default.Naming_web)
-            //{
-            //    case 0: //Original
-            //        {
-            //            NewFileName = FileName;
-            //            break;
-            //        }
+            switch (AppSettings.NamingPattern_Web)
+            {
+                case 0: //Original
+                    {
+                        //NewFileName = FileName;
+                        break;
+                    }
 
-            //    case 1: //Artist_Title
-            //        {
-            //            if (((string)DataRowPass["Grab_Title"]).Contains("Created by"))
-            //            {
-            //                goto case 2;
-            //            }
-            //            if (((string)DataRowPass["Grab_Title"]).Contains("Plurk by"))
-            //            {
-            //                goto case 2;
-            //            }
-            //            string TitleSubstring = (string)DataRowPass["Grab_Title"];
-            //            TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
-            //            NewFileName += string.Format("{0}_{1}.{2}", TitleSubstring, FileName.Substring(0, 4), FileFormat);
-            //            NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
-            //            break;
-            //        }
+                case 1: //Artist_Title_....
+                    {
+                        if (DownloadItemRef.Grab_Title.Contains("Created by") || DownloadItemRef.Grab_Title.Contains("Plurk by"))
+                        {
+                            goto case 2;
+                        }
+                        string TitleSubstring = DownloadItemRef.Grab_Title;
+                        TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName.Substring(0, 4)}.{DownloadItemRef.Grab_MediaFormat}";
+                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
+                        break;
+                    }
 
-            //    case 2: //Artist_Original
-            //        {
-            //            NewFileName += FileName;
-            //            NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
-            //            break;
-            //        }
-            //}
+                case 2: //Artist_Original
+                    {
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{FileName}";
+                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
+                        break;
+                    }
+            }
 
-            //return NewFileName;
-            return FileName;
+            return NewFileName;
         }
 
         internal static bool ReSaveMedia(DownloadItem DownloadItemRef)
@@ -742,29 +736,35 @@ namespace e621_ReBot_v3.Modules
             if (PoolName != null) DownloadPath += $"{PoolName}\\";
             Directory.CreateDirectory(DownloadPath);
 
-            //switch (Properties.Settings.Default.Naming_e6)
-            //{
-            //    case 1:
-            //        {
-            //            if (PoolName != null)
-            //            {
-            //                GetFileNameOnly = string.Format("{0}_{1}", PostID, GetFileNameOnly);
-            //            }
-            //            break;
-            //        }
-
-            //    case 2:
-            //        {
-            //            GetFileNameOnly = string.Format("{0}_{1}", PostID, GetFileNameOnly);
-            //            break;
-            //        }
-            //}
+            switch (AppSettings.NamingPattern_e6)
+            {
+                case 0:
+                    {
+                        //GetFileNameOnly is MD5 by default
+                        break;
+                    }
+                case 1:
+                    {
+                        GetFileNameOnly = $"{DownloadItemRef.e6_PostID}.{DownloadItemRef.Grab_MediaFormat}";
+                        break;
+                    }
+                case 2:
+                    {
+                        GetFileNameOnly = $"{GetFileNameOnly}_{DownloadItemRef.e6_PostID}.{DownloadItemRef.Grab_MediaFormat}";
+                        break;
+                    }
+                case 3:
+                    {
+                        GetFileNameOnly = $"{DownloadItemRef.e6_PostID}_{GetFileNameOnly}.{DownloadItemRef.Grab_MediaFormat}";
+                        break;
+                    }
+            }
             if (DownloadItemRef.e6_PoolPostIndex != null)
             {
                 GetFileNameOnly = $"{DownloadItemRef.e6_PoolPostIndex}_{GetFileNameOnly}";
             }
-            string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
 
+            string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 DownloadVE DownloadVETemp = FindDownloadVE();
@@ -800,14 +800,12 @@ namespace e621_ReBot_v3.Modules
             //    GetFileNameOnly += Module_HicceArs.GetHicceArsMediaType((string)DataRowRef["Grab_MediaURL"]);
             //}
 
-            string? ImageRename = null;
-
             switch (GetFileNameOnly)
             {
                 case string UgoiraTest when UgoiraTest.Contains("ugoira"):
                     {
                         string WebMName = $"{GetFileNameOnly.Substring(0, GetFileNameOnly.IndexOf("_ugoira0"))}_ugoira1920x1080.webm";
-                        ImageRename = MediaFile_RenameFileName(WebMName, DownloadItemRef);
+                        string ImageRename = MediaFile_RenameFileName(WebMName, DownloadItemRef);
 
                         string FilePath = Path.Combine(FolderPath, ImageRename);
                         if (File.Exists(FilePath))
@@ -858,22 +856,22 @@ namespace e621_ReBot_v3.Modules
 
                 default:
                     {
-                        //ImageRename = RenameMediaFileName(GetFileNameOnly, DataRowRef);
+                        string ImageRename = MediaFile_RenameFileName(GetFileNameOnly, DownloadItemRef);
 
-                        string FilePath = Path.Combine(FolderPath, GetFileNameOnly);
-                        //if (File.Exists(FilePath) || (MediaBrowser_MediaCache.Keys.Contains(GetFileNameOnly) && ReSaveMedia(ref DataRowRef)))
-                        //{
-                        //    Form_Loader._FormReference.BeginInvoke(new Action(() =>
-                        //    {
-                        //        Form_Loader._FormReference.DownloadFLP_Downloaded.SuspendLayout();
-                        //        UIDrawController.SuspendDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
-                        //        AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
-                        //        Form_Loader._FormReference.DownloadFLP_Downloaded.ResumeLayout();
-                        //        UIDrawController.ResumeDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
-                        //    }));
-                        //DLThreadsWaiting++;
-                        //    return;
-                        //}
+                        string FilePath = Path.Combine(FolderPath, ImageRename);
+                        if (File.Exists(FilePath) || (MediaBrowser_MediaCache.Keys.Contains(GetFileNameOnly) && ReSaveMedia(DownloadItemRef)))
+                        {
+                            //Form_Loader._FormReference.BeginInvoke(new Action(() =>
+                            //{
+                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.SuspendLayout();
+                            //    UIDrawController.SuspendDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
+                            //    AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
+                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.ResumeLayout();
+                            //    UIDrawController.ResumeDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
+                            //}));
+                            DLThreadsWaiting++;
+                            return;
+                        }
 
                         Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                         {
@@ -922,7 +920,6 @@ namespace e621_ReBot_v3.Modules
                                         else
                                         {
                                             ThreadPool.QueueUserWorkItem(state => Module_FFMpeg.DownloadQueue_Video2WebM(DownloadVETemp));
-                                            //Module_FFMpeg.DownloadQueue_Video2WebM(DownloadVETemp);
                                         }
                                         break;
                                     }
@@ -934,8 +931,8 @@ namespace e621_ReBot_v3.Modules
                                     }
                             }
                         });
-                    };
-                    break;
+                        break;
+                    }
             }
         }
     }

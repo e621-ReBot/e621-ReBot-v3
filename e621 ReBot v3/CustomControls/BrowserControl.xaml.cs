@@ -177,7 +177,7 @@ namespace e621_ReBot_v3.CustomControls
             if (BB_PoolWatcher.Tag == null)
             {
                 ThreadPool.QueueUserWorkItem(state => Window_PoolWatcher.PoolWatcher_AddPool2Watch());
-                Window_Main._RefHolder.SettingsButton_PoolWatcher.IsEnabled = true;
+                Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = true;
             }
             else
             {
@@ -187,7 +187,7 @@ namespace e621_ReBot_v3.CustomControls
                 {
                     AppSettings.PoolWatcher.Remove(PoolItemTemp);
                 }
-                Window_Main._RefHolder.SettingsButton_PoolWatcher.IsEnabled = AppSettings.PoolWatcher.Any();
+                Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = AppSettings.PoolWatcher.Any();
             }
         }
 
