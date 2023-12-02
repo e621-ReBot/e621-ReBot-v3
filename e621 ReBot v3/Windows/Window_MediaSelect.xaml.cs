@@ -49,7 +49,7 @@ namespace e621_ReBot_v3
             Window_MediaSelect Window_MediaSelectTemp = new Window_MediaSelect
             {
                 Owner = Window_Tagger._RefHolder,
-                Left = StartingPoint.X,
+                Left = StartingPoint.X - 8,
                 Top = StartingPoint.Y,
                 Title = "Parent Offset"
             };
@@ -101,6 +101,8 @@ namespace e621_ReBot_v3
                     Window_MediaSelectTemp.ItemPanel.Children.Add(MediaSelectItemTemp);
                 }
             }
+
+            _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(Math.Ceiling(Window_MediaSelectTemp.ItemPanel.Children.Count / 3d) * 204); //202 + 1 + 1
 
             if (LaunchTimer)
             {

@@ -56,6 +56,7 @@ namespace e621_ReBot_v3.CustomControls
                 IsUploaded_SetText(_MediaItemRef.UP_UploadedID);
                 ChangeRating(_MediaItemRef.UP_Rating);
                 GridVEIsLoading = false;
+                if (_MediaItemRef.UP_Tags != null) cTagWarning_TextBlock.Visibility = cUpload_CheckBox.IsEnabled && _MediaItemRef.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Count() < 16 ? Visibility.Visible : Visibility.Hidden;
             }
         }
 
@@ -185,7 +186,7 @@ namespace e621_ReBot_v3.CustomControls
         private void CUpload_CheckBox_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             cUpload_CheckBox.Visibility = cUpload_CheckBox.IsEnabled ? Visibility.Visible : Visibility.Hidden;
-            cTagWarning_TextBlock.Visibility = cUpload_CheckBox.IsEnabled && _MediaItemRef.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().Count() < 8 ? Visibility.Visible : Visibility.Hidden;
+            cTagWarning_TextBlock.Visibility = cUpload_CheckBox.IsEnabled && _MediaItemRef.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Count() < 16 ? Visibility.Visible : Visibility.Hidden;
             cIsSuperior_Polygon.Visibility = cUpload_CheckBox.IsEnabled && _MediaItemRef.UP_Inferior_ID != null ? Visibility.Visible : Visibility.Hidden;
             cRating_Polygon.Visibility = cUpload_CheckBox.Visibility;
         }

@@ -299,16 +299,19 @@ namespace e621_ReBot_v3.Modules
             }
         }
 
-        internal static void SaveFileBytes(in byte[] bytes2Save, string FileName, string? DownloadFolder = null)
+        internal static void SaveFileBytes(ActionType ActionTypeEnum, in byte[] bytes2Save, string FileName, string? DownloadFolder = null)
         {
             //HicceArs filename fix for extension is not needed, e621 detects it.
+
+            string SavePath = $"FFMpegTemp\\{(ActionTypeEnum == ActionType.Upload ? "Upload\\" : null)}{FileName}";
             using (MemoryStream bytes2Stream = new MemoryStream(bytes2Save))
             {
                 if (FileName.Contains("ugoira"))
                 {
                     using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))
                     {
-                        UgoiraZip.ExtractToDirectory($"FFMpegTemp\\{FileName}");
+                        UgoiraZip.ExtractToDirectory(SavePath);
+
                         //if (DownloadFolder != null && Properties.Settings.Default.Converter_KeepOriginal)
                         //{
                         //    Directory.CreateDirectory(DownloadFolder);
@@ -322,7 +325,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    using (FileStream FileStreamTemp = new FileStream($"FFMpegTemp\\{FileName}", FileMode.Create))
+                    using (FileStream FileStreamTemp = new FileStream(SavePath, FileMode.Create))
                     {
                         bytes2Stream.WriteTo(FileStreamTemp);
                     }

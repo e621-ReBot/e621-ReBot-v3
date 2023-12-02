@@ -182,8 +182,8 @@ namespace e621_ReBot_v3.Modules.Converter
                         }
                     }
                     FFMpeg.WaitForExit();
-                    if (File.Exists("ffmpeg2pass-0.log")) File.Delete("ffmpeg2pass-0.log");
                 }
+                if (File.Exists("ffmpeg2pass-0.log")) File.Delete("ffmpeg2pass-0.log");
             }
         }
 
@@ -230,7 +230,7 @@ namespace e621_ReBot_v3.Modules.Converter
             File.WriteAllText(@"FFMpegTemp\\Upload\input.txt", UgoiraConcat.ToString());
 
             byte[] TempBytes = Module_Downloader.DownloadFileBytes(UgoiraJObject["originalSrc"].Value<string>(), ActionType.Upload);
-            Module_Downloader.SaveFileBytes(TempBytes, $"{UgoiraFileName}.zip");
+            Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{UgoiraFileName}.zip");
 
             Module_Uploader.Report_Status("Converting Ugoira to WebM...");
             FFMpeg4Ugoira(ActionType.Upload, "FFMpegTemp\\Upload", "FFMpegTemp\\Upload", UgoiraFileName, TotalUgoiraLength);
@@ -254,7 +254,7 @@ namespace e621_ReBot_v3.Modules.Converter
             Directory.CreateDirectory("FFMpegTemp\\Upload").Attributes = FileAttributes.Hidden;
 
             byte[] TempBytes = Module_Downloader.DownloadFileBytes(WorkURL, ActionType.Upload);
-            Module_Downloader.SaveFileBytes(TempBytes, $"{VideoFileName}.{VideoFormat}");
+            Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{VideoFileName}.{VideoFormat}");
 
             Module_Uploader.Report_Status($"Converting Video to WebM...");
             FFMpeg4Video(ActionType.Upload, "FFMpegTemp\\Upload", VideoFileName, VideoFormat, "FFMpegTemp\\Upload");
@@ -307,7 +307,7 @@ namespace e621_ReBot_v3.Modules.Converter
             File.WriteAllText($"{TempFolderName}\\input.txt", UgoiraConcat.ToString());
 
             byte[] TempBytes = Module_Downloader.DownloadFileBytes(UgoiraJObject["originalSrc"].Value<string>(), ActionType.Download, DownloadVERef.DownloadProgress);
-            Module_Downloader.SaveFileBytes(TempBytes, UgoiraFileName, FolderPath);
+            Module_Downloader.SaveFileBytes(ActionType.Download, TempBytes, UgoiraFileName, FolderPath);
 
             string OriginalVideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
             FFMpeg4Ugoira(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, TotalUgoiraLength, DownloadVERef.ConversionProgress);
@@ -367,7 +367,7 @@ namespace e621_ReBot_v3.Modules.Converter
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             byte[] TempBytes = Module_Downloader.DownloadFileBytes(DownloadVERef._DownloadItemRef.Grab_MediaURL, ActionType.Download, DownloadVERef.DownloadProgress);
-            Module_Downloader.SaveFileBytes(TempBytes, VideoFileName, FolderPath);
+            Module_Downloader.SaveFileBytes(ActionType.Download, TempBytes, VideoFileName, FolderPath);
 
             string OriginalVideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
             FFMpeg4Video(ActionType.Download, TempFolderName, VideoFileName, OriginalVideoFormat, FolderPath, DownloadVERef.ConversionProgress);

@@ -7,7 +7,7 @@
         Title="Window_MediaSelect" ResizeMode="NoResize" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed" MinWidth="204" MinHeight="60" MaxWidth="650" MaxHeight="655" UseLayoutRounding="True" SnapsToDevicePixels="True" SizeToContent="WidthAndHeight" ShowInTaskbar="False">
 
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="1,0,0,0">
+        <ScrollViewer x:Name="MediaSelect_ScrollViewer"  VerticalScrollBarVisibility="Auto" Padding="1,0,0,0">
             <WrapPanel Name="ItemPanel"/>
         </ScrollViewer>
         <TextBlock x:Name="SearchStatus" TextWrapping="Wrap" Text="Checking Site status..." Margin="0,8,0,8"/>

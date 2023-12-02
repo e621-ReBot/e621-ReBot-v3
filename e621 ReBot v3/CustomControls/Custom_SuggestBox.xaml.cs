@@ -92,6 +92,13 @@ namespace e621_ReBot_v3.CustomControls
                         break;
                     }
                 case Key.Space:
+                    {
+                        if (IsOpen)
+                        {
+                            IsOpen = false;
+                        }
+                        break;
+                    }
                 case Key.Left:
                 case Key.Right:
                     {

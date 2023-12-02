@@ -97,7 +97,7 @@ namespace e621_ReBot_v3.Modules
             for (int i = StartIndex; i <= EndIndex; i++)
             {
                 MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                if (MediaItemTemp.UP_Queued && MediaItemTemp.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 8)
+                if (MediaItemTemp.UP_Queued && MediaItemTemp.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 16)
                 {
                     MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "There is media with insufficent number of tags selected for upload. Are you sure you want to proceed?", "e621 ReBot - Uploader", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No); });
                     if (MessageBoxResultTemp == MessageBoxResult.No) return;
