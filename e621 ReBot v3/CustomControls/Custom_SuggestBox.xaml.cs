@@ -87,8 +87,11 @@ namespace e621_ReBot_v3.CustomControls
                     }
                 case Key.PageUp:
                     {
-                        SelectListItem(MaxItemCount * (-1));
-                        e.Handled = true;
+                        if (IsOpen)
+                        {
+                            SelectListItem(MaxItemCount * (-1));
+                            e.Handled = true;
+                        }
                         break;
                     }
                 case Key.Space:
