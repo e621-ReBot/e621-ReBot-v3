@@ -17,7 +17,30 @@ namespace e621_ReBot_v3.CustomControls
         internal static ushort _Height = 200;
         internal static Thickness MarginSize = new Thickness(2, 4, 2, 4);
 
-        internal bool _isSelected = false;
+        private bool _IsSelected = false;
+        internal bool IsSelected
+        {
+            get
+            {
+                return _IsSelected;
+            }
+            set
+            {
+                _IsSelected = value;
+                if (_IsSelected)
+                {
+                    BorderHighlight.BorderBrush = new SolidColorBrush(Colors.Orange);
+                    BorderHighlight.BorderThickness = new Thickness(2);
+                }
+                else
+                {
+                    BorderHighlight.BorderBrush = new SolidColorBrush(Colors.RoyalBlue);
+                    BorderHighlight.BorderThickness = new Thickness(1);
+                }
+                Window_Main._RefHolder.ChangeGridVESelection(this);
+            }
+        }
+
         internal MediaItem? _MediaItemRef;
         public GridVE()
         {
@@ -56,6 +79,7 @@ namespace e621_ReBot_v3.CustomControls
                 IsUploaded_SetText(_MediaItemRef.UP_UploadedID);
                 ChangeRating(_MediaItemRef.UP_Rating);
                 GridVEIsLoading = false;
+                IsSelected = false;
                 if (_MediaItemRef.UP_Tags != null) cTagWarning_TextBlock.Visibility = cUpload_CheckBox.IsEnabled && _MediaItemRef.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Count() < 16 ? Visibility.Visible : Visibility.Hidden;
             }
         }
@@ -107,9 +131,7 @@ namespace e621_ReBot_v3.CustomControls
         {
             if (e.ClickCount == 2)
             {
-                _isSelected = true;
-                BorderHighlight.BorderBrush = new SolidColorBrush(Colors.Orange);
-                BorderHighlight.BorderThickness = new Thickness(2);
+                IsSelected = true;
                 if (Window_Preview._RefHolder == null)
                 {
                     if (Window_Main._RefHolder.InitStarted)
@@ -131,11 +153,8 @@ namespace e621_ReBot_v3.CustomControls
             }
             else
             {
-                _isSelected = !_isSelected;
-                BorderHighlight.BorderBrush = new SolidColorBrush(_isSelected ? Colors.Orange : Colors.RoyalBlue);
-                BorderHighlight.BorderThickness = new Thickness(_isSelected ? 2 : 1);
+                IsSelected = !IsSelected;
             }
-            Window_Main._RefHolder.ChangeGridVESelection(this);
         }
 
         internal void ToggleSelection()

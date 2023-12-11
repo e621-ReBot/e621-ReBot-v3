@@ -102,6 +102,7 @@ namespace e621_ReBot_v3
                     {
                         UpdateNotNeeded();
                     }
+                    AppSettings.Update_LastCheck = DateTime.UtcNow;
                     return;
                 }
             }
@@ -135,7 +136,7 @@ namespace e621_ReBot_v3
                         }
                     }
 
-                    AppSettings.Update_LastCheck = DateTime.UtcNow;
+                    //AppSettings.Update_LastCheck = DateTime.UtcNow;
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                     {
                         MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Update is downloaded and ready, do you want to update now?", "e621 ReBot v3", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);

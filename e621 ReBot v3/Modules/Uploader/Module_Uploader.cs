@@ -544,8 +544,11 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             FailedUploadTask = true;
-                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                            {
+                                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
+                                MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
+                            });
                         }
                         break;
                     }
@@ -553,9 +556,12 @@ namespace e621_ReBot_v3.Modules
                 default:
                     {
                         FailedUploadTask = true;
-                        Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
                         Report_Info($"Error uploading: {UploadedURL4Report}");
-                        MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        {
+                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
+                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
                         break;
                     }
             }
@@ -646,7 +652,7 @@ namespace e621_ReBot_v3.Modules
             E621UploadRequest($"https://e621.net/post_replacements.json?post_id={MediaItemRef.UP_Inferior_ID}", "POST", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse, in bytes2Send);
             switch (e621HttpWebResponse.StatusCode)
             {
-                case HttpStatusCode.Created:
+                case HttpStatusCode.OK:
                     {
                         //JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
                         Module_Credit.Credit_UploadHourly--;
@@ -674,8 +680,11 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             //FailedUploadTask = true;
-                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                            {
+                                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
+                                MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
+                            });
                         }
                         break;
                     }
@@ -683,9 +692,12 @@ namespace e621_ReBot_v3.Modules
                 default:
                     {
                         //FailedUploadTask = true;
-                        Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
                         Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}");
-                        MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        {
+                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
+                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
                         break;
                     }
             }

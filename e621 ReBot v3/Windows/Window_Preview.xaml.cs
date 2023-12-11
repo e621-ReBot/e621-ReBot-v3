@@ -31,7 +31,7 @@ namespace e621_ReBot_v3
         {
             InitializeComponent();
             _RefHolder = this;
-            Owner = Window_Main._RefHolder;
+            //Owner = Window_Main._RefHolder;
             Top = Window_Main._RefHolder.Top;
             Left = Window_Main._RefHolder.Left;
             App.SetWindow2Square(this);
@@ -41,6 +41,7 @@ namespace e621_ReBot_v3
                 RequestHandler = new MediaBrowser_RequestHandler(),
                 MenuHandler = new MediaBrowser_MenuHandler(),
                 //FocusHandler = new MediaBrowser_FocusHandler()
+                Focusable = false
             };
             MediaBrowser.TitleChanged += MediaBrowser_TitleChanged;
             MediaBrowser.LoadingStateChanged += MediaBrowser_LoadingStateChanged;
@@ -57,7 +58,7 @@ namespace e621_ReBot_v3
             Preview_Grid.Children.Remove(MediaBrowser);
             MediaBrowser.Dispose();
             _RefHolder = null;
-            Owner.Activate();
+            Window_Main._RefHolder.Activate();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -265,7 +266,7 @@ namespace e621_ReBot_v3
             else
             {
                 LoadFinishedDateTime = DateTime.Now;
-                this.Dispatcher.BeginInvoke(BrowserLoadedActions);
+                Dispatcher.Invoke(BrowserLoadedActions);
             }
         }
 

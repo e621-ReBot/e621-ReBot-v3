@@ -39,9 +39,11 @@ namespace e621_ReBot_v3.CustomControls
 
         internal void RemoveTextBoxTarget(TextBox TextBoxRef)
         {
+            TextBoxRef.GotFocus -= TextBoxRef_GotFocus;
             TextBoxRef.PreviewKeyDown -= TextBoxRef_PreviewKeyDown;
             TextBoxRef.PreviewMouseWheel -= TextBoxRef_PreviewMouseWheel;
             Window.GetWindow(TextBoxRef).LostFocus -= TextBoxRefWindow_LostFocus;
+            Window.GetWindow(TextBoxRef).Closing -= TextBoxRefWindow_Closing;
             _TextBoxRef = null;
         }
 
@@ -50,6 +52,7 @@ namespace e621_ReBot_v3.CustomControls
             _TextBoxRef = (TextBox?)sender;
         }
 
+        private readonly KeyConverter _KeyConverter = new KeyConverter();
         private void TextBoxRef_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             SuggestionTimer.Stop();
@@ -84,11 +87,8 @@ namespace e621_ReBot_v3.CustomControls
                     }
                 case Key.PageUp:
                     {
-                        if (IsOpen)
-                        {
-                            SelectListItem(MaxItemCount * (-1));
-                            e.Handled = true;
-                        }
+                        SelectListItem(MaxItemCount * (-1));
+                        e.Handled = true;
                         break;
                     }
                 case Key.Space:
@@ -99,15 +99,6 @@ namespace e621_ReBot_v3.CustomControls
                         }
                         break;
                     }
-                case Key.Left:
-                case Key.Right:
-                    {
-                        if (IsOpen)
-                        {
-                            e.Handled = true;
-                        }
-                        break;
-                    }
                 case Key.Enter:
                 case Key.Tab:
                     {
@@ -115,7 +106,7 @@ namespace e621_ReBot_v3.CustomControls
                         {
                             InputSuggestion();
                             e.Handled = true;
-                        } 
+                        }
                         break;
                     }
                 case Key.Escape:
@@ -127,9 +118,42 @@ namespace e621_ReBot_v3.CustomControls
                         }
                         break;
                     }
+                case Key.CapsLock:
+                case Key.LeftShift:
+                case Key.RightShift:
+                case Key.LeftCtrl:
+                case Key.RightCtrl:
+                case Key.LeftAlt:
+                case Key.RightAlt:
+                case Key.LWin:
+                case Key.RWin:
+                case Key.F1:
+                case Key.F2:
+                case Key.F3:
+                case Key.F4:
+                case Key.F5:
+                case Key.F6:
+                case Key.F7:
+                case Key.F8:
+                case Key.F9:
+                case Key.F10:
+                case Key.F11:
+                case Key.F12:
+                case Key.Print:
+                case Key.PrintScreen:
+                case Key.Scroll:
+                case Key.Pause:
+                case Key.Insert:
+                case Key.Delete:
+                case Key.Home:
+                case Key.End:
+                    {
+                        //e.Handled = false;
+                        break;
+                    }
                 default:
                     {
-                        SuggestionTimer?.Start();
+                        SuggestionTimer.Start();
                         break;
                     }
             }

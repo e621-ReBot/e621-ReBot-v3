@@ -513,7 +513,7 @@ namespace e621_ReBot_v3
         internal GridVE? _SelectedGridVE;
         internal void ChangeGridVESelection(GridVE GridVERef)
         {
-            if (GridVERef._isSelected)
+            if (GridVERef.IsSelected)
             {
                 if (_SelectedGridVE != null && !ReferenceEquals(_SelectedGridVE, GridVERef)) _SelectedGridVE.ToggleSelection();
                 _SelectedGridVE = GridVERef;
@@ -1025,6 +1025,8 @@ namespace e621_ReBot_v3
                 Module_Uploader._2Upload_MediaItems.RemoveURL(TreeViewItemTarget.Header.ToString());
             }
             Upload_TreeView.Items.Remove(TreeViewItemTarget);
+            Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
+
         }
 
         private void UploadTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
@@ -1034,6 +1036,7 @@ namespace e621_ReBot_v3
                 Module_Uploader._2Upload_MediaItems.Clear();
             }
             Upload_TreeView.Items.Clear();
+            Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
         }
 
         private void Upload_ReverseUploadQueue_Click(object sender, RoutedEventArgs e)
