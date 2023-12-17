@@ -5,7 +5,7 @@
         xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls"
         x:Class="e621_ReBot_v3.Window_PoolWatcher"
         mc:Ignorable="d"
-        Title="Pool Watcher" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinHeight="210" MaxHeight="810" MinWidth="172" MaxWidth="648" Loaded="Window_Loaded" SizeToContent="WidthAndHeight" Closed="Window_Closed" ShowInTaskbar="False">
+        Title="Pool Watcher" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinHeight="210" MaxHeight="810" MinWidth="172" MaxWidth="648" Loaded="Window_Loaded" SizeToContent="WidthAndHeight" Closed="Window_Closed" ShowInTaskbar="False" KeyDown="Window_KeyDown">
 
     <Grid>
         <Grid.RowDefinitions>

@@ -31,6 +31,7 @@ namespace e621_ReBot_v3
         private void Window_Closed(object sender, EventArgs e)
         {
             _RefHolder = null;
+            Owner.Activate();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -102,7 +103,7 @@ namespace e621_ReBot_v3
                 }
             }
 
-            _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(Math.Floor(Math.Max(0,RowIndex-1) / 3d) * 204); //202 + 1 + 1
+            _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(Math.Floor(Math.Max(0, RowIndex - 1) / 3d) * 204); //202 + 1 + 1
 
             if (LaunchTimer)
             {

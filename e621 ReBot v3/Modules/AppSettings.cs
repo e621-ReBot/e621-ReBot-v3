@@ -89,7 +89,7 @@ namespace e621_ReBot_v3
             if (MediaRecords.Any()) JObjectTemp.Add("MediaRecords", JObject.FromObject(MediaRecords));
             if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
             if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
-            if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JArray.FromObject(PoolWatcher));
+            if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
 
             string SaveSettingsString = JsonConvert.SerializeObject(JObjectTemp, Formatting.Indented);
             File.WriteAllText("settings.json", SaveSettingsString);

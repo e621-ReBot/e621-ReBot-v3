@@ -329,6 +329,9 @@ namespace e621_ReBot_v3
                         if (MediaItemHolder.Grid_MediaMD5 == null)
                         {
                             MatchCollection ImageResolution = Preview_Regex().Matches(DocumentTitle);
+
+                            if (ImageResolution.Count == 0) return; //Protect against 404
+
                             MediaItemHolder.Grid_MediaWidth = ushort.Parse(ImageResolution[0].Groups[1].Value);
                             MediaItemHolder.Grid_MediaHeight = ushort.Parse(ImageResolution[0].Groups[2].Value);
 

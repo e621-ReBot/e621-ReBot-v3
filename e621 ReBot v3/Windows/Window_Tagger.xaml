@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_Tagger"
         mc:Ignorable="d"
-        Title="Tagger" Height="240" Width="420" SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" ResizeMode="NoResize" Cursor="{StaticResource Cursor_Default}" Closing="Window_Closing" Closed="Window_Closed" Loaded="Window_Loaded">
+        Title="Tagger" Height="240" Width="420" SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" ResizeMode="NoResize" Cursor="{StaticResource Cursor_Default}" Closing="Window_Closing" Closed="Window_Closed" Loaded="Window_Loaded" Activated="Window_Activated">
 
     <Window.Resources>
         <Style x:Key="ButtonTaggerStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">

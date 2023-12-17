@@ -13,6 +13,7 @@ using e621_ReBot_v3.Modules.Downloader;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Windows.Input;
 
 namespace e621_ReBot_v3
 {
@@ -43,6 +44,14 @@ namespace e621_ReBot_v3
         private void Window_Closed(object sender, EventArgs e)
         {
             _RefHolder = null;
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
 
         [GeneratedRegex(@".+e621.net/pools/\d+/?")]
@@ -249,6 +258,5 @@ namespace e621_ReBot_v3
                 }
             }
         }
-
     }
 }

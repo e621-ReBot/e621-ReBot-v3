@@ -67,8 +67,6 @@ namespace e621_ReBot_v3
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Tags_TextBox.Focus();
-
             Title_TextBox.Text = MediaItemHolder.Grab_Title;
             Description_TextBox.Text = MediaItemHolder.Grab_TextBody;
             string ArtistAlias = AppSettings.ArtistAlias_Check(MediaItemHolder);
@@ -118,6 +116,11 @@ namespace e621_ReBot_v3
             //}
         }
 
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            Tags_TextBox.Focus();
+        }
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             if (TagsAdded)
@@ -148,6 +151,7 @@ namespace e621_ReBot_v3
         {
             //Form_Loader._FormReference.AutoTags.SetAutocompleteMenu(textBox_Tags, null);
             //Form_Loader._FormReference.AutoTags.SetAutocompleteItems(Form_Loader._FormReference.AutoTagsList_Tags);
+            SuggestionPopup.PoolMode = false;
             SuggestionPopup.RemoveTextBoxTarget(Tags_TextBox);
             _RefHolder = null;
             Owner.Activate();
@@ -355,7 +359,7 @@ namespace e621_ReBot_v3
                 return;
             }
 
-            string InputBoxDescription = $"Chose a new alias for artist: {MediaItemHolder.Grab_Artist}{(TB_ArtistAlias.Tag == null ? null : $"Current alias is: {TB_ArtistAlias.Tag}")}";
+            string InputBoxDescription = $"Chose a new alias for artist: {MediaItemHolder.Grab_Artist}{(TB_ArtistAlias.Tag == null ? null : $"\nCurrent alias is: {TB_ArtistAlias.Tag}")}";
             string InputBoxAliastString = TB_ArtistAlias.Tag == null ? MediaItemHolder.Grab_Artist.ToLower() : TB_ArtistAlias.Tag.ToString();
             string InputedText = Custom_InputBox.ShowInputBox(this, "Create Artist Alias", InputBoxDescription, TB_ArtistAlias.PointToScreen(new Point(0, 0)), InputBoxAliastString).ToLower();
             if (InputedText.Equals("☠")) return;

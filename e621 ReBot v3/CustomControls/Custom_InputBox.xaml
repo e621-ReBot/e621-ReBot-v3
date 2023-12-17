@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Custom_InputBox" Width="320" Height="80" ResizeMode="NoResize" UseLayoutRounding="True" SnapsToDevicePixels="True" Closed="Window_Closed" ContentRendered="Window_ContentRendered" Cursor="{StaticResource Cursor_Default}">
+        Title="Custom_InputBox" Width="320" Height="80" ResizeMode="NoResize" UseLayoutRounding="True" SnapsToDevicePixels="True" Closed="Window_Closed" ContentRendered="Window_ContentRendered" Cursor="{StaticResource Cursor_Default}" ShowInTaskbar="False">
 
     <Grid>
         <Label Height="32" IsHitTestVisible="False" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="1" Margin="2">
