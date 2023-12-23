@@ -63,6 +63,16 @@ namespace e621_ReBot_v3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] _2560SantaHat {
+            get {
+                object obj = ResourceManager.GetObject("2560SantaHat", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Banner_Tail {
             get {
                 object obj = ResourceManager.GetObject("Banner_Tail", resourceCulture);

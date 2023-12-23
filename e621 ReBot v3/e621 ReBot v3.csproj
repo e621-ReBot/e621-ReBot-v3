@@ -11,7 +11,7 @@
     <ApplicationIcon>Resources\ReBot_Icon.ico</ApplicationIcon>
     <Platforms>x64</Platforms>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <FileVersion>3.0.0.11</FileVersion>
+    <FileVersion>3.0.0.12</FileVersion>
     <StartupObject>e621_ReBot_v3.App</StartupObject>
     <IsPublishable>False</IsPublishable>
     <RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>
@@ -68,6 +68,7 @@
     <None Remove="Resources\Files\HtmlAgilityPack.dll" />
     <None Remove="Resources\Files\Newtonsoft.Json.Bson.dll" />
     <None Remove="Resources\Files\Newtonsoft.Json.dll" />
+    <None Remove="Resources\MainWindow\2560SantaHat.png" />
     <None Remove="Resources\MainWindow\Banner_Tail.png" />
     <None Remove="Resources\MainWindow\Button_Close.png" />
     <None Remove="Resources\MainWindow\Button_Minimize.png" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <Resource Include="Resources\Browser\BrowserIcon_e621.png" />
     <Resource Include="Resources\Browser\BrowserIcon_Weasyl.png" />
+    <Resource Include="Resources\MainWindow\2560SantaHat.png" />
     <Resource Include="Resources\MainWindow\ReBot_Logo.png" />
     <Resource Include="Resources\ReBot_Icon.ico" />
   </ItemGroup>

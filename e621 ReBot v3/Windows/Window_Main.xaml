@@ -108,6 +108,16 @@
                     <Button x:Name="MakeUpdate_WButton" Content="Make Update" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,48" Width="128" Height="32" Click="MakeUpdate_WButton_Click" Cursor="Hand"/>
 
                     <TextBlock x:Name="Update_TextBlock" Text="Checking for updates..." Foreground="{DynamicResource ThemeFocus}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" FontSize="16" FontStyle="Italic" FontWeight="Bold"/>
+                    <Image x:Name="SantaHat1" IsHitTestVisible="False" Source="/Resources/MainWindow/2560Santahat.png" Width="110" RenderTransformOrigin="0.5,0.5" Margin="-50,0,0,110" Visibility="Collapsed">
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="15"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
                 </Grid>
             </TabItem>
 
@@ -676,10 +686,20 @@
             </TabItem>
 
         </TabControl>
-        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2"/>
+        <Border Grid.Row="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="31,0,1,0"/>
         <Canvas Grid.Row="0" Grid.Column="0" Width="48" Height="48" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Image Source="/Resources/Browser/BrowserIcon_e621.png" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="48"/>
             <Polygon x:Name="ReBot_e6Button" Points="1,17 8,5 22,5 29,17 22,29 8,29" Fill="Transparent" Cursor="{StaticResource Cursor_BrowserNav}" ToolTip="Open e621.net" Tag="https://e621.net/" MouseLeftButtonDown="ReBot_e6Button_MouseLeftButtonDown" Margin="8,8,0,0"/>
+            <Image x:Name="SantaHat2" IsHitTestVisible="False" Source="/Resources/MainWindow/2560Santahat.png" Width="24" RenderTransformOrigin="0.5,0.5" Margin="0,2,0,0" Visibility="Collapsed">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="345"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
         </Canvas>
 
     </Grid>

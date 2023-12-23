@@ -52,6 +52,14 @@ namespace e621_ReBot_v3
             GBTB_Right.Visibility = Visibility.Hidden;
             SettingsButton_DLGenders.Visibility = Visibility.Hidden;
             SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
+
+            DateTime HolidaysStart = new DateTime(DateTime.UtcNow.Year, 12, 24);
+            DateTime HolidaysEnd = HolidaysStart.AddDays(13);
+            if (DateTime.UtcNow > HolidaysStart && DateTime.UtcNow < HolidaysEnd)
+            {
+                SantaHat1.Visibility = Visibility.Visible;
+                SantaHat2.Visibility = Visibility.Visible;
+            }
         }
 
         #region "Window"
