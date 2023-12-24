@@ -218,10 +218,12 @@ namespace CefSharp
                                 {
                                     //[@something]makes it go two levels deep.
                                     //data.user.result.timeline_v2.timeline.instructions[0].entries[0].content.itemContent.tweet_results.result.legacy.extended_entities
-                                    TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
+                                    TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
+                                    if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                 }
                                 if (Twitter.StartsWith("https://api.twitter.com/graphql/")) //not logged in
                                 {
+                                    //TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                     TweetsContainer = JObjectTemp.SelectTokens("$..tweetResult.result.legacy").Where(token => token["extended_entities"] != null);
                                 }                      
                                 if (TweetsContainer.Any())
