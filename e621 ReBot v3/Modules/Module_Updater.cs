@@ -60,7 +60,7 @@ namespace e621_ReBot_v3
         }
 
 
-        [GeneratedRegex(@"(?:.+/v)(\d\.\d\.\d\.\d)")]
+        [GeneratedRegex(@"(?:.+/v)(\d\.\d+\.\d+\.\d+)")]
         private static partial Regex VersionRegex();
         private static CookieContainer CookieContainerGitHub = new CookieContainer();
         internal static void Check4Update()
