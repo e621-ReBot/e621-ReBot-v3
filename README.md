@@ -1,4 +1,4 @@
-# e621 ReBot v3 (Readme copied from v2)
+# e621 ReBot v3
 
 e621 ReBot is a tool for making your uploading life to e621 easier, it also supports downloading.
 
@@ -27,6 +27,11 @@ Features:
 - Windows, resolution 1366 x 768 (+)
 - .Net 4.8 (+)
 - C++ 2019
+
+---
+## How to install:
+- Extract archive, run the ReBot.exe
+- For manual updates, just overwrite older files
 
 ---
 ### Discord:
