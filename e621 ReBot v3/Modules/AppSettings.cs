@@ -65,7 +65,7 @@ namespace e621_ReBot_v3
                 { "Update_Interval", Update_Interval },
                 { "Update_LastCheck", Update_LastCheck },
                 { "Grid_SaveSession", Grid_SaveSession },
-                { "Downloads_FolderLocation", Download_FolderLocation },
+                { "Download_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },

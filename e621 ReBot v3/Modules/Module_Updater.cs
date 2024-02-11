@@ -136,6 +136,8 @@ namespace e621_ReBot_v3
                         }
                     }
 
+                    DeleteErrorLog();
+
                     //AppSettings.Update_LastCheck = DateTime.UtcNow;
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                     {
@@ -194,6 +196,11 @@ namespace e621_ReBot_v3
             {
                 Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Hidden;
             });
+        }
+
+        private static void DeleteErrorLog()
+        {
+            if (File.Exists("ReBotErrorLog.txt")) File.Delete("ReBotErrorLog.txt");
         }
     }
 }
