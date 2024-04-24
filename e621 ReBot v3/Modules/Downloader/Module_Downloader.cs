@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -613,7 +612,7 @@ namespace e621_ReBot_v3.Modules
                     }
                     else
                     {
-                        MessageBox.Show(Window_Main._RefHolder, ErrorMsg, "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Window_Main._RefHolder, $"{PicURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
                         throw e.Error;
                     }
                 }

@@ -435,30 +435,30 @@ namespace e621_ReBot_v3
         private void Check4MD5On621()
         {
             if (MediaItemHolder.Grid_MediaMD5 == null) return;
-            string MD5Check = Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolder.Grid_MediaMD5}");
-            if (MD5Check != null && MD5Check.Length > 24)
-            {
-                JObject MD5CheckJSON = JObject.Parse(MD5Check);
-                MediaItemHolder.UP_UploadedID = MD5CheckJSON["post"]["id"].Value<string>();
-                AppSettings.MediaRecord_Add(MediaItemHolder);
-
-                MediaItemHolder.UP_Rating = MD5CheckJSON["post"]["rating"].Value<string>().ToUpper();
-                List<string> TagList = new List<string>();
-                foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
-                {
-                    foreach (JToken cTag in pTag.First)
-                    {
-                        TagList.Add(cTag.Value<string>());
-                    }
-                };
-                MediaItemHolder.UP_Tags = string.Join(' ', TagList);
-                GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
-                if (GridVETemp != null)
-                {
-                    GridVETemp.IsUploaded_SetText(MediaItemHolder.UP_UploadedID);
-                }
-            }
             MediaItemHolder.Preview_DontDelay = true;
+
+            string MD5Check = Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolder.Grid_MediaMD5}");
+            if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 24) return;
+
+            JObject MD5CheckJSON = JObject.Parse(MD5Check);
+            MediaItemHolder.UP_UploadedID = MD5CheckJSON["post"]["id"].Value<string>();
+            AppSettings.MediaRecord_Add(MediaItemHolder);
+
+            MediaItemHolder.UP_Rating = MD5CheckJSON["post"]["rating"].Value<string>().ToUpper();
+            List<string> TagList = new List<string>();
+            foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
+            {
+                foreach (JToken cTag in pTag.First)
+                {
+                    TagList.Add(cTag.Value<string>());
+                }
+            };
+            MediaItemHolder.UP_Tags = string.Join(' ', TagList);
+            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+            if (GridVETemp != null)
+            {
+                GridVETemp.IsUploaded_SetText(MediaItemHolder.UP_UploadedID);
+            }
         }
 
         private void AutoTags()
@@ -832,9 +832,14 @@ namespace e621_ReBot_v3
             }
 
             string? PostTest = await RunTaskFirst;
-            if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16)
+            if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16 || PostTest.StartsWith('ⓔ'))
             {
                 MessageBox.Show(this, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (PostTest.StartsWith('ⓔ'))
+            {
+                MessageBox.Show(this, $"{PostTest}", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -887,6 +892,11 @@ namespace e621_ReBot_v3
             if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16)
             {
                 MessageBox.Show(_RefHolder, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (PostTest.StartsWith('ⓔ'))
+            {
+                MessageBox.Show(_RefHolder, $"{PostTest}", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -954,7 +964,7 @@ namespace e621_ReBot_v3
                 }
 
                 PostTest = await RunTaskFirst;
-                if (!PostTest.StartsWith("{")) // no notes then
+                if (!string.IsNullOrEmpty(PostTest) && !PostTest.StartsWith('ⓔ') && !PostTest.StartsWith('{'))
                 {
                     MediaItemRef.UP_Inferior_HasNotes = true;
                     float NewNoteSizeRatio = Math.Max((float)MediaItemRef.Grid_MediaWidth, (float)MediaItemRef.Grid_MediaHeight) / Math.Max(PostData["file"]["width"].Value<uint>(), PostData["file"]["height"].Value<uint>());

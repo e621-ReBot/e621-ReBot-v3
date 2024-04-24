@@ -130,6 +130,10 @@ namespace e621_ReBot_v3.Modules.Downloader
                             if (GetCurrentPage > 1)
                             {
                                 string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
+
+                                string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
+                                if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 24) return;
+
                                 PoolPages = JObject.Parse(Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"))["post_ids"].Values<string>().ToList();
                             }
 
@@ -315,47 +319,49 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (e6JSONResult != null && e6JSONResult.Length > 24)
-            {
-                JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
-                foreach (JToken cPost in JSON_Object.Children())
-                {
-                    List<string> TempTagList = CreateTagList(cPost["tags"], cPost["rating"].Value<string>());
-                    if (!Blacklist_Check(TempTagList))
-                    {
-                        string MediaURLTemp;
-                        string ThumbnailURLTemp;
-                        MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
-                        string PostID = cPost["id"].Value<string>();
-                        Module_Downloader.AddDownloadItem2Queue(
-                            PageURL: $"https://e621.net/posts/{PostID}",
-                            MediaURL: MediaURLTemp,
-                            ThumbnailURL: ThumbnailURLTemp,
-                            MediaFormat: cPost["file"]["ext"].Value<string>(),
-                            e6PostID: PostID,
-                            e6PoolName: FolderName,
-                            e6Download: true
-                            );
-                    }
-                }
-                PageCounter += 1;
-                Module_Downloader.UpdateDownloadTreeView();
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
 
-                if (CancellationPending)
+            JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
+            foreach (JToken cPost in JSON_Object.Children())
+            {
+                List<string> TempTagList = CreateTagList(cPost["tags"], cPost["rating"].Value<string>());
+                if (!Blacklist_Check(TempTagList))
                 {
-                    CancellationPending = false;
-                    return;
+                    string MediaURLTemp;
+                    string ThumbnailURLTemp;
+                    MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
+                    string PostID = cPost["id"].Value<string>();
+                    Module_Downloader.AddDownloadItem2Queue(
+                        PageURL: $"https://e621.net/posts/{PostID}",
+                        MediaURL: MediaURLTemp,
+                        ThumbnailURL: ThumbnailURLTemp,
+                        MediaFormat: cPost["file"]["ext"].Value<string>(),
+                        e6PostID: PostID,
+                        e6PoolName: FolderName,
+                        e6Download: true
+                        );
                 }
-                if (JSON_Object.Children().Count() == 320)
-                {
-                    goto GrabAnotherAPIPage;
-                }
+            }
+            PageCounter += 1;
+            Module_Downloader.UpdateDownloadTreeView();
+
+            if (CancellationPending)
+            {
+                CancellationPending = false;
+                return;
+            }
+            if (JSON_Object.Children().Count() == 320)
+            {
+                goto GrabAnotherAPIPage;
             }
         }
 
         internal async static void Grab_Pool(string PoolID)
         {
-            JToken PoolJSON = JObject.Parse(Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"));
+            string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
+            if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 24) return;
+
+            JToken PoolJSON = JObject.Parse(JSON_PoolData);
             string PoolName = PoolJSON["name"].Value<string>().Replace('_', ' ').Trim();
             PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\", PoolName);
@@ -387,45 +393,44 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (e6JSONResult != null && e6JSONResult.Length > 24)
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
+
+            JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
+            foreach (JToken cPost in JSON_Object)
             {
-                JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
-                foreach (JToken cPost in JSON_Object)
-                {
-                    string MediaURLTemp;
-                    string ThumbnailURLTemp;
-                    MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
+                string MediaURLTemp;
+                string ThumbnailURLTemp;
+                MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
 
-                    string PicName = MediaURLTemp.Substring(MediaURLTemp.LastIndexOf('/') + 1);
-                    if (FoundComicPosts.Contains(PicName))
-                    {
-                        SkippedPostsCounter += 1;
-                        continue;
-                    }
-
-                    string? PostID = cPost["id"].Value<string>();
-                    Module_Downloader.AddDownloadItem2Queue(
-                        PageURL: $"https://e621.net/posts/{PostID}",
-                        MediaURL: MediaURLTemp,
-                        ThumbnailURL: ThumbnailURLTemp,
-                        MediaFormat: cPost["file"]["ext"].Value<string>(),
-                        e6PostID: PostID,
-                        e6PoolName: PoolName,
-                        e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
-                        e6Download: true
-                        );
-                }
-                Module_Downloader.UpdateDownloadTreeView();
-
-                if (CancellationPending)
+                string PicName = MediaURLTemp.Substring(MediaURLTemp.LastIndexOf('/') + 1);
+                if (FoundComicPosts.Contains(PicName))
                 {
-                    CancellationPending = false;
-                    goto ExitFromStuff;
+                    SkippedPostsCounter += 1;
+                    continue;
                 }
-                if (JSON_Object.Children().Count() == 320)
-                {
-                    goto GrabAnotherAPIPage;
-                }
+
+                string? PostID = cPost["id"].Value<string>();
+                Module_Downloader.AddDownloadItem2Queue(
+                    PageURL: $"https://e621.net/posts/{PostID}",
+                    MediaURL: MediaURLTemp,
+                    ThumbnailURL: ThumbnailURLTemp,
+                    MediaFormat: cPost["file"]["ext"].Value<string>(),
+                    e6PostID: PostID,
+                    e6PoolName: PoolName,
+                    e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
+                    e6Download: true
+                    );
+            }
+            Module_Downloader.UpdateDownloadTreeView();
+
+            if (CancellationPending)
+            {
+                CancellationPending = false;
+                goto ExitFromStuff;
+            }
+            if (JSON_Object.Children().Count() == 320)
+            {
+                goto GrabAnotherAPIPage;
             }
 
         ExitFromStuff:

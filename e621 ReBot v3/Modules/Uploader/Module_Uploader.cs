@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Formats.Asn1;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -716,7 +714,10 @@ namespace e621_ReBot_v3.Modules
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);
             }
 
-            JArray NoteList = JArray.Parse(await RunTaskFirst);
+            string? JSON_NoteData = await RunTaskFirst;
+            if (string.IsNullOrEmpty(JSON_NoteData) || JSON_NoteData.StartsWith('ⓔ') || JSON_NoteData.Length < 24) return;
+
+            JArray NoteList = JArray.Parse(JSON_NoteData);
             foreach (JObject Note in NoteList.Reverse())
             {
                 if (!Note["is_active"].Value<bool>())

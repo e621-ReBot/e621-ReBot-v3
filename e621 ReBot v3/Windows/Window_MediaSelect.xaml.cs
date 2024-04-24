@@ -148,7 +148,7 @@ namespace e621_ReBot_v3
         }
 
         private static readonly HttpClientHandler SS_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate, UseCookies = false };
-        private static readonly HttpClient SS_HttpClient = new HttpClient(SS_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly HttpClient SS_HttpClient = new HttpClient(SS_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(5) };
         private static async Task CheckSiteStatus(string ModeString)
         {
             using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Head, ModeString.Equals("IQDBQ") ? "https://e621.net/iqdb_queries" : "https://saucenao.com/"))
@@ -159,12 +159,15 @@ namespace e621_ReBot_v3
                 {
                     if (HttpResponseMessageTemp.IsSuccessStatusCode)
                     {
+                        if (_RefHolder == null) return;
                         _RefHolder.Dispatcher.Invoke(() =>
                         {
                             _RefHolder.SearchStatus.Foreground = new SolidColorBrush(Colors.LimeGreen);
                             _RefHolder.SearchStatus.Text = $"{ModeString} is online.";
                         });
                         await Task.Delay(500);
+
+                        if (_RefHolder == null) return;
                         _RefHolder.Dispatcher.Invoke(() =>
                         {
                             _RefHolder.SearchStatus.Foreground = new SolidColorBrush(Colors.Black);
@@ -174,12 +177,15 @@ namespace e621_ReBot_v3
                     }
                     else
                     {
+                        if (_RefHolder == null) return;
                         _RefHolder.Dispatcher.Invoke(() =>
                         {
                             _RefHolder.SearchStatus.Foreground = new SolidColorBrush(Colors.Red);
                             _RefHolder.SearchStatus.Text = $"{ModeString} is offline.";
                         });
                         await Task.Delay(1000);
+
+                        if (_RefHolder == null) return;
                         _RefHolder.Dispatcher.Invoke(() =>
                         {
                             _RefHolder.Close();
@@ -278,6 +284,13 @@ namespace e621_ReBot_v3
             string? JSON_SimilarData = Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{string.Join(',', ResultList)}");
             if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
             {
+                if (JSON_SimilarData.StartsWith('ⓔ'))
+                {
+                    MessageBox.Show(Window_Preview._RefHolder, $"{JSON_SimilarData}", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _RefHolder.Close();
+                    return;
+                };
+
                 JToken e6SimilarData = JObject.Parse(JSON_SimilarData)["posts"];
                 foreach (JObject e6Post in e6SimilarData.Children())
                 {
@@ -320,6 +333,13 @@ namespace e621_ReBot_v3
             string? JSON_SimilarData = Module_e621Data.DataDownload($"https://e621.net/iqdb_queries.json?url={Window_Preview._RefHolder.MediaItemHolder.Grab_MediaURL}", true);
             if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
             {
+                if (JSON_SimilarData.StartsWith('ⓔ'))
+                {
+                    MessageBox.Show(Window_Preview._RefHolder, $"{JSON_SimilarData}", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _RefHolder.Close();
+                    return;
+                };
+
                 JArray e6SimilarData = JArray.Parse(JSON_SimilarData);
                 foreach (JObject e6Post in e6SimilarData.Children())
                 {

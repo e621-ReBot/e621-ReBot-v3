@@ -11,7 +11,7 @@
     <ApplicationIcon>Resources\ReBot_Icon.ico</ApplicationIcon>
     <Platforms>x64</Platforms>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <FileVersion>3.0.0.16</FileVersion>
+    <FileVersion>3.0.0.17</FileVersion>
     <StartupObject>e621_ReBot_v3.App</StartupObject>
     <IsPublishable>False</IsPublishable>
     <RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>
@@ -40,9 +40,13 @@
 
   <ItemGroup>
     <Compile Remove="bin\**" />
+    <Compile Remove="Resources\zzz_Unused\**" />
     <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="Resources\zzz_Unused\**" />
     <None Remove="bin\**" />
+    <None Remove="Resources\zzz_Unused\**" />
     <Page Remove="bin\**" />
+    <Page Remove="Resources\zzz_Unused\**" />
   </ItemGroup>
 
   <ItemGroup>

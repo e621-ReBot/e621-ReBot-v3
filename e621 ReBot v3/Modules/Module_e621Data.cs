@@ -17,7 +17,7 @@ namespace e621_ReBot_v3.Modules
     internal static class Module_e621Data
     {
         private static readonly HttpClientHandler e621_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-        private static readonly HttpClient e621_HttpClient = new HttpClient(e621_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly HttpClient e621_HttpClient = new HttpClient(e621_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
         internal static string? DataDownload(string Address, bool Authentication = false)
         {
             using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, Address))
@@ -25,13 +25,21 @@ namespace e621_ReBot_v3.Modules
                 HttpRequestMessageTemp.Headers.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
                 if (Authentication) HttpRequestMessageTemp.Headers.Authorization = new AuthenticationHeaderValue("Basic", $"{Convert.ToBase64String(Encoding.ASCII.GetBytes($"{AppSettings.UserName}:{Module_Cryptor.Decrypt(AppSettings.APIKey)}"))}");
 
-                using (HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.Send(HttpRequestMessageTemp))
+                try
                 {
-                    if (HttpResponseMessageTemp.IsSuccessStatusCode)
+                    using (HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.Send(HttpRequestMessageTemp))
                     {
-                        return HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                        if (HttpResponseMessageTemp.IsSuccessStatusCode)
+                        {
+                            return HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                        }
                     }
                 }
+                catch (Exception e) //Timeout most often
+                {
+                    return $"ⓔ{e.Message}";
+                }
+
             }
             return null;
         }

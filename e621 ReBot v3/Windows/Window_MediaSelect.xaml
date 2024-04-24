@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Window_MediaSelect" ResizeMode="NoResize" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed" MinWidth="204" MinHeight="60" MaxWidth="650" MaxHeight="655" UseLayoutRounding="True" SnapsToDevicePixels="True" SizeToContent="WidthAndHeight" ShowInTaskbar="False">
+        Title="Window_MediaSelect" ResizeMode="NoResize" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed" MinWidth="240" MinHeight="60" MaxWidth="650" MaxHeight="655" UseLayoutRounding="True" SnapsToDevicePixels="True" SizeToContent="WidthAndHeight" ShowInTaskbar="False">
 
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <ScrollViewer x:Name="MediaSelect_ScrollViewer"  VerticalScrollBarVisibility="Auto" Padding="1,0,0,0">

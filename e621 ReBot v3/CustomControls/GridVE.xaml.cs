@@ -127,8 +127,12 @@ namespace e621_ReBot_v3.CustomControls
 
         // - - - - - - - - - - - - - - - -
 
+        internal bool GettingDestroyed = false;
+
         private void GridVE_UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (GettingDestroyed) return;
+
             if (e.ClickCount == 2)
             {
                 IsSelected = true;
@@ -331,6 +335,7 @@ namespace e621_ReBot_v3.CustomControls
         {
             RenderTransformOrigin = new Point(0.5, 0.5);
             ((Storyboard)FindResource("ScaleOut")).Begin(this);
+            GettingDestroyed = true;
         }
     }
 }

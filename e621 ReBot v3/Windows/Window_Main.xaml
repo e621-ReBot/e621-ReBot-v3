@@ -156,8 +156,10 @@
                     <WrapPanel Grid.Row="0" x:Name="Grid_GridVEPanel" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="Transparent" Margin="8,8,0,16"/>
 
                     <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,1,0,0"/>
-                    <Button x:Name="GB_Left" Grid.Row="1" Style="{StaticResource ButtonStyle_Grid}"  Content="◁" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="0,0,1,0" ToolTip="Previous page" IsVisibleChanged="GB_Left_IsVisibleChanged" Click="GB_Left_Click"/>
-                    <Button x:Name="GB_Right" Grid.Row="1" Style="{StaticResource ButtonStyle_Grid}" Content="▷" HorizontalAlignment="Right" VerticalAlignment="Center" BorderThickness="1,0,0,0" ToolTip="Next page" IsVisibleChanged="GB_Right_IsVisibleChanged" Click="GB_Right_Click"/>
+                    <Button x:Name="GB_Left" Style="{StaticResource ButtonStyle_Grid}"  Content="◁" HorizontalAlignment="Left" ToolTip="Previous page" IsVisibleChanged="GB_Left_IsVisibleChanged" Click="GB_Left_Click" BorderThickness="0,0,0,0" Grid.Row="1" Margin="0,1,0,0"/>
+                    <Border BorderBrush="Black" HorizontalAlignment="Left" Grid.Row="1" BorderThickness="0,0,1,0" Margin="32,2,0,0" Height="22" VerticalAlignment="Top"/>
+                    <Button x:Name="GB_Right" Grid.Row="1" Style="{StaticResource ButtonStyle_Grid}" Content="▷" HorizontalAlignment="Right" ToolTip="Next page" IsVisibleChanged="GB_Right_IsVisibleChanged" Click="GB_Right_Click" BorderThickness="0,0,0,0" Margin="0,1,0,0"/>
+                    <Border BorderBrush="Black" HorizontalAlignment="Right" Grid.Row="1" BorderThickness="0,0,1,0" Height="22" VerticalAlignment="Top" Margin="0,2,32,0"/>
 
                     <DockPanel LastChildFill="False" Grid.Row="1" HorizontalAlignment="Center" Margin="0,1,0,0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -333,7 +335,7 @@
                         <TextBlock Text="Web media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="NamingPattern_Web_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                                <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and 4 characters of original name." IsChecked="True"/>
+                                <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its original name." IsChecked="True"/>
                                 <RadioButton x:Name="RadionButton_NPWeb_1" Content="Artist__Title__...." Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and 4 characters of original name."/>
                                 <RadioButton x:Name="RadionButton_NPWeb_2" Content="Artist__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its artist and original filename."/>
                             </StackPanel>

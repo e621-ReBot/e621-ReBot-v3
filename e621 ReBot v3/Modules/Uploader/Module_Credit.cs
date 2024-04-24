@@ -91,66 +91,64 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (!string.IsNullOrEmpty(JSON_UserInfo) && JSON_UserInfo.Length > 24)
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+
+                JObject UserJObject = JObject.Parse(JSON_UserInfo);
+                UserLevel = UserJObject["level"].Value<ushort>();
+
+                CanReplace = UserJObject["replacements_beta"].Value<bool>();
+
+                Credit_UploadTotal = UserJObject["upload_limit"].Value<ushort>();
+
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}"));
+                lock (Module_e621APIController.BackgroundTasks)
                 {
-                    JObject UserJObject = JObject.Parse(JSON_UserInfo);
-                    UserLevel = UserJObject["level"].Value<ushort>();
-
-                    CanReplace = UserJObject["replacements_beta"].Value<bool>();
-
-                    Credit_UploadTotal = UserJObject["upload_limit"].Value<ushort>();
-
-                    RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}"));
-                    lock (Module_e621APIController.BackgroundTasks)
-                    {
-                        Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                    }
-
-                    JSON_UserInfo = await RunTaskFirst;
-                    if (!string.IsNullOrEmpty(JSON_UserInfo) && JSON_UserInfo.Length > 24)
-                    {
-                        JObject PostHistory = JObject.Parse(JSON_UserInfo);
-                        foreach (JObject UploadedPost in PostHistory["posts"])
-                        {
-                            DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
-                            if (DateTime.UtcNow > TempTime)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                Timestamps_Upload.Add(TempTime);
-                                Credit_UploadHourly--;
-                            }
-                        }
-                    }
-
-                    RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?search[creator_id]={AppSettings.UserID}"));
-                    lock (Module_e621APIController.BackgroundTasks)
-                    {
-                        Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                    }
-
-                    JSON_UserInfo = await RunTaskFirst;
-                    if (!string.IsNullOrEmpty(JSON_UserInfo) && JSON_UserInfo.Length > 24)
-                    {
-                        JArray PostHistory = JArray.Parse(JSON_UserInfo);
-                        foreach (JObject UploadedPost in PostHistory)
-                        {
-                            DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
-                            if (DateTime.UtcNow > TempTime)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                Timestamps_Upload.Add(TempTime);
-                                Credit_UploadHourly--;
-                            }
-                        }
-                    }
-                    Timestamps_Upload.Sort();
+                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
                 }
+
+                JSON_UserInfo = await RunTaskFirst;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+
+                JObject PostHistory = JObject.Parse(JSON_UserInfo);
+                foreach (JObject UploadedPost in PostHistory["posts"])
+                {
+                    DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    if (DateTime.UtcNow > TempTime)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Timestamps_Upload.Add(TempTime);
+                        Credit_UploadHourly--;
+                    }
+                }
+
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?search[creator_id]={AppSettings.UserID}"));
+                lock (Module_e621APIController.BackgroundTasks)
+                {
+                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
+                }
+
+                JSON_UserInfo = await RunTaskFirst;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+
+                JArray PostHistoryArray = JArray.Parse(JSON_UserInfo);
+                foreach (JObject UploadedPost in PostHistoryArray)
+                {
+                    DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    if (DateTime.UtcNow > TempTime)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Timestamps_Upload.Add(TempTime);
+                        Credit_UploadHourly--;
+                    }
+                }
+
+                Timestamps_Upload.Sort();
             }
         }
 
@@ -166,24 +164,23 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (!string.IsNullOrEmpty(JSON_UserInfo) && JSON_UserInfo.Length > 24)
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+
+                JArray FlagHistory = JArray.Parse(JSON_UserInfo);
+                for (int x = 0; x <= 10; x++)
                 {
-                    JArray FlagHistory = JArray.Parse(JSON_UserInfo);
-                    for (int x = 0; x <= 10; x++)
+                    DateTime TempTime = FlagHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    if (DateTime.UtcNow > TempTime)
                     {
-                        DateTime TempTime = FlagHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
-                        if (DateTime.UtcNow > TempTime)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            Timestamps_Flags.Add(TempTime);
-                            Credit_Flags--;
-                        }
+                        break;
                     }
-                    Timestamps_Flags.Sort();
+                    else
+                    {
+                        Timestamps_Flags.Add(TempTime);
+                        Credit_Flags--;
+                    }
                 }
+                Timestamps_Flags.Sort();
             }
         }
 
@@ -199,22 +196,21 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (!string.IsNullOrEmpty(JSON_UserInfo) && JSON_UserInfo.Length > 24)
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+
+                JArray NoteHistory = JArray.Parse(JSON_UserInfo);
+                for (int x = 0; x <= 50; x++)
                 {
-                    JArray NoteHistory = JArray.Parse(JSON_UserInfo);
-                    for (int x = 0; x <= 50; x++)
+                    DateTime TempTime = NoteHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    if (DateTime.UtcNow > TempTime)
+                        break;
+                    else
                     {
-                        DateTime TempTime = NoteHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
-                        if (DateTime.UtcNow > TempTime)
-                            break;
-                        else
-                        {
-                            Timestamps_Notes.Add(TempTime);
-                            Credit_Notes--;
-                        }
+                        Timestamps_Notes.Add(TempTime);
+                        Credit_Notes--;
                     }
-                    Timestamps_Notes.Sort();
                 }
+                Timestamps_Notes.Sort();
             }
         }
     }

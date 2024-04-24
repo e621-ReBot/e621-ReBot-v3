@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using CefSharp.DevTools.CSS;
 
 namespace e621_ReBot_v3.CustomControls
 {
