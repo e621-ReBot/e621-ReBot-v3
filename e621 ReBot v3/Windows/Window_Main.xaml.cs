@@ -17,6 +17,7 @@ using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Uploader;
+using Microsoft.Win32;
 
 namespace e621_ReBot_v3
 {
@@ -935,6 +936,22 @@ namespace e621_ReBot_v3
         private void Download_PoolWatcher_Click(object sender, RoutedEventArgs e)
         {
             new Window_PoolWatcher().ShowDialog();
+        }
+
+        private void Download_DownloadFolderLocation_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFolderDialog OpenFolderDialogTemp = new OpenFolderDialog()
+            {
+                InitialDirectory = AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            if (OpenFolderDialogTemp.ShowDialog() == true)
+            {
+                string DLFolderPath = $"{OpenFolderDialogTemp.FolderName}";
+                Download_DownloadFolderLocation.ToolTip = $"Current path: {DLFolderPath}";
+                AppSettings.Download_FolderLocation = DLFolderPath;
+                AppSettings.SaveSettings();
+            }
         }
 
         #endregion

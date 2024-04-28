@@ -231,7 +231,7 @@
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
                         <Grid>
                             <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Select the number of download threads.">
                                     <TextBlock Text="Download Threads:" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,8,0"/>
                                     <StackPanel x:Name="DLThreads_StackPanel" Orientation="Horizontal" Margin="0,2,0,0">
                                         <RadioButton x:Name="RadionButton_DLT1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Click="RadionButton_DLTX_Click"/>
@@ -242,8 +242,8 @@
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="Black" HorizontalAlignment="Right" BorderThickness="1,0,0,0">
-                                <Button x:Name="Download_DownloadFolder" BorderThickness="0" Click="Download_DownloadFolder_Click" Height="30" Cursor="Hand">
-                                    <StackPanel Orientation="Horizontal" Margin="4,2,4,2">
+                                <Button x:Name="Download_DownloadFolder" BorderThickness="0" Click="Download_DownloadFolder_Click" Height="30" Cursor="Hand" ToolTip="Open Downloads folder.">
+                                    <StackPanel Orientation="Horizontal" Margin="8,2,8,2">
                                         <Image Source="/Resources/MainWindow/FolderIcon.png" />
                                         <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="Downloads"/>
                                     </StackPanel>
@@ -267,12 +267,12 @@
 
                         <Border Grid.RowSpan="3" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="DownloadQueue_CheckBox" Grid.Row="0" Style="{DynamicResource CheckBoxStyle_Large}" Content="Download Queue" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Margin="8,0,0,0" IsChecked="True"/>
+                        <CheckBox x:Name="DownloadQueue_CheckBox" Grid.Row="0" Style="{DynamicResource CheckBoxStyle_Large}" Content="Download Queue" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Margin="8,0,0,0" IsChecked="True" ToolTip="Toggle downloading status."/>
                         <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageUp" Width="24" Content="▲" ToolTip="Show previous page of Download Queue." HorizontalAlignment="Left"  Cursor="Hand" BorderThickness="1,0,1,0" Click="DownloadQueue_DownloadPageUp_Click" IsEnabled="False" />
                         <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageDown" Width="24" Content="▼" ToolTip="Show next page of Download Queue." HorizontalAlignment="Left" Cursor="Hand" BorderThickness="1,0,1,0" Margin="23,0,0,0" Click="DownloadQueue_DownloadPageDown_Click" IsEnabled="False" />
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
                         <Button x:Name="DownloadQueue_CancelAPIDL" Content="Cancel" BorderThickness="1,0,1,0" ToolTip="Cancel grabbing further download links from e621 API." HorizontalAlignment="Right" Margin="0,0,31,0" Width="64" Height="32" IsEnabled="False" Click="DownloadQueue_CancelAPIDL_Click"/>
-                        <Button x:Name="DownloadQueue_ReverseDownloadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order" HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
+                        <Button x:Name="DownloadQueue_ReverseDownloadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
                         <TextBlock x:Name="DownloadQueue_StatusTextBlock" Text="API DL Status: Suspended." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="52,0,0,0"/>
                         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
@@ -315,7 +315,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        <TextBlock Text="e621 media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
+                        <TextBlock Text="e621 media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="NamingPattern_e6_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_NPe6_0" Content="MD5" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their MD5 hash." IsChecked="True"/>
@@ -332,7 +332,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        <TextBlock Text="Web media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
+                        <TextBlock Text="Web media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="NamingPattern_Web_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its original name." IsChecked="True"/>
@@ -341,6 +341,7 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+                    <Button x:Name="Download_DownloadFolderLocation" Content="Change Download Location" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="165" Height="72" Cursor="Hand" Click="Download_DownloadFolderLocation_Click" Margin="664,0,0,8"/>
                 </Grid>
             </TabItem>
 
@@ -355,7 +356,7 @@
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True"/>
+                        <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True" ToolTip="Toggle grabbing status."/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
                         <Grid IsHitTestVisible="False">
@@ -403,12 +404,12 @@
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged"/>
+                        <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged" ToolTip="Toggle uploading status."/>
 
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
-                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order" HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
+                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
@@ -600,7 +601,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        <TextBlock Text="Volume" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Volume" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Application Volume (relative to Master volume)."/>
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
                         <customcontrols:VolumeSlider x:Name="Settings_VolumeSlider" VerticalAlignment="Top" Grid.Column="1" Margin="8,0,8,0"/>
                     </Grid>
@@ -632,7 +633,7 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand"/>
+                    <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand" ToolTip="Blacklist Tags you do not want to download.&#xA;Blacklist applies to downloads from e621 via API (pool downloads ignore it)."/>
                     <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -668,9 +669,9 @@
                         </StackPanel>
                         <Button x:Name="ResetTheme_Button" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Content="⥀" FontSize="24" ToolTip="Reset theme to default." Click="ResetTheme_Button_Click" Cursor="Hand"/>
                     </Grid>
-                    <Button x:Name="SettingsButton_DLSuggestions" Content="DL Suggestions" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,288,16" Click="SettingsButton_DLSuggestions_Click"/>
-                    <Button x:Name="SettingsButton_DLGenders" Content="DL Genders" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,432,16" Click="SettingsButton_DLGenders_Click"/>
-                    <Button x:Name="SettingsButton_DLDNPs" Content="DL DNPs" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,576,16" Click="SettingsButton_DLDNPs_Click"/>
+                    <Button x:Name="SettingsButton_DLSuggestions" Content="DL Suggestions" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,288,16" Click="SettingsButton_DLSuggestions_Click" ToolTip="DL data from e621 for autocomplete suggestions."/>
+                    <Button x:Name="SettingsButton_DLGenders" Content="DL Genders" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,432,16" Click="SettingsButton_DLGenders_Click" ToolTip="DL all Genders (data) from e621 (used for autocomplete suggestions and gender missing warning)."/>
+                    <Button x:Name="SettingsButton_DLDNPs" Content="DL DNPs" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,576,16" Click="SettingsButton_DLDNPs_Click" ToolTip="DL all DNPs (data) from e621 (used for DNP upload warning)."/>
                 </Grid>
             </TabItem>
 

@@ -189,6 +189,7 @@ namespace e621_ReBot_v3
                         case "Download_FolderLocation":
                             {
                                 Download_FolderLocation = LoadSettingsJObject["Download_FolderLocation"].Value<string>();
+                                Window_Main._RefHolder.Download_DownloadFolderLocation.ToolTip = $"Current path: {Download_FolderLocation}";
                                 break;
                             }
                         case "Download_ThreadsCount":
