@@ -715,7 +715,7 @@ namespace e621_ReBot_v3.Modules
             }
 
             string? JSON_NoteData = await RunTaskFirst;
-            if (string.IsNullOrEmpty(JSON_NoteData) || JSON_NoteData.StartsWith('ⓔ') || JSON_NoteData.Length < 24) return;
+            if (string.IsNullOrEmpty(JSON_NoteData) || JSON_NoteData.StartsWith('ⓔ') || JSON_NoteData.Length < 32) return;
 
             JArray NoteList = JArray.Parse(JSON_NoteData);
             foreach (JObject Note in NoteList.Reverse())

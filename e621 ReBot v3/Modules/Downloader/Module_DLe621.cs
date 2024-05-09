@@ -132,7 +132,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
 
                                 string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
-                                if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 24) return;
+                                if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
 
                                 PoolPages = JObject.Parse(Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"))["post_ids"].Values<string>().ToList();
                             }
@@ -319,7 +319,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
             JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
             foreach (JToken cPost in JSON_Object.Children())
@@ -359,7 +359,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         internal async static void Grab_Pool(string PoolID)
         {
             string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
-            if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 24) return;
+            if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
 
             JToken PoolJSON = JObject.Parse(JSON_PoolData);
             string PoolName = PoolJSON["name"].Value<string>().Replace('_', ' ').Trim();
@@ -393,7 +393,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
             JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
             foreach (JToken cPost in JSON_Object)

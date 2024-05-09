@@ -91,7 +91,7 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JObject UserJObject = JObject.Parse(JSON_UserInfo);
                 UserLevel = UserJObject["level"].Value<ushort>();
@@ -107,7 +107,7 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 JSON_UserInfo = await RunTaskFirst;
-                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JObject PostHistory = JObject.Parse(JSON_UserInfo);
                 foreach (JObject UploadedPost in PostHistory["posts"])
@@ -131,7 +131,7 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 JSON_UserInfo = await RunTaskFirst;
-                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray PostHistoryArray = JArray.Parse(JSON_UserInfo);
                 foreach (JObject UploadedPost in PostHistoryArray)
@@ -164,7 +164,7 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray FlagHistory = JArray.Parse(JSON_UserInfo);
                 for (int x = 0; x <= 10; x++)
@@ -196,7 +196,7 @@ namespace e621_ReBot_v3.Modules.Uploader
                 }
 
                 string? JSON_UserInfo = await RunTaskFirst;
-                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 24) return;
+                if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray NoteHistory = JArray.Parse(JSON_UserInfo);
                 for (int x = 0; x <= 50; x++)

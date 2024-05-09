@@ -438,7 +438,7 @@ namespace e621_ReBot_v3
             MediaItemHolder.Preview_DontDelay = true;
 
             string MD5Check = Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolder.Grid_MediaMD5}");
-            if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 24) return;
+            if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
             JObject MD5CheckJSON = JObject.Parse(MD5Check);
             MediaItemHolder.UP_UploadedID = MD5CheckJSON["post"]["id"].Value<string>();

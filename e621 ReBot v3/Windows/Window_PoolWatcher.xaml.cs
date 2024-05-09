@@ -128,7 +128,7 @@ namespace e621_ReBot_v3
                     }
                     string e6JSONResult = await RunTaskFirst;
 
-                    if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
+                    if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
                     JArray? PoolArray = JArray.Parse(e6JSONResult);
                     Dictionary<int, PoolItem> PoolPosts2Get = new Dictionary<int, PoolItem>();
@@ -177,7 +177,7 @@ namespace e621_ReBot_v3
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
                 }
                 string e6JSONResult = await RunTaskFirst;
-                if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 24) return;
+                if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
                 JToken PostData = JObject.Parse(e6JSONResult)["posts"];
                 foreach (JToken PostDataDetailed in PostData.Children())
