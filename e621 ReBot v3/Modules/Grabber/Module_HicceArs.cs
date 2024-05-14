@@ -105,7 +105,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//body");
+            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body");
 
             HtmlNode LoginTest = PostNode.SelectSingleNode(".//div[@class='content-grid pt-0']/div[@class='content']//div[@class='widget-box-title mb-3']");
             if (LoginTest != null)

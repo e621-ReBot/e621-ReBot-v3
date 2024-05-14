@@ -90,22 +90,26 @@ namespace CefSharp
 
             ButtonEnableCheck = new List<Regex>
             {
-                new Regex(@".+e621.net/(posts(/\d+|\?.+)?|pools/\d+|favorites|popular)"),
+                new Regex(@"^\w+://e621\.net/(posts|pools|favorites|popular)"),
                 new Regex(@"^\w+://www\.furaffinity\.net/(view|full|gallery|scraps|favorites|search)/"),
                 new Regex(@"^\w+://inkbunny\.net/(s|gallery|scraps|submissionsviewall)"),
                 //new Regex(@"^\w+://www.pixiv.net/(\w+/artworks/\d+|ajax/user/\d+/profile/(illusts|top|all))"),
                 //new Regex(@"^\w+://s.pximg.net/www/js/build/spa.\w+.js"),
                 new Regex(@"^\w+://www\.recaptcha\.net/recaptcha/enterprise/reload\?k="), //Pixiv
-                new Regex(@"^\w+://www\.hiccears\.com/(contents|file|p).+(illustrations|/.+)?"),
+                new Regex(@"^\w+://www\.hiccears\.com/(contents|file|p)"),
                 new Regex(@"^\w+://twitter\.com/i/api/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables="),
-                new Regex(@"^\w+://api.twitter\.com/graphql/.+/TweetResultByRestId\?variables="), //when not logged in
-                new Regex(@"^\w+://\w+\.newgrounds\.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
-                new Regex(@"^\w+://\w+\.sofurry\.com/(view/\d+|artwork|browse/\w+/art\?uid=\d+)"),
-                new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?(submissions/\w+(/.+)?)|search.+find=submit)"),
+                new Regex(@"^\w+://api\.twitter\.com/graphql/.+/TweetResultByRestId\?variables="), //when not logged in
+                new Regex(@"^\w+://\w+\.newgrounds\.com/(movies|portal|art)"),
+                new Regex(@"^\w+://\w+\.sofurry\.com/(view|artwork|browse)"),
+                new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?submissions|search)"),
                 new Regex(@"^\w+://\w+\.\w+/api/v1/(accounts/\d+/statuses|statuses/\d+)"), //Mastodons
                 new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
-                new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures/(user/.+|featured|popular|random|recent/)|user/.+/faves/pictures|users/FaveUsersRecentPictures)"),
-                new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)(.+)?")
+                new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures|user)"),
+                new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)"),
+
+                //- - - Download only
+
+                new Regex(@"^\w+://derpibooru\.org/(images|search\?|galleries/)")
             };
         }
 
@@ -136,7 +140,6 @@ namespace CefSharp
             {
                 return new CefSharp_ResourceRequestHandler();
             }
-
 
             //if (chromiumWebBrowser.Address.Contains("https://www.deviantart.com/") && request.Url.Contains("https://www.deviantart.com/_napi/da-user-profile/api/gallery/contents") && request.Url.Contains("&folderid="))
             //{
@@ -225,7 +228,7 @@ namespace CefSharp
                                 {
                                     //TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                     TweetsContainer = JObjectTemp.SelectTokens("$..tweetResult.result.legacy").Where(token => token["extended_entities"] != null);
-                                }                      
+                                }
                                 if (TweetsContainer.Any())
                                 {
                                     JArray TweetHolder = new JArray(TweetsContainer);
@@ -263,7 +266,7 @@ namespace CefSharp
                         }
                         break;
                     }
-         
+
                 case string Newgrounds when Newgrounds.Contains(".newgrounds.com/"):
                     {
                         if (response.MimeType.Equals("application/json"))
@@ -331,6 +334,18 @@ namespace CefSharp
                                     Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                                 });
                             });
+                        }
+                        break;
+                    }
+
+                //- - - Download only
+
+                case string Derpibooru when Derpibooru.StartsWith("https://derpibooru.org/"):
+                    {
+                        if (response.MimeType.Equals("text/html"))
+                        {
+                            Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
+                            Module_Downloader.DownloadEnabler(request.Url);
                         }
                         break;
                     }

@@ -104,7 +104,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//body");
+            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body");
 
             //HtmlNode LoginTest = PostNode.SelectSingleNode(".//div[@id='standardpage']/section[@class='aligncenter notice-message']");
             //if (LoginTest != null)

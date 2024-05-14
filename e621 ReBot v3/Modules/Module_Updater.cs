@@ -82,7 +82,7 @@ namespace e621_ReBot_v3
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode ReleaseNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@class='Box-footer']//include-fragment"); //SelectSingleNode(".//turbo-frame[@id='repo-content-turbo-frame']//div[@data-pjax]/section");
+            HtmlNode ReleaseNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='Box-footer']//include-fragment"); //SelectSingleNode(".//turbo-frame[@id='repo-content-turbo-frame']//div[@data-pjax]/section");
             if (ReleaseNode != null)
             {
                 string ReleaseTag = ReleaseNode.Attributes["src"].Value;//.Replace("https://github.com/e621-ReBot/e621-ReBot-v3/releases/expanded_assets/v", null);

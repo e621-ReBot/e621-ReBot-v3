@@ -50,7 +50,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@".+inkbunny.net/(s|gallery|scraps)/\w+"),
                 new Regex(@".+inkbunny.net/submissionsviewall.php"),
                 new Regex(@".+pixiv.net/\w+/(artworks|users)/\d+"),
-                new Regex(@".+www.hiccears.com/(contents|file).+"),
+                new Regex(@".+www.hiccears.com/(contents|file)/.+"),
                 new Regex(@".+www.hiccears.com/p/.+/illustrations"),
                 new Regex(@".+twitter.com/.+/(media|status/\d+/?)"),
                 new Regex(@".+.newgrounds.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
@@ -62,8 +62,13 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@".+pawoo.net/@.+/(\d+|media)"),
                 new Regex(@".+www.plurk.com/(p/)?\w+"),
                 new Regex(@".+mastodon.social/@.+/(\d+|media)"),
-                new Regex(@".+baraag.net/@.+(\d+|media)")
+                new Regex(@".+baraag.net/@.+(\d+|media)"),
+
+                //- - - Download only
+
+                new Regex(@".+derpibooru.org/(images/?|search\?|galleries/)(\d+)?")
             };
+
             for (int i = 0; i < 8; i++)
             {
                 Custom_WebClient ThumbClient = new Custom_WebClient();
@@ -468,15 +473,36 @@ namespace e621_ReBot_v3.Modules
 
         internal static void Grab_DownloadMedia(string WebAddress)
         {
-            if (WebAddress.StartsWith("https://e621.net/"))
+            switch (WebAddress)
             {
-                Module_DLe621.Grab(WebAddress);
-                UpdateDownloadTreeView();
+                case string e621 when e621.StartsWith("https://e621.net/"):
+                    {
+                        Module_DLe621.Grab(WebAddress);
+                        break;
+                    }
+
+                case string Derpibooru when Derpibooru.StartsWith("https://derpibooru.org/"):
+                    {
+                        Module_Derpibooru.Grab(WebAddress);
+                        break;
+                    }
+            }
+            UpdateDownloadTreeView();
+        }
+
+        internal static string? SelectFolderPopup(string? LastValue)
+        {
+            string? InputedText = Window_Main._RefHolder.Dispatcher.Invoke(() => { return Custom_InputBox.ShowInputBox(Window_Main._RefHolder, "e621 ReBot", "If you want to download media to a separate folder, enter a folder name below.", BrowserControl._RefHolder.BQB_Start.PointToScreen(new Point(0, 0)), LastValue ?? string.Empty); });
+            if (InputedText.Equals("☠") || string.IsNullOrEmpty(InputedText))
+            {
+                InputedText = null;
             }
             else
             {
-
+                InputedText = string.Join(null, InputedText.Split(Path.GetInvalidFileNameChars()));
+                InputedText = InputedText.Trim();
             }
+            return InputedText;
         }
 
         // - - - - - - - - - - - - - - - -
@@ -537,6 +563,7 @@ namespace e621_ReBot_v3.Modules
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
 
             if (DownloadVETemp._DownloadItemRef == null) return; //file download finished before thumb?
+            if (e.Result == null) return; // same?
 
             using (MemoryStream MemoryStreamTemp = new MemoryStream(e.Result))
             {
@@ -793,7 +820,7 @@ namespace e621_ReBot_v3.Modules
 
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
             PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), string.Empty));
-            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
+            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName, DownloadItemRef.e6_PoolName);
             Directory.CreateDirectory(FolderPath);
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);

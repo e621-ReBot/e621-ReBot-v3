@@ -12,7 +12,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 {
     internal static class Module_DLe621
     {
-        private static string? LastGrabFolder = null;
+        internal static string? SpecialSaveFolder;
         internal static bool CancellationPending = false;
 
         internal static void Grab(string WebAddress)
@@ -26,19 +26,22 @@ namespace e621_ReBot_v3.Modules.Downloader
                 case string Posts when Posts.StartsWith("posts"):
                     {
                         string? PicURL;
+                        string? PostID;
+                        string? ThumbURL;
+                        string? Media_Format;
                         if (URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
                         {
-                            PicURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='image-download-link']/a").Attributes["href"].Value;
+                            PicURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='image-download-link']/a").Attributes["href"].Value;
                             if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
                             {
                                 return;
                             }
 
-                            string PostID = WebAddress;
+                            PostID = WebAddress;
                             if (PostID.Contains('?')) PostID = PostID.Substring(0, PostID.IndexOf('?'));
                             PostID = PostID.Substring(PostID.LastIndexOf('/') + 1);
-                            string ThumbURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//section[@id='image-container']").Attributes["data-preview-file-url"].Value;
-                            string Media_Format = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//section[@id='image-container']").Attributes["data-file-ext"].Value;
+                            ThumbURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-file-url"].Value;
+                            Media_Format = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
 
                             Module_Downloader.AddDownloadItem2Queue(
                                 PageURL: WebAddress,
@@ -50,10 +53,10 @@ namespace e621_ReBot_v3.Modules.Downloader
                         }
                         else //multi
                         {
-                            SelectFolderPopup();
+                            SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                             if (WebAddress.Contains("/posts?tags="))
                             {
-                                if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@class='paginator']/menu").ChildNodes.Count <= 3)
+                                if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
                                 {
                                     goto GrabPageOnly_Tags;
                                 }
@@ -64,7 +67,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                     string TagQuery = WebAddress;
                                     TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
 
-                                    Grab_MediaWithTags(TagQuery, LastGrabFolder);
+                                    Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
                                     return;
                                 }
                                 else
@@ -74,7 +77,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             }
 
                         GrabPageOnly_Tags:
-                            HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes("//div[@id='posts-container']/article");
+                            HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
                             if (NodeSelector != null)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -93,7 +96,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                             ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
                                             MediaFormat: Post.Attributes["data-file-ext"].Value,
                                             e6PostID: Post.Attributes["data-id"].Value,
-                                            e6PoolName: LastGrabFolder,
+                                            e6PoolName: SpecialSaveFolder,
                                             e6Download: true);
                                     }
                                 }
@@ -104,8 +107,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "pools":
                     {
-                        HtmlNode BottomMenuHolder = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@class='paginator']/menu");
-                        if (string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.SelectSingleNode("//div[@class='paginator']/menu").ChildNodes.Count <= 3)
+                        HtmlNode BottomMenuHolder = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu");
+                        if (string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
                         {
                             goto GrabPageOnly_Pools;
                         }
@@ -113,7 +116,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
                         if (MessageBoxResultTemp == MessageBoxResult.OK)
                         {
-                            string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//li[@id='subnav-show']/a").Attributes["href"].Value;
+                            string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
                             PoolID = PoolID.Substring(PoolID.LastIndexOf('/') + 1);
 
                             Grab_Pool(PoolID);
@@ -121,7 +124,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         }
 
                     GrabPageOnly_Pools:
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes("//div[@id='a-show']//article");
+                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='a-show']//article");
                         if (NodeSelector != null)
                         {
                             int GetCurrentPage = int.Parse(BottomMenuHolder.SelectSingleNode(".//li[@class='current-page']").InnerText);
@@ -129,7 +132,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             var PoolPages = new List<string>();
                             if (GetCurrentPage > 1)
                             {
-                                string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
+                                string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
 
                                 string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
                                 if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
@@ -149,7 +152,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 }
 
                                 string PostID = Post.Attributes["data-id"].Value;
-                                string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='a-show']//a").InnerText;
+                                string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
                                 PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
                                 string PoolPostIndex = GetCurrentPage > 1 ? PoolPages.IndexOf(PostID).ToString() : PoolIndex.ToString();
 
@@ -171,10 +174,10 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "popular":
                     {
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes("//div[@id='posts-container']/article");
+                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
                         if (NodeSelector != null)
                         {
-                            SelectFolderPopup();
+                            SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                             foreach (HtmlNode Post in NodeSelector)
                             {
                                 if (!Post.Attributes["class"].Value.Contains("blacklisted"))
@@ -191,7 +194,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                           ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
                                           e6PostID: Post.Attributes["data-id"].Value,
-                                          e6PoolName: LastGrabFolder,
+                                          e6PoolName: SpecialSaveFolder,
                                           e6Download: true);
                                 }
                             }
@@ -201,8 +204,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "favorites":
                     {
-                        SelectFolderPopup();
-                        if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@class='paginator']/menu").ChildNodes.Count <= 3)
+                        SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
+                        if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
                         {
                             goto GrabPageOnly_Favorites;
                         }
@@ -213,7 +216,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             string TagQuery = WebAddress;
                             if (TagQuery.Contains("user_id"))
                             {
-                                TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//input[@id='tags']").Attributes["value"].Value;
+                                TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
                             }
                             else
                             {
@@ -223,16 +226,16 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 }
                                 else
                                 {
-                                    TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//input[@id='tags']").Attributes["value"].Value;
+                                    TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
                                 }
                             }
 
-                            Grab_MediaWithTags(TagQuery, LastGrabFolder);
+                            Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
                             return;
                         }
 
                     GrabPageOnly_Favorites:
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes("//div[@id='posts-container']/article");
+                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             foreach (HtmlNode Post in NodeSelector)
@@ -251,7 +254,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                        ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
                                        MediaFormat: Post.Attributes["data-file-ext"].Value,
                                        e6PostID: Post.Attributes["data-id"].Value,
-                                       e6PoolName: LastGrabFolder,
+                                       e6PoolName: SpecialSaveFolder,
                                        e6Download: true);
                                 }
                             }
@@ -259,21 +262,6 @@ namespace e621_ReBot_v3.Modules.Downloader
                         break;
                     }
             }
-        }
-
-        private static void SelectFolderPopup()
-        {
-            string? InputedText = Window_Main._RefHolder.Dispatcher.Invoke(() => { return Custom_InputBox.ShowInputBox(Window_Main._RefHolder, "e621 ReBot", "If you want to download media to a separate folder, enter a folder name below.", BrowserControl._RefHolder.BQB_Start.PointToScreen(new Point(0, 0)), LastGrabFolder); });
-            if (InputedText.Equals("☠") || string.IsNullOrEmpty(InputedText))
-            {
-                InputedText = null;
-            }
-            else
-            {
-                InputedText = string.Join(null, InputedText.Split(Path.GetInvalidFileNameChars()));
-                InputedText = InputedText.Trim();
-            }
-            LastGrabFolder = InputedText;
         }
 
         private static List<string> CreateTagList(JToken PostTags, string RatingTag)

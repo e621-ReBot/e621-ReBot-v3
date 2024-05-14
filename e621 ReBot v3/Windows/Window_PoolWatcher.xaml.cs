@@ -87,7 +87,7 @@ namespace e621_ReBot_v3
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
-            string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//li[@id='subnav-show']/a").Attributes["href"].Value;
+            string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
             PoolID = PoolID.Substring(PoolID.LastIndexOf('/') + 1);
 
             if (AppSettings.PoolWatcher.Any())
@@ -100,10 +100,10 @@ namespace e621_ReBot_v3
                 }
             }
 
-            string ThumbnailURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='posts-container']/article[@id]").Attributes["data-md5"].Value;
+            string ThumbnailURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='posts-container']/article[@id]").Attributes["data-md5"].Value;
             ThumbnailURL = $"https://static1.e621.net/data/preview/{ThumbnailURL.Substring(0, 2)}/{ThumbnailURL.Substring(2, 2)}/{ThumbnailURL}.jpg";
 
-            string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode("//div[@id='c-pools']/div[@id='a-show']/h2/a").InnerText.Trim();
+            string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='c-pools']/div[@id='a-show']/h2/a").InnerText.Trim();
             PoolItem PoolItemRef = new PoolItem { ID = int.Parse(PoolID), Name = PoolName, ThumbnailURL = ThumbnailURL };
             lock (AppSettings.PoolWatcher)
             {

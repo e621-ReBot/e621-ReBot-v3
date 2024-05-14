@@ -251,7 +251,7 @@ namespace e621_ReBot_v3
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(ResponseString);
 
-            HtmlNodeCollection ResultCollection = HtmlDocumentTemp.DocumentNode.SelectNodes("//div[@id='middle']/div[@class='result']");
+            HtmlNodeCollection ResultCollection = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='middle']/div[@class='result']");
             if (ResultCollection.Last().InnerText.Contains("Low similarity results have been hidden."))
             {
                 ResultCollection.RemoveAt(ResultCollection.Count - 1);
