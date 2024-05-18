@@ -52,7 +52,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@".+pixiv.net/\w+/(artworks|users)/\d+"),
                 new Regex(@".+www.hiccears.com/(contents|file)/.+"),
                 new Regex(@".+www.hiccears.com/p/.+/illustrations"),
-                new Regex(@".+twitter.com/.+/(media|status/\d+/?)"),
+                new Regex(@".+x.com/.+/(media|status/\d+/?)"),
                 new Regex(@".+.newgrounds.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
                 new Regex(@".+.sofurry.com/(view/\d+|browse/\w+/art?uid=\d+|artwork|photos)"),
                 new Regex(@".+www.weasyl.com/((~.+/)?submissions(/\d+/)?|collections).+"),

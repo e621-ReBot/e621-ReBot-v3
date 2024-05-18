@@ -83,7 +83,7 @@ namespace CefSharp
 
                 //Analytics
                 "google-analytics.com",
-                "analytics.twitter.com"
+                "analytics.x.com"
             };
 
             // - - - - - - - - - - - - - - - -
@@ -97,8 +97,8 @@ namespace CefSharp
                 //new Regex(@"^\w+://s.pximg.net/www/js/build/spa.\w+.js"),
                 new Regex(@"^\w+://www\.recaptcha\.net/recaptcha/enterprise/reload\?k="), //Pixiv
                 new Regex(@"^\w+://www\.hiccears\.com/(contents|file|p)"),
-                new Regex(@"^\w+://twitter\.com/i/api/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables="),
-                new Regex(@"^\w+://api\.twitter\.com/graphql/.+/TweetResultByRestId\?variables="), //when not logged in
+                new Regex(@"^\w+://x\.com/i/api/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables="),
+                new Regex(@"^\w+://api\.x\.com/graphql/.+/TweetResultByRestId\?variables="), //when not logged in
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies|portal|art)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view|artwork|browse)"),
                 new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?submissions|search)"),
@@ -130,7 +130,7 @@ namespace CefSharp
         private readonly List<Regex> ButtonEnableCheck;
         protected override IResourceRequestHandler? GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
         {
-            //if (request.Headers["authorization"] != null && request.Method.Equals("GET") && request.Url.StartsWith("https://api.twitter.com/graphql/", StringComparison.OrdinalIgnoreCase) && Regex.Match(request.Url, @"^\w+://api.twitter.com/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables=").Success)
+            //if (request.Headers["authorization"] != null && request.Method.Equals("GET") && request.Url.StartsWith("https://api.x.com/graphql/", StringComparison.OrdinalIgnoreCase) && Regex.Match(request.Url, @"^\w+://api.twitter.com/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables=").Success)
             //{
             //    Module_Twitter.TwitterAuthorizationHolder = request.Headers["authorization"];
             //    return new CefSharp_ResourceRequestHandler();
@@ -207,7 +207,7 @@ namespace CefSharp
                         break;
                     }
 
-                case string Twitter when Twitter.Contains("twitter.com"):
+                case string Twitter when Twitter.Contains("x.com"):
                     {
                         if (response.MimeType.Equals("application/json"))
                         {
@@ -217,14 +217,14 @@ namespace CefSharp
                                 JObject JObjectTemp = JObject.Parse(Data2String);
 
                                 IEnumerable<JToken>? TweetsContainer = null;
-                                if (Twitter.StartsWith("https://twitter.com/i/api/graphql/")) //logged in
+                                if (Twitter.StartsWith("https://x.com/i/api/graphql/")) //logged in
                                 {
                                     //[@something]makes it go two levels deep.
                                     //data.user.result.timeline_v2.timeline.instructions[0].entries[0].content.itemContent.tweet_results.result.legacy.extended_entities
                                     TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                     if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                 }
-                                if (Twitter.StartsWith("https://api.twitter.com/graphql/")) //not logged in
+                                if (Twitter.StartsWith("https://api.x.com/graphql/")) //not logged in
                                 {
                                     //TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
                                     TweetsContainer = JObjectTemp.SelectTokens("$..tweetResult.result.legacy").Where(token => token["extended_entities"] != null);

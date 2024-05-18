@@ -64,6 +64,8 @@ namespace e621_ReBot_v3.Modules.Grabber
                 string URL2Post = ExtendedContainer["media"][0]["expanded_url"].Value<string>();
                 URL2Post = $"{URL2Post.Substring(0, URL2Post.IndexOf("/status/") + 8)}{JTokenTemp["id_str"].Value<string>()}";
 
+                URL2Post = URL2Post.Replace("//twitter.com", "//x.com"); //They still have twitter in api.
+
                 if (Module_Grabber._GrabQueue_URLs.Contains(URL2Post))
                 {
                     SkipCounter++;

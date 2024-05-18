@@ -157,7 +157,7 @@
                 <Image Source="/Resources/Browser/BrowserIcon_HicceArs.png" IsHitTestVisible="False" Margin="6,0,10,0"/>
             </Button>
 
-            <Button x:Name="BQB_Twitter" Style="{StaticResource ButtonStyle_HexagonalButton}"  Click="BQB_Button_Click" Canvas.Top="150" Canvas.Left="48" Tag="https://twitter.com/" ToolTip="Twitter.com">
+            <Button x:Name="BQB_Twitter" Style="{StaticResource ButtonStyle_HexagonalButton}"  Click="BQB_Button_Click" Canvas.Top="150" Canvas.Left="48" Tag="https://x.com/" ToolTip="X.com">
                 <Image Source="/Resources/Browser/BrowserIcon_Twitter.png" IsHitTestVisible="False" Margin="12,0,12,0"/>
             </Button>
 
