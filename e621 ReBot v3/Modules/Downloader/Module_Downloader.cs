@@ -446,7 +446,7 @@ namespace e621_ReBot_v3.Modules
                 Grab_Title = Title,
                 Grab_MediaFormat = MediaFormat,
                 e6_PostID = e6PostID,
-                e6_PoolName = e6PoolName,
+                e6_PoolName = e6PoolName ?? string.Empty,
                 e6_PoolPostIndex = e6PoolPostIndex,
                 Is_e6Download = e6Download,
                 MediaItemRef = MediaItemRef
