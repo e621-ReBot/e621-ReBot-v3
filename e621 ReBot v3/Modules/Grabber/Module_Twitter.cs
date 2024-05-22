@@ -126,7 +126,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             ushort SkipCounter = 0;
             foreach (JToken MediaNode in TweeterJSON["extended_entities"]["media"])
             {
-                if (MediaNode["type"].Value<string>().Equals("video"))
+                if (MediaNode["video_info"] != null)
                 {
                     JToken? BestVideo = null;
                     foreach (JToken VideoCheck in MediaNode["video_info"]["variants"])

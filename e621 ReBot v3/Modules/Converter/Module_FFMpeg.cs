@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using e621_ReBot_v3.CustomControls;
@@ -134,12 +135,12 @@ namespace e621_ReBot_v3.Modules.Converter
                             {
                                 VideoDuration = TimeSpan.Parse(ReadLine.Substring(12, 11));
                             }
-                            else if (ReadLine.Contains("Stream #0:") && ReadLine.Contains(": Video:"))
-                            {
-                                // Stream #0:1(eng): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(tv), 1920x1080 [SAR 1:1 DAR 16:9], 14070 kb/s, 29.97 fps, 29.97 tbr, 30k tbn, 59.94 tbc (default)
-                                int FrameCount = (int)(VideoDuration.TotalSeconds * double.Parse(ReadLine.Substring(ReadLine.IndexOf(" kb/s,") + 7, 7).Split(' ', StringSplitOptions.RemoveEmptyEntries)[0]));
-                                break;
-                            }
+                            //else if (ReadLine.Contains("Stream #0:") && ReadLine.Contains(": Video:"))
+                            //{
+                            //    // Stream #0:1(eng): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(tv), 1920x1080 [SAR 1:1 DAR 16:9], 14070 kb/s, 29.97 fps, 29.97 tbr, 30k tbn, 59.94 tbc (default)
+                            //    int FrameCount = (int)(VideoDuration.TotalSeconds * double.Parse(ReadLine.Substring(ReadLine.IndexOf(" kb/s,") + 7, 7).Split(' ', StringSplitOptions.RemoveEmptyEntries)[0]));
+                            //    break;
+                            //}
                             ReadLine = FFMpeg.StandardError.ReadLine();
                         }
                     }
@@ -253,8 +254,24 @@ namespace e621_ReBot_v3.Modules.Converter
             if (Directory.Exists("FFMpegTemp\\Upload")) Directory.Delete("FFMpegTemp\\Upload", true);
             Directory.CreateDirectory("FFMpegTemp\\Upload").Attributes = FileAttributes.Hidden;
 
-            byte[] TempBytes = Module_Downloader.DownloadFileBytes(WorkURL, ActionType.Upload);
-            Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{VideoFileName}.{VideoFormat}");
+            ushort RetryCount = 0;
+            byte[] TempBytes;
+            do
+            {
+                RetryCount++;
+                TempBytes = Module_Downloader.DownloadFileBytes(WorkURL, ActionType.Upload);
+                if (TempBytes.Length == 0)
+                {
+                    Thread.Sleep(500);
+                    continue;
+                }
+                Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{VideoFileName}.{VideoFormat}");
+            } while (RetryCount < 4);
+
+            if (TempBytes.Length == 0)
+            {
+                throw new Exception("0 bytes error @Upload Video");
+            }
 
             Module_Uploader.Report_Status($"Converting Video to WebM...");
             FFMpeg4Video(ActionType.Upload, "FFMpegTemp\\Upload", VideoFileName, VideoFormat, "FFMpegTemp\\Upload");
@@ -439,7 +456,7 @@ namespace e621_ReBot_v3.Modules.Converter
             if (File.Exists(FullFilePath))
             {
                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show("Converted video file already exists, do you want to continue regardless?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (MessageBoxResultTemp != MessageBoxResult.Yes) 
+                if (MessageBoxResultTemp != MessageBoxResult.Yes)
                 {
                     return;
                 }
