@@ -178,10 +178,17 @@ namespace e621_ReBot_v3
                         case "Grid_Session":
                             {
                                 JToken JTokenMedia = LoadSettingsJObject["Grid_Session"];
-                                foreach (JToken MediaItemTemp in JTokenMedia.Children())
+                                lock (Module_Grabber._Grabbed_MediaItems)
                                 {
-                                    Module_Grabber._Grabbed_MediaItems.Add(MediaItemTemp.ToObject<MediaItem>());
-                                    if (MediaItemTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
+                                    lock (Module_Grabber._Grabbed_MediaURLs)
+                                    {
+                                        foreach (JToken MediaItemTemp in JTokenMedia.Children())
+                                        {
+                                            Module_Grabber._Grabbed_MediaItems.Add(MediaItemTemp.ToObject<MediaItem>());
+                                            Module_Grabber._Grabbed_MediaURLs.Add(Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grab_MediaURL);
+                                            if (MediaItemTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
+                                        }
+                                    }
                                 }
                                 Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
                                 break;

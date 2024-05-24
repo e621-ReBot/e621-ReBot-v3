@@ -128,13 +128,13 @@
                         <customcontrols:Custom_TextWithOutline Width="180" Height="32" Text="Initilizing Browser..." FontSize="18" Fill="{DynamicResource ThemeFocus}" Margin="8,0,0,0" FontWeight="Bold" StrokeThickness="2"/>
                         <Canvas>
                             <Canvas.RenderTransform>
-                                <RotateTransform x:Name="CanvasTransform" CenterX="100" CenterY="100"/>
+                                <RotateTransform x:Name="CanvasTransformBrowser" CenterX="100" CenterY="100"/>
                             </Canvas.RenderTransform>
                             <Canvas.Triggers>
                                 <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Angle" Storyboard.TargetName="CanvasTransform" From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                            <DoubleAnimation Storyboard.TargetProperty="Angle" Storyboard.TargetName="CanvasTransformBrowser" From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
@@ -399,21 +399,41 @@
                     <Grid x:Name="Upload_GridBox" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Width="610" Height="335">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>
+                            <RowDefinition Height="32"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+                        <Border Grid.Row="0" Grid.RowSpan="3" BorderBrush="Black" BorderThickness="1"/>
 
                         <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged" ToolTip="Toggle uploading status."/>
 
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
+                        
                         <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
-
-                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
-
-                        <customcontrols:Custom_TreeView Grid.Row="1" x:Name="Upload_TreeView" Margin="1,0,1,1">
+                        
+                        <Canvas x:Name="Upload_ProgressCanvas" HorizontalAlignment="Right" Margin="0,8,64,0">
+                            <Canvas.RenderTransform>
+                                <RotateTransform x:Name="CanvasTransformUpload" CenterX="8" CenterY="8"/>
+                            </Canvas.RenderTransform>
+                            <Canvas.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Angle" Storyboard.TargetName="CanvasTransformUpload" From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Canvas.Triggers>
+                            <Path Stroke="{DynamicResource ThemeFocus}" StrokeThickness="4" Data="M 0,8 A 8,8 0 1 0 8,0"/>
+                        </Canvas>
+                        
+                        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1">
+                            <TextBlock x:Name="Upload_WorkingOnTextBlock" Text="Working on: Nothing." Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8,0,0,0"/>
+                        </Border>
+                        
+                        <customcontrols:Custom_TreeView Grid.Row="2" x:Name="Upload_TreeView" Margin="1,0,1,1">
                             <customcontrols:Custom_TreeView.Resources>
                                 <ContextMenu x:Key="UploadTreeViewContextMenu" x:Shared="False" IsTabStop="False">
                                     <MenuItem Header="Remove" Click="UploadTreeViewContextMenu_Remove"/>
@@ -439,8 +459,11 @@
                                 </Style>
                             </customcontrols:Custom_TreeView.ItemContainerStyle>
                         </customcontrols:Custom_TreeView>
+                        
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                     </Grid>
+                    
                     <Grid x:Name="Conversion_GridBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8" Width="610" Height="335">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>

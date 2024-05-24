@@ -46,6 +46,7 @@ namespace e621_ReBot_v3
             GBTB_Center.Visibility = Visibility.Hidden;
             GBTB_Left.Visibility = Visibility.Hidden;
             GBTB_Right.Visibility = Visibility.Hidden;
+            Upload_ProgressCanvas.Visibility = Visibility.Hidden;
             SettingsButton_DLGenders.Visibility = Visibility.Hidden;
             SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
 

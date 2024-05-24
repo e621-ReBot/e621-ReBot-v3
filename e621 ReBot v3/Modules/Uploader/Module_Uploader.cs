@@ -175,6 +175,15 @@ namespace e621_ReBot_v3.Modules
             });
         }
 
+        internal static void Report_WorkingOn(string? WorkURL)
+        {
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                Window_Main._RefHolder.Upload_WorkingOnTextBlock.Text = $"Working on: {WorkURL ?? "Nothing."}";
+                Window_Main._RefHolder.Upload_ProgressCanvas.Visibility = WorkURL== null ? Visibility.Hidden : Visibility.Visible;
+            });
+        }
+
         // - - - - - - - - - - - - - - - -
 
         internal static readonly BackgroundWorker Upload_BGW = new BackgroundWorker();
@@ -205,6 +214,7 @@ namespace e621_ReBot_v3.Modules
 
                 string TaskName = JobTreeViewItem.Header.ToString().Replace(" ", null);
                 Upload_BGW.RunWorkerAsync(TaskName);
+                Report_WorkingOn(UploadMediaItemHolder.Grab_MediaURL);
             }
         }
 
@@ -213,6 +223,7 @@ namespace e621_ReBot_v3.Modules
         {
             //typeof(Module_Uploader).GetMethod($"UploadTask_{e.Argument}", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { _2Upload_MediaItems[0] });
             if (e.Argument != null) Thread.Sleep(500);
+
             switch (e.Argument.ToString())
             {
                 case "Upload":
@@ -246,6 +257,7 @@ namespace e621_ReBot_v3.Modules
         private static bool FailedUploadTask;
         private static void UploadBGW_WorkDone(object? sender, RunWorkerCompletedEventArgs e)
         {
+            Report_WorkingOn(null);
             Report_Status("Waiting...");
             Module_Credit.Credit_UpdateDisplay();
 
