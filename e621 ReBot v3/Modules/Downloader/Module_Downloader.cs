@@ -423,6 +423,7 @@ namespace e621_ReBot_v3.Modules
                         }
                     }
                 }
+                Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
             });
         }
 
@@ -597,6 +598,7 @@ namespace e621_ReBot_v3.Modules
             ((DownloadVE)e.UserState).DownloadProgress.Value = e.ProgressPercentage;
         }
 
+        private static uint SessionDownloads = 0;
         private static void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
@@ -645,6 +647,7 @@ namespace e621_ReBot_v3.Modules
                 }
             }
 
+            SessionDownloads++;
             DownloadVETemp._DownloadFinished = true;
             _DownloadVEFinisherTimer.Stop();
             _DownloadVEFinisherTimer.Start();
