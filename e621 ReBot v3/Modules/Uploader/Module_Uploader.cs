@@ -952,11 +952,11 @@ namespace e621_ReBot_v3.Modules
         private static void UploadDisableTimer_Tick(object? sender, EventArgs e)
         {
             _UploadDisableTimer.Stop();
-            if (_UploadDisableTimer.Tag.ToString().Equals("Total"))
+            if (_UploadDisableTimer.Tag != null) //Total
             {
                 ThreadPool.QueueUserWorkItem(state => Module_Credit.Credit_CheckAll());
             }
-            else
+            else //Hourly
             {
                 List<DateTime> TimestampsCopy = Module_Credit.Timestamps_Upload;
                 for (int i = 0; i < Module_Credit.Timestamps_Upload.Count; i++)
