@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -34,7 +35,7 @@ namespace e621_ReBot_v3
             }
             if (SuggestionPopup != null)
             {
-                SuggestionPopup.SetTextBoxTarget(Tags_TextBox);
+                SuggestionPopup.SetTextBoxTarget(Tags_TextBox, true);
                 SuggestionSwitch.IsEnabled = true;
             }
         }
@@ -161,7 +162,7 @@ namespace e621_ReBot_v3
 
         [GeneratedRegex(@"[ ]{2,}", RegexOptions.None)]
         private static partial Regex Tagger_Regex1();
-        private void CountTags()
+        internal void CountTags()
         {
             List<string> SortTags = MediaItemHolder.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
             Title = $"Tagger - Tags: {SortTags.Count}";
@@ -291,6 +292,21 @@ namespace e621_ReBot_v3
                         Dispatcher.BeginInvoke(CountTags);
                         break;
                     }
+            }
+        }
+
+        private void Tags_TextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CursorClickChange = true;
+        }
+
+        private bool CursorClickChange = false;
+        private void Tags_TextBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (SuggestionPopup != null && CursorClickChange)
+            {
+                SuggestionPopup.IsOpen = false;
+                CursorClickChange = false;
             }
         }
 

@@ -32,7 +32,7 @@
             <Border Width="1" Margin="1,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0"/>
             <CustomControls:Custom_ToggleSwitch x:Name="SuggestionSwitch" Width="64" OffText="Tags" OnText="Pools" Margin="1,0,0,0" Click="Custom_ToggleSwitch_Click" ToolTip="Autocomplete the selected type." IsChecked="False" IsEnabled="False"/>
         </StackPanel>
-        <TextBox x:Name="Tags_TextBox" Background="Transparent" Margin="1,51,1,1" BorderBrush="Black" Text="Tags Tags Tags" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" KeyDown="Tags_TextBox_KeyDown" PreviewKeyDown="Tags_TextBox_PreviewKeyDown" ToolTip="Add tags for media here"/>
+        <TextBox x:Name="Tags_TextBox" Background="Transparent" Margin="1,51,1,1" BorderBrush="Black" Text="Tags Tags Tags" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" KeyDown="Tags_TextBox_KeyDown" PreviewKeyDown="Tags_TextBox_PreviewKeyDown" ToolTip="Add tags for media here" SelectionChanged="Tags_TextBox_SelectionChanged" PreviewMouseLeftButtonDown="Tags_TextBox_PreviewMouseLeftButtonDown"/>
         <TextBox x:Name="Description_TextBox" Background="#3F000000" Margin="1,51,1,1" BorderBrush="Black" Text="Description" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True" IsReadOnlyCaretVisible="True" Visibility="Hidden"/>
     </Grid>
 </Window>

@@ -134,7 +134,7 @@
                 <Grid x:Name="BrowserTabGrid">
                     <customcontrols:BrowserControl x:Name="ReBot_Browser" Visibility="Hidden"/>
                     <Grid x:Name="BrowserLoadingIcon" Width="200" Height="200" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,260,0,0">
-                        <customcontrols:Custom_TextWithOutline Width="180" Height="32" Text="Initilizing Browser..." FontSize="18" Fill="{DynamicResource ThemeFocus}" Margin="8,0,0,0" FontWeight="Bold" StrokeThickness="2"/>
+                        <customcontrols:Custom_TextWithOutline Width="180" Height="32" Text="Initializing Browser..." FontSize="18" Fill="{DynamicResource ThemeFocus}" Margin="8,0,0,0" FontWeight="Bold" StrokeThickness="2"/>
                         <Canvas>
                             <Canvas.RenderTransform>
                                 <RotateTransform x:Name="CanvasTransformBrowser" CenterX="100" CenterY="100"/>
@@ -155,7 +155,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem x:Name="ReBot_GridTab" Background="Transparent">
+            <TabItem x:Name="ReBot_GridTab" Background="Transparent" MouseWheel="ReBot_GridTab_MouseWheel">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>

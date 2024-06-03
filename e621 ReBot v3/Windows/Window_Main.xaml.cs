@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using CefSharp;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
@@ -57,6 +58,7 @@ namespace e621_ReBot_v3
                 SantaHat1.Visibility = Visibility.Visible;
                 SantaHat2.Visibility = Visibility.Visible;
             }
+            ScrollDisableTimer.Tick += ScrollDisableTimer_Tick;
         }
 
         #region "Window"
@@ -409,6 +411,27 @@ namespace e621_ReBot_v3
         private void GB_Right_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             GBTB_Right.Visibility = GB_Right.Visibility;
+        }
+
+        private readonly DispatcherTimer ScrollDisableTimer = new DispatcherTimer { Interval = TimeSpan.FromMicroseconds(250) };
+        private void ScrollDisableTimer_Tick(object? sender, EventArgs e)
+        {
+            ScrollDisableTimer.Stop();
+            ReBot_GridTab.MouseWheel += ReBot_GridTab_MouseWheel;
+        }
+
+        private void ReBot_GridTab_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ReBot_GridTab.MouseWheel -= ReBot_GridTab_MouseWheel;
+            if (e.Delta > 0) // Up / Left
+            {
+                if (GB_Left.IsVisible) GB_Left.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            }
+            else
+            {
+                if (GB_Right.IsVisible) GB_Right.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            }
+            ScrollDisableTimer.Start();
         }
 
         private void GB_Left_Click(object sender, RoutedEventArgs e)

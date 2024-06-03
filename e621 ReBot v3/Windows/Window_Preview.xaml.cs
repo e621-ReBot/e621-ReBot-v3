@@ -689,7 +689,7 @@ namespace e621_ReBot_v3
         {
             if (TaggerLocation.X == 0 && TaggerLocation.Y == 0)
             {
-                TaggerLocation = new Point(Width / 2, Height / 2);
+                TaggerLocation = new Point(Left + Width / 2 - 240, Top + Height / 2 - 120);
             }
             Window_Tagger.OpenTagger(this, MediaItemHolder, TaggerLocation, !Keyboard.Modifiers.HasFlag(ModifierKeys.Control));
         }

@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
+using CefSharp;
 
 namespace e621_ReBot_v3.CustomControls
 {
@@ -27,9 +28,11 @@ namespace e621_ReBot_v3.CustomControls
             ClickInputDelay.Tick += ClickInputDelay_Tick;
         }
 
-        internal void SetTextBoxTarget(TextBox TextBoxRef)
+        private bool DuplicatesDisabled = false;
+        internal void SetTextBoxTarget(TextBox TextBoxRef, bool DisableDuplicates = false)
         {
             _TextBoxRef = TextBoxRef;
+            DuplicatesDisabled = DisableDuplicates;
             TextBoxRef.GotFocus += TextBoxRef_GotFocus;
             TextBoxRef.PreviewKeyDown += TextBoxRef_PreviewKeyDown;
             TextBoxRef.PreviewMouseWheel += TextBoxRef_PreviewMouseWheel;
@@ -338,6 +341,14 @@ namespace e621_ReBot_v3.CustomControls
             SIndexTracker = Math.Max(0, ResultSelectIndex);
             if (SuggestionResultList.Any())
             {
+                List<string> TextBoxRefList = _TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                SuggestionResultList.RemoveAll(l => TextBoxRefList.Contains(l.First()));
+                if (SuggestionResultList.Count == 0)
+                {
+                    IsOpen = false;
+                    return;
+                }
+
                 SuggestScrollBar.Visibility = SuggestionResultList.Count > MaxItemCount ? Visibility.Visible : Visibility.Collapsed;
                 SuggestScrollBar.Maximum = SuggestionResultList.Count - 1;
                 SuggestScrollBar.Value = SIndexTracker;
@@ -373,6 +384,7 @@ namespace e621_ReBot_v3.CustomControls
                 ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[i - SIndexStart];
                 ListBoxItemTemp.Content = SuggestionResultList[i][0];
                 ListBoxItemTemp.Tag = SuggestionResultList[i][1];
+                ListBoxItemTemp.Cursor = Cursors.Hand;
             }
             ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[SIndexTracker - SIndexStart];
             ListBoxItemTemp.IsSelected = true;
@@ -391,7 +403,7 @@ namespace e621_ReBot_v3.CustomControls
             UpdateSuggestionDisplay();
         }
 
-        private int SetValue(int value, int minValue, int maxValue)
+        private static int SetValue(int value, int minValue, int maxValue)
         {
             return Math.Max(minValue, Math.Min(value, maxValue));
         }

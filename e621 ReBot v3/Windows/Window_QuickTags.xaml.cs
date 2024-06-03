@@ -16,7 +16,7 @@ namespace e621_ReBot_v3
             InitializeComponent();
             App.SetWindow2Square(this);
             Owner = Window_Tagger._RefHolder;
-            Window_Tagger.SuggestionPopup.SetTextBoxTarget(QuickTags_TextBox);
+            Window_Tagger.SuggestionPopup.SetTextBoxTarget(QuickTags_TextBox, true);
             RestorePoolMode = Window_Tagger.SuggestionPopup.PoolMode;
             Window_Tagger.SuggestionPopup.PoolMode = false;
             LoadQuickTags();

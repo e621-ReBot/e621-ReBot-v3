@@ -109,7 +109,7 @@
             <CheckBox x:Name="cUpload_CheckBox" Style="{StaticResource cCheckBoxUP}"  Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="1" ClickMode="Press" Focusable="False" Checked="CUpload_CheckBox_CheckChanged" Unchecked="CUpload_CheckBox_CheckChanged" IsEnabledChanged="CUpload_CheckBox_IsEnabledChanged" ToolTip="Select for upload."/>
 
             <DockPanel x:Name="IsUploaded_DockPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="{StaticResource Cursor_ReBotNav}" Background="Transparent" MouseLeftButtonDown="IsUploaded_DockPanel_MouseLeftButtonDown" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser.">
-                <local:Custom_TextWithOutline x:Name="cIsUploaded_TextBlock" Text="#1234567" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontSize="24" FontWeight="Bold" StrokeThickness="2" IsHitTestVisible="False" Width="120"/>
+                <local:Custom_TextWithOutline x:Name="cIsUploaded_TextBlock" Text="#1234567" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontSize="24" FontWeight="Bold" StrokeThickness="2" IsHitTestVisible="False" MinWidth="120"/>
             </DockPanel>
         </Grid>
         

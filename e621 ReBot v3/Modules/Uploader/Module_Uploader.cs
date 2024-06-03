@@ -180,7 +180,16 @@ namespace e621_ReBot_v3.Modules
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 Window_Main._RefHolder.Upload_WorkingOnTextBlock.Text = $"Working on: {WorkURL ?? "Nothing."}";
-                Window_Main._RefHolder.Upload_ProgressCanvas.Visibility = WorkURL== null ? Visibility.Hidden : Visibility.Visible;
+                Window_Main._RefHolder.Upload_ProgressCanvas.Visibility = WorkURL == null ? Visibility.Hidden : Visibility.Visible;
+            });
+        }
+
+        internal static void Report_Error(string StatusMessage, string TitleMessage)
+        {
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
+                MessageBox.Show(Window_Main._RefHolder, StatusMessage, TitleMessage, MessageBoxButton.OK, MessageBoxImage.Error);
             });
         }
 
@@ -193,28 +202,102 @@ namespace e621_ReBot_v3.Modules
             if (Window_Main._RefHolder.Upload_CheckBox.IsChecked == true && Window_Main._RefHolder.Upload_TreeView.HasItems && !Upload_BGW.IsBusy)
             {
                 TreeViewItem ParentJobNode = (TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0];
-                TreeViewItem JobTreeViewItem = (TreeViewItem)ParentJobNode.Items[0];
                 if (ParentJobNode.ContextMenu != null) ParentJobNode.ContextMenu.IsOpen = false;
 
-                UploadMediaItemHolder = _2Upload_MediaItems[0];
-                if (ParentJobNode.Items.Count == 1)
+                TreeViewItem JobTreeViewItem;
+                string TaskName = string.Empty;
+                bool NoTask = true;
+                for (int i = 0; i < ParentJobNode.Items.Count; i++)
                 {
-                    Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
-                    lock (_2Upload_MediaItems)
+                    JobTreeViewItem = (TreeViewItem)ParentJobNode.Items[i];
+                    TaskName = JobTreeViewItem.Header.ToString().Replace(" ", null);
+                    switch (TaskName)
                     {
-                        _2Upload_MediaItems.RemoveAt(0);
+                        case "Upload":
+                            {
+                                if (Module_Credit.Credit_UploadHourly == 0 || Module_Credit.Credit_UploadHourly == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    NoTask = false;
+                                }
+                                break;
+                            }
+                        case "ReplaceInferior":
+                            {
+                                if (Module_Credit.Credit_UploadHourly == 0 || Module_Credit.Credit_UploadHourly == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    NoTask = false;
+                                }
+                                break;
+                            }
+                        case "CopyNotes":
+                            {
+                                if (Module_Credit.Credit_Notes == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    NoTask = false;
+                                }
+                                break;
+                            }
+                        case "MoveChildren":
+                            {
+                                //could loop here, should probably handle it
+                                NoTask = false;
+                                break;
+                            }
+                        case "FlagInferior":
+                            {
+                                if (Module_Credit.Credit_Flags == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    NoTask = false;
+                                }
+                                break;
+                            }
                     }
-                    int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count;
-                    Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
+                    goto DoTask;
+                }
+
+            DoTask:
+                if (NoTask)
+                {
+                    //disable upload or put into retry
                 }
                 else
                 {
-                    ParentJobNode.Items.RemoveAt(0);
+                    UploadMediaItemHolder = _2Upload_MediaItems[0];
+                    if (ParentJobNode.Items.Count == 1)
+                    {
+                        //Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
+                        //lock (_2Upload_MediaItems)
+                        //{
+                        //    _2Upload_MediaItems.RemoveAt(0);
+                        //}
+                        ((TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0]).Visibility = Visibility.Collapsed;
+                        int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count - 1;
+                        Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
+                    }
+                    else
+                    {
+                        ParentJobNode.Items.RemoveAt(0);
+                    }
+                    if (string.IsNullOrEmpty(TaskName)) return;
+                    Upload_BGW.RunWorkerAsync(TaskName);
+                    Report_WorkingOn(UploadMediaItemHolder.Grab_MediaURL);
                 }
-
-                string TaskName = JobTreeViewItem.Header.ToString().Replace(" ", null);
-                Upload_BGW.RunWorkerAsync(TaskName);
-                Report_WorkingOn(UploadMediaItemHolder.Grab_MediaURL);
             }
         }
 
@@ -263,25 +346,32 @@ namespace e621_ReBot_v3.Modules
 
             if (FailedUploadTask)
             {
-                lock (_2Upload_MediaItems)
-                {
-                    _2Upload_MediaItems.Add(UploadMediaItemHolder);
-                }
-                UploadTreeView_CreateJob(UploadMediaItemHolder);
+                ((TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0]).Visibility = Visibility.Visible;
+                int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count - 1;
+                Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
                 FailedUploadTask = false;
             }
-
-            TreeView TreeViewUploadRef = Window_Main._RefHolder.Upload_TreeView;
-            if (TreeViewUploadRef.Items.Count > 0)
+            else
             {
-                // To finish notes/flags even when there's no upload credit left, instead of waiting for upload credit
-                TreeViewItem FirstJobTreeViewItem = (TreeViewItem)((TreeViewItem)TreeViewUploadRef.Items[0]).Items[0];
-                if (_UploadDisableTimer.IsEnabled && !FirstJobTreeViewItem.Header.Equals("Upload"))
+                Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
+                lock (_2Upload_MediaItems)
                 {
-                    Upload_BGW.RunWorkerAsync(true);
-                    return;
+                    _2Upload_MediaItems.RemoveAt(0);
                 }
             }
+
+            //TreeView TreeViewUploadRef = Window_Main._RefHolder.Upload_TreeView;
+            //if (TreeViewUploadRef.Items.Count > 0)
+            //{
+            //    // To finish notes/flags even when there's no upload credit left, instead of waiting for upload credit
+            //    TreeViewItem FirstJobTreeViewItem = (TreeViewItem)((TreeViewItem)TreeViewUploadRef.Items[0]).Items[0];
+            //    string TaskName = FirstJobTreeViewItem.Header.ToString().Replace(" ", null);
+            //    if (_UploadDisableTimer.IsEnabled && !TaskName.Equals("Upload"))
+            //    {                
+            //        Upload_BGW.RunWorkerAsync(TaskName);
+            //        return;
+            //    }
+            //}
 
             UploadMediaItemHolder = null;
         }
@@ -554,11 +644,7 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             FailedUploadTask = true;
-                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                            {
-                                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                                MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
-                            });
+                            Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
                         }
                         break;
                     }
@@ -567,11 +653,7 @@ namespace e621_ReBot_v3.Modules
                     {
                         FailedUploadTask = true;
                         Report_Info($"Error uploading: {UploadedURL4Report}");
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                        {
-                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Error);
-                        });
+                        Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
                         break;
                     }
             }
@@ -689,25 +771,17 @@ namespace e621_ReBot_v3.Modules
                         }
                         else
                         {
-                            //FailedUploadTask = true;
-                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                            {
-                                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                                MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
-                            });
+                            FailedUploadTask = true;
+                            Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
                         }
                         break;
                     }
 
                 default:
                     {
-                        //FailedUploadTask = true;
+                        FailedUploadTask = true;
                         Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}");
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                        {
-                            Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
-                            MessageBox.Show(Window_Main._RefHolder, $"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
-                        });
+                        Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
                         break;
                     }
             }
