@@ -1,15 +1,15 @@
-﻿using e621_ReBot_v3.CustomControls;
-using HtmlAgilityPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using e621_ReBot_v3.CustomControls;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
-    internal static partial class Module_FurAffinitty
+    internal static partial class Module_FurAffinity
     {
         internal static void Queue_Prepare(string WebAddress)
         {
@@ -100,7 +100,7 @@ namespace e621_ReBot_v3.Modules.Grabber
         private static partial Regex FA_Regex1();
         [GeneratedRegex(@"(?<=/)\d+(?=/\d+.)")]
         private static partial Regex FA_Regex2();
-        internal static void Grab(string WebAddress, string HTMLSource)
+        internal static void Grab(string WebAddress, string? HTMLSource)
         {
             HTMLSource = string.IsNullOrEmpty(HTMLSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_FurAffinity) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))

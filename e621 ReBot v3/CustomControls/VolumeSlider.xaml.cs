@@ -24,7 +24,7 @@ namespace e621_ReBot_v3.CustomControls
             AppSettings.Volume = (ushort)VolumeSliderX.Value;
         }
 
-        internal void SetVolume(ushort Volume) 
+        internal void SetVolume(ushort Volume)
         {
             VolumeSliderX.Value = Volume;
         }

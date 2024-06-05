@@ -19,7 +19,6 @@ using CefSharp;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
-using e621_ReBot_v3.Modules.Grabber;
 using DownloadItem = e621_ReBot_v3.CustomControls.DownloadItem;
 
 namespace e621_ReBot_v3.Modules
@@ -45,28 +44,32 @@ namespace e621_ReBot_v3.Modules
             _DownloadEnabler = new List<Regex>
             {
                 new Regex(@".+e621.net/(posts(/\d+|\?.+)?|pools/\d+|favorites|popular)"),
-                new Regex(@".+www.furaffinity.net/(view|full|gallery|scraps|favorites)/.+/"),
-                new Regex(@".+www.furaffinity.net/search/"),
-                new Regex(@".+inkbunny.net/(s|gallery|scraps)/\w+"),
-                new Regex(@".+inkbunny.net/submissionsviewall.php"),
-                new Regex(@".+pixiv.net/\w+/(artworks|users)/\d+"),
-                new Regex(@".+www.hiccears.com/(contents|file)/.+"),
-                new Regex(@".+www.hiccears.com/p/.+/illustrations"),
-                new Regex(@".+x.com/.+/(media|status/\d+/?)"),
-                new Regex(@".+.newgrounds.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
-                new Regex(@".+.sofurry.com/(view/\d+|browse/\w+/art?uid=\d+|artwork|photos)"),
-                new Regex(@".+www.weasyl.com/((~.+/)?submissions(/\d+/)?|collections).+"),
-                new Regex(@".+www.weasyl.com/search\?find=submit"),
-                new Regex(@".+www.hentai-foundry.com/(user/.+/faves/pictures|users/.+)"),
-                new Regex(@".+www.hentai-foundry.com/pictures/(user/.+|featured|popular|random|recent/)"),
-                new Regex(@".+pawoo.net/@.+/(\d+|media)"),
-                new Regex(@".+www.plurk.com/(p/)?\w+"),
-                new Regex(@".+mastodon.social/@.+/(\d+|media)"),
-                new Regex(@".+baraag.net/@.+(\d+|media)"),
+                new Regex(@".+www.furaffinity.net/view/\d+/"),
+                new Regex(@".+inkbunny.net/s/\d+"),
+                //new Regex(@".+www.furaffinity.net/(view|full|gallery|scraps|favorites)/.+/"),
+                //new Regex(@".+www.furaffinity.net/search/"),
+                //new Regex(@".+inkbunny.net/(s|gallery|scraps)/\w+"),
+                //new Regex(@".+inkbunny.net/submissionsviewall.php"),
+                //new Regex(@".+pixiv.net/\w+/(artworks|users)/\d+"),
+                //new Regex(@".+www.hiccears.com/(contents|file)/.+"),
+                //new Regex(@".+www.hiccears.com/p/.+/illustrations"),
+                //new Regex(@".+x.com/.+/(media|status/\d+/?)"),
+                //new Regex(@".+.newgrounds.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
+                //new Regex(@".+.sofurry.com/(view/\d+|browse/\w+/art?uid=\d+|artwork|photos)"),
+                //new Regex(@".+www.weasyl.com/((~.+/)?submissions(/\d+/)?|collections).+"),
+                //new Regex(@".+www.weasyl.com/search\?find=submit"),
+                //new Regex(@".+www.hentai-foundry.com/(user/.+/faves/pictures|users/.+)"),
+                //new Regex(@".+www.hentai-foundry.com/pictures/(user/.+|featured|popular|random|recent/)"),
+                //new Regex(@".+pawoo.net/@.+/(\d+|media)"),
+                //new Regex(@".+www.plurk.com/(p/)?\w+"),
+                //new Regex(@".+mastodon.social/@.+/(\d+|media)"),
+                //new Regex(@".+baraag.net/@.+(\d+|media)"),
 
                 //- - - Download only
 
-                new Regex(@".+derpibooru.org/(images/?|search\?|galleries/)(\d+)?")
+                new Regex(@".+derpibooru.org/(images/?|search\?|galleries/)(\d+)?"),
+                new Regex(@".+itaku.ee/(images/\d+|profile/\w+/gallery)")
+
             };
 
             for (int i = 0; i < 8; i++)
@@ -474,17 +477,102 @@ namespace e621_ReBot_v3.Modules
 
         internal static void Grab_DownloadMedia(string WebAddress)
         {
-            switch (WebAddress)
+            Uri TempURI = new Uri(WebAddress);
+            switch (TempURI.Host)
             {
-                case string e621 when e621.StartsWith("https://e621.net/"):
+                case "e621.net":
                     {
-                        Module_DLe621.Grab(WebAddress);
+                        Module_DLe621.GrabMediaLinks(WebAddress);
                         break;
                     }
 
-                case string Derpibooru when Derpibooru.StartsWith("https://derpibooru.org/"):
+                case "www.furaffinity.net":
                     {
-                        Module_Derpibooru.Grab(WebAddress);
+                        Module_FurAffinity.GrabMediaLinks(WebAddress);
+                        break;
+                    }
+
+                case "inkbunny.net":
+                    {
+                        Module_Inkbunny.GrabMediaLinks(WebAddress);
+                        break;
+                    }
+
+                case "www.pixiv.net":
+                    {
+                        Module_Pixiv.GrabMediaLinks(WebAddress);
+                        break;
+                    }
+
+                //case "www.hiccears.com":
+                //    {
+                //        Module_HicceArs.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case "x.com":
+                //    {
+                //        Module_Twitter.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
+                //    {
+                //        Module_Newgrounds.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case string SoFurry when SoFurry.Contains(".sofurry.com"):
+                //    {
+                //        Module_SoFurry.Grab(WebAddress);
+                //        break;
+                //    }
+
+                //case "www.weasyl.com":
+                //    {
+                //        Module_Weasyl.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case "mastodon.social":
+                //    {
+                //        Module_Mastodons.Grab(WebAddress, (string)NeededData, ref Module_CookieJar.Cookies_Mastodon);
+                //        break;
+                //    }
+
+                //case "baraag.net":
+                //    {
+                //        Module_Mastodons.Grab(WebAddress, (string)NeededData, ref Module_CookieJar.Cookies_Baraag);
+                //        break;
+                //    }
+
+                //case "pawoo.net":
+                //    {
+                //        Module_Pawoo.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case "www.hentai-foundry.com":
+                //    {
+                //        Module_HentaiFoundry.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                //case "www.plurk.com":
+                //    {
+                //        Module_Plurk.Grab(WebAddress, (string)NeededData);
+                //        break;
+                //    }
+
+                case "derpibooru.org":
+                    {
+                        Module_Derpibooru.GrabMediaLinks(WebAddress);
+                        break;
+                    }
+
+                case "itaku.ee":
+                    {
+                        Module_Itaku.GrabMediaLinks(WebAddress);
                         break;
                     }
             }

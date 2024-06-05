@@ -60,7 +60,7 @@ namespace e621_ReBot_v3.CustomControls
                             return;
                         }
 
-                    case Key.A:        
+                    case Key.A:
                         {
                             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) return;
                             break;
@@ -79,7 +79,7 @@ namespace e621_ReBot_v3.CustomControls
                             return;
                         }
 
-                        case Key.Enter: 
+                    case Key.Enter:
                         {
                             NotCancel = true;
                             e.Handled = true;

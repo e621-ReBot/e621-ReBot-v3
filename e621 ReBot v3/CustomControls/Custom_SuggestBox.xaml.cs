@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CefSharp;
 
 namespace e621_ReBot_v3.CustomControls
 {
@@ -341,12 +340,15 @@ namespace e621_ReBot_v3.CustomControls
             SIndexTracker = Math.Max(0, ResultSelectIndex);
             if (SuggestionResultList.Any())
             {
-                List<string> TextBoxRefList = _TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                SuggestionResultList.RemoveAll(l => TextBoxRefList.Contains(l.First()));
-                if (SuggestionResultList.Count == 0)
+                if (DuplicatesDisabled)
                 {
-                    IsOpen = false;
-                    return;
+                    List<string> TextBoxRefList = _TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    SuggestionResultList.RemoveAll(l => TextBoxRefList.Contains(l.First()));
+                    if (SuggestionResultList.Count == 0)
+                    {
+                        IsOpen = false;
+                        return;
+                    }
                 }
 
                 SuggestScrollBar.Visibility = SuggestionResultList.Count > MaxItemCount ? Visibility.Visible : Visibility.Collapsed;

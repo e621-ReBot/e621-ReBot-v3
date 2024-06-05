@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Net.Http;
-using System.Net;
-using System.Text;
-using System.Net.Http.Headers;
-using e621_ReBot_v3.Modules.Uploader;
-using System.IO;
-using System.Windows.Controls;
-using Microsoft.VisualBasic.FileIO;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Windows;
+using System.Windows.Controls;
+using e621_ReBot_v3.Modules.Uploader;
+using Microsoft.VisualBasic.FileIO;
 
 namespace e621_ReBot_v3.Modules
 {

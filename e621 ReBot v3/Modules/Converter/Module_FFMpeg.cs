@@ -9,7 +9,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules.Converter

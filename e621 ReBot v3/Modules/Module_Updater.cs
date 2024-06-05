@@ -1,15 +1,15 @@
-﻿using System.IO.Compression;
-using System.IO;
-using System.Reflection;
+﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Net;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using e621_ReBot_v3.Modules;
-using System.Net;
 using HtmlAgilityPack;
-using System;
-using System.Threading;
-using System.Text.RegularExpressions;
 
 namespace e621_ReBot_v3
 {
@@ -65,7 +65,7 @@ namespace e621_ReBot_v3
         private static CookieContainer CookieContainerGitHub = new CookieContainer();
         internal static void Check4Update()
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => 
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Visible;
             });

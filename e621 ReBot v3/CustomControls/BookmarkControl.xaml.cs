@@ -40,7 +40,7 @@ namespace e621_ReBot_v3.CustomControls
                         Content = DictionaryEntryTemp.Value,
                         Tag = DictionaryEntryTemp.Key,
                         ToolTip = $"{DictionaryEntryTemp.Value}\n{DictionaryEntryTemp.Key}",
-                        IsTabStop= false
+                        IsTabStop = false
                     };
                     BookmarkList.Items.Add(ListViewItemTemp);
                 }

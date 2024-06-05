@@ -166,7 +166,7 @@ namespace e621_ReBot_v3.CustomControls
             BB_Download.Visibility = Visibility.Collapsed;
             //Worker_Sound();
             string TagPass = BB_Download.Tag.ToString();
-            ThreadPool.QueueUserWorkItem(state => Module_Downloader.Grab_DownloadMedia(TagPass));       
+            ThreadPool.QueueUserWorkItem(state => Module_Downloader.Grab_DownloadMedia(TagPass));
             //Module_Downloader.UpdateTreeViewNodes();
             //Module_Downloader.timer_Download.Start();
         }

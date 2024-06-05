@@ -131,7 +131,7 @@ namespace e621_ReBot_v3.Modules
             {
                 case "www.furaffinity.net":
                     {
-                        Module_FurAffinitty.Queue_Prepare(WebAddress);
+                        Module_FurAffinity.Queue_Prepare(WebAddress);
                         break;
                     }
 
@@ -266,7 +266,7 @@ namespace e621_ReBot_v3.Modules
             {
                 case "www.furaffinity.net":
                     {
-                        Module_FurAffinitty.Grab(WebAddress, (string)NeededData);
+                        Module_FurAffinity.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
@@ -474,7 +474,7 @@ namespace e621_ReBot_v3.Modules
                         {
                             _Grabbed_MediaItems.AddRange((List<MediaItem>)_GrabQueue_WorkingOn[0]);
                         }
-                        for (int i = CountBeforeCheck; i < _Grabbed_MediaItems.Count; i++) 
+                        for (int i = CountBeforeCheck; i < _Grabbed_MediaItems.Count; i++)
                         {
                             AppSettings.MediaRecord_Check(_Grabbed_MediaItems[i]);
                         }

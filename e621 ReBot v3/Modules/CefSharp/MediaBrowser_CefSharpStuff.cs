@@ -6,7 +6,6 @@ using System.Windows;
 using CefSharp.Handler;
 using e621_ReBot_v3;
 using e621_ReBot_v3.Modules;
-using e621_ReBot_v3.Modules.Grabber;
 
 namespace CefSharp
 {

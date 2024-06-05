@@ -117,7 +117,7 @@ namespace e621_ReBot_v3
             {
                 Module_e621APIController.ToggleStatus();
                 ThreadPool.QueueUserWorkItem(state => Window_PoolWatcher.PoolWatcher_Check4New());
-            } 
+            }
         }
 
         private void ErrorReporter()
@@ -942,7 +942,7 @@ namespace e621_ReBot_v3
             RadioButton WhichRadioButton = (RadioButton)sender;
             if (WhichRadioButton.IsChecked == true)
             {
-                ushort NewValue = ushort.Parse(WhichRadioButton.Name.Substring(WhichRadioButton.Name.Length-1));
+                ushort NewValue = ushort.Parse(WhichRadioButton.Name.Substring(WhichRadioButton.Name.Length - 1));
                 AppSettings.NamingPattern_e6 = NewValue;
             }
         }

@@ -1,9 +1,9 @@
-﻿using CefSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using CefSharp;
 
-namespace e621_ReBot_v3.Modules.Grabber
+namespace e621_ReBot_v3.Modules
 {
     internal static class Module_CookieJar
     {

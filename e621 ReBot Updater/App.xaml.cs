@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System;
-using System.Windows;
+﻿using System;
 using System.IO;
+using System.Threading;
+using System.Windows;
 
 namespace e621_ReBot_Updater
 {

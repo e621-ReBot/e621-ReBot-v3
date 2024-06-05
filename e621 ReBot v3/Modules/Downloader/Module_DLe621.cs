@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using e621_ReBot_v3.CustomControls;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 
@@ -15,7 +14,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         internal static string? SpecialSaveFolder;
         internal static bool CancellationPending = false;
 
-        internal static void Grab(string WebAddress)
+        internal static void GrabMediaLinks(string WebAddress)
         {
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);

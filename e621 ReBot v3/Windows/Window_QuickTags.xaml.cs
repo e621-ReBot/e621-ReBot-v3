@@ -72,7 +72,7 @@ namespace e621_ReBot_v3
         {
             if (QuickTags_TextBox.Text.Length == 0)
             {
-                MessageBox.Show(this,"You must add some tags first.", "Quick Tags", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, "You must add some tags first.", "Quick Tags", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {

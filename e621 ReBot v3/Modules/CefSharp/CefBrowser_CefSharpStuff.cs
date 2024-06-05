@@ -13,8 +13,10 @@ using CefSharp.Structs;
 using e621_ReBot_v3;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
+using static System.Net.WebRequestMethods;
 
 namespace CefSharp
 {
@@ -109,7 +111,8 @@ namespace CefSharp
 
                 //- - - Download only
 
-                new Regex(@"^\w+://derpibooru\.org/(images|search\?|galleries/)")
+                new Regex(@"^\w+://derpibooru\.org/(images|search\?|galleries/)"),
+                new Regex(@"^\w+://itaku.ee/api/galleries/images/(\d+/$)?") //new Regex(@".+itaku.ee/images/\d+")
             };
         }
 
@@ -197,6 +200,7 @@ namespace CefSharp
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
                             Module_Grabber.GrabEnabler(request.Url);
+                            Module_Downloader.DownloadEnabler(request.Url);
                         }
                         break;
                     }
@@ -231,35 +235,37 @@ namespace CefSharp
                                 }
                                 if (TweetsContainer.Any())
                                 {
+                                    bool SkipUnion = false;
                                     JArray TweetHolder = new JArray(TweetsContainer);
-                                    if (Module_Twitter.TwitterJSONHolder != null)
-                                    {
-                                        Module_Twitter.TwitterJSONHolder.Merge(TweetHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
-                                    }
-                                    else
+                                    if (Module_Twitter.TwitterJSONHolder == null)
                                     {
                                         Module_Twitter.TwitterJSONHolder = TweetHolder;
+                                        SkipUnion = true;
                                     }
 
-                                    //clear duplicates, happens rarely
-                                    if (Module_Twitter.TwitterJSONHolder.Count > 1)
+                                    lock (Module_Twitter.TwitterJSONHolder)
                                     {
-                                        //Module_Twitter.TwitterJSONHolder.OrderBy(token => token["id_str"].Value<uint>());
-                                        List<string> TweetIDList = new List<string>();
-                                        for (int i = Module_Twitter.TwitterJSONHolder.Count - 1; i >= 0; i--)
+                                        if (!SkipUnion) Module_Twitter.TwitterJSONHolder.Merge(TweetHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
+
+                                        //clear duplicates, happens rarely
+                                        if (Module_Twitter.TwitterJSONHolder.Count > 1)
                                         {
-                                            string TweetID = Module_Twitter.TwitterJSONHolder[i]["id_str"].Value<string>();
-                                            if (TweetIDList.Contains(TweetID))
+                                            //Module_Twitter.TwitterJSONHolder.OrderBy(token => token["id_str"].Value<uint>());
+                                            List<string> TweetIDList = new List<string>();
+                                            for (int i = Module_Twitter.TwitterJSONHolder.Count - 1; i >= 0; i--)
                                             {
-                                                Module_Twitter.TwitterJSONHolder.RemoveAt(i);
-                                            }
-                                            else
-                                            {
-                                                TweetIDList.Add(TweetID);
+                                                string TweetID = Module_Twitter.TwitterJSONHolder[i]["id_str"].Value<string>();
+                                                if (TweetIDList.Contains(TweetID))
+                                                {
+                                                    Module_Twitter.TwitterJSONHolder.RemoveAt(i);
+                                                }
+                                                else
+                                                {
+                                                    TweetIDList.Add(TweetID);
+                                                }
                                             }
                                         }
                                     }
-
                                     Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                                 }
                             }
@@ -301,14 +307,17 @@ namespace CefSharp
                                 IEnumerable<JToken> MastodonsContainer = Data2String.StartsWith("{") ? JTokenTemp : MastodonsContainer = JTokenTemp.SelectTokens("$[?(@.media_attachments[0] != null)]");
                                 if (MastodonsContainer.Any())
                                 {
+                                    bool SkipUnion = false;
                                     JArray MastodonHolder = new JArray(MastodonsContainer);
-                                    if (Module_Mastodons.MastodonsJSONHolder != null)
-                                    {
-                                        Module_Mastodons.MastodonsJSONHolder.Merge(MastodonHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
-                                    }
-                                    else
+                                    if (Module_Mastodons.MastodonsJSONHolder == null)
                                     {
                                         Module_Mastodons.MastodonsJSONHolder = MastodonHolder;
+                                        SkipUnion = true;
+                                    }
+
+                                    lock (Module_Mastodons.MastodonsJSONHolder)
+                                    {
+                                        if (!SkipUnion) Module_Mastodons.MastodonsJSONHolder.Merge(MastodonHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
                                     }
                                     Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                                 }
@@ -346,6 +355,58 @@ namespace CefSharp
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
                             Module_Downloader.DownloadEnabler(request.Url);
+                        }
+                        break;
+                    }
+
+                case string Itaku when Itaku.StartsWith("https://itaku.ee/"):
+                    {
+                        if (response.MimeType.Equals("application/json"))
+                        {
+                            string Data2String = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
+                            if (Itaku.EndsWith('/')) //single
+                            {
+                                Module_Itaku.ItakuSingleJSONHolder = JObject.Parse(Data2String);
+                            }
+                            else //gallery
+                            {
+                                JObject JObjectTemp = JObject.Parse(Data2String);
+                                IEnumerable<JToken>? TempContainer = JObjectTemp.SelectTokens("$.results.[*]");
+                                if (TempContainer.Any())
+                                {
+                                    bool SkipUnion = false;
+                                    JArray ItakuHolder = new JArray(TempContainer);
+                                    if (Module_Itaku.ItakuMultiJSONHolder == null)
+                                    {
+                                        Module_Itaku.ItakuMultiJSONHolder = ItakuHolder;
+                                        SkipUnion = true;
+                                    }
+
+                                    lock (Module_Itaku.ItakuMultiJSONHolder)
+                                    {
+                                        if (!SkipUnion) Module_Itaku.ItakuMultiJSONHolder.Merge(ItakuHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
+
+                                        //clear duplicates if they happen
+                                        if (Module_Itaku.ItakuMultiJSONHolder.Count > 1)
+                                        {
+                                            List<string> ItakuIDList = new List<string>();
+                                            for (int i = Module_Itaku.ItakuMultiJSONHolder.Count - 1; i >= 0; i--)
+                                            {
+                                                string ItakuID = Module_Itaku.ItakuMultiJSONHolder[i]["id"].Value<string>();
+                                                if (ItakuIDList.Contains(ItakuID))
+                                                {
+                                                    Module_Itaku.ItakuMultiJSONHolder.RemoveAt(i);
+                                                }
+                                                else
+                                                {
+                                                    ItakuIDList.Add(ItakuID);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Module_Downloader.DownloadEnabler(Module_CefSharp.BrowserAddress);
                         }
                         break;
                     }

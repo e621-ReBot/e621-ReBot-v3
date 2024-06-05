@@ -187,10 +187,10 @@ namespace e621_ReBot_v3.Modules
 
                 //if (e.IsLoading)
                 //{
-                    //_browserControl.BB_Grab.Visibility= Visibility.Collapsed;
-                    //_browserControl.BB_GrabAll.Visibility = Visibility.Collapsed;
-                    //_browserControl.BB_Download.Visibility = Visibility.Collapsed;
-                    //_browserControl.BrowserQuickButtons.IsEnabled = false;
+                //_browserControl.BB_Grab.Visibility= Visibility.Collapsed;
+                //_browserControl.BB_GrabAll.Visibility = Visibility.Collapsed;
+                //_browserControl.BB_Download.Visibility = Visibility.Collapsed;
+                //_browserControl.BrowserQuickButtons.IsEnabled = false;
                 //}
             });
 

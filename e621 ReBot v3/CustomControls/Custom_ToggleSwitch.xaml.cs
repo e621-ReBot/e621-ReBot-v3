@@ -9,7 +9,7 @@ namespace e621_ReBot_v3.CustomControls
         public static readonly DependencyProperty OffTextProperty = DependencyProperty.Register("OffText", typeof(string), typeof(Custom_ToggleSwitch), new UIPropertyMetadata("OffText"));
         public static readonly DependencyProperty OnTextProperty = DependencyProperty.Register("OnText", typeof(string), typeof(Custom_ToggleSwitch), new UIPropertyMetadata("OnText"));
 
-        public string? OffText 
+        public string? OffText
         {
             get => (string)GetValue(OffTextProperty);
             set => SetValue(OffTextProperty, value);

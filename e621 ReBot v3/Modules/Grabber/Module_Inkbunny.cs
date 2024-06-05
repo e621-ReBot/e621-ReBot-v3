@@ -1,12 +1,12 @@
-﻿using e621_ReBot_v3.CustomControls;
-using HtmlAgilityPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using e621_ReBot_v3.CustomControls;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
@@ -118,9 +118,9 @@ namespace e621_ReBot_v3.Modules.Grabber
                 return;
             }
 
-            HtmlDocument HtmldocumentTemp = new HtmlDocument();
-            HtmldocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode PostNode = HtmldocumentTemp.DocumentNode.SelectSingleNode("html");
+            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+            HtmlDocumentTemp.LoadHtml(HTMLSource);
+            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode("html");
 
             HtmlNode LoginTest = PostNode.SelectSingleNode(".//div[@class='elephant elephant_bottom elephant_white']/div[@class='content']/div[@class='title']");
             if (LoginTest != null)

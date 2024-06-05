@@ -1,7 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using System;
 using System.Linq;
-using System;
 using System.Net;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
@@ -104,7 +104,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "a":
                     {
                         string aURL = $"https://www.furaffinity.net{WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value)}";
-                        string TempTextHolder = TextHolderNode.InnerText.Replace("&nbsp;", " ").Trim();                 
+                        string TempTextHolder = TextHolderNode.InnerText.Replace("&nbsp;", " ").Trim();
                         if (TextHolderNode.Attributes["class"] != null) // parsed_nav_links doesn't have class attribute
                         {
                             if (TextHolderNode.Attributes["class"].Value.Equals("linkusername") || TextHolderNode.Attributes["class"].Value.Equals("iconusername"))
@@ -205,7 +205,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "#text":
                     {
                         int TabTest = TextHolderNode.InnerText.Count(ch => ch.Equals('\t'));
-                        TextHolder += TabTest > 2 ? $"{TextHolderNode.InnerText.Trim()} ": TextHolderNode.InnerText;
+                        TextHolder += TabTest > 2 ? $"{TextHolderNode.InnerText.Trim()} " : TextHolderNode.InnerText;
                         break;
                     }
 
@@ -372,7 +372,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 case "strong":
                     {
-                        TextHolder +=  $"[b]{(!TextHolderNode.FirstChild.Name.Equals("#text") ? ParseNode_Pixiv(TextHolderNode.FirstChild) : TextHolderNode.InnerText)} [/b]";
+                        TextHolder += $"[b]{(!TextHolderNode.FirstChild.Name.Equals("#text") ? ParseNode_Pixiv(TextHolderNode.FirstChild) : TextHolderNode.InnerText)} [/b]";
                         break;
                     }
 
@@ -485,7 +485,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             return DecodeText(TextString);
         }
-        
+
         private static string? ParseNode_SoFurry(HtmlNode TextHolderNode)
         {
             string? TextHolder = null;
@@ -493,7 +493,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 case "#text":
                     {
-                        TextHolder += $"{TextHolderNode.InnerText}\n";;
+                        TextHolder += $"{TextHolderNode.InnerText}\n"; ;
                         break;
                     }
 
@@ -681,7 +681,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "a":
                     {
                         string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
-                        TextHolder += $"\"{ TextHolderNode.InnerText}\":{aURL} ";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} ";
                         break;
                     }
 

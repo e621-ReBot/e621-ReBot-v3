@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System;
+﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -12,17 +12,17 @@ namespace e621_ReBot_v3.CustomControls
 
         internal PoolItem? _PoolItemRef
         {
-            get 
-            { 
-                return PoolItemRef; 
-            }   
-            set 
-            { 
+            get
+            {
+                return PoolItemRef;
+            }
+            set
+            {
                 PoolItemRef = value;
-                if (PoolItemRef != null ) 
+                if (PoolItemRef != null)
                 {
                     if (PoolItemRef.Name != null) PVE_Title.Text = PoolItemRef.Name;
-                    if (PoolItemRef.Thumbnail != null) 
+                    if (PoolItemRef.Thumbnail != null)
                     {
                         using (MemoryStream MemoryStreamTemp = new MemoryStream(Convert.FromBase64String(PoolItemRef.Thumbnail)))
                         {
@@ -38,7 +38,7 @@ namespace e621_ReBot_v3.CustomControls
                         }
                     }
                 }
-            }  
+            }
         }
 
         public PoolVE()

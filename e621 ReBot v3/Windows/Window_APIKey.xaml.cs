@@ -100,7 +100,7 @@ namespace e621_ReBot_v3
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => 
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 if (AppSettings.FirstRun && !string.IsNullOrEmpty(AppSettings.APIKey))
                 {
@@ -112,7 +112,7 @@ namespace e621_ReBot_v3
                 }
                 if (!string.IsNullOrEmpty(AppSettings.APIKey))
                 {
-                    ThreadPool.QueueUserWorkItem(state => 
+                    ThreadPool.QueueUserWorkItem(state =>
                     {
                         Module_Credit.Credit_CheckAll();
                         Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.Credit_StackPanel.Visibility = Visibility.Visible; });

@@ -1,6 +1,4 @@
-﻿using e621_ReBot_v3.CustomControls;
-using HtmlAgilityPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,6 +6,8 @@ using System.Net;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using e621_ReBot_v3.CustomControls;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {

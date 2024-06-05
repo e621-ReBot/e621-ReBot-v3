@@ -273,7 +273,7 @@ namespace e621_ReBot_v3
                     }
                 }
 
-                if (DevMode) 
+                if (DevMode)
                 {
                     Window_Main._RefHolder.MakeUpdate_WButton.Visibility = Visibility.Visible;
                     Window_Main._RefHolder.SettingsButton_DLGenders.Visibility = Visibility.Visible;
