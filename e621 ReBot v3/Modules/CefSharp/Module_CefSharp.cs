@@ -6,6 +6,7 @@ using System.Windows;
 using CefSharp;
 using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using HtmlAgilityPack;
 
@@ -156,6 +157,8 @@ namespace e621_ReBot_v3.Modules
             BrowserAddress = e.NewValue.ToString();
             Module_Twitter.TwitterJSONHolder = null;
             Module_Mastodons.MastodonsJSONHolder = null;
+            Module_Itaku.ItakuSingleJSONHolder = null;
+            Module_Itaku.ItakuMultiJSONHolder = null;
             InvokeOnUIThread(() =>
             {
                 _browserControl.Url_TextBox.Text = HttpUtility.UrlDecode(BrowserAddress);

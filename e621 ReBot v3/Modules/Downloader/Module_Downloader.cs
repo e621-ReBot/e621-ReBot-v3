@@ -68,7 +68,7 @@ namespace e621_ReBot_v3.Modules
                 //- - - Download only
 
                 new Regex(@".+derpibooru.org/(images/?|search\?|galleries/)(\d+)?"),
-                new Regex(@".+itaku.ee/(images/\d+|profile/\w+/gallery)")
+                new Regex(@".+itaku.ee/((images|posts)/\d+|profile/\w+/gallery)")
 
             };
 

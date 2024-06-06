@@ -112,7 +112,7 @@ namespace CefSharp
                 //- - - Download only
 
                 new Regex(@"^\w+://derpibooru\.org/(images|search\?|galleries/)"),
-                new Regex(@"^\w+://itaku.ee/api/galleries/images/(\d+/$)?") //new Regex(@".+itaku.ee/images/\d+")
+                new Regex(@"^\w+://itaku.ee/api/(galleries/images|posts)/(\d+/$)?") //new Regex(@".+itaku.ee/images/\d+")
             };
         }
 
@@ -364,14 +364,15 @@ namespace CefSharp
                         if (response.MimeType.Equals("application/json"))
                         {
                             string Data2String = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            if (Itaku.EndsWith('/')) //single
+
+                            if (Itaku.EndsWith('/') && Itaku.Contains("/images/")) //single
                             {
-                                Module_Itaku.ItakuSingleJSONHolder = JObject.Parse(Data2String);
+                                    Module_Itaku.ItakuSingleJSONHolder = JObject.Parse(Data2String);
                             }
                             else //gallery
                             {
                                 JObject JObjectTemp = JObject.Parse(Data2String);
-                                IEnumerable<JToken>? TempContainer = JObjectTemp.SelectTokens("$.results.[*]");
+                                IEnumerable<JToken>? TempContainer = Itaku.Contains("/posts/") ? JObjectTemp.SelectTokens("$.gallery_images.[*]") : JObjectTemp.SelectTokens("$.results.[*]");
                                 if (TempContainer.Any())
                                 {
                                     bool SkipUnion = false;

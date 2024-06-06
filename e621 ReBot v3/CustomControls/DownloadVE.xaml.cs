@@ -7,6 +7,8 @@ namespace e621_ReBot_v3.CustomControls
     public partial class DownloadVE : UserControl
     {
         internal static readonly ImageSource LoadingImage = new ImageSourceConverter().ConvertFrom(Properties.Resources.E6Image_Loading) as ImageSource;
+        internal Custom_WebClient? ThumbClient;
+
         internal DownloadItem? _DownloadItemRef;
         internal bool _DownloadFinished = true;
         internal bool _AlreadyCopied = true;
@@ -34,6 +36,7 @@ namespace e621_ReBot_v3.CustomControls
             ConversionProgress.Value = 0;
             cThumbnail_Image.Source = null;
             _DownloadItemRef = null;
+            ThumbClient?.CancelAsync();
         }
     }
 }

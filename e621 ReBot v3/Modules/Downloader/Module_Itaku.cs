@@ -23,7 +23,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             {
                 if (ItakuMultiJSONHolder == null) return;
 
-                SpecialSaveFolder = WebAddress.Split('/',System.StringSplitOptions.RemoveEmptyEntries)[3];
+                SpecialSaveFolder = ItakuMultiJSONHolder.First["owner_displayname"].Value<string>();
                 SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                 foreach (JToken JTokenTemp in ItakuMultiJSONHolder.Children())
                 {
@@ -43,12 +43,20 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             string? Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
 
-            string ThumbURL = ItakuJSONToken["image_xl"].Value<string>().Replace("/xl","/sm");
+            //https://itaku.ee/api/media/gallery_imgs/xyz/sm_REFLb27.png
+            //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png
+            //https://itaku.ee/api/media/gallery_imgs/xyz/xl_GoYCeeW.png
+            //https://itaku.ee/api/media/gallery_imgs/xyz.PNG
+            string ThumbURL = ItakuJSONToken["image_xl"].Value<string>();
+            if (ThumbURL.Length - ThumbURL.LastIndexOf('/') == 8)
+            {
+                ThumbURL = ThumbURL.Replace("/xl", "/sm");
+            }
 
             Module_Downloader.AddDownloadItem2Queue(
                 PageURL: WebAddress,
-                MediaURL: PicURL,
-                ThumbnailURL: ThumbURL,
+                MediaURL: "https://itaku.ee/api/media/gallery_imgs/Tiru__Splateon_Sketch_May_2020_hyz3T4W/sm_REFLb27.png", //PicURL,
+                ThumbnailURL: "https://itaku.ee/api/media/gallery_imgs/Tiru__Splateon_Fur_Coat_August_2020_w9l5WcU.PNG", //ThumbURL,
                 MediaFormat: Media_Format,
                 Artist: string.Empty,
                 e6PoolName: FolderName);
