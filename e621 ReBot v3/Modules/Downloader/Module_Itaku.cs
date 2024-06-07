@@ -55,8 +55,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             Module_Downloader.AddDownloadItem2Queue(
                 PageURL: WebAddress,
-                MediaURL: "https://itaku.ee/api/media/gallery_imgs/Tiru__Splateon_Sketch_May_2020_hyz3T4W/sm_REFLb27.png", //PicURL,
-                ThumbnailURL: "https://itaku.ee/api/media/gallery_imgs/Tiru__Splateon_Fur_Coat_August_2020_w9l5WcU.PNG", //ThumbURL,
+                MediaURL: PicURL,
+                ThumbnailURL: ThumbURL,
                 MediaFormat: Media_Format,
                 Artist: string.Empty,
                 e6PoolName: FolderName);
