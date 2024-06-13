@@ -30,6 +30,7 @@ Features:
 
 ---
 ## How to install:
+- Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/Beta
 - Extract archive, run the ReBot.exe
 - For manual updates, just overwrite older files
 
