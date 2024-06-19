@@ -123,6 +123,7 @@ namespace e621_ReBot_v3
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            SuggestionPopup?.SuggestionTimer.Stop();
             if (TagsAdded)
             {
                 //List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
