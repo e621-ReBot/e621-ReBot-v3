@@ -24,12 +24,12 @@
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="ClickMode" Value="Press"/>
-            <Setter Property="Content" Value="Button"/>
-
+            <Setter Property="Content" Value="{Binding}"/>
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="KeyboardNavigation.AcceptsReturn" Value="False"/>
+            <Setter Property="FlowDirection" Value="LeftToRight"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -62,7 +62,6 @@
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="ClickMode" Value="Press"/>
-
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -96,7 +95,6 @@
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="ClickMode" Value="Press"/>
-
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -128,7 +126,6 @@
             <Setter Property="Padding" Value="0"/>
             <Setter Property="ClickMode" Value="Press"/>
             <Setter Property="Cursor" Value="Hand"/>
-
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -169,7 +166,6 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
-
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -237,7 +233,6 @@
             <Setter Property="ClickMode" Value="Press"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Cursor" Value="Hand"/>
-
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="UseLayoutRounding" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>

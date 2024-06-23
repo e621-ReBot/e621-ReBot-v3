@@ -786,7 +786,6 @@
                 </Image.RenderTransform>
             </Image>
         </Canvas>
-        <customcontrols:Custom_TextWithOutline Grid.ColumnSpan="2" Height="100" Grid.RowSpan="2" Width="100"/>
 
     </Grid>
 </Window>
