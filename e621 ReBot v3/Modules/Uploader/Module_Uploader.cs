@@ -12,7 +12,6 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
-using e621_ReBot_v3.Modules.Uploader;
 using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules

@@ -1,7 +1,4 @@
-﻿using System.Web;
-using System.Xml.Serialization;
-using HtmlAgilityPack;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {

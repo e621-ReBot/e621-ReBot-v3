@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace e621_ReBot_v3.Modules.Uploader
+namespace e621_ReBot_v3.Modules
 {
     internal class Module_Cryptor
     {

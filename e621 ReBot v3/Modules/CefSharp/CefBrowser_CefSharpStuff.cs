@@ -16,7 +16,6 @@ using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
-using static System.Net.WebRequestMethods;
 
 namespace CefSharp
 {
@@ -367,7 +366,7 @@ namespace CefSharp
 
                             if (Itaku.EndsWith('/') && Itaku.Contains("/images/")) //single
                             {
-                                    Module_Itaku.ItakuSingleJSONHolder = JObject.Parse(Data2String);
+                                Module_Itaku.ItakuSingleJSONHolder = JObject.Parse(Data2String);
                             }
                             else //gallery
                             {

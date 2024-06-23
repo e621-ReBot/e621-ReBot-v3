@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json.Linq;
 
-namespace e621_ReBot_v3.Modules.Uploader
+namespace e621_ReBot_v3.Modules
 {
     internal class Module_Credit
     {

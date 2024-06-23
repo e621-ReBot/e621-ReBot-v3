@@ -17,7 +17,6 @@ using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
-using e621_ReBot_v3.Modules.Uploader;
 using Microsoft.Win32;
 
 namespace e621_ReBot_v3
@@ -82,23 +81,14 @@ namespace e621_ReBot_v3
             if (AppSettings.FirstRun)
             {
                 ReBot_Menu_ListBox.Visibility = Visibility.Visible;
-                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "Since this is our first date, would you like to know more about me?", "e621 ReBot Tutorial", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-                if (MessageBoxResultTemp == MessageBoxResult.Yes)
-                {
-                    ReBot_Menu_ListBox.SelectedIndex = 1;
-                    ListBoxItem_Browser_PreviewMouseLeftButtonDown(null, null);
-                }
-                else
-                {
-                    AppSettings.FirstRun = false;
-                }
+                Module_Tutorial.Step_0();
             }
             else
             {
                 if (!string.IsNullOrEmpty(AppSettings.APIKey)) ThreadPool.QueueUserWorkItem(state => Module_Credit.Credit_CheckAll());
+                Module_Updater.PreUpdateCheck();
             }
 
-            Module_Updater.PreUpdateCheck();
             ModuleEnabler();
             ErrorReporter();
 
@@ -328,7 +318,7 @@ namespace e621_ReBot_v3
 
         internal bool InitStarted = false;
 
-        private void ListBoxItem_Browser_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        internal void ListBoxItem_Browser_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (InitStarted == false && Module_CefSharp.CefSharpBrowser == null)
             {

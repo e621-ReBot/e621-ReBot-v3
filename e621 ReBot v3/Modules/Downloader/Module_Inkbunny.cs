@@ -1,10 +1,7 @@
-﻿using e621_ReBot_v3.CustomControls;
-using System.Collections.Generic;
-using System.Threading;
-using System.Windows.Controls;
-using System.Windows;
-using HtmlAgilityPack;
+﻿using System.Collections.Generic;
 using System.Net;
+using System.Threading;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {

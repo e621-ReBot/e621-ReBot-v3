@@ -26,7 +26,7 @@ namespace e621_ReBot_v3
         internal static ushort Volume = 25;
         // - - - - - - - - - - - - - - - -
         internal static ushort Update_Interval = 1;
-        internal static DateTime Update_LastCheck = DateTime.UtcNow;
+        internal static DateTime Update_LastCheck = DateTime.UtcNow.AddYears(-1);
         // - - - - - - - - - - - - - - - -
         internal static bool Grid_SaveSession = true;
         // - - - - - - - - - - - - - - - -
