@@ -107,7 +107,7 @@ namespace e621_ReBot_v3
                     MessageBox.Show(Window_Main._RefHolder, "You can change or remove your API key at any time in the settings.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
                     AppSettings.FirstRun = false;
                     AppSettings.SaveSettings();
-                    MessageBox.Show(Window_Main._RefHolder, "You can now go visit your favorite artists and grab your favorite media. List of supported sites will be shown below.\n\nA button to grab media will appear in the upper right corner, you just need to decide if you wish to download it or grab it for later use where you can tag and upload as well.\nYou can also download media from e621.net.\n\nRead button tooltips for further explanations on how things work.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(Window_Main._RefHolder, "You can now go visit your favorite artists and grab your favorite media. List of supported sites will be shown under this message box.\nYou can also download media from e621.net\n\nWhen there, buttons will appear in the upper right corner, you just need to decide if you wish to download media straight away or grab it for later use. Grabbed media will be stored in Grid tab.\n\nRead button tooltips for further explanations on how things work.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
                     BrowserControl._RefHolder.BrowserQuickButtons.IsEnabled = true;
                 }
                 if (!string.IsNullOrEmpty(AppSettings.APIKey))

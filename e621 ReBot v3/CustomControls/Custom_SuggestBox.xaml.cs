@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -185,7 +186,7 @@ namespace e621_ReBot_v3.CustomControls
 
         // - - - - - - - - - - - - - - - -
 
-        private readonly short MaxItemCount = 14;
+        private readonly ushort MaxItemCount = 14;
         internal void LoadSuggestionBox()
         {
             TagCollection.Clear();
@@ -193,7 +194,7 @@ namespace e621_ReBot_v3.CustomControls
 
             for (int i = 0; i < MaxItemCount; i++)
             {
-                SuggestBox.Items.Add(new ListBoxItem());
+                SuggestBox.Items.Add(new ListBoxItem() { Cursor = Cursors.Hand });
             }
 
             if (File.Exists("tags.txt"))
@@ -281,7 +282,6 @@ namespace e621_ReBot_v3.CustomControls
             SuggestionResultList.Clear();
 
             int ResultSelectIndex = -1;
-            int MatchLoop = 0;
             if (PoolMode)
             {
                 Regex RegexSearcher = PoolRegex();
@@ -294,16 +294,12 @@ namespace e621_ReBot_v3.CustomControls
                         if (MakePoolString.Contains(Word4Suggest, StringComparison.OrdinalIgnoreCase))
                         {
                             SuggestionResultList.Add(new string[] { $"#{KeyValuePairTemp.Key}", KeyValuePairTemp.Value });
-                            if (MakePoolString.Equals(Word4Suggest, StringComparison.OrdinalIgnoreCase)) ResultSelectIndex = MatchLoop;
-                            MatchLoop++;
                         }
                         continue;
                     }
                     if (KeyValuePairTemp.Value.Contains(Word4Suggest, StringComparison.OrdinalIgnoreCase))
                     {
                         SuggestionResultList.Add(new string[] { $"#{KeyValuePairTemp.Key}", KeyValuePairTemp.Value });
-                        if (KeyValuePairTemp.Key.Equals(Word4Suggest, StringComparison.OrdinalIgnoreCase)) ResultSelectIndex = MatchLoop;
-                        MatchLoop++;
                         continue;
                     }
                 }
@@ -318,8 +314,6 @@ namespace e621_ReBot_v3.CustomControls
                     if (KeyString.StartsWith(Word4Suggest, StringComparison.OrdinalIgnoreCase))
                     {
                         SuggestionResultList.Add(new string[] { KeyString, string.Empty });
-                        if (KeyString.Equals(Word4Suggest, StringComparison.OrdinalIgnoreCase)) ResultSelectIndex = MatchLoop;
-                        MatchLoop++;
                         continue;
                     }
                     if (ValueArray != null)
@@ -329,15 +323,12 @@ namespace e621_ReBot_v3.CustomControls
                             if (AlternateValue.StartsWith(Word4Suggest, StringComparison.OrdinalIgnoreCase))
                             {
                                 SuggestionResultList.Add(new string[] { KeyString, AlternateValue });
-                                if (AlternateValue.Equals(Word4Suggest, StringComparison.OrdinalIgnoreCase)) ResultSelectIndex = MatchLoop;
-                                MatchLoop++;
                             }
                         }
                     }
                 }
             }
 
-            SIndexTracker = Math.Max(0, ResultSelectIndex);
             if (SuggestionResultList.Any())
             {
                 if (DuplicatesDisabled)
@@ -351,20 +342,42 @@ namespace e621_ReBot_v3.CustomControls
                     }
                 }
 
+                for (int i = 0; i < SuggestionResultList.Count; i++)
+                {
+                    string ListWord = PoolMode ? $"pool:{SuggestionResultList[i][0].Substring(1)}" : SuggestionResultList[i][0];
+                    if (ListWord.Equals(Word4Suggest))
+                    {
+                        ResultSelectIndex = i;
+                        break;
+                    }
+                    if (SuggestionResultList[i][1] != null && SuggestionResultList[i][1].Equals(Word4Suggest))
+                    {
+                        ResultSelectIndex = i;
+                        break;
+                    }
+                }
+                ScrollSelectIndexTracker = Math.Max(0, ResultSelectIndex);
+
                 SuggestScrollBar.Visibility = SuggestionResultList.Count > MaxItemCount ? Visibility.Visible : Visibility.Collapsed;
                 SuggestScrollBar.Maximum = SuggestionResultList.Count - 1;
-                SuggestScrollBar.Value = SIndexTracker;
+                SuggestScrollBar.Value = ScrollSelectIndexTracker;
 
-                int MaxVisibleControls = Math.Min(MaxItemCount - 1, SuggestionResultList.Count - 1);
-                ushort iLoop = 0;
-                foreach (ListBoxItem ListBoxItemTemp in SuggestBox.Items)
+                int MaxVisibleControls = Math.Min(MaxItemCount, SuggestionResultList.Count) - 1;
+                for (int i = 0; i < SuggestBox.Items.Count; i++)
                 {
-                    ListBoxItemTemp.Visibility = iLoop <= MaxVisibleControls ? Visibility.Visible : Visibility.Collapsed;
-                    iLoop++;
+                    if (i <= MaxVisibleControls)
+                    {
+                        ((ListBoxItem)SuggestBox.Items[i]).Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        ((ListBoxItem)SuggestBox.Items[i]).Visibility = Visibility.Collapsed;
+                        ((ListBoxItem)SuggestBox.Items[i]).Content = null;
+                    }
                 }
                 VisibleItemCount = MaxVisibleControls + 1;
-                SIndexEnd = Math.Max(MaxVisibleControls, Math.Min(SIndexTracker + MaxVisibleControls, SuggestionResultList.Count - 1));
-                SIndexStart = Math.Max(0, Math.Min(SIndexTracker, SIndexEnd - MaxVisibleControls));
+                ScrollIndexEnd = Math.Max(MaxVisibleControls, Math.Min(ScrollSelectIndexTracker + MaxVisibleControls, SuggestionResultList.Count - 1));
+                ScrollIndexStart = Math.Max(0, Math.Min(ScrollSelectIndexTracker, ScrollIndexEnd - MaxVisibleControls));
                 UpdateSuggestionDisplay();
                 IsOpen = true;
             }
@@ -374,33 +387,40 @@ namespace e621_ReBot_v3.CustomControls
             }
         }
 
-        private int SIndexStart = 0;
-        private int SIndexEnd = 0;
-        private int SIndexTracker = 0;
+        private int ScrollIndexStart = 0;
+        private int ScrollIndexEnd = 0;
+        private int ScrollSelectIndexTracker = 0;
         private int VisibleItemCount = 0;
         private void UpdateSuggestionDisplay()
         {
             ListBoxItem ListBoxItemTemp;
-            for (int i = SIndexStart; i < SIndexStart + VisibleItemCount; i++)
+            for (int i = ScrollIndexStart; i < ScrollIndexStart + VisibleItemCount; i++)
             {
-                ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[i - SIndexStart];
+                ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[i - ScrollIndexStart];
                 ListBoxItemTemp.Content = SuggestionResultList[i][0];
                 ListBoxItemTemp.Tag = SuggestionResultList[i][1];
-                ListBoxItemTemp.Cursor = Cursors.Hand;
             }
-            ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[SIndexTracker - SIndexStart];
+            if (VisibleItemCount == 1)
+            {
+                ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[0];
+            }
+            else
+            {
+                ListBoxItemTemp = (ListBoxItem)SuggestBox.Items[ScrollSelectIndexTracker - ScrollIndexStart];
+            }
             ListBoxItemTemp.IsSelected = true;
+            //Debug.WriteLine($"V: {ScrollSelectIndexTracker}, S:{ScrollIndexStart}, E:{ScrollIndexEnd}");
         }
 
         internal void SelectListItem(int IndexChange)
         {
-            SIndexTracker = SetValue(SIndexTracker + IndexChange, 0, SuggestionResultList.Count - 1);
-            if (SIndexTracker > SIndexEnd || SIndexTracker < SIndexStart)
+            ScrollSelectIndexTracker = SetValue(ScrollSelectIndexTracker + IndexChange, 0, SuggestionResultList.Count - 1);
+            if (ScrollSelectIndexTracker > ScrollIndexEnd || ScrollSelectIndexTracker < ScrollIndexStart)
             {
-                SIndexStart = SetValue(SIndexStart + IndexChange, 0, SuggestionResultList.Count - VisibleItemCount);
-                SIndexEnd = SetValue(SIndexEnd + IndexChange, VisibleItemCount - 1, SuggestionResultList.Count - 1);
+                ScrollIndexStart = SetValue(ScrollIndexStart + IndexChange, 0, SuggestionResultList.Count - VisibleItemCount);
+                ScrollIndexEnd = SetValue(ScrollIndexEnd + IndexChange, VisibleItemCount - 1, SuggestionResultList.Count - 1);
             }
-            SuggestScrollBar.Value = SIndexTracker;
+            SuggestScrollBar.Value = ScrollSelectIndexTracker;
             //Debug.WriteLine($"V: {SIndexTracker}, S:{SIndexStart}, E:{SIndexEnd}");
             UpdateSuggestionDisplay();
         }

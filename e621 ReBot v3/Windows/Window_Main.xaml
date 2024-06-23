@@ -65,7 +65,7 @@
 
 
 
-        <ListBox x:Name="ReBot_Menu_ListBox" Style="{StaticResource ListBoxStyle_Menu}" Grid.Row="1" Grid.Column="0" Width="32" Margin="0,29,0,0" ItemContainerStyle="{StaticResource ListBoxItemStyle_Menu}" Focusable="False" IsTextSearchEnabled="False" Grid.RowSpan="2">
+        <ListBox x:Name="ReBot_Menu_ListBox" Style="{StaticResource ListBoxStyle_Menu}" Grid.Row="1" Grid.Column="0" Width="32" Margin="0,29,0,32" ItemContainerStyle="{StaticResource ListBoxItemStyle_Menu}" Focusable="False" IsTextSearchEnabled="False" Grid.RowSpan="2">
 
             <ListBoxItem Height="32" Width="32" MinWidth="32" MinHeight="32" MaxWidth="32" MaxHeight="32" ToolTip="Welcome">
                 <Image Source="/Resources/MainWindow/MenuIcon_Welcome.png" IsHitTestVisible="False"/>
@@ -101,9 +101,11 @@
 
         </ListBox>
 
+        <Border x:Name="Tooltip_Border" BorderBrush="Black" BorderThickness="1" VerticalAlignment="Bottom" Grid.Row="3" Margin="-1" Background="Transparent" ToolTip="Test" Height="26">
+            <customcontrols:Custom_TextWithOutline Text="?" Fill="{DynamicResource ThemeFocus}" FontWeight="Bold" StrokeThickness="2" TextAlignment="Center" FontSize="16"/>
+        </Border>
 
-
-        <TabControl x:Name="ReBot_TabControl" Margin="31,20,-2,-2" Background="Transparent"  SelectedIndex="0" BorderThickness="0" Grid.ColumnSpan="2" Grid.RowSpan="3">
+        <TabControl x:Name="ReBot_TabControl" Background="Transparent"  SelectedIndex="0" BorderThickness="0" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="-2,-4,-2,-2">
             <TabControl.ItemContainerStyle>
                 <Style TargetType="{x:Type TabItem}">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -324,34 +326,34 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
-                        
+
                         <Grid>
-                            
+
                             <TextBlock Text="Downloader Message Log" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                            
+
                             <Border BorderThickness="1,0,0,0" BorderBrush="Black" Margin="192,1,0,1">
                                 <TextBlock x:Name="Download_SessionDownloadsTextBlock" Text="Media Downloaded: 0" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Media downloaded this sesion."/>
                             </Border>
-                            
+
                         </Grid>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <TextBox x:Name="Download_InfoTextBox" Grid.Row="1" Background="Transparent" Foreground="{DynamicResource ThemeForeground}" AllowDrop="False" IsTabStop="False" BorderThickness="0" Margin="1,1,1,1" VerticalScrollBarVisibility="Auto" UndoLimit="0" HorizontalScrollBarVisibility="Auto" TextWrapping="WrapWithOverflow"/>
                     </Grid>
-                    
-                    
+
+
                     <Button x:Name="Download_PoolWatcher" Content="Pool Watcher" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="128" Height="72" Cursor="Hand" Click="Download_PoolWatcher_Click" IsEnabled="False" Margin="8,0,0,8"/>
                     <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="512" Height="32" Margin="144,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="192"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-           
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        
+
                         <TextBlock Text="e621 media naming pattern" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="NamingPattern_e6_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_NPe6_0" Content="MD5" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_Naminge6_Click" ToolTip="All downloaded posts will be named by their MD5 hash." IsChecked="True"/>
@@ -395,12 +397,12 @@
                         <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True" ToolTip="Toggle grabbing status."/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
-                        
+
                         <Grid IsHitTestVisible="False">
                             <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                                 <TextBlock x:Name="Grab_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                             </Border>
-                            
+
                             <StackPanel x:Name="Grab_PogressBarPanel" HorizontalAlignment="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
                                 <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Height="32" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Vertical" Value="100" Visibility="Hidden"/>
                                 <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Value="75" Height="32" Orientation="Vertical" Margin="-1,0,0,0" Visibility="Hidden"/>
@@ -515,7 +517,7 @@
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
-                        
+
                         <Label x:Name="DragDropConver_Label" Content="Drop Converter" Foreground="{DynamicResource ThemeForeground}" AllowDrop="True" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DragEnter="DragDropConver_Label_DragEnter" Drop="DragDropConver_Label_Drop" Width="128" Height="32"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
@@ -631,11 +633,11 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        
+
                         <TextBlock Text="App Name" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
-                        
+
                         <TextBlock x:Name="STB_AppName" Text="e621 ReBot (&lt;Name&gt;)" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" Grid.Column="1" HorizontalAlignment="Left"/>
                     </Grid>
 
@@ -646,11 +648,11 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        
+
                         <TextBlock Text="API Key" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
-                        
+
                         <Button x:Name="SB_APIKey" Content="Add API key" Grid.Column="1" BorderThickness="0" BorderBrush="{x:Null}" Height="28" Margin="1" Cursor="Hand" Click="SB_APIKey_Click" />
                     </Grid>
 
@@ -661,11 +663,11 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        
+
                         <TextBlock Text="Volume" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Application Volume (relative to Master volume)."/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2"/>
-                        
+
                         <customcontrols:VolumeSlider x:Name="Settings_VolumeSlider" VerticalAlignment="Top" Grid.Column="1" Margin="8,0,8,0"/>
                     </Grid>
 
@@ -676,19 +678,19 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2"/>
-                        
+
                         <TextBlock Text="Update Interval" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" HorizontalAlignment="Left" ToolTip="Check for update every x days."/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="UpdateInterval_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_UI0" Content="0" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every time."/>
-                                
+
                                 <RadioButton x:Name="RadionButton_UI1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" IsChecked="True" ToolTip="Every 1 days."/>
-                                
+
                                 <RadioButton x:Name="RadionButton_UI2" Content="2" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 2 days."/>
-                                
+
                                 <RadioButton x:Name="RadionButton_UI4" Content="4" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 4 days."/>
-                                
+
                                 <RadioButton x:Name="RadionButton_UI8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 8 days."/>
                             </StackPanel>
                         </Border>
@@ -698,7 +700,7 @@
                         <Border BorderBrush="Black" BorderThickness="1">
                             <StackPanel Margin="8">
                                 <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
-                                
+
                                 <CheckBox x:Name="SettingsCheckBox_BrowserClearCache" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Browser cache on exit" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clear web browser cache when closing the app." Click="SettingsCheckBox_BrowserClearCache_Click"/>
                             </StackPanel>
                         </Border>
@@ -729,24 +731,24 @@
                             <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
                             <TextBox x:Name="ColorBox_Background" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" KeyDown="ColorBox_KeyDown" Tag="0" PreviewTextInput="ColorBox_PreviewTextInput"/>
                         </StackPanel>
-                        
+
                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,2,2,2" Orientation="Horizontal">
                             <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
                             <TextBox x:Name="ColorBox_Foreground" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" Tag="1" KeyDown="ColorBox_KeyDown" PreviewTextInput="ColorBox_PreviewTextInput"/>
                         </StackPanel>
-                        
+
                         <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,2,2,2" Orientation="Horizontal">
                             <TextBlock Text="#" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center"/>
                             <TextBox x:Name="ColorBox_Focus" Text="012E56" Foreground="{DynamicResource ThemeForeground}" Background="{x:Null}" BorderBrush="{x:Null}" MaxLength="6" MaxLines="1" Margin="4,1,1,1" Tag="2" KeyDown="ColorBox_KeyDown" PreviewTextInput="ColorBox_PreviewTextInput"/>
                         </StackPanel>
-                        
+
                         <Button x:Name="ResetTheme_Button" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Content="⥀" FontSize="24" ToolTip="Reset theme to default." Click="ResetTheme_Button_Click" Cursor="Hand"/>
                     </Grid>
-                    
+
                     <Button x:Name="SettingsButton_DLSuggestions" Content="DL Suggestions" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,288,16" Click="SettingsButton_DLSuggestions_Click" ToolTip="DL data from e621 for autocomplete suggestions."/>
-                    
+
                     <Button x:Name="SettingsButton_DLGenders" Content="DL Genders" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,432,16" Click="SettingsButton_DLGenders_Click" ToolTip="DL all Genders (data) from e621 (used for autocomplete suggestions and gender missing warning)."/>
-                    
+
                     <Button x:Name="SettingsButton_DLDNPs" Content="DL DNPs" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,576,16" Click="SettingsButton_DLDNPs_Click" ToolTip="DL all DNPs (data) from e621 (used for DNP upload warning)."/>
                 </Grid>
             </TabItem>
@@ -757,18 +759,19 @@
                         <Button Background="Transparent" BorderBrush="Transparent" Tag="https://discord.gg/7ncEzah" ToolTip="https://discord.gg/7ncEzah" Cursor="Hand" Click="ButtonNavTag_Click" Height="64" VerticalAlignment="Bottom" Margin="0,0,16,0">
                             <Image Source="/Resources/MainWindow/DiscordLogo.png"/>
                         </Button>
-                        
+
                         <Button Background="Transparent" BorderBrush="Transparent" Tag="https://github.com/e621-ReBot/e621-ReBot-v3" ToolTip="https://github.com/e621-ReBot/e621-ReBot-v3" Cursor="Hand" Click="ButtonNavTag_Click" Height="96" VerticalAlignment="Bottom">
                             <Image Source="/Resources/MainWindow/GitHubLogo.png"/>
                         </Button>
                     </StackPanel>
+                    <TextBlock x:Name="ReBot_Title_Copy" Text="F1 - Panic button" Foreground="{DynamicResource ThemeForeground}" TextWrapping="Wrap" Padding="4,0,0,0" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="64,62,0,0" FontSize="32" FontStyle="Italic"/>
                 </Grid>
             </TabItem>
 
         </TabControl>
-        
+
         <Border Grid.Row="1" Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="Black" Grid.RowSpan="2"/>
-        
+
         <Canvas Grid.Row="0" Grid.Column="0" Width="48" Height="48" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Image Source="/Resources/Browser/BrowserIcon_e621.png" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="48"/>
             <Polygon x:Name="ReBot_e6Button" Points="1,17 8,5 22,5 29,17 22,29 8,29" Fill="Transparent" Cursor="{StaticResource Cursor_BrowserNav}" ToolTip="Open e621.net" Tag="https://e621.net/" MouseLeftButtonDown="ReBot_e6Button_MouseLeftButtonDown" Margin="8,8,0,0"/>
@@ -783,6 +786,7 @@
                 </Image.RenderTransform>
             </Image>
         </Canvas>
+        <customcontrols:Custom_TextWithOutline Grid.ColumnSpan="2" Height="100" Grid.RowSpan="2" Width="100"/>
 
     </Grid>
 </Window>

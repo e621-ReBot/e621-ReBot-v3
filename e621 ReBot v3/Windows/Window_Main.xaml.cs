@@ -40,8 +40,9 @@ namespace e621_ReBot_v3
 
             Credit_StackPanel.Visibility = Visibility.Hidden;
             ReBot_Menu_ListBox.Visibility = Visibility.Hidden;
-            MakeUpdate_WButton.Visibility = Visibility.Collapsed;
-            Update_TextBlock.Visibility = Visibility.Collapsed;
+            MakeUpdate_WButton.Visibility = Visibility.Hidden;
+            Update_TextBlock.Visibility = Visibility.Hidden;
+            Tooltip_Border.Visibility = Visibility.Hidden;
             GB_Left.Visibility = Visibility.Hidden;
             GB_Right.Visibility = Visibility.Hidden;
             GBTB_Center.Visibility = Visibility.Hidden;
@@ -303,6 +304,26 @@ namespace e621_ReBot_v3
         private void ReBot_Menu_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ReBot_TabControl.SelectedIndex = ReBot_Menu_ListBox.SelectedIndex;
+            TooltipSetter();
+        }
+
+        private void TooltipSetter()
+        {
+            switch (ReBot_TabControl.SelectedIndex)
+            {
+                case 2:
+                    {
+                        Tooltip_Border.ToolTip = "Scroll the mouse or press Left/Right arrows to scroll through pages.\n----------------\nMedia controls:\n* Click on media to de/select.\n* Double-click to view.\n* Ctrl+click to navigate to Source.\n* Alt+click to navigate to Source with default browser.\n* Right click for more options.\nWhile selected:\n* Press Q, S or E to change rating.\n* +, - to toggle upload selection.\n* 1, 0 to toggle download selection.\n* T to open Tagger.\n* Del to remove media.";
+                        Tooltip_Border.Visibility = Visibility.Visible;
+                        break;
+                    }
+
+                default:
+                    {
+                        Tooltip_Border.Visibility = Visibility.Hidden;
+                        break;
+                    }
+            }
         }
 
         internal bool InitStarted = false;
