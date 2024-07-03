@@ -190,6 +190,7 @@ namespace e621_ReBot_v3
             if (Module_CefSharp.CefSharpBrowser != null)
             {
                 Module_CefSharp.CefSharpBrowser.LoadUrl("https://e621.net/");
+                ReBot_Menu_ListBox.SelectedIndex = 1;
             }
             else
             {

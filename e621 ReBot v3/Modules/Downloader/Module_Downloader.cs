@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Formats.Asn1;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
@@ -109,7 +112,6 @@ namespace e621_ReBot_v3.Modules
         internal static Dictionary<string, string> MediaBrowser_MediaCache = new Dictionary<string, string>();
         internal static List<string> Download_AlreadyDownloaded = new List<string>();
         internal static DownloadItemList _2Download_DownloadItems = new DownloadItemList();
-        private static List<string> DownloadFolderCache = new List<string>();
 
         // - - - - - - - - - - - - - - - -
 
@@ -643,7 +645,7 @@ namespace e621_ReBot_v3.Modules
             else
             {
                 //DownloadVERef.ToolTip = (DownloadVERef._DownloadItemRef.Grab_MediaURL);
-                WebClientSelected.DownloadFileAsync(new Uri(DownloadVERef._DownloadItemRef.Grab_MediaURL), DownloadVERef.FolderIcon.Tag.ToString(), DownloadVERef);
+                WebClientSelected.DownloadFileAsync(new Uri(DownloadVERef._DownloadItemRef.Grab_MediaURL), $"{DownloadVERef.FolderIcon.Tag}.dlpart", DownloadVERef);
             }
         }
 
@@ -733,6 +735,13 @@ namespace e621_ReBot_v3.Modules
                         throw e.Error;
                     }
                 }
+            }
+
+            string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
+            FileInfo FileInfoTemp = new FileInfo(TempFilePath);
+            if (FileInfoTemp.Exists)
+            {
+                FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
             }
 
             SessionDownloads++;
@@ -845,11 +854,6 @@ namespace e621_ReBot_v3.Modules
             string PicURL = DownloadItemRef.Grab_MediaURL;
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(PicURL);
-            if (DownloadFolderCache.Contains(GetFileNameOnly))
-            {
-                DLThreadsWaiting++;
-                return; // Don't need duplicates
-            }
 
             string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\");
             string PoolName = DownloadItemRef.e6_PoolName;
@@ -885,6 +889,12 @@ namespace e621_ReBot_v3.Modules
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
+            if (File.Exists(FilePath))
+            {
+                    DLThreadsWaiting++;
+                    return; // Don't need duplicates
+            }
+
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 DownloadVE DownloadVETemp = FindDownloadVE();
