@@ -25,8 +25,8 @@ Features:
 ---
 ## Requirements:
 - Windows, resolution 1366 x 768 (+)
-- .Net 4.8 (+)
-- C++ 2019
+- .Net 8 (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- C++ 2019 (https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
 
 ---
 ## How to install:
