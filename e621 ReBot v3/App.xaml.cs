@@ -64,7 +64,13 @@ namespace e621_ReBot_v3
         private void Write2Log(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ExceptionHolder = (Exception)e.ExceptionObject;
-            File.WriteAllText("ReBotErrorLog.txt", $"{DateTime.UtcNow}\n{ExceptionHolder.Message}\n\n{ExceptionHolder.StackTrace}");
+            string Header = $"{DateTime.UtcNow}, {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version}";
+            string Message = $"Message: {ExceptionHolder.Message}";
+            string InnerException = $"Inner Exception: {ExceptionHolder.InnerException}";
+            string Source = $"Source: {ExceptionHolder.Source}";
+            string Target = $"Target: {ExceptionHolder.TargetSite}";
+            string StackTrace = $"Stack Trace: {ExceptionHolder.StackTrace}";
+            File.WriteAllText("ReBotErrorLog.txt", $"{Header}\n{Message}\n{InnerException}\n{Source}\n{Target}\n\n{StackTrace}");
         }
 
         protected override void OnExit(ExitEventArgs e)
