@@ -505,8 +505,8 @@ namespace e621_ReBot_v3.Modules
             return null;
         }
 
-        private static HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
-        private static HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
+        private static readonly HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
+        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
         internal static async void Grab_Thumbnail(MediaItem MediaItemRef)
         {
             MediaItemRef.Grid_ThumbnailDLStart = true;

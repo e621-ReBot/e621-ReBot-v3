@@ -107,7 +107,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 case "pools":
                     {
                         HtmlNode BottomMenuHolder = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu");
-                        if (string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
+                        if (string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.ChildNodes.Count <= 3)
                         {
                             goto GrabPageOnly_Pools;
                         }

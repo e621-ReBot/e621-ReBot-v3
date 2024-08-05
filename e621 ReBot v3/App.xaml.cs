@@ -64,7 +64,7 @@ namespace e621_ReBot_v3
         private void Write2Log(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ExceptionHolder = (Exception)e.ExceptionObject;
-            string Header = $"{DateTime.UtcNow}, {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version}";
+            string Header = $"{DateTime.UtcNow}, v{Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version}";
             string Message = $"Message: {ExceptionHolder.Message}";
             string InnerException = $"Inner Exception: {ExceptionHolder.InnerException}";
             string Source = $"Source: {ExceptionHolder.Source}";
