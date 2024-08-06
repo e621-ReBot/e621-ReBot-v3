@@ -39,7 +39,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             PostID = WebAddress;
                             if (PostID.Contains('?')) PostID = PostID.Substring(0, PostID.IndexOf('?'));
                             PostID = PostID.Substring(PostID.LastIndexOf('/') + 1);
-                            ThumbURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-file-url"].Value;
+                            ThumbURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
                             Media_Format = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
 
                             Module_Downloader.AddDownloadItem2Queue(
@@ -92,7 +92,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                         Module_Downloader.AddDownloadItem2Queue(
                                             PageURL: WebAddress,
                                             MediaURL: PicURL,
-                                            ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
+                                            ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                             MediaFormat: Post.Attributes["data-file-ext"].Value,
                                             e6PostID: Post.Attributes["data-id"].Value,
                                             e6PoolName: SpecialSaveFolder,
@@ -158,7 +158,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 Module_Downloader.AddDownloadItem2Queue(
                                            PageURL: WebAddress,
                                            MediaURL: PicURL,
-                                           ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
+                                           ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                            MediaFormat: Post.Attributes["data-file-ext"].Value,
                                            e6PostID: Post.Attributes["data-id"].Value,
                                            e6PoolName: PoolName,
@@ -190,7 +190,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                     Module_Downloader.AddDownloadItem2Queue(
                                           PageURL: WebAddress,
                                           MediaURL: PicURL,
-                                          ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
+                                          ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
                                           e6PostID: Post.Attributes["data-id"].Value,
                                           e6PoolName: SpecialSaveFolder,
@@ -250,7 +250,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                     Module_Downloader.AddDownloadItem2Queue(
                                        PageURL: WebAddress,
                                        MediaURL: PicURL,
-                                       ThumbnailURL: Post.Attributes["data-preview-file-url"].Value,
+                                       ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                        MediaFormat: Post.Attributes["data-file-ext"].Value,
                                        e6PostID: Post.Attributes["data-id"].Value,
                                        e6PoolName: SpecialSaveFolder,
