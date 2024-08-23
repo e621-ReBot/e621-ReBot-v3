@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Quick Tags" Width="256" MinHeight="40" MaxHeight="256" WindowStartupLocation="CenterOwner" Closed="Window_Closed" ShowInTaskbar="False" ResizeMode="NoResize" UseLayoutRounding="True" SnapsToDevicePixels="True" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" SizeToContent="Height">
+        Title="Quick Tags" Width="420" MinHeight="40" MaxHeight="512" Closed="Window_Closed" ShowInTaskbar="False" ResizeMode="NoResize" UseLayoutRounding="True" SnapsToDevicePixels="True" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" SizeToContent="Height">
 
     <Window.Resources>
         <ContextMenu x:Key="QuickTagRemove_ContextMenu" IsTabStop="False">

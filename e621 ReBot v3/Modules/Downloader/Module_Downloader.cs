@@ -834,6 +834,10 @@ namespace e621_ReBot_v3.Modules
             while (DLThreadsWaiting > 0 && _2Download_DownloadItems.Count > 0)
             {
                 DownloadItemTemp = _2Download_DownloadItems[0];
+                lock (_2Download_DownloadItems)
+                {
+                    _2Download_DownloadItems.RemoveAt(0);
+                }
 
                 DLThreadsWaiting--;
                 if (DownloadItemTemp.Is_e6Download)
@@ -843,11 +847,6 @@ namespace e621_ReBot_v3.Modules
                 else
                 {
                     DownloadFrom_URL(DownloadItemTemp);
-                }
-
-                lock (_2Download_DownloadItems)
-                {
-                    _2Download_DownloadItems.RemoveAt(0);
                 }
             }
             UpdateDownloadTreeView();

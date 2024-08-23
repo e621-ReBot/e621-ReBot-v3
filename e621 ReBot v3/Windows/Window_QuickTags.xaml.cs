@@ -16,6 +16,10 @@ namespace e621_ReBot_v3
             InitializeComponent();
             App.SetWindow2Square(this);
             Owner = Window_Tagger._RefHolder;
+            Point OwnerLocation = Owner.PointToScreen(new Point(0, 0));
+            Left = OwnerLocation.X - 8;
+            Top = OwnerLocation.Y + Owner.Height - 40 + 2;
+
             Window_Tagger.SuggestionPopup.SetTextBoxTarget(QuickTags_TextBox, true);
             RestorePoolMode = Window_Tagger.SuggestionPopup.PoolMode;
             Window_Tagger.SuggestionPopup.PoolMode = false;
@@ -111,7 +115,7 @@ namespace e621_ReBot_v3
                     Margin = new Thickness(2, 0, 0, 2),
                     Height = 24,
                     MinWidth = 32,
-                    MaxWidth = 64,
+                    MaxWidth = 128,
                     Content = QuickTagPair.Key,
                     Tag = QuickTagPair.Value,
                     ToolTip = QuickTagPair.Value,
@@ -141,5 +145,6 @@ namespace e621_ReBot_v3
             }
             LoadQuickTags();
         }
+
     }
 }
