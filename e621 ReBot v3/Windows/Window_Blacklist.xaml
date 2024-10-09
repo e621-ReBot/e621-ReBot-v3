@@ -7,6 +7,6 @@
         Title="Blacklist" Height="256" Width="512" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Loaded="Window_Loaded" Closed="Window_Closed">
 
     <Grid>
-        <TextBox x:Name="Blacklist_TextBox" Background="Silver" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Margin="2" TabIndex="1" ToolTip="Tags can be combined by entering them on the same line, separated by a space.&#xA;Each line is regarded separately.&#xA;Use shortened terms 'e', 'q', 's' for ratings.&#xA;&#xA;Blacklist applies to downloads from e621 via API (pool downloads ignore it)."/>
+        <TextBox x:Name="Blacklist_TextBox" Background="Silver" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Margin="2" TabIndex="1" ToolTip="Tags can be combined by entering them on the same line, separated by a space.&#xA;Each line is regarded separately.&#xA;Use shortened terms 'e', 'q', 's' for ratings.&#xA;&#xA;Blacklist applies to downloads from e621 via API (pool downloads ignore it)." AcceptsReturn="True" PreviewKeyDown="Blacklist_TextBox_PreviewKeyDown"/>
     </Grid>
 </Window>
