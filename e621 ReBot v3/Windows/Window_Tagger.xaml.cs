@@ -231,39 +231,6 @@ namespace e621_ReBot_v3
                         e.Handled = true;
                         return;
                     }
-                case Key.V:
-                    {
-                        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-                        {
-                            e.Handled = true;
-                            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.StringFormat))
-                            {
-                                List<string> PasteTags = ((string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat)).ToLower().Replace(Environment.NewLine, "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
-
-                                if (PasteTags.Count == 1 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1).Equals(":"))
-                                {
-                                    Tags_TextBox.Text += $"{string.Join(' ', PasteTags)} ";
-                                }
-                                else
-                                {
-                                    List<string> SortTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
-                                    for (int i = PasteTags.Count - 1; i >= 0; i--)
-                                    {
-                                        if (SortTags.Contains(PasteTags[i]))
-                                        {
-                                            PasteTags.RemoveAt(i);
-                                        }
-                                    }
-                                    SortTags.AddRange(PasteTags);
-                                    Tags_TextBox.Text += $"{string.Join(' ', SortTags)} ";
-                                }
-                                Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                                CountTags();
-                            }
-                            return;
-                        }
-                        break;
-                    }
             }
         }
 
@@ -290,6 +257,40 @@ namespace e621_ReBot_v3
                 case Key.Delete:
                     {
                         Dispatcher.BeginInvoke(CountTags);
+                        break;
+                    }
+
+                case Key.V: //Doesn't work in KeyDown
+                    {
+                        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                        {
+                            e.Handled = true;
+                            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.StringFormat))
+                            {
+                                List<string> PasteTags = ((string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat)).ToLower().Replace(Environment.NewLine, "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+
+                                if (PasteTags.Count == 1 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1).Equals(":"))
+                                {
+                                    Tags_TextBox.Text += $"{string.Join(' ', PasteTags)} ";
+                                }
+                                else
+                                {
+                                    List<string> SortTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+                                    for (int i = PasteTags.Count - 1; i >= 0; i--)
+                                    {
+                                        if (SortTags.Contains(PasteTags[i]))
+                                        {
+                                            PasteTags.RemoveAt(i);
+                                        }
+                                    }
+                                    SortTags.AddRange(PasteTags);
+                                    Tags_TextBox.Text = $"{string.Join(' ', SortTags)} ";
+                                }
+                                Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                                CountTags();
+                            }
+                            return;
+                        }
                         break;
                     }
             }
@@ -326,9 +327,12 @@ namespace e621_ReBot_v3
             Tags_TextBox.Text = string.Join(' ', SortTags).ToLower();
 
             if (ReferenceEquals(Owner, Window_Preview._RefHolder)) Window_Preview._RefHolder.Tags_TextBlock.Text = Tags_TextBox.Text;
-            GridVE GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
-            if (GridVETemp != null) GridVETemp.cTagWarning_TextBlock.Visibility = SortTags.Count < 8 ? Visibility.Visible : Visibility.Hidden;
-            TagsAdded = true;
+            if (MediaItemHolder.UP_UploadedID == null)
+            {
+                GridVE GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+                if (GridVETemp != null) GridVETemp.cTagWarning_TextBlock.Visibility = SortTags.Count < 16 ? Visibility.Visible : Visibility.Hidden;
+                TagsAdded = true;
+            }
         }
 
         private void TB_Description_Click(object sender, RoutedEventArgs e)
