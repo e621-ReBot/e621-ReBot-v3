@@ -55,28 +55,23 @@ namespace e621_ReBot_v3.Modules.Downloader
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                             if (WebAddress.Contains("/posts?tags="))
                             {
-                                if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
+                                //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
+                                if (!string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count > 3)
                                 {
-                                    goto GrabPageOnly_Tags;
-                                }
+                                    MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                                    if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                    {
+                                        string TagQuery = WebAddress;
+                                        TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
 
-                                MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                                if (MessageBoxResultTemp == MessageBoxResult.Yes)
-                                {
-                                    string TagQuery = WebAddress;
-                                    TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
-
-                                    Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
-                                    return;
-                                }
-                                else
-                                {
-                                    goto GrabPageOnly_Tags;
+                                        Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
+                                        return;
+                                    }
                                 }
                             }
 
-                        GrabPageOnly_Tags:
-                            HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
+                            //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
+                            HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                             if (NodeSelector != null)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -107,22 +102,22 @@ namespace e621_ReBot_v3.Modules.Downloader
                 case "pools":
                     {
                         HtmlNode BottomMenuHolder = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu");
-                        if (string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.ChildNodes.Count <= 3)
+
+                        //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
+                        if (!string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.ChildNodes.Count > 3)
                         {
-                            goto GrabPageOnly_Pools;
+                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            if (MessageBoxResultTemp == MessageBoxResult.OK)
+                            {
+                                string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
+                                PoolID = PoolID.Substring(PoolID.LastIndexOf('/') + 1);
+
+                                Grab_Pool(PoolID);
+                                return;
+                            }
                         }
 
-                        MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                        if (MessageBoxResultTemp == MessageBoxResult.OK)
-                        {
-                            string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
-                            PoolID = PoolID.Substring(PoolID.LastIndexOf('/') + 1);
-
-                            Grab_Pool(PoolID);
-                            return;
-                        }
-
-                    GrabPageOnly_Pools:
+                        //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
                         HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='a-show']//article");
                         if (NodeSelector != null)
                         {
@@ -173,7 +168,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "popular":
                     {
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
+                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
@@ -204,37 +199,37 @@ namespace e621_ReBot_v3.Modules.Downloader
                 case "favorites":
                     {
                         SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
-                        if (string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count <= 3)
-                        {
-                            goto GrabPageOnly_Favorites;
-                        }
 
-                        MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                        if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                        //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
+                        if (!string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count > 3)
                         {
-                            string TagQuery = WebAddress;
-                            if (TagQuery.Contains("user_id"))
+                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            if (MessageBoxResultTemp == MessageBoxResult.Yes)
                             {
-                                TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
-                            }
-                            else
-                            {
-                                if (TagQuery.Contains('?'))
-                                {
-                                    TagQuery = TagQuery.Substring(TagQuery.IndexOf("?") + 1);
-                                }
-                                else
+                                string TagQuery = WebAddress;
+                                if (TagQuery.Contains("user_id"))
                                 {
                                     TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
                                 }
-                            }
+                                else
+                                {
+                                    if (TagQuery.Contains('?'))
+                                    {
+                                        TagQuery = TagQuery.Substring(TagQuery.IndexOf("?") + 1);
+                                    }
+                                    else
+                                    {
+                                        TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
+                                    }
+                                }
 
-                            Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
-                            return;
+                                Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
+                                return;
+                            }
                         }
 
-                    GrabPageOnly_Favorites:
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts-container']/article");
+                        //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
+                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             foreach (HtmlNode Post in NodeSelector)

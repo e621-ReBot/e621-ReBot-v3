@@ -133,7 +133,7 @@
             </TabItem>
 
             <TabItem x:Name="ReBot_BrowserTab" Header="TabItem" Background="Transparent" >
-                <Grid x:Name="BrowserTabGrid">
+                <Grid x:Name="BrowserTabGrid" Margin="0,0,0,1">
                     <customcontrols:BrowserControl x:Name="ReBot_Browser" Visibility="Hidden"/>
                     <Grid x:Name="BrowserLoadingIcon" Width="200" Height="200" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,260,0,0">
                         <customcontrols:Custom_TextWithOutline Width="180" Height="32" Text="Initializing Browser..." FontSize="18" Fill="{DynamicResource ThemeFocus}" Margin="8,0,0,0" FontWeight="Bold" StrokeThickness="2"/>

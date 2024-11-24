@@ -8,7 +8,6 @@ using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
-using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules
 {
