@@ -240,7 +240,7 @@ namespace e621_ReBot_v3
             {
                 case Key.Space:
                     {
-                        if (Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1, 1).Equals(" "))
+                        if (Tags_TextBox.SelectionStart > 0 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1, 1).Equals(" "))
                         {
                             e.Handled = true;
                             break;
