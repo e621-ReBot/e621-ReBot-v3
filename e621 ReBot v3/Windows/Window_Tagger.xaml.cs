@@ -269,22 +269,22 @@ namespace e621_ReBot_v3
                             {
                                 List<string> PasteTags = ((string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat)).ToLower().Replace(Environment.NewLine, "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
 
-                                if (PasteTags.Count == 1 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1).Equals(":"))
+                                if (PasteTags.Count == 1 && Tags_TextBox.SelectionStart > 0 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1).Equals(":"))
                                 {
                                     Tags_TextBox.Text += $"{string.Join(' ', PasteTags)} ";
                                 }
                                 else
                                 {
-                                    List<string> SortTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+                                    List<string> textBoxTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
                                     for (int i = PasteTags.Count - 1; i >= 0; i--)
                                     {
-                                        if (SortTags.Contains(PasteTags[i]))
+                                        if (textBoxTags.Contains(PasteTags[i]))
                                         {
                                             PasteTags.RemoveAt(i);
                                         }
                                     }
-                                    SortTags.AddRange(PasteTags);
-                                    Tags_TextBox.Text = $"{string.Join(' ', SortTags)} ";
+                                    textBoxTags.AddRange(PasteTags);
+                                    Tags_TextBox.Text = $"{string.Join(' ', textBoxTags)} ";
                                 }
                                 Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
                                 CountTags();
