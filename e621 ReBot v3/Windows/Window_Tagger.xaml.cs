@@ -275,16 +275,16 @@ namespace e621_ReBot_v3
                                 }
                                 else
                                 {
-                                    List<string> textBoxTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+                                    List<string> TextBoxTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
                                     for (int i = PasteTags.Count - 1; i >= 0; i--)
                                     {
-                                        if (textBoxTags.Contains(PasteTags[i]))
+                                        if (TextBoxTags.Contains(PasteTags[i]))
                                         {
                                             PasteTags.RemoveAt(i);
                                         }
                                     }
-                                    textBoxTags.AddRange(PasteTags);
-                                    Tags_TextBox.Text = $"{string.Join(' ', textBoxTags)} ";
+                                    TextBoxTags.AddRange(PasteTags);
+                                    Tags_TextBox.Text = $"{string.Join(' ', TextBoxTags)} ";
                                 }
                                 Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
                                 CountTags();

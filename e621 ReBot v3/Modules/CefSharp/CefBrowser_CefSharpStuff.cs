@@ -223,9 +223,8 @@ namespace CefSharp
                                 if (Twitter.StartsWith("https://x.com/i/api/graphql/")) //logged in
                                 {
                                     //[@something]makes it go two levels deep.
-                                    //data.user.result.timeline_v2.timeline.instructions[0].entries[0].content.itemContent.tweet_results.result.legacy.extended_entities
-                                    TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
-                                    if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
+                                    TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //media page
+                                    if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //status page
                                 }
                                 if (Twitter.StartsWith("https://api.x.com/graphql/")) //not logged in
                                 {

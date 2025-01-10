@@ -82,21 +82,21 @@ namespace e621_ReBot_v3
 
         // - - - - - - - - - - - - - - - -
 
-        [LibraryImport("User32.dll", EntryPoint = "SetForegroundWindow")]
+        [DllImport("User32.dll", EntryPoint = "SetForegroundWindow")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool SetForegroundWindow(IntPtr hWnd);
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [LibraryImport("User32.dll", EntryPoint = "ShowWindow")]
+        [DllImport("User32.dll", EntryPoint = "ShowWindow")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [LibraryImport("User32.dll", EntryPoint = "IsIconic")]
+        [DllImport("User32.dll", EntryPoint = "IsIconic")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool IsIconic(IntPtr hWnd);
+        private static extern bool IsIconic(IntPtr hWnd);
 
-        [LibraryImport("User32.dll", EntryPoint = "IsWindowVisible")]
+        [DllImport("User32.dll", EntryPoint = "IsWindowVisible")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool IsWindowVisible(IntPtr hWnd);
+        private static extern bool IsWindowVisible(IntPtr hWnd);
 
         // shows the window of the single-instance that is already open
         private static void ShowExistingWindow()

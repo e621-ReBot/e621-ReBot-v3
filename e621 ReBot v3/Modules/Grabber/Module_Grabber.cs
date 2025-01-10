@@ -32,7 +32,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@"^\w+://inkbunny\.net/((s|gallery|scraps)/\w+|submissionsviewall.php)"),
                 new Regex(@"^\w+://www\.pixiv\.net/\w+/(artworks|users)/\d+"),
                 new Regex(@"^\w+://www\.hiccears\.com/((contents|file).+(/.+)?|p/.+/illustrations)"),
-                new Regex(@"^\w+://x\.com/.+/(media|status/\d+/?)"),
+                new Regex(@"^\w+://x\.com/.+/(media|status/\d+/?$)"),
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view/\d+|artwork|browse/\w+/art\?uid=\d+)"),
                 new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?(submissions/\w+(/.+)?)|search.+find=submit)"),
