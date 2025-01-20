@@ -186,7 +186,7 @@ namespace e621_ReBot_v3.Modules
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
-            string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);
+            //string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);
             //if (GetFileNameOnly.EndsWith(".", StringComparison.Ordinal))
             //{
             //    GetFileNameOnly += Module_HicceArs.GetHicceArsMediaType((string)DataRowRef["Grab_MediaURL"]);
@@ -857,6 +857,7 @@ namespace e621_ReBot_v3.Modules
             string PicURL = DownloadItemRef.Grab_MediaURL;
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(PicURL);
+            GetFileNameOnly = GetFileNameOnly.Substring(0, GetFileNameOnly.LastIndexOf('.'));
 
             string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\");
             string PoolName = DownloadItemRef.e6_PoolName;
@@ -867,7 +868,7 @@ namespace e621_ReBot_v3.Modules
             {
                 case 0:
                     {
-                        //GetFileNameOnly is MD5 by default
+                        GetFileNameOnly = $"{GetFileNameOnly}.{DownloadItemRef.Grab_MediaFormat}";
                         break;
                     }
                 case 1:
@@ -888,7 +889,7 @@ namespace e621_ReBot_v3.Modules
             }
             if (DownloadItemRef.e6_PoolPostIndex != null)
             {
-                GetFileNameOnly = $"{DownloadItemRef.e6_PoolPostIndex}_{GetFileNameOnly}";
+                GetFileNameOnly = $"{DownloadItemRef.e6_PoolPostIndex}_{GetFileNameOnly}.{DownloadItemRef.Grab_MediaFormat}";
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);

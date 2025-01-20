@@ -185,7 +185,7 @@ namespace e621_ReBot_v3
             }
 
             string MediaURL = MediaItemHolder.Grab_MediaURL;
-            string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaURL);
+            string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaURL, MediaItemHolder.Grid_MediaFormat);
 
             //if (Form_Loader._FormReference.cTreeView_ConversionQueue.Nodes.ContainsKey(ImageURL))
             //{
@@ -748,7 +748,7 @@ namespace e621_ReBot_v3
                 goto DownloadInstead;
             }
 
-            string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL);
+            string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL, MediaItemHolder.Grid_MediaFormat);
             if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(MediaName))
             {
                 DownloadItem DownloadItemTemp = new DownloadItem()
