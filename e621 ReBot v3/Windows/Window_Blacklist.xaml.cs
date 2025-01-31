@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -47,7 +48,7 @@ namespace e621_ReBot_v3
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
             List<string> NewBlacklist = new List<string>();
             Blacklist_TextBox.Text = Blacklist_TextBox.Text.Trim().ToLower();
@@ -57,6 +58,10 @@ namespace e621_ReBot_v3
                 if (TBLine.Length > 0) NewBlacklist.Add(TBLine);
             }
             AppSettings.Blacklist = NewBlacklist;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
             _RefHolder = null;
             Owner.Activate();
         }
