@@ -52,21 +52,21 @@ namespace e621_ReBot_v3.Modules
             if (UserTasks.Any())
             {
                 Task TaskTemp = UserTasks[0];
-                TaskTemp.Start();
                 lock (UserTasks)
                 {
                     UserTasks.RemoveAt(0);
                 }
+                TaskTemp.Start();
                 return;
             }
             if (BackgroundTasks.Any())
             {
                 Task TaskTemp = BackgroundTasks[0];
-                TaskTemp.Start();
                 lock (BackgroundTasks)
                 {
                     BackgroundTasks.RemoveAt(0);
                 }
+                TaskTemp.Start();
             }
         }
     }

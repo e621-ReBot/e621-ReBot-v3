@@ -20,6 +20,9 @@ namespace e621_ReBot_v3.Modules.Downloader
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
             string[] URLParts = WebAddress.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
+            HtmlNode PageNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='page']");
+            HtmlNode BottomMenuHolder = PageNode.SelectSingleNode(".//nav[@class='pagination numbered']");
+
             switch (URLParts[2])
             {
                 case string Posts when Posts.StartsWith("posts"):
@@ -28,9 +31,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                         string? PostID;
                         string? ThumbURL;
                         string? Media_Format;
-                        if (URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
+                        if (BottomMenuHolder == null) //(URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
                         {
-                            PicURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='image-download-link']/a").Attributes["href"].Value;
+                            PicURL = PageNode.SelectSingleNode(".//div[@id='image-download-link']/a").Attributes["href"].Value;
                             if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
                             {
                                 return;
@@ -39,8 +42,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                             PostID = WebAddress;
                             if (PostID.Contains('?')) PostID = PostID.Substring(0, PostID.IndexOf('?'));
                             PostID = PostID.Substring(PostID.LastIndexOf('/') + 1);
-                            ThumbURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
-                            Media_Format = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
+                            ThumbURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
+                            Media_Format = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
 
                             Module_Downloader.AddDownloadItem2Queue(
                                 PageURL: WebAddress,
@@ -55,8 +58,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                             if (WebAddress.Contains("/posts?tags="))
                             {
-                                //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
-                                if (!string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count > 3)
+                                int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
+                                //If page has more than 1 page and API key present then ask to grab all
+                                if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey)) 
                                 {
                                     MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
                                     if (MessageBoxResultTemp == MessageBoxResult.Yes)
@@ -70,8 +74,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 }
                             }
 
-                            //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
-                            HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
+                            //If single page or no API key present then just grab this (single) page
+                            HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                             if (NodeSelector != null)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -101,13 +105,12 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "pools":
                     {
-                        HtmlNode BottomMenuHolder = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu");
-
-                        //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
-                        if (!string.IsNullOrEmpty(AppSettings.APIKey) || BottomMenuHolder.ChildNodes.Count > 3)
+                        int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
+                        //If page has more than 1 page and API key present then ask to grab all
+                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                         {
                             MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                            if (MessageBoxResultTemp == MessageBoxResult.OK)
+                            if (MessageBoxResultTemp == MessageBoxResult.Yes)
                             {
                                 string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
                                 PoolID = PoolID.Substring(PoolID.LastIndexOf('/') + 1);
@@ -117,16 +120,16 @@ namespace e621_ReBot_v3.Modules.Downloader
                             }
                         }
 
-                        //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='a-show']//article");
+                        //If single page or no API key present then just grab this (single) page
+                        HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='a-show']//article");
                         if (NodeSelector != null)
                         {
-                            int GetCurrentPage = int.Parse(BottomMenuHolder.SelectSingleNode(".//li[@class='current-page']").InnerText);
+                            int GetCurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value); ;
 
                             var PoolPages = new List<string>();
                             if (GetCurrentPage > 1)
                             {
-                                string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
+                                string PoolID = PageNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
 
                                 string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
                                 if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
@@ -146,7 +149,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 }
 
                                 string PostID = Post.Attributes["data-id"].Value;
-                                string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
+                                string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
                                 PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
                                 string PoolPostIndex = GetCurrentPage > 1 ? PoolPages.IndexOf(PostID).ToString() : PoolIndex.ToString();
 
@@ -168,7 +171,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "popular":
                     {
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
+                        HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
@@ -200,36 +203,21 @@ namespace e621_ReBot_v3.Modules.Downloader
                     {
                         SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
 
-                        //If there is API key or page navigation has more than 3 buttons (<, 1, >) then grab all
-                        if (!string.IsNullOrEmpty(AppSettings.APIKey) || HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='paginator']/menu").ChildNodes.Count > 3)
+                        int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
+                        //If page has more than 1 page and API key present then ask to grab all
+                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                         {
                             MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
                             if (MessageBoxResultTemp == MessageBoxResult.Yes)
                             {
-                                string TagQuery = WebAddress;
-                                if (TagQuery.Contains("user_id"))
-                                {
-                                    TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
-                                }
-                                else
-                                {
-                                    if (TagQuery.Contains('?'))
-                                    {
-                                        TagQuery = TagQuery.Substring(TagQuery.IndexOf("?") + 1);
-                                    }
-                                    else
-                                    {
-                                        TagQuery = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//input[@id='tags']").Attributes["value"].Value;
-                                    }
-                                }
-
+                                string TagQuery = PageNode.SelectSingleNode(".//textarea[@id='tags']").InnerText;
                                 Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
                                 return;
                             }
                         }
 
-                        //If no API key or page navigation has 3 buttons (<, 1, >) then just grab this (single) page
-                        HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
+                        //If single page or no API key present then just grab this (single) page
+                        HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             foreach (HtmlNode Post in NodeSelector)
@@ -330,12 +318,15 @@ namespace e621_ReBot_v3.Modules.Downloader
             if (CancellationPending)
             {
                 CancellationPending = false;
+                Update_APIStatus("Suspended.", false);
                 return;
             }
             if (JSON_Object.Children().Count() == 320)
             {
                 goto GrabAnotherAPIPage;
             }
+
+            Update_APIStatus("Suspended.", false);
         }
 
         internal async static void Grab_Pool(string PoolID)
@@ -420,6 +411,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             {
                 Module_Downloader.Report_Info($"{PoolName}: {SkippedPostsCounter} page{(SkippedPostsCounter > 1 ? "s" : null)} skipped as they already exist");
             }
+            Update_APIStatus("Suspended.", false);
         }
 
         private static bool Blacklist_Check(List<string> PostTags)

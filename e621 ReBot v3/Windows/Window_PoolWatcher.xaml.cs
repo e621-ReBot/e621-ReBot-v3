@@ -204,6 +204,7 @@ namespace e621_ReBot_v3
             if (ItemsAddedCount > 0)
             {
                 Module_Downloader.Report_Info($"Pool Watcher >>> Started download of {ItemsAddedCount} image{(ItemsAddedCount > 1 ? "s" : null)}");
+                Module_Downloader.UpdateDownloadTreeView();
             }
         }
 
