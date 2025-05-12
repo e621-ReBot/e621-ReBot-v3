@@ -17,6 +17,7 @@ using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
+using e621_ReBot_v3.Modules.Uploader;
 using Microsoft.Win32;
 
 namespace e621_ReBot_v3
@@ -29,9 +30,6 @@ namespace e621_ReBot_v3
             InitializeComponent();
             _RefHolder = this;
             App.SetWindow2Square(this);
-
-            //this.Width = 1920;
-            //this.Height = 1032;
 
 #if DEBUG
             AppSettings.DevMode = true;
@@ -59,6 +57,16 @@ namespace e621_ReBot_v3
                 SantaHat2.Visibility = Visibility.Visible;
             }
             ScrollDisableTimer.Tick += ScrollDisableTimer_Tick;
+
+            AppSettings.LoadSettings();
+
+            if (AppSettings.BigMode)
+            {
+                Width = 1920;
+                Height = 1032;
+                Grid_ItemLimit = 32;
+                //Grid_GridVEPanel.Margin = new Thickness(8, 16, 0, 16);
+            }
         }
 
         #region "Window"
@@ -72,7 +80,7 @@ namespace e621_ReBot_v3
             GBD_Download.IsEnabledChanged += GBD_Download_IsEnabledChanged;
             GB_Clear.IsEnabledChanged += GB_Clear_IsEnabledChanged;
 
-            AppSettings.LoadSettings();
+            AppSettings.SetLoadedSettings();
         }
 
         //Like Shown
@@ -93,6 +101,8 @@ namespace e621_ReBot_v3
             ErrorReporter();
 
             if (!string.IsNullOrEmpty(AppSettings.Note)) new Window_Notes().ShowDialog();
+            //ReBot_HttpClient.CreateClient();
+            //ReBot_HttpClient.CreateClient1();
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -380,6 +390,14 @@ namespace e621_ReBot_v3
                     {
                         int ScaleValue = SkipAnimation ? 1 : 0;
                         GridVE GridVETemp = new GridVE(ScaleValue);
+
+                        if (Grid_ItemLimit > 20) //big mode
+                        {
+                            GridVETemp.Margin = new Thickness(6, 8, 6, 8);
+                            GridVETemp.Width = 220;
+                            GridVETemp.Height = 220;
+                        }
+
                         Grid_GridVEPanel.Children.Add(GridVETemp);
                         if (!SkipAnimation) GridVETemp.AnimateScaleIn();
                     }
@@ -481,17 +499,13 @@ namespace e621_ReBot_v3
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
                 {
-                    lock (Module_Grabber._Grabbed_MediaURLs)
+                    for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
                     {
-                        for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
+                        MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
+                        DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
+                        if (MediaItemTemp.UP_UploadedID != null)
                         {
-                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
-                            if (MediaItemTemp.UP_UploadedID != null)
-                            {
-                                Module_Grabber._Grabbed_MediaURLs.Remove(MediaItemTemp.Grab_MediaURL);
-                                Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
-                            }
+                            Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
                         }
                     }
                 }
@@ -501,16 +515,12 @@ namespace e621_ReBot_v3
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
                 {
-                    lock (Module_Grabber._Grabbed_MediaURLs)
+                    for (int i = Grid_ItemStartIndex + Grid_GridVEPanel.Children.Count - 1; i >= Grid_ItemStartIndex; i--)
                     {
-                        for (int i = Grid_ItemStartIndex + Grid_GridVEPanel.Children.Count - 1; i >= Grid_ItemStartIndex; i--)
-                        {
-                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
-                            UploadCounter += MediaItemTemp.UP_Queued ? -1 : 0;
-                            Module_Grabber._Grabbed_MediaURLs.Remove(MediaItemTemp.Grab_MediaURL);
-                            Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
-                        }
+                        MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
+                        DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
+                        UploadCounter += MediaItemTemp.UP_Queued ? -1 : 0;
+                        Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
                     }
                 }
                 ClearAll = false;
@@ -520,10 +530,6 @@ namespace e621_ReBot_v3
                 lock (Module_Grabber._Grabbed_MediaItems)
                 {
                     Module_Grabber._Grabbed_MediaItems.Clear();
-                }
-                lock (Module_Grabber._Grabbed_MediaURLs)
-                {
-                    Module_Grabber._Grabbed_MediaURLs.Clear();
                 }
                 Grid_GridVEPanel.Children.Clear();
                 Grid_ItemStartIndex = 0;
@@ -680,6 +686,11 @@ namespace e621_ReBot_v3
                     MediaItem? MediaItemTemp = GridVETemp._MediaItemRef;
                     if (MediaItemTemp.DL_Queued)
                     {
+                        if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaItemTemp.Grab_MediaURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaItemTemp.Grab_MediaURL))
+                        {
+                            continue;
+                        }
+
                         Module_Downloader.AddDownloadItem2Queue(
                             PageURL: MediaItemTemp.Grab_PageURL,
                             MediaURL: MediaItemTemp.Grab_MediaURL,
@@ -697,6 +708,11 @@ namespace e621_ReBot_v3
                 {
                     if (MediaItemTemp.DL_Queued)
                     {
+                        if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaItemTemp.Grab_MediaURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaItemTemp.Grab_MediaURL))
+                        {
+                            continue;
+                        }
+
                         Module_Downloader.AddDownloadItem2Queue(
                             PageURL: MediaItemTemp.Grab_PageURL,
                             MediaURL: MediaItemTemp.Grab_MediaURL,
@@ -1015,8 +1031,7 @@ namespace e621_ReBot_v3
             }
             else
             {
-                int NodeCount = Upload_TreeView.Items.Count;
-                Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
+                Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
             }
         }
 
@@ -1088,7 +1103,6 @@ namespace e621_ReBot_v3
             }
             Upload_TreeView.Items.Remove(TreeViewItemTarget);
             Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
-
         }
 
         private void UploadTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
@@ -1109,6 +1123,42 @@ namespace e621_ReBot_v3
                 return;
             }
             Module_Uploader.ReverseUploadTreeView();
+        }
+
+        private void RetryTreeViewContextMenu_Retry(object sender, RoutedEventArgs e)
+        {
+            MenuItem MenuItemClicked = (MenuItem)sender;
+            ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
+            TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
+            MediaItem MediaItemTarget = (MediaItem)TreeViewItemTarget.Tag;
+
+            Module_RetryQueue.MoveItem2UploadQueue(MediaItemTarget);
+            Retry_TreeView.Items.Remove(TreeViewItemTarget);
+            Retry_TextBlock.Text = $"Retry Queue{(Retry_TreeView.Items.Count > 0 ? $" ({Retry_TreeView.Items.Count})" : null)}";
+        }
+
+        private void RetryTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
+        {
+            MenuItem MenuItemClicked = (MenuItem)sender;
+            ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
+            TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
+
+            lock (Module_RetryQueue._2Retry_MediaItems)
+            {
+                Module_RetryQueue._2Retry_MediaItems.RemoveURL(TreeViewItemTarget.Header.ToString());
+            }
+            Retry_TreeView.Items.Remove(TreeViewItemTarget);
+            Retry_TextBlock.Text = $"Retry Queue{(Retry_TreeView.Items.Count > 0 ? $" ({Retry_TreeView.Items.Count})" : null)}";
+        }
+
+        private void RetryTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
+        {
+            lock (Module_RetryQueue._2Retry_MediaItems)
+            {
+                Module_RetryQueue._2Retry_MediaItems.Clear();
+            }
+            Retry_TreeView.Items.Clear();
+            Retry_TextBlock.Text = $"Retry Queue{(Retry_TreeView.Items.Count > 0 ? $" ({Retry_TreeView.Items.Count})" : null)}";
         }
 
         private void DragDropConver_Label_DragEnter(object sender, DragEventArgs e)
@@ -1197,6 +1247,11 @@ namespace e621_ReBot_v3
             }
         }
 
+        private void SettingsCheckBox_BigMode_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.BigMode = ((CheckBox)sender).IsChecked ?? false;
+        }
+
         private void SettingsCheckBox_GridSaveSession_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Grid_SaveSession = ((CheckBox)sender).IsChecked ?? false;
@@ -1205,6 +1260,11 @@ namespace e621_ReBot_v3
         private void SettingsCheckBox_BrowserClearCache_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Browser_ClearCache = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        private void SettingsCheckBox_DownloadSaveTags_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.Download_SaveTags = ((CheckBox)sender).IsChecked ?? false;
         }
 
         private void SettingsButton_Blacklist_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using System.Net;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {
@@ -38,12 +39,14 @@ namespace e621_ReBot_v3.Modules.Downloader
                 Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
                 ThumbURL = $"https:{PostNode.SelectSingleNode(".//img[@id='submissionImg']").Attributes["data-preview-src"].Value.Replace("@600-", "@200-")}";
 
+                string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-id-sub-container' or @class='classic-submission-title information']//a").InnerText.Trim());
+
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: WebAddress,
                     MediaURL: PicURL,
                     ThumbnailURL: ThumbURL,
                     MediaFormat: Media_Format,
-                    Artist: string.Empty);
+                    Artist: ArtistName);
             }
         }
     }

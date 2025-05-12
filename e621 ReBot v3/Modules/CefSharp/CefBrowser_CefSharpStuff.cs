@@ -207,6 +207,7 @@ namespace CefSharp
                 case string Pixiv when Pixiv.StartsWith("https://www.recaptcha.net/recaptcha/enterprise/reload?k"):
                     {
                         Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                        Module_Downloader.DownloadEnabler(Module_CefSharp.BrowserAddress);
                         break;
                     }
 

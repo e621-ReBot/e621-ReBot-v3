@@ -1,12 +1,19 @@
-﻿using HtmlAgilityPack;
+﻿using System.Text.RegularExpressions;
+using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {
-    internal static class Module_Pixiv
+    internal static partial class Module_Pixiv
     {
         private static string? SpecialSaveFolder = null;
+
+        [GeneratedRegex(@"(?<=/)\d+(?=/)?")]
+        private static partial Regex Pixiv_Regex();
         internal static void GrabMediaLinks(string WebAddress)
         {
+            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Pixiv);
+
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
             HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body");
@@ -21,29 +28,34 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? PicURL;
             string? ThumbURL;
             string? Media_Format;
-            if (WebAddress.Contains("/view/")) //single
+            if (WebAddress.Contains("/artworks/")) //single
             {
-                HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a");
-                if (DownloadNode == null) //classic theme selected
+                string ArtistName = PostNode.SelectSingleNode(".//aside/section/h2//a[@class]").InnerText; ;
+
+                string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
+
+                string JSONSourceTest = Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", ref Module_CookieJar.Cookies_Pixiv);
+                JObject PixivJSON = JObject.Parse(JSONSourceTest);
+
+                foreach (JToken JTokenTemp in PixivJSON["body"].Children())
                 {
-                    DownloadNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
+                    PicURL = JTokenTemp["urls"]["original"].Value<string>();
+
+                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
+                    {
+                        return;
+                    }
+
+                    ThumbURL = JTokenTemp["urls"]["thumb_mini"].Value<string>().Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
+                    Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
+
+                    Module_Downloader.AddDownloadItem2Queue(
+                        PageURL: WebAddress,
+                        MediaURL: PicURL,
+                        ThumbnailURL: ThumbURL,
+                        MediaFormat: Media_Format,
+                        Artist: ArtistName);
                 }
-                PicURL = $"https:{DownloadNode.Attributes["href"].Value}";
-
-                if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                {
-                    return;
-                }
-
-                Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
-                ThumbURL = $"https:{PostNode.SelectSingleNode(".//img[@id='submissionImg']").Attributes["data-preview-src"].Value.Replace("@600-", "@200-")}";
-
-                Module_Downloader.AddDownloadItem2Queue(
-                    PageURL: WebAddress,
-                    MediaURL: PicURL,
-                    ThumbnailURL: ThumbURL,
-                    MediaFormat: Media_Format,
-                    Artist: string.Empty);
             }
         }
     }

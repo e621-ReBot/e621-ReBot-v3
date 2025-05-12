@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -121,37 +122,37 @@ namespace e621_ReBot_v3
             Tags_TextBox.Focus();
         }
 
+        List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
+        List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             SuggestionPopup?.SuggestionTimer.Stop();
             if (TagsAdded)
             {
-                //List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                //string DNPArtist = TagListOnClose.Intersect(Form_Loader._FormReference.DNP_Tags).First();
-                //if (DNPArtist != null && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
-                //{
-                //    Tags_TextBox.AppendText(" ");
-                //    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                //    TagsAdded = false;
-                //    e.Cancel = true;
-                //    return;
-                //}
-                //if (!TagListOnClose.Intersect(Form_Loader._FormReference.Gender_Tags).Any() && (MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
-                //{
-                //    Tags_TextBox.AppendText(" ");
-                //    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                //    TagsAdded = false;
-                //    e.Cancel = true;
-                //    return;
-                //}
+                List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
+                if (!string.IsNullOrEmpty(DNPArtist) != null && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
+                {
+                    Tags_TextBox.AppendText(" ");
+                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                    TagsAdded = false;
+                    e.Cancel = true;
+                    return;
+                }
+                if (!TagListOnClose.Intersect(Gender_List).Any() && (MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
+                {
+                    Tags_TextBox.AppendText(" ");
+                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                    TagsAdded = false;
+                    e.Cancel = true;
+                    return;
+                }
                 MediaItemHolder.UP_Tags = Tags_TextBox.Text;
             }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            //Form_Loader._FormReference.AutoTags.SetAutocompleteMenu(textBox_Tags, null);
-            //Form_Loader._FormReference.AutoTags.SetAutocompleteItems(Form_Loader._FormReference.AutoTagsList_Tags);
             SuggestionPopup.PoolMode = false;
             SuggestionPopup.RemoveTextBoxTarget(Tags_TextBox);
             _RefHolder = null;

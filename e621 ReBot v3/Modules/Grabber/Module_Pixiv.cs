@@ -205,7 +205,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     return;
                 }
 
-                if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                 {
                     SkipCounter++;
                     Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
@@ -227,7 +227,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
                     Post_MediaURL = JSONPages["body"][p]["urls"]["original"].Value<string>();
 
-                    if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
@@ -255,14 +255,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
             }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)

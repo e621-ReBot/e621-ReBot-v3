@@ -162,7 +162,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 Post_ThumbnailURL = $"https://www.hiccears.com{ThumbNodes[NodeIndex].SelectSingleNode(".//img").Attributes["src"].Value}";
 
-                if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                 {
                     SkipCounter++;
                     Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
@@ -183,7 +183,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = $"https://www.hiccears.com{ThumbNode.Attributes["href"].Value.Replace("/preview", "/download")}";
                     Post_ThumbnailURL = $"https://www.hiccears.com{ThumbNode.SelectSingleNode(".//img").Attributes["src"].Value}";
 
-                    if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
@@ -209,14 +209,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
             }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)

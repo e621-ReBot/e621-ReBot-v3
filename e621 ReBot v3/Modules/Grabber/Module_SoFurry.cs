@@ -129,7 +129,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             // - - - - - - - - - - - - - - - -
 
-            if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+            if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
             {
                 lock (Module_Grabber._GrabQueue_WorkingOn)
                 {
@@ -164,10 +164,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemTemp;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
             }
             Module_Grabber.Report_Info($"Finished grabbing: {Post_URL}");
         }

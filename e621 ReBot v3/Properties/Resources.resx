@@ -118,65 +118,65 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="2560SantaHat" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MainWindow\2560SantaHat.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="Banner_Tail" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\banner_tail.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\Banner_Tail.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Baraag" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_baraag.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Baraag.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_e621" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_e621.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_FurAffinity" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_furaffinity.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_FurAffinity.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_HentaiFoundry" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_hentaifoundry.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_HentaiFoundry.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_HicceArs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_hiccears.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_HicceArs.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Inkbunny" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_inkbunny.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Inkbunny.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Mastodon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_mastodon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Mastodon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Newgrounds" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_newgrounds.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Newgrounds.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Pawoo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_pawoo.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Pawoo.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Pixiv" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_pixiv.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Pixiv.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Plurk" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_plurk.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Plurk.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_SoFurry" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_sofurry.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_SoFurry.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Twitter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\browser\browsericon_twitter.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\Browser\BrowserIcon_Twitter.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Weasyl" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_Weasyl.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Button_Close" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\button_close.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\Button_Close.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Button_Minimize" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\button_minimize.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\Button_Minimize.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="CefSharp.Wpf" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Files\CefSharp.Wpf.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DiscordLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\DiscordLogo.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="DNPs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Files\DNPs.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="E6Image_Deleted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\E6Image_Deleted.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -190,11 +190,17 @@
   <data name="FolderIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\FolderIcon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="genders" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Files\genders.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GitHubLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\GitHubLogo.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="HtmlAgilityPack" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Files\HtmlAgilityPack.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Http_Formatting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Files\System.Net.Http.Formatting.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Icon_Flag" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\Icon_Flag.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -209,28 +215,31 @@
     <value>..\Resources\MainWindow\Ko-Fi Button.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Ko_Fi_ButtonSmall" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\ko-fi buttonsmall.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\Ko-Fi ButtonSmall.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Browser" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_browser.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Browser.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Downloads" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_downloads.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Downloads.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Grid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_grid.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Grid.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Information" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\MenuIcon_Information.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Jobs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_jobs.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Jobs.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MenuIcon_Logs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MainWindow\MenuIcon_Logs.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Settings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_settings.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Settings.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="MenuIcon_Welcome" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\MainWindow\menuicon_welcome.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Resources\MainWindow\MenuIcon_Welcome.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Newtonsoft_Json" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Files\Newtonsoft.Json.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -240,5 +249,8 @@
   </data>
   <data name="ReBot_Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MainWindow\ReBot_Logo.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="_2560SantaHat" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MainWindow\2560SantaHat.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

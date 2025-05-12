@@ -154,7 +154,7 @@ namespace e621_ReBot_v3.Modules
                         break;
                     }
 
-                case "x.com":
+                case "x.com": //was twitter.com before
                     {
                         Module_Twitter.Queue_Prepare(WebAddress);
                         break;
@@ -251,7 +251,6 @@ namespace e621_ReBot_v3.Modules
         }
 
         internal static OrderedDictionary _GrabQueue_WorkingOn = new OrderedDictionary();
-        internal static List<string> _Grabbed_MediaURLs = new List<string>();
         private static void Grab_2Media(string WebAddress, object? NeededData)
         {
             GrabberActiveHandCount++;
@@ -357,7 +356,7 @@ namespace e621_ReBot_v3.Modules
             {
                 using (HttpClient HttpClientTemp = new HttpClient(HttpClientHandlerTemp) { Timeout = TimeSpan.FromSeconds(5) })
                 {
-                    HttpClientTemp.DefaultRequestHeaders.UserAgent.TryParseAdd(AppSettings.GlobalUserAgent);
+                    HttpClientTemp.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
 
                     using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, WebAddress))
                     {

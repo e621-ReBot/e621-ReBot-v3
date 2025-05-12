@@ -65,7 +65,7 @@ namespace e621_ReBot_v3.Properties {
         /// </summary>
         internal static byte[] _2560SantaHat {
             get {
-                object obj = ResourceManager.GetObject("2560SantaHat", resourceCulture);
+                object obj = ResourceManager.GetObject("_2560SantaHat", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -261,6 +261,15 @@ namespace e621_ReBot_v3.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 0eff0rt✄0eff0rt_(artist)✄1delkon✄1delkon_(artist)✄1ksrw✄1ksrw_(artist)✄1oi✄1oi_(artist)✄2001maxx✄2001maxx_(artist)✄2dredders✄2dredders_(artist)✄2dreddersart✄2dreddersart_(artist)✄2gecs✄2gecs_(artist)✄2gecsart✄2gecsart_(artist)✄413k✄413k_(artist)✄413k_zzzz✄413k_zzzz_(artist)✄4dbadbooks✄4dbadbooks_(artist)✄69beas✄69beas_(artist)✄7mii✄7mii_(artist)✄abananaman✄abananaman_(artist)✄ablimpfox✄ablimpfox_(artist)✄abobarseem✄abobarseem_(artist)✄abritishfox✄abritishfox_(artist)✄abyssalwolfy✄abyssalwolfy_(artist)✄accel [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string DNPs {
+            get {
+                return ResourceManager.GetString("DNPs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] E6Image_Deleted {
@@ -301,6 +310,15 @@ namespace e621_ReBot_v3.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ?/?✄?/am✄?/c✄?/cuntboy✄?/d✄?/dickgirl✄?/f✄?/female✄?/gm✄?/h✄?/herm✄?/i✄?/intersex✄?/m✄?/male✄?/p/f✄?/p/m✄♀_penetrating_♀✄♀_penetrating_♂✄♂_penetrating_♀✄♂_penetrating_♂✄1_boy✄1_futa✄1_futanari✄1_girl✄1_guys✄1_intersex✄1boy✄1futa✄1futanari✄1girl✄1girls✄1guy✄1intersex✄1male✄2_boys✄2_girl✄2_girls✄2_guys✄2boys✄2girl✄2girls✄2guys✄3_boys✄3_girl✄3_girls✄3_guys✄3boys✄3girl✄3girls✄3guys✄4_boys✄4_girl✄4_girls✄4_guys✄4boys✄4girl✄4girls✄4guys✄5_girls✄5boys✄5guys✄7girls✄a/a✄a/d✄a/f✄a/h✄a/i✄a/m✄adult_ambiguous✄adult_andr [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string genders {
+            get {
+                return ResourceManager.GetString("genders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] GitHubLogo {
@@ -316,6 +334,16 @@ namespace e621_ReBot_v3.Properties {
         internal static byte[] HtmlAgilityPack {
             get {
                 object obj = ResourceManager.GetObject("HtmlAgilityPack", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Http_Formatting {
+            get {
+                object obj = ResourceManager.GetObject("Http_Formatting", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -416,6 +444,16 @@ namespace e621_ReBot_v3.Properties {
         internal static byte[] MenuIcon_Jobs {
             get {
                 object obj = ResourceManager.GetObject("MenuIcon_Jobs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] MenuIcon_Logs {
+            get {
+                object obj = ResourceManager.GetObject("MenuIcon_Logs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

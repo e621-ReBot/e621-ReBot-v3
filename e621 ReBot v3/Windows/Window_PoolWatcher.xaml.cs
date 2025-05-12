@@ -46,7 +46,7 @@ namespace e621_ReBot_v3
             _RefHolder = null;
         }
 
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {

@@ -130,18 +130,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                 if (VideoNodeHitTest != null)
                 {
                     Post_MediaURL = VideoNodeHitTest.Attributes["src"].Value;
-                    if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                     {
                         SkipCounter += 1;
                     }
                     else
                     {
-                        if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                        if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                         {
-                            lock (Module_Grabber._Grabbed_MediaURLs)
-                            {
-                                Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                            }
                             Post_ThumbnailURL = VideoNodeHitTest.Attributes["poster"].Value;
                             MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Text));
                         }
@@ -158,17 +154,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                     foreach (HtmlNode MediaNode in MediaNodeHitTest.SelectNodes(".//img"))
                     {
                         Post_MediaURL = MediaNode.ParentNode.Attributes["href"].Value;
-                        if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                        if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                         {
                             SkipCounter += 1;
                             continue;
-                        }
-                        else
-                        {
-                            lock (Module_Grabber._Grabbed_MediaURLs)
-                            {
-                                Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                            }
                         }
                         Post_ThumbnailURL = MediaNode.Attributes["src"].Value;
                         MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Text));
@@ -192,14 +181,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
             }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)

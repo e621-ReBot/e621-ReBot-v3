@@ -41,11 +41,12 @@ namespace e621_ReBot_v3
 
         private static Assembly? LoadMergedDLLs(object sender, ResolveEventArgs e)
         {
-            List<string> LoadList = new List<string> { "HtmlAgilityPack", "Newtonsoft.Json", "CefSharp.Wpf" };
+            List<string> LoadList = new List<string> { "HtmlAgilityPack", "Newtonsoft.Json", "CefSharp.Wpf", "System.Net.Http.Formatting" };
             if (LoadList.Any(stringName => e.Name.Contains(stringName)))
             {
                 Assembly thisAssembly = Assembly.GetExecutingAssembly();
                 string DLLName = $"{e.Name.Substring(0, e.Name.IndexOf(','))}.dll";
+                //DLLName = DLLName.Replace(".resources.dll", ".dll"); not sure why but not removing resource from name makes it work even though it will load null during debug
                 IEnumerable<string> Resource2Load = thisAssembly.GetManifestResourceNames().Where(s => s.EndsWith(DLLName));
                 if (Resource2Load.Any())
                 {

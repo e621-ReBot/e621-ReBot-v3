@@ -31,6 +31,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         string? PostID;
                         string? ThumbURL;
                         string? Media_Format;
+                        string? PostTags;
                         if (BottomMenuHolder == null) //(URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
                         {
                             PicURL = PageNode.SelectSingleNode(".//div[@id='image-download-link']/a").Attributes["href"].Value;
@@ -44,6 +45,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             PostID = PostID.Substring(PostID.LastIndexOf('/') + 1);
                             ThumbURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
                             Media_Format = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
+                            PostTags = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-tags"].Value;
 
                             Module_Downloader.AddDownloadItem2Queue(
                                 PageURL: WebAddress,
@@ -51,6 +53,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 ThumbnailURL: ThumbURL,
                                 MediaFormat: Media_Format,
                                 e6PostID: PostID,
+                                e6Tags: PostTags,
                                 e6Download: true);
                         }
                         else //multi
@@ -60,7 +63,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             {
                                 int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
                                 //If page has more than 1 page and API key present then ask to grab all
-                                if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey)) 
+                                if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                                 {
                                     MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
                                     if (MessageBoxResultTemp == MessageBoxResult.Yes)
@@ -95,6 +98,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                             MediaFormat: Post.Attributes["data-file-ext"].Value,
                                             e6PostID: Post.Attributes["data-id"].Value,
                                             e6PoolName: SpecialSaveFolder,
+                                            e6Tags: Post.Attributes["data-tags"].Value,
                                             e6Download: true);
                                     }
                                 }
@@ -161,6 +165,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                            e6PostID: Post.Attributes["data-id"].Value,
                                            e6PoolName: PoolName,
                                            e6PoolPostIndex: PoolPostIndex,
+                                           e6Tags: Post.Attributes["data-tags"].Value,
                                            e6Download: true);
 
                                 PoolIndex += 1;
@@ -192,6 +197,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
                                           e6PostID: Post.Attributes["data-id"].Value,
                                           e6PoolName: SpecialSaveFolder,
+                                          e6Tags: Post.Attributes["data-tags"].Value,
                                           e6Download: true);
                                 }
                             }
@@ -237,6 +243,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                        MediaFormat: Post.Attributes["data-file-ext"].Value,
                                        e6PostID: Post.Attributes["data-id"].Value,
                                        e6PoolName: SpecialSaveFolder,
+                                       e6Tags: Post.Attributes["data-tags"].Value,
                                        e6Download: true);
                                 }
                             }
@@ -301,6 +308,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                     string ThumbnailURLTemp;
                     MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
                     string PostID = cPost["id"].Value<string>();
+
+                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaURLTemp) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaURLTemp))
+                    {
+                        continue;
+                    }
+
                     Module_Downloader.AddDownloadItem2Queue(
                         PageURL: $"https://e621.net/posts/{PostID}",
                         MediaURL: MediaURLTemp,
@@ -308,6 +321,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         MediaFormat: cPost["file"]["ext"].Value<string>(),
                         e6PostID: PostID,
                         e6PoolName: FolderName,
+                        e6Tags: string.Join(' ', TempTagList),
                         e6Download: true
                         );
                 }
@@ -382,6 +396,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                     continue;
                 }
 
+                List<string> TempTagList = CreateTagList(cPost["tags"], cPost["rating"].Value<string>());
+
                 string? PostID = cPost["id"].Value<string>();
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: $"https://e621.net/posts/{PostID}",
@@ -391,6 +407,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                     e6PostID: PostID,
                     e6PoolName: PoolName,
                     e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
+                    e6Tags: string.Join(' ', TempTagList),
                     e6Download: true
                     );
             }

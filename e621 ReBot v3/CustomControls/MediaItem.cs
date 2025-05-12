@@ -20,7 +20,7 @@ namespace e621_ReBot_v3.CustomControls
         // = = = Grid stuff
 
         [JsonIgnore] public ImageSource? Grid_Thumbnail;
-        public bool Grid_ThumbnailDLStart = false;
+        [JsonIgnore] public bool Grid_ThumbnailDLStart = false;
         public bool? Grid_ThumbnailFullInfo = false;
         public string? Grid_MediaFormat;
         public uint Grid_MediaWidth;

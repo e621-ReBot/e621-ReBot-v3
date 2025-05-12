@@ -123,7 +123,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 Post_MediaURL = MediaNode["url"].Value<string>();
 
-                if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                 {
                     SkipCounter += 1;
                     continue;
@@ -167,14 +167,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
             }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)

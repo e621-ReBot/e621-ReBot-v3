@@ -32,16 +32,16 @@ namespace e621_ReBot_v3.Modules
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
-            string TextNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-name']").Attributes["content"].Value;
-            AppSettings.UserName = TextNode;
-            TextNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-id']").Attributes["content"].Value;
-            AppSettings.UserID = TextNode;
-            Module_CefSharp.LoadURL($"https://e621.net/users/{TextNode}/api_key");
+            string MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-name']").Attributes["content"].Value;
+            AppSettings.UserName = MetaDataNode;
+            MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-id']").Attributes["content"].Value;
+            AppSettings.UserID = MetaDataNode;
+            Module_CefSharp.LoadURL($"https://e621.net/users/{MetaDataNode}/api_key");
         }
 
-        internal static void Step_3()
+        internal static void Step_3(bool isTutorial = false)
         {
-            MessageBox.Show(Window_Main._RefHolder, "Generate you API key and copy it into the floating box.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Window_Main._RefHolder, "Generate you API key and copy it into the floating box.", $"e621 ReBot{(isTutorial ? " Tutorial" : null)}", MessageBoxButton.OK, MessageBoxImage.Information);
             if (Window_APIKey._RefHolder == null) new Window_APIKey().Show();
         }
 
@@ -55,6 +55,7 @@ namespace e621_ReBot_v3.Modules
             MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Do you want me to check if there are any updates for my programming, like right now?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
             if (MessageBoxResultTemp == MessageBoxResult.Yes)
             {
+                Module_CefSharp.LoadURL($"https://e621.net/users/{AppSettings.UserID}");
                 Window_Main._RefHolder.ReBot_Menu_ListBox.SelectedIndex = 0;
                 Module_Updater.PreUpdateCheck();
             }

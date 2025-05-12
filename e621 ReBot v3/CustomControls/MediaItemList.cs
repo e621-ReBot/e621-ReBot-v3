@@ -43,6 +43,15 @@ namespace e621_ReBot_v3.CustomControls
             return -1;
         }
 
+        internal int FindURLIndex(string URL2Find)
+        {
+            for (int i = 0; i < MediaURLs.Count; i++)
+            {
+                if (MediaURLs[i].Equals(URL2Find)) return i;
+            }
+            return -1;
+        }
+
         internal void Add(MediaItem MediaItemRef)
         {
             MediaURLs.Add(MediaItemRef.Grab_MediaURL);
@@ -116,6 +125,12 @@ namespace e621_ReBot_v3.CustomControls
         {
             MediaURLs.Insert(index, MediaItemRef.Grab_MediaURL);
             InnerList.Insert(index, MediaItemRef);
+        }
+
+        internal new void Clear()
+        {
+            MediaURLs.Clear();
+            InnerList.Clear();
         }
     }
 }

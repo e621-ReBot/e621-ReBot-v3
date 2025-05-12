@@ -191,10 +191,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemTemp;
             }
-            lock (Module_Grabber._Grabbed_MediaItems)
-            {
-                Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-            }
             Module_Grabber.Report_Info($"Finished grabbing: {Post_URL}");
         }
     }

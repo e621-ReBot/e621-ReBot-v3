@@ -48,6 +48,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                     {
                         MediaCounter++;
                         PicURL = ImageNode.Attributes["src"].Value;
+
+                        if (PicURL.Contains("overlays/writing")) //don't need writing thumb
+                        {
+                            continue;
+                        }
+
                         if (PicURL.Contains("overlays/video")) //if video
                         {
                             HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
@@ -80,6 +86,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                         Thread.Sleep(Module_Grabber.PauseBetweenImages);
                     }
                 }
+
+                string ArtistName = PostNode.SelectSingleNode(".//div[@class='elephant elephant_555753']/div[@class='content' and not(@id)]//a[text()]").Attributes["href"].Value;
 
                 foreach (string MediaURL in MediaList)
                 {
@@ -120,7 +128,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         MediaURL: MediaURL,
                         ThumbnailURL: ThumbURL,
                         MediaFormat: Media_Format,
-                        Artist: string.Empty);
+                        Artist: ArtistName);
                 }
             }
         }

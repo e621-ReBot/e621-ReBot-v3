@@ -452,7 +452,8 @@ namespace e621_ReBot_v3
                 {
                     TagList.Add(cTag.Value<string>());
                 }
-            };
+            }
+            ;
             MediaItemHolder.UP_Tags = string.Join(' ', TagList);
             GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
             if (GridVETemp != null)
@@ -767,6 +768,13 @@ namespace e621_ReBot_v3
             }
 
         DownloadInstead:
+
+            PB_Download.IsEnabled = false;
+            if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaItemHolder.Grab_MediaURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaItemHolder.Grab_MediaURL))
+            {
+                return;
+            }
+
             Module_Downloader.AddDownloadItem2Queue(
                PageURL: MediaItemHolder.Grab_PageURL,
                MediaURL: MediaItemHolder.Grab_MediaURL,
@@ -775,7 +783,6 @@ namespace e621_ReBot_v3
                Title: MediaItemHolder.Grab_Title,
                MediaFormat: MediaItemHolder.Grid_MediaFormat,
                MediaItemRef: MediaItemHolder);
-            PB_Download.IsEnabled = false;
         }
 
         private void PB_ViewFile_Click(object sender, RoutedEventArgs e)

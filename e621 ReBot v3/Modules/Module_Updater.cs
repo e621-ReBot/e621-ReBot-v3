@@ -46,14 +46,14 @@ namespace e621_ReBot_v3
 
         internal static void PreUpdateCheck()
         {
-                if (DateTime.UtcNow > AppSettings.Update_LastCheck.AddDays(AppSettings.Update_Interval))
-                {
-                    ThreadPool.QueueUserWorkItem(state => Check4Update());
-                }
-                else
-                {
-                    Window_Main._RefHolder.ReBot_Menu_ListBox.Visibility = Visibility.Visible;
-                }
+            if (DateTime.UtcNow > AppSettings.Update_LastCheck.AddDays(AppSettings.Update_Interval))
+            {
+                ThreadPool.QueueUserWorkItem(state => Check4Update());
+            }
+            else
+            {
+                Window_Main._RefHolder.ReBot_Menu_ListBox.Visibility = Visibility.Visible;
+            }
         }
 
         [GeneratedRegex(@"(?:.+/v)(\d\.\d+\.\d+\.\d+)")]

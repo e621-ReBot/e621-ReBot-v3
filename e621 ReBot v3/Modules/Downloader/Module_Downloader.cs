@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Formats.Asn1;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
@@ -54,6 +51,7 @@ namespace e621_ReBot_v3.Modules
                 //new Regex(@".+inkbunny.net/(s|gallery|scraps)/\w+"),
                 //new Regex(@".+inkbunny.net/submissionsviewall.php"),
                 //new Regex(@".+pixiv.net/\w+/(artworks|users)/\d+"),
+                new Regex(@".+pixiv.net/\w+/artworks/\d+"),
                 //new Regex(@".+www.hiccears.com/(contents|file)/.+"),
                 //new Regex(@".+www.hiccears.com/p/.+/illustrations"),
                 //new Regex(@".+x.com/.+/(media|status/\d+/?)"),
@@ -153,11 +151,14 @@ namespace e621_ReBot_v3.Modules
 
                 case 1: //Artist_Title_....
                     {
-                        if (DownloadItemRef.Grab_Title.Contains("Created by") || DownloadItemRef.Grab_Title.Contains("Plurk by"))
+                        List<string> TitleFilterList = new List<string> { "Created by", "Tweet by", "Plurk by" };
+                        string? TitleSubstring = DownloadItemRef.Grab_Title;
+
+                        if (string.IsNullOrEmpty(TitleSubstring) || TitleFilterList.Any(TitleName => TitleSubstring.Contains(TitleName)))
                         {
                             goto case 2;
                         }
-                        string TitleSubstring = DownloadItemRef.Grab_Title;
+
                         TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
                         NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName.Substring(0, 4)}.{DownloadItemRef.Grab_MediaFormat}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
@@ -166,6 +167,11 @@ namespace e621_ReBot_v3.Modules
 
                 case 2: //Artist_Original
                     {
+                        if (string.IsNullOrEmpty(DownloadItemRef.Grab_Artist))
+                        {
+                            break;
+                        }
+
                         NewFileName = $"{DownloadItemRef.Grab_Artist}_{FileName}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
                         break;
@@ -441,7 +447,7 @@ namespace e621_ReBot_v3.Modules
         }
 
         // - - - - - - - - - - - - - - - -
-        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, bool e6Download = false, MediaItem? MediaItemRef = null)
+        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null)
         {
             DownloadItem DownloadItemTemp = new DownloadItem()
             {
@@ -454,6 +460,7 @@ namespace e621_ReBot_v3.Modules
                 e6_PostID = e6PostID,
                 e6_PoolName = e6PoolName ?? string.Empty,
                 e6_PoolPostIndex = e6PoolPostIndex,
+                e6_Tags = e6Tags,
                 Is_e6Download = e6Download,
                 MediaItemRef = MediaItemRef
             };
@@ -657,7 +664,7 @@ namespace e621_ReBot_v3.Modules
             {
                 Report_Info($"Thumb DL Error @{DownloadVETemp._DownloadItemRef.Grab_ThumbnailURL}, Msg:{e.Error.Message}");
                 return;
-            } 
+            }
             if (e.Result == null) return; // same?
 
             using (MemoryStream MemoryStreamTemp = new MemoryStream(e.Result))
@@ -746,6 +753,10 @@ namespace e621_ReBot_v3.Modules
             if (FileInfoTemp.Exists)
             {
                 FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
+                if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
+                {
+                    File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
+                }
             }
 
             SessionDownloads++;
@@ -895,8 +906,8 @@ namespace e621_ReBot_v3.Modules
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
             if (File.Exists(FilePath))
             {
-                    DLThreadsWaiting++;
-                    return; // Don't need duplicates
+                DLThreadsWaiting++;
+                return; // Don't need duplicates
             }
 
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
@@ -997,11 +1008,7 @@ namespace e621_ReBot_v3.Modules
                         {
                             //Form_Loader._FormReference.BeginInvoke(new Action(() =>
                             //{
-                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.SuspendLayout();
-                            //    UIDrawController.SuspendDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
                             //    AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
-                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.ResumeLayout();
-                            //    UIDrawController.ResumeDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
                             //}));
                             DLThreadsWaiting++;
                             return;

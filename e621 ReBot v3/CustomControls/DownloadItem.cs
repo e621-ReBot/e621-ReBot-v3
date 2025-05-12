@@ -16,6 +16,7 @@
         internal string? e6_PostID;
         internal string? e6_PoolName;
         internal string? e6_PoolPostIndex;
+        internal string? e6_Tags;
         internal bool Is_e6Download = false;
 
         // = = = Grid stiff

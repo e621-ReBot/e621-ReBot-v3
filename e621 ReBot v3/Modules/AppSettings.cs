@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Uploader;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -18,6 +19,7 @@ namespace e621_ReBot_v3
         internal static readonly string GlobalUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0";
         internal static bool DevMode = false;
         internal static bool FirstRun = true;
+        internal static bool FirstRunSession = true;
         internal static string AppName = "e621 ReBot";
         internal static string? UserName;
         internal static string? UserID;
@@ -28,10 +30,12 @@ namespace e621_ReBot_v3
         internal static ushort Update_Interval = 1;
         internal static DateTime Update_LastCheck = DateTime.UtcNow.AddYears(-1);
         // - - - - - - - - - - - - - - - -
+        internal static bool BigMode = false;
         internal static bool Grid_SaveSession = true;
         // - - - - - - - - - - - - - - - -
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
+        internal static bool Download_SaveTags = false;
         internal static ushort NamingPattern_e6 = 0;
         internal static ushort NamingPattern_Web = 0;
         // - - - - - - - - - - - - - - - -
@@ -64,32 +68,44 @@ namespace e621_ReBot_v3
                 { "ThemeFocus", ((SolidColorBrush)Application.Current.Resources["ThemeFocus"]).Color.ToString()},
                 { "Update_Interval", Update_Interval },
                 { "Update_LastCheck", Update_LastCheck },
+                { "BigMode", BigMode },
                 { "Grid_SaveSession", Grid_SaveSession },
                 { "Download_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
+                { "Download_SaveTags", Download_SaveTags },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },
                 { "Browser_ClearCache", Browser_ClearCache },
                 { "Converter_DontConvertVideos", Converter_DontConvertVideos },
                 { "Note", Note }
             };
-            if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
-            {
-                JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
-                JArray MediaJArray = new JArray();
-                foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
-                {
-                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
-                    MediaJArray.Last["Grid_ThumbnailDLStart"] = false;
-                }
-                JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
-            }
             if (Bookmarks.Count > 0) JObjectTemp.Add("Bookmarks", JObject.FromObject(Bookmarks));
             if (Blacklist.Any()) JObjectTemp.Add("Blacklist", JArray.FromObject(Blacklist));
             if (MediaRecords.Any()) JObjectTemp.Add("MediaRecords", JObject.FromObject(MediaRecords));
             if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
             if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
             if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
+
+            JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
+            JArray? MediaJArray;
+            if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
+            {
+                MediaJArray = new JArray();
+                foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
+                {
+                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                }
+                JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
+            }
+            if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
+            {
+                MediaJArray = new JArray();
+                foreach (MediaItem MediaItemTemp in Module_RetryQueue._2Retry_MediaItems)
+                {
+                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                }
+                JObjectTemp.Add("RetryQueue", JArray.FromObject(MediaJArray));
+            }
 
             string SaveSettingsString = JsonConvert.SerializeObject(JObjectTemp, Formatting.Indented);
             File.WriteAllText("settings.json", SaveSettingsString);
@@ -118,7 +134,7 @@ namespace e621_ReBot_v3
                         case "UserName":
                             {
                                 UserName = LoadSettingsJObject["UserName"].Value<string>();
-                                AppName = $"e621 ReBot ({UserName})";
+                                AppName = $"e621 ReBot ({UserName ?? "<Name>"})";
                                 Window_Main._RefHolder.STB_AppName.Text = AppName;
                                 break;
                             }
@@ -162,12 +178,17 @@ namespace e621_ReBot_v3
                         case "Update_Interval":
                             {
                                 Update_Interval = LoadSettingsJObject["Update_Interval"].Value<ushort>();
-                                ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
+                                //((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
                                 break;
                             }
                         case "Update_LastCheck":
                             {
                                 Update_LastCheck = LoadSettingsJObject["Update_LastCheck"].Value<DateTime>();
+                                break;
+                            }
+                        case "BigMode":
+                            {
+                                BigMode = LoadSettingsJObject["BigMode"].Value<bool>();
                                 break;
                             }
                         case "Grid_SaveSession":
@@ -178,19 +199,12 @@ namespace e621_ReBot_v3
                         case "Grid_Session":
                             {
                                 JToken JTokenMedia = LoadSettingsJObject["Grid_Session"];
-                                lock (Module_Grabber._Grabbed_MediaItems)
+                                foreach (JToken MediaItemTokenTemp in JTokenMedia.Children())
                                 {
-                                    lock (Module_Grabber._Grabbed_MediaURLs)
-                                    {
-                                        foreach (JToken MediaItemTemp in JTokenMedia.Children())
-                                        {
-                                            Module_Grabber._Grabbed_MediaItems.Add(MediaItemTemp.ToObject<MediaItem>());
-                                            Module_Grabber._Grabbed_MediaURLs.Add(Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grab_MediaURL);
-                                            if (MediaItemTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
-                                        }
-                                    }
+                                    Module_Grabber._Grabbed_MediaItems.Add(MediaItemTokenTemp.ToObject<MediaItem>());
+                                    if (MediaItemTokenTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
                                 }
-                                Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
+                                //Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
                                 break;
                             }
                         case "Download_FolderLocation":
@@ -202,31 +216,37 @@ namespace e621_ReBot_v3
                         case "Download_ThreadsCount":
                             {
                                 Download_ThreadsCount = LoadSettingsJObject["Download_ThreadsCount"].Value<ushort>();
-                                ((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName($"RadionButton_DLT{Download_ThreadsCount}")).IsChecked = true;
+                                //((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName($"RadionButton_DLT{Download_ThreadsCount}")).IsChecked = true;
                                 Module_Downloader.DLThreadsWaiting = Download_ThreadsCount;
-                                Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
-                                for (int i = 0; i < Download_ThreadsCount; i++)
-                                {
-                                    Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
-                                }
+                                //Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
+                                //for (int i = 0; i < Download_ThreadsCount; i++)
+                                //{
+                                //    Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
+                                //}
+                                break;
+                            }
+                        case "Download_SaveTags":
+                            {
+                                Download_SaveTags = LoadSettingsJObject["Download_SaveTags"].Value<bool>();
+                                //(Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags).IsChecked = Download_SaveTags;
                                 break;
                             }
                         case "NamingPattern_e6":
                             {
                                 NamingPattern_e6 = LoadSettingsJObject["NamingPattern_e6"].Value<ushort>();
-                                ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
+                                //((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
                                 break;
                             }
                         case "NamingPattern_Web":
                             {
                                 NamingPattern_Web = LoadSettingsJObject["NamingPattern_Web"].Value<ushort>();
-                                ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
+                                //((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
                                 break;
                             }
                         case "Browser_ClearCache":
                             {
                                 Browser_ClearCache = LoadSettingsJObject["Browser_ClearCache"].Value<bool>();
-                                (Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
+                                //(Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
                                 break;
                             }
                         case "Converter_DontConvertVideos":
@@ -270,6 +290,30 @@ namespace e621_ReBot_v3
                                 QuickTags = LoadSettingsJObject["QuickTags"].ToObject<Dictionary<string, string>>();
                                 break;
                             }
+                        case "RetryQueue":
+                            {
+                                JToken JTokenMedia = LoadSettingsJObject["RetryQueue"];
+                                MediaItem? MediaItemTemp;
+                                foreach (JToken MediaItemTokenTemp in JTokenMedia.Children())
+                                {
+                                    MediaItemTemp = MediaItemTokenTemp.ToObject<MediaItem>();
+                                    int IndexCheck = -1;
+                                    if (Module_Grabber._Grabbed_MediaItems.Count > 0)
+                                    {
+                                        IndexCheck = Module_Grabber._Grabbed_MediaItems.FindURLIndex(MediaItemTemp.Grab_MediaURL);
+                                        if (IndexCheck >= 0)
+                                        {
+                                            Module_RetryQueue._2Retry_MediaItems.Add(Module_Grabber._Grabbed_MediaItems[IndexCheck]);
+                                            continue;
+                                        }
+                                    }
+                                    Module_RetryQueue._2Retry_MediaItems.Add(MediaItemTemp);
+                                }
+
+                                var test = Module_RetryQueue._2Retry_MediaItems[0];
+                                var test1 = Module_Grabber._Grabbed_MediaItems[0];
+                                break;
+                            }
                     }
                 }
 
@@ -282,6 +326,40 @@ namespace e621_ReBot_v3
             }
         }
 
+        internal static void SetLoadedSettings()
+        {
+            // - - - Settings
+
+            ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
+            Window_Main._RefHolder.SettingsCheckBox_BigMode.IsChecked = BigMode;
+            Window_Main._RefHolder.SettingsCheckBox_GridSaveSession.IsChecked = Grid_SaveSession;
+            Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache.IsChecked = Browser_ClearCache;
+
+            // - - - Jobs
+
+            while (Module_RetryQueue._2Retry_MediaItems.Count > 0)
+            {
+                Module_RetryQueue.MoveItem2UploadQueue(Module_RetryQueue._2Retry_MediaItems[0]);
+            }
+
+            // - - - Download
+
+            Window_Main._RefHolder.Download_DownloadFolderLocation.ToolTip = $"Current path: {Download_FolderLocation}";
+            ((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName($"RadionButton_DLT{Download_ThreadsCount}")).IsChecked = true;
+            Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
+            for (int i = 0; i < Download_ThreadsCount; i++)
+            {
+                Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
+            }
+            Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
+            ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
+            ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
+
+            // - - - Grid
+
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
+        }
+
         internal static void MediaRecord_Check(MediaItem MediaItemRef)
         {
             if (MediaRecords.ContainsKey(MediaItemRef.Grab_MediaURL)) MediaItemRef.UP_UploadedID = MediaRecords[MediaItemRef.Grab_MediaURL];
@@ -289,7 +367,7 @@ namespace e621_ReBot_v3
 
         internal static void MediaRecord_Add(MediaItem MediaItemRef)
         {
-            MediaRecords.Add(MediaItemRef.Grab_MediaURL, MediaItemRef.UP_UploadedID);
+            if (!MediaRecords.ContainsKey(MediaItemRef.Grab_MediaURL)) MediaRecords.Add(MediaItemRef.Grab_MediaURL, MediaItemRef.UP_UploadedID);
         }
 
         internal static void MediaRecord_Remove(MediaItem MediaItemRef)

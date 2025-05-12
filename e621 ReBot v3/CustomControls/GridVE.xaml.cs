@@ -94,10 +94,6 @@ namespace e621_ReBot_v3.CustomControls
         {
             Window_Main._RefHolder.DownloadCounterChange(_MediaItemRef.DL_Queued ? -1 : 0);
             Window_Main._RefHolder.UploadCounterChange(_MediaItemRef.UP_Queued ? -1 : 0);
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                Module_Grabber._Grabbed_MediaURLs.Remove(_MediaItemRef.Grab_MediaURL);
-            }
             lock (Module_Grabber._Grabbed_MediaItems)
             {
                 Module_Grabber._Grabbed_MediaItems.Remove(_MediaItemRef);

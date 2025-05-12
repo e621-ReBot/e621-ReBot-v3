@@ -289,7 +289,8 @@ namespace e621_ReBot_v3
                     MessageBox.Show(Window_Preview._RefHolder, $"{JSON_SimilarData}", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Error);
                     _RefHolder.Close();
                     return;
-                };
+                }
+                ;
 
                 JToken e6SimilarData = JObject.Parse(JSON_SimilarData)["posts"];
                 foreach (JObject e6Post in e6SimilarData.Children())
@@ -338,7 +339,8 @@ namespace e621_ReBot_v3
                     MessageBox.Show(Window_Preview._RefHolder, $"{JSON_SimilarData}", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Error);
                     _RefHolder.Close();
                     return;
-                };
+                }
+                ;
 
                 JArray e6SimilarData = JArray.Parse(JSON_SimilarData);
                 foreach (JObject e6Post in e6SimilarData.Children())

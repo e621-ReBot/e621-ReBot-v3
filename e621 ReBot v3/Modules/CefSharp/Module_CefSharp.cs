@@ -8,6 +8,7 @@ using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
+using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -244,23 +245,71 @@ namespace e621_ReBot_v3.Modules
                             break;
                         }
 
-                    case string Step3 when Step3.Equals($"https://e621.net/users/{AppSettings.UserID}/api_key/view"):
+                    case string Step3 when Step3.Equals($"https://e621.net/users/{AppSettings.UserID}/api_key"):
                         {
-                            Module_Tutorial.Step_3();
+                            Module_Tutorial.Step_3(true);
                             break;
                         }
                 }
                 return;
             }
+            else
+            {
+                if (AppSettings.FirstRunSession)
+                {
+                    switch (CefAdress)
+                    {
+                        case "https://e621.net/posts":
+                            {
+                                HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+                                HtmlDocumentTemp.LoadHtml(BrowserHTMLSource);
 
-            //if (CefAdress.Contains("mastodon.social/@"))
-            //{
-            //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='status__content__spoiler-link']\").forEach(button=>button.click())");
-            //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='spoiler-button__overlay']\").forEach(button=>button.click())");
-            //}
+                                string UserNameString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-name']").Attributes["content"].Value;
+                                string UserIDString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-id']").Attributes["content"].Value;
 
-            //Module_Grabber.GrabEnabler(CefAdress);
-            //Module_Downloader.DownloadEnabler(CefAdress);
+                                if (string.IsNullOrEmpty(AppSettings.UserName))
+                                {
+                                    AppSettings.UserName = UserNameString;
+                                    AppSettings.UserID = UserIDString;
+                                }
+
+                                if (!UserNameString.Equals("Anonymous") && AppSettings.UserName.Equals(UserNameString))
+                                {
+                                    MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "A different username has been detected, you might have logged in into a different account or changed your username.\n\nWould you like to go and regenerate your API key?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                    if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                    {
+                                        LoadURL($"https://e621.net/users/{UserIDString}/api_key");
+                                        return;
+                                    }
+                                }
+
+                                AppSettings.AppName = $"e621 ReBot ({AppSettings.UserName})";
+                                Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
+                                AppSettings.FirstRunSession = false;
+                                break;
+                            }
+
+                        case string Step3 when Step3.Equals($"https://e621.net/users/{AppSettings.UserID}/api_key"):
+                            {
+                                Module_Tutorial.Step_3(false);
+
+                                AppSettings.AppName = $"e621 ReBot ({AppSettings.UserName})";
+                                Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
+                                AppSettings.FirstRunSession = false;
+                                break;
+                            }
+                    }
+                }
+
+                //if (CefAdress.Contains("mastodon.social/@"))
+                //{
+                //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='status__content__spoiler-link']\").forEach(button=>button.click())");
+                //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='spoiler-button__overlay']\").forEach(button=>button.click())");
+                //}
+
+                //Module_Grabber.GrabEnabler(CefAdress);
+                //Module_Downloader.DownloadEnabler(CefAdress);
+            }
         }
     }
 }

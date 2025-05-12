@@ -229,14 +229,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
             }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
-            }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)
             {

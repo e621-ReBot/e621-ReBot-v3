@@ -159,7 +159,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = PostNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value.Replace("files/screen", "files/full");
                 }
 
-                if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                 {
                     SkipCounter++;
                 }
@@ -179,6 +179,11 @@ namespace e621_ReBot_v3.Modules.Grabber
                     MediaCounter++;
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
                     Post_MediaURL = ImageNode.Attributes["src"].Value;
+
+                    if (Post_MediaURL.Contains("overlays/writing")) //don't need writing thumb
+                    {
+                        continue;
+                    }
 
                     if (Post_MediaURL.Contains("overlays/video")) //if video
                     {
@@ -207,7 +212,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         }
                     }
 
-                    if (Module_Grabber._Grabbed_MediaURLs.Contains(Post_MediaURL))
+                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
@@ -233,14 +238,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;
-            }
-            lock (Module_Grabber._Grabbed_MediaURLs)
-            {
-                foreach (MediaItem MediaItemTemp in MediaItemList)
-                {
-                    Post_MediaURL = MediaItemTemp.Grab_MediaURL;
-                    Module_Grabber._Grabbed_MediaURLs.Add(Post_MediaURL);
-                }
             }
             string PrintText = $"Finished grabbing: {Post_URL}";
             if (SkipCounter > 0)

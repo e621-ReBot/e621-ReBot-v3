@@ -100,6 +100,8 @@ namespace e621_ReBot_v3.Modules
 
                 Credit_UploadTotal = UserJObject["upload_limit"].Value<ushort>();
 
+                AppSettings.UserName = UserJObject["name"].Value<string>(); //In case user changes name
+
                 RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}"));
                 lock (Module_e621APIController.BackgroundTasks)
                 {

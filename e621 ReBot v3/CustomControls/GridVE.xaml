@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:e621_ReBot_v3.CustomControls"
              mc:Ignorable="d"
-             Width="200" Height="200" MaxWidth="200" MaxHeight="200" MinWidth="160" MinHeight="160" Margin="2" Background="Transparent" ScrollViewer.VerticalScrollBarVisibility="Disabled" UseLayoutRounding="True" SnapsToDevicePixels="True" IsTabStop="False" MouseLeftButtonDown="GridVE_UserControl_MouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0, 0" ContextMenuOpening="GridVE_UserControl_ContextMenuOpening">
+             Width="200" Height="200" MaxWidth="220" MaxHeight="220" MinWidth="160" MinHeight="160" Margin="2" Background="Transparent" ScrollViewer.VerticalScrollBarVisibility="Disabled" UseLayoutRounding="True" SnapsToDevicePixels="True" IsTabStop="False" MouseLeftButtonDown="GridVE_UserControl_MouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0, 0" ContextMenuOpening="GridVE_UserControl_ContextMenuOpening">
 
     <UserControl.Resources>
         <Style x:Key="cCheckBoxUP" TargetType="{x:Type CheckBox}">
@@ -99,7 +99,7 @@
     </UserControl.ContextMenu>
 
     <Grid>
-        <Image x:Name="cThumbnail_Image" IsHitTestVisible="False" Source="/Resources/MainWindow/E6Image_Loading.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"/>
+        <Image x:Name="cThumbnail_Image" IsHitTestVisible="False" Source="/Resources/MainWindow/E6Image_Loading.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True" StretchDirection="DownOnly"/>
         
         <Grid Margin="2">
             <local:Custom_TextWithOutline x:Name="cTagWarning_TextBlock" Text="T" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontWeight="Black" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="16" Height="28" Margin="0,0,1,16" ToolTip="Media has less than minimum required tags.&#xA;Uploading like this may lead to getting a record." FontSize="20"/>

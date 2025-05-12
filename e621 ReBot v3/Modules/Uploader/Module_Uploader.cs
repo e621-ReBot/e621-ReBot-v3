@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Handlers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
+using e621_ReBot_v3.Modules.Uploader;
 using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules
@@ -24,6 +26,7 @@ namespace e621_ReBot_v3.Modules
             Upload_BGW.RunWorkerCompleted += UploadBGW_WorkDone;
             _UploadTimer.Tick += UploadTimer_Tick;
             _UploadDisableTimer.Tick += UploadDisableTimer_Tick;
+            e621_HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.AppName);
         }
 
         internal static void Media2BigCheck(MediaItem MediaItemRef)
@@ -117,7 +120,7 @@ namespace e621_ReBot_v3.Modules
             }
         }
 
-        private static void UploadTreeView_CreateJob(MediaItem MediaItemRef)
+        internal static void UploadTreeView_CreateJob(MediaItem MediaItemRef)
         {
             TreeViewItem? TreeViewItemParent = new TreeViewItem
             {
@@ -185,7 +188,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static void Report_Error(string StatusMessage, string TitleMessage)
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            Window_Main._RefHolder.Dispatcher.Invoke(() =>
             {
                 Window_Main._RefHolder.Upload_CheckBox.IsChecked = false;
                 MessageBox.Show(Window_Main._RefHolder, StatusMessage, TitleMessage, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -213,39 +216,24 @@ namespace e621_ReBot_v3.Modules
                     switch (TaskName)
                     {
                         case "Upload":
-                            {
-                                if (Module_Credit.Credit_UploadHourly == 0 || Module_Credit.Credit_UploadHourly == 0)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    NoTask = false;
-                                }
-                                break;
-                            }
                         case "ReplaceInferior":
                             {
-                                if (Module_Credit.Credit_UploadHourly == 0 || Module_Credit.Credit_UploadHourly == 0)
+                                if (Module_Credit.Credit_UploadHourly == 0 || Module_Credit.Credit_UploadTotal == 0)
                                 {
-                                    continue;
+                                    Module_Credit.Credit_UpdateDisplay();
+                                    break;
                                 }
-                                else
-                                {
-                                    NoTask = false;
-                                }
+                                NoTask = false;
                                 break;
                             }
+                        //see what to do when upload fails
                         case "CopyNotes":
                             {
                                 if (Module_Credit.Credit_Notes == 0)
                                 {
                                     continue;
                                 }
-                                else
-                                {
-                                    NoTask = false;
-                                }
+                                NoTask = false;
                                 break;
                             }
                         case "MoveChildren":
@@ -260,10 +248,7 @@ namespace e621_ReBot_v3.Modules
                                 {
                                     continue;
                                 }
-                                else
-                                {
-                                    NoTask = false;
-                                }
+                                NoTask = false;
                                 break;
                             }
                     }
@@ -273,27 +258,26 @@ namespace e621_ReBot_v3.Modules
             DoTask:
                 if (NoTask)
                 {
-                    //disable upload or put into retry
+                    //disable upload or put into retry here
+                    //Module_RetryQueue.MoveItem2RetryQueue(_2Upload_MediaItems[0]);
                 }
                 else
                 {
+                    if (string.IsNullOrEmpty(TaskName)) return;
+
                     UploadMediaItemHolder = _2Upload_MediaItems[0];
+                    int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count;
                     if (ParentJobNode.Items.Count == 1)
                     {
-                        //Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
-                        //lock (_2Upload_MediaItems)
-                        //{
-                        //    _2Upload_MediaItems.RemoveAt(0);
-                        //}
-                        ((TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0]).Visibility = Visibility.Collapsed;
-                        int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count - 1;
-                        Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
+                        ParentJobNode.Visibility = Visibility.Collapsed;
+                        NodeCount--;
                     }
                     else
                     {
-                        ParentJobNode.Items.RemoveAt(0);
+                        JobTreeViewItem = (TreeViewItem)ParentJobNode.Items[0];
+                        JobTreeViewItem.Visibility = Visibility.Collapsed;
                     }
-                    if (string.IsNullOrEmpty(TaskName)) return;
+                    Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
                     Upload_BGW.RunWorkerAsync(TaskName);
                     Report_WorkingOn(UploadMediaItemHolder.Grab_MediaURL);
                 }
@@ -343,21 +327,47 @@ namespace e621_ReBot_v3.Modules
             Report_Status("Waiting...");
             Module_Credit.Credit_UpdateDisplay();
 
+            TreeViewItem ParentJobNode = (TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0];
+            TreeViewItem JobTreeViewItem = (TreeViewItem)ParentJobNode.Items[0];
             if (FailedUploadTask)
             {
-                ((TreeViewItem)Window_Main._RefHolder.Upload_TreeView.Items[0]).Visibility = Visibility.Visible;
-                int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count - 1;
-                Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
+                Window_Main._RefHolder.Upload_CheckBox.IsChecked = false; //already disabled in report error
+                Module_RetryQueue.MoveItem2RetryQueue(_2Upload_MediaItems[0]);
+                if (ParentJobNode.Items.Count == 1)
+                {
+                    Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
+                }
+                else
+                {
+                    ParentJobNode.Items.RemoveAt(0);
+                }
+                //if (ParentJobNode.Items.Count == 1)
+                //{
+                //    ParentJobNode.Visibility = Visibility.Visible;
+                //}
+                //else
+                //{
+                //    JobTreeViewItem.Visibility = Visibility.Visible;
+                //}
                 FailedUploadTask = false;
             }
             else
             {
-                Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
-                lock (_2Upload_MediaItems)
+                if (ParentJobNode.Items.Count == 1)
                 {
-                    _2Upload_MediaItems.RemoveAt(0);
+                    Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
+                    lock (_2Upload_MediaItems)
+                    {
+                        _2Upload_MediaItems.RemoveAt(0);
+                    }
+                }
+                else
+                {
+                    ParentJobNode.Items.RemoveAt(0);
                 }
             }
+            int NodeCount = Window_Main._RefHolder.Upload_TreeView.Items.Count;
+            Window_Main._RefHolder.Upload_CheckBox.Content = $"Uploader{(NodeCount > 0 ? $" ({NodeCount})" : null)}";
 
             //TreeView TreeViewUploadRef = Window_Main._RefHolder.Upload_TreeView;
             //if (TreeViewUploadRef.Items.Count > 0)
@@ -375,7 +385,10 @@ namespace e621_ReBot_v3.Modules
             UploadMediaItemHolder = null;
         }
 
-        internal static void E621UploadRequest(string SendAddress, string SendMethod, Dictionary<string, string> SendDictionary, out HttpWebResponse? e621HttpWebResponse, out string? e621StringResponse, in byte[]? bytes2Send = null)
+        private static readonly HttpClientHandler e621_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+        private static readonly ProgressMessageHandler e621_ProgressMessageHandler = new ProgressMessageHandler(e621_HttpClientHandler);
+        private static readonly HttpClient e621_HttpClient = new HttpClient(e621_ProgressMessageHandler) { Timeout = TimeSpan.FromSeconds(600) };
+        internal static void E621UploadRequest(string SendAddress, string SendMethod, Dictionary<string, string> SendDictionary, out HttpResponseMessage? e621HttpResponseMessage, out string? e621StringResponse, in byte[]? bytes2Send = null)
         {
             string MPF_Boundary = $"----e621 ReBot----";
             MultipartFormDataContent EncodedContent = new MultipartFormDataContent(MPF_Boundary);
@@ -393,64 +406,25 @@ namespace e621_ReBot_v3.Modules
             }
             //string PostText = EncodedContent.ReadAsStringAsync().Result.ToString();
 
-            using (Stream EncodedContentStream = EncodedContent.ReadAsStreamAsync().Result)
+            using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(new HttpMethod(SendMethod), SendAddress))
             {
-                HttpWebRequest e6Uploader = (HttpWebRequest)WebRequest.Create(SendAddress);
-                e6Uploader.UserAgent = AppSettings.AppName;
-                e6Uploader.ContentType = $"multipart/form-data; boundary={MPF_Boundary}";
-                e6Uploader.ContentLength = EncodedContentStream.Length;
-                e6Uploader.Method = SendMethod;
-                if (bytes2Send == null)
-                {
-                    e6Uploader.Timeout = 33333; // timeout is for request start until response end
-                    EncodedContentStream.CopyTo(e6Uploader.GetRequestStream());
-                }
-                else
+                HttpRequestMessageTemp.Content = EncodedContent;
+
+                if (bytes2Send != null)
                 {
                     Report_Status("Uploading Media...0%");
-                    e6Uploader.AllowWriteStreamBuffering = false;
-                    e6Uploader.SendChunked = true;
-                    e6Uploader.Timeout = 99999; // timeout is for request start until response end    
-                    float SentBytesCount = 0;
-                    using (Stream UploadStream = e6Uploader.GetRequestStream())
-                    {
-                        byte[] UploadBuffer = new byte[4096]; //new byte[65536]; // 64 kB buffer
-                        int ReadBytes;
-                        using (Stream InputStream = EncodedContentStream)
-                        {
-                            while (SentBytesCount < EncodedContentStream.Length)
-                            {
-                                ReadBytes = InputStream.Read(UploadBuffer, 0, UploadBuffer.Length);
-                                UploadStream.Write(UploadBuffer, 0, ReadBytes);
-                                float ReportPercentage = SentBytesCount / EncodedContentStream.Length;
-                                Report_Status($"Uploading Media...{ReportPercentage:P0}");
-                                SentBytesCount += ReadBytes;
-                            }
-                        }
-                    }
-                    Report_Status("Uploading Media...100%");
+                    e621_ProgressMessageHandler.HttpSendProgress += E621_ProgressMessageHandler_HttpSendProgress;
                 }
-
-                Report_Status("Waiting for e621 response...");
-                e621HttpWebResponse = null;
-                e621StringResponse = null;
-                try
-                {
-                    e621HttpWebResponse = (HttpWebResponse)e6Uploader.GetResponse();
-                }
-                catch (WebException webex)
-                {
-                    e621HttpWebResponse = (HttpWebResponse)webex.Response;
-                }
-                finally
-                {
-                    using (StreamReader StreamReaderTemp = new StreamReader(e621HttpWebResponse.GetResponseStream()))
-                    {
-                        e621StringResponse = StreamReaderTemp.ReadToEnd();
-                    }
-                    // e6Response.Dispose()
-                }
+                HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.Send(HttpRequestMessageTemp);
+                e621StringResponse = HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                e621HttpResponseMessage = HttpResponseMessageTemp;
             }
+            if (bytes2Send != null) e621_ProgressMessageHandler.HttpSendProgress -= E621_ProgressMessageHandler_HttpSendProgress;
+        }
+
+        private static void E621_ProgressMessageHandler_HttpSendProgress(object? sender, HttpProgressEventArgs e)
+        {
+            Report_Status($"Uploading Media...{e.ProgressPercentage}%");
         }
 
         private static void SuccessfulUpload_DisplayUpdates(MediaItem MediaItemRef, string PostID, bool Save2DB = true)
@@ -524,7 +498,7 @@ namespace e621_ReBot_v3.Modules
                         string VideoFileName = MediaItemRef.Grab_MediaURL.Remove(MediaItemRef.Grab_MediaURL.Length - 4);
                         VideoFileName = $"{VideoFileName.Substring(VideoFileName.LastIndexOf('/') + 1)}.webm";
                         UploadedURL4Report = $"{VideoFileName}, converted from {MediaItemRef.Grab_PageURL}";
-                        Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -b:a 192k -b:v 2000k -minrate 1500k -maxrate 2500k -crf 16 -quality good -speed 4 -pass 2";
+                        Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -b:a 192k -crf 24 -b:v 4M realtime -cpu-used 2";
                         isByteUpload = true;
                         break;
                     }
@@ -613,10 +587,10 @@ namespace e621_ReBot_v3.Modules
             POST_Dictionary.Add("login", AppSettings.UserName);
             POST_Dictionary.Add("api_key", Module_Cryptor.Decrypt(AppSettings.APIKey));
 
-            HttpWebResponse? e621HttpWebResponse;
-            string? e621StringResponse;
-            E621UploadRequest("https://e621.net/uploads.json", "POST", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse, in bytes2Send);
-            switch (e621HttpWebResponse.StatusCode)
+            HttpResponseMessage? e621HttpResponseMessage;
+            string? e621StringResponse = string.Empty;
+            E621UploadRequest("https://e621.net/uploads.json", "POST", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse, in bytes2Send);
+            switch (e621HttpResponseMessage.StatusCode)
             {
                 case HttpStatusCode.OK:
                     {
@@ -634,6 +608,8 @@ namespace e621_ReBot_v3.Modules
 
                 case HttpStatusCode.PreconditionFailed:
                     {
+                        //{{"success": false,"reason": "invalid","message": "error: ActiveRecord::RecordInvalid - Validation failed: Md5 duplicate of pending replacement on post #0123456"}}
+
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
                         if (Upload_ReponseData["reason"].Value<string>().Equals("duplicate"))
                         {
@@ -643,7 +619,7 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             FailedUploadTask = true;
-                            Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
+                            Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
                         }
                         break;
                     }
@@ -652,11 +628,11 @@ namespace e621_ReBot_v3.Modules
                     {
                         FailedUploadTask = true;
                         Report_Info($"Error uploading: {UploadedURL4Report}");
-                        Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
+                        Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
                         break;
                     }
             }
-            e621HttpWebResponse.Dispose();
+            e621HttpResponseMessage.Dispose();
         }
 
         private static void UploadTask_ReplaceInferior(MediaItem MediaItemRef)
@@ -738,10 +714,10 @@ namespace e621_ReBot_v3.Modules
             POST_Dictionary.Add("login", AppSettings.UserName);
             POST_Dictionary.Add("api_key", Module_Cryptor.Decrypt(AppSettings.APIKey));
 
-            HttpWebResponse? e621HttpWebResponse;
+            HttpResponseMessage? e621HttpResponseMessage;
             string? e621StringResponse;
-            E621UploadRequest($"https://e621.net/post_replacements.json?post_id={MediaItemRef.UP_Inferior_ID}", "POST", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse, in bytes2Send);
-            switch (e621HttpWebResponse.StatusCode)
+            E621UploadRequest($"https://e621.net/post_replacements.json?post_id={MediaItemRef.UP_Inferior_ID}", "POST", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse, in bytes2Send);
+            switch (e621HttpResponseMessage.StatusCode)
             {
                 case HttpStatusCode.OK:
                     {
@@ -766,12 +742,12 @@ namespace e621_ReBot_v3.Modules
                             string PostID = ResponseMessage.Substring(ResponseMessage.IndexOf('#') + 1);
                             if (PostID.Contains(';')) PostID = PostID.Substring(0, PostID.IndexOf(';'));
                             SuccessfulUpload_DisplayUpdates(MediaItemRef, PostID);
-                            Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}, duplicate of #{PostID}");
+                            Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}, duplicate of pending replacement on #{PostID}");
                         }
                         else
                         {
                             FailedUploadTask = true;
-                            Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
+                            Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
                         }
                         break;
                     }
@@ -780,11 +756,11 @@ namespace e621_ReBot_v3.Modules
                     {
                         FailedUploadTask = true;
                         Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}");
-                        Report_Error($"Some other Error {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
+                        Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
                         break;
                     }
             }
-            e621HttpWebResponse.Dispose();
+            e621HttpResponseMessage.Dispose();
         }
 
         private static async void UploadTask_CopyNotes(MediaItem MediaItemRef)
@@ -828,18 +804,19 @@ namespace e621_ReBot_v3.Modules
                     { "api_key", Module_Cryptor.Decrypt(AppSettings.APIKey) }
                 };
 
-                HttpWebResponse? e621HttpWebResponse;
+                HttpResponseMessage? e621HttpResponseMessage;
                 string? e621StringResponse;
-                E621UploadRequest("https://e621.net/uploads.json", "POST", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse);
-                switch (e621HttpWebResponse.StatusCode)
+                E621UploadRequest("https://e621.net/uploads.json", "POST", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse);
+                switch (e621HttpResponseMessage.StatusCode)
                 {
                     case HttpStatusCode.OK:
                         {
-                            if (Module_Credit.UserLevel < 30)
+                            if (Module_Credit.UserLevel < 30) //is user level needed?
                             {
                                 Module_Credit.Credit_Notes -= 1;
                                 Module_Credit.Timestamps_Notes.Add(DateTime.UtcNow.AddHours(1));
                             }
+                            MediaItemRef.UP_Inferior_HasNotes = null;
                             break;
                         }
 
@@ -864,11 +841,11 @@ namespace e621_ReBot_v3.Modules
 
                     default:
                         {
-                            MessageBox.Show(Window_Main._RefHolder, $" Error code {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Copy Notes", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Window_Main._RefHolder, $" Error code {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Copy Notes", MessageBoxButton.OK, MessageBoxImage.Error);
                             break;
                         }
                 }
-                e621HttpWebResponse.Dispose();
+                e621HttpResponseMessage.Dispose();
                 Thread.Sleep(500);
             }
         }
@@ -893,10 +870,10 @@ namespace e621_ReBot_v3.Modules
                     { "api_key", Module_Cryptor.Decrypt(AppSettings.APIKey) }
                 };
 
-                HttpWebResponse? e621HttpWebResponse;
+                HttpResponseMessage? e621HttpResponseMessage;
                 string? e621StringResponse;
-                E621UploadRequest($"https://e621.net/posts/{ChildrenList[i]}.json", "PATCH", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse);
-                switch (e621HttpWebResponse.StatusCode)
+                E621UploadRequest($"https://e621.net/posts/{ChildrenList[i]}.json", "PATCH", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse);
+                switch (e621HttpResponseMessage.StatusCode)
                 {
                     case HttpStatusCode.OK:
                         {
@@ -906,13 +883,14 @@ namespace e621_ReBot_v3.Modules
 
                     default:
                         {
-                            MessageBox.Show(Window_Main._RefHolder, $" Error code {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Copy Notes", MessageBoxButton.OK, MessageBoxImage.Error);
-                            break;
+                            MessageBox.Show(Window_Main._RefHolder, $" Error code {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Move Children", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
                         }
                 }
-                e621HttpWebResponse.Dispose();
+                e621HttpResponseMessage.Dispose();
                 Thread.Sleep(500);
             }
+            MediaItemRef.UP_Inferior_Children = null;
         }
 
         private static void UploadTask_FlagInferior(MediaItem MediaItemRef)
@@ -930,10 +908,10 @@ namespace e621_ReBot_v3.Modules
                 { "api_key", Module_Cryptor.Decrypt(AppSettings.APIKey) }
             };
 
-            HttpWebResponse? e621HttpWebResponse;
+            HttpResponseMessage? e621HttpResponseMessage;
             string? e621StringResponse;
-            E621UploadRequest("https://e621.net/post_flags.json", "POST", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse);
-            switch (e621HttpWebResponse.StatusCode)
+            E621UploadRequest("https://e621.net/post_flags.json", "POST", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse);
+            switch (e621HttpResponseMessage.StatusCode)
             {
                 case HttpStatusCode.Created:
                     {
@@ -970,11 +948,11 @@ namespace e621_ReBot_v3.Modules
                 default:
                     {
                         //FailedUploadTask = true;
-                        MessageBox.Show(Window_Main._RefHolder, $"Error code {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Flag Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Window_Main._RefHolder, $"Error code {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Flag Inferior", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                     }
             }
-            e621HttpWebResponse.Dispose();
+            e621HttpResponseMessage.Dispose();
         }
 
         private static void UploadTask_ChangeParent(MediaItem MediaItemRef)
@@ -991,20 +969,14 @@ namespace e621_ReBot_v3.Modules
                 { "api_key", Module_Cryptor.Decrypt(AppSettings.APIKey) }
             };
 
-            HttpWebResponse? e621HttpWebResponse;
+            HttpResponseMessage? e621HttpResponseMessage;
             string? e621StringResponse;
-            E621UploadRequest($"https://e621.net/posts/{MediaItemRef.UP_Inferior_ID}.json", "PATCH", POST_Dictionary, out e621HttpWebResponse, out e621StringResponse);
-            switch (e621HttpWebResponse.StatusCode)
+            E621UploadRequest($"https://e621.net/posts/{MediaItemRef.UP_Inferior_ID}.json", "PATCH", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse);
+            switch (e621HttpResponseMessage.StatusCode)
             {
                 case HttpStatusCode.OK:
                     {
                         //JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        Module_Credit.Credit_UploadHourly -= 1;
-                        if (Module_Credit.UserLevel < 30)
-                        {
-                            Module_Credit.Credit_Flags -= 1;
-                            Module_Credit.Timestamps_Flags.Add(DateTime.UtcNow.AddHours(1));
-                        }
                         Report_Info($"Changed parent #{MediaItemRef.UP_Inferior_ID} to #{MediaItemRef.UP_UploadedID}");
                         break;
                     }
@@ -1012,11 +984,11 @@ namespace e621_ReBot_v3.Modules
                 default:
                     {
                         //FailedUploadTask = true;
-                        MessageBox.Show(Window_Main._RefHolder, $"Error code {e621HttpWebResponse.StatusCode}\n{e621StringResponse}", "e621 ReBot - Change Parent", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Window_Main._RefHolder, $"Error code {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Change Parent", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                     }
             }
-            e621HttpWebResponse.Dispose();
+            e621HttpResponseMessage.Dispose();
         }
 
         // - - - - - - - - - - - - - - - -
