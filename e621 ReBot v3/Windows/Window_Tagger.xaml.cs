@@ -131,7 +131,7 @@ namespace e621_ReBot_v3
             {
                 List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
                 string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
-                if (!string.IsNullOrEmpty(DNPArtist) != null && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
+                if (!string.IsNullOrEmpty(DNPArtist) && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
                 {
                     Tags_TextBox.AppendText(" ");
                     Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
