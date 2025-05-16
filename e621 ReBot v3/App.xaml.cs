@@ -81,6 +81,43 @@ namespace e621_ReBot_v3
             base.OnExit(e);
         }
 
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            //int TryCount = 0;
+            //if (AppSettings.Browser_ClearCache)
+            //{
+            //    bool DeleteWorked = false;
+            //    do
+            //    {
+            //        try
+            //        {
+            //            TryCount++;
+            //            Directory.Delete("CefSharp Cache", true);
+            //            DeleteWorked = true;
+            //        }
+            //        catch (Exception)
+            //        {
+            //            Thread.Sleep(500);
+            //        }
+            //    } while (TryCount < 5 && DeleteWorked == false);
+            //}
+
+            //Newer CefSharp version broke something and files are getting locked while the application is running
+            //try and clear it up after process exits instead.
+
+            Process CleanupProcess = new Process();
+            ProcessStartInfo ProcessStartInfoTemp = new ProcessStartInfo
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = "cmd.exe",
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                Arguments = "/c timeout /t 1 && rmdir /s /q \"CefSharp Cache\"",
+                UseShellExecute = true,
+            };
+            CleanupProcess.StartInfo = ProcessStartInfoTemp;
+            CleanupProcess.Start();
+        }
+
         // - - - - - - - - - - - - - - - -
 
         [DllImport("User32.dll", EntryPoint = "SetForegroundWindow")]
@@ -158,5 +195,6 @@ namespace e621_ReBot_v3
                 }
             }
         }
+
     }
 }

@@ -164,22 +164,6 @@ namespace e621_ReBot_v3
             }
 
             AppSettings.SaveSettings();
-            if (AppSettings.Browser_ClearCache)
-            {
-                bool DeleteWorked = false;
-                do
-                {
-                    try
-                    {
-                        Directory.Delete("CefSharp Cache", true);
-                        DeleteWorked = true;
-                    }
-                    catch (Exception)
-                    {
-                        Thread.Sleep(500);
-                    }
-                } while (DeleteWorked == false);
-            }
 
             if (UploadQueueProcess != null) UploadQueueProcess.Kill();
             if (ConversionQueueProcess != null) ConversionQueueProcess.Kill();

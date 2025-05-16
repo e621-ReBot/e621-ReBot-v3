@@ -1,7 +1,7 @@
 ﻿<Application x:Class="e621_ReBot_v3.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="Windows/Window_Main.xaml" ShutdownMode="OnMainWindowClose" >
+             StartupUri="Windows/Window_Main.xaml" ShutdownMode="OnMainWindowClose" Exit="Application_Exit" >
     <Application.Resources>
         <Cursor x:Key="Cursor_Default">Resources/e621ReBot_CursorDefault.cur</Cursor>
         <Cursor x:Key="Cursor_ReBotNav">Resources/e621ReBot_CursorReBot.cur</Cursor>
