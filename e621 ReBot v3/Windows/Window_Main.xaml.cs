@@ -808,7 +808,7 @@ namespace e621_ReBot_v3
                     for (int i = 0; i < DifferenceRequired; i++)
                     {
                         Download_DownloadVEPanel.Children.Add(new DownloadVE());
-                        Module_Downloader.DLThreadsWaiting++;
+                        Module_Downloader.DLThreadsWaiting++;     
                     }
                 }
                 else

@@ -244,7 +244,7 @@
                             <TextBlock Text="Downloader" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0"/>
                         </Border>
 
-                        <Grid>
+                        <Grid MinWidth="820">
                             <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" Margin="128,0,128,0">
                                 <Grid>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Select the number of download threads.">
@@ -376,9 +376,9 @@
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left" Grid.Column="1" Margin="0,2,0,2">
                             <StackPanel x:Name="NamingPattern_Web_StackPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its original name." IsChecked="True"/>
-                                <RadioButton x:Name="RadionButton_NPWeb_1" Content="Artist__Title__...." Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and 4 characters of original name."/>
-                                <RadioButton x:Name="RadionButton_NPWeb_2" Content="Artist__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its artist and original filename."/>
-                            </StackPanel>
+                                <RadioButton x:Name="RadionButton_NPWeb_1" Content="Artist__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its artist and original filename."/>
+                                <RadioButton x:Name="RadionButton_NPWeb_2" Content="Artist__Title__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and original name."/>
+                                </StackPanel>
                         </Border>
                     </Grid>
                     <Button x:Name="Download_DownloadFolderLocation" Content="Change Download Location" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="165" Height="72" Cursor="Hand" Click="Download_DownloadFolderLocation_Click" Margin="664,0,0,8"/>

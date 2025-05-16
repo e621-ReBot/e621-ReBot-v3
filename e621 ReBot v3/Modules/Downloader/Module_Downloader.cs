@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -149,23 +150,7 @@ namespace e621_ReBot_v3.Modules
                         break;
                     }
 
-                case 1: //Artist_Title_....
-                    {
-                        List<string> TitleFilterList = new List<string> { "Created by", "Tweet by", "Plurk by" };
-                        string? TitleSubstring = DownloadItemRef.Grab_Title;
-
-                        if (string.IsNullOrEmpty(TitleSubstring) || TitleFilterList.Any(TitleName => TitleSubstring.Contains(TitleName)))
-                        {
-                            goto case 2;
-                        }
-
-                        TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
-                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName.Substring(0, 4)}.{DownloadItemRef.Grab_MediaFormat}";
-                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
-                        break;
-                    }
-
-                case 2: //Artist_Original
+                case 1: //Artist_Original
                     {
                         if (string.IsNullOrEmpty(DownloadItemRef.Grab_Artist))
                         {
@@ -173,6 +158,22 @@ namespace e621_ReBot_v3.Modules
                         }
 
                         NewFileName = $"{DownloadItemRef.Grab_Artist}_{FileName}";
+                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
+                        break;
+                    }
+
+                case 2: //Artist_Title_Original
+                    {
+                        List<string> TitleFilterList = new List<string> { "Created by", "Tweet by", "Plurk by" };
+                        string? TitleSubstring = DownloadItemRef.Grab_Title;
+
+                        if (string.IsNullOrEmpty(TitleSubstring) || TitleFilterList.Any(TitleName => TitleSubstring.Contains(TitleName)))
+                        {
+                            goto case 1;
+                        }
+
+                        TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName}.{DownloadItemRef.Grab_MediaFormat}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
                         break;
                     }
@@ -619,6 +620,8 @@ namespace e621_ReBot_v3.Modules
                     break;
                 }
             }
+            //WebClientSelected sometimes null
+
             WebClientSelected.Headers.Add(HttpRequestHeader.Referer, SiteReferer);
 
             switch (SiteReferer)
@@ -703,8 +706,8 @@ namespace e621_ReBot_v3.Modules
         private static void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
-
             string PicURL = DownloadVETemp._DownloadItemRef.Grab_MediaURL;
+
             if (e.Cancelled) //timeout detected, cancelled it;
             {
                 Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
@@ -746,20 +749,23 @@ namespace e621_ReBot_v3.Modules
                         throw e.Error;
                     }
                 }
-            }
-
-            string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
-            FileInfo FileInfoTemp = new FileInfo(TempFilePath);
-            if (FileInfoTemp.Exists)
-            {
-                FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
-                if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
+                else
                 {
-                    File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
+                    string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
+                    FileInfo FileInfoTemp = new FileInfo(TempFilePath);
+                    if (FileInfoTemp.Exists)
+                    {
+                        FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
+                        if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
+                        {
+                            File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
+                        }
+                    }
+
+                    SessionDownloads++;
                 }
             }
 
-            SessionDownloads++;
             DownloadVETemp._DownloadFinished = true;
             _DownloadVEFinisherTimer.Stop();
             _DownloadVEFinisherTimer.Start();
@@ -829,6 +835,7 @@ namespace e621_ReBot_v3.Modules
         // - - - - - - - - - - - - - - - -
 
         internal static DispatcherTimer _DownloadTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        private static readonly BackgroundWorker Download_BGW = new BackgroundWorker();
         private static void DownloadTimer_Tick(object? sender, EventArgs e)
         {
             if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true && _2Download_DownloadItems.Count > 0 && !Download_BGW.IsBusy)
@@ -838,7 +845,6 @@ namespace e621_ReBot_v3.Modules
         }
 
         internal static ushort DLThreadsWaiting = 4;
-        private static readonly BackgroundWorker Download_BGW = new BackgroundWorker();
         private static void DownloadBGW_Start(object? sender, DoWorkEventArgs e)
         {
             DownloadItem? DownloadItemTemp;
