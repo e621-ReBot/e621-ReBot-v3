@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -134,7 +135,7 @@ namespace e621_ReBot_v3.CustomControls
                 IsSelected = true;
                 if (Window_Preview._RefHolder == null)
                 {
-                    if (Window_Main._RefHolder.InitStarted)
+                    if (Window_Main._RefHolder.InitStarted && Module_CefSharp.CefSharpBrowser.IsInitialized)
                     {
                         new Window_Preview().Show();
                         Window_Preview._RefHolder.Nav2URL(_MediaItemRef);
@@ -254,7 +255,7 @@ namespace e621_ReBot_v3.CustomControls
             }
             else
             {
-                if (Window_Main._RefHolder.InitStarted)
+                if (Window_Main._RefHolder.InitStarted && Module_CefSharp.CefSharpBrowser.IsInitialized)
                 {
                     if (Module_CefSharp.BrowserAddress == null || !Module_CefSharp.BrowserAddress.Equals(e6Post)) Module_CefSharp.LoadURL(e6Post);
                     Window_Main._RefHolder.Activate();

@@ -294,6 +294,8 @@ namespace e621_ReBot_v3
         private void ActionAfterDelayTimer_Tick(object? sender, EventArgs e)
         {
             ActionAfterDelayTimer.Stop();
+            if (_RefHolder == null) return;
+
             MediaLoadedActions();
         }
 

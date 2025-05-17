@@ -170,6 +170,12 @@ namespace CefSharp
                             }
                             break;
                         }
+                    case "x-icon": //Ignore
+                        {
+                            //Why are they sending icons now?
+                            break;
+                        }
+
                     default:
                         {
                             Window_Preview._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Preview._RefHolder, $"{FileExt} file extension is not supported.", "e621 Rebot Preview Caching Error", MessageBoxButton.OK, MessageBoxImage.Error); });
