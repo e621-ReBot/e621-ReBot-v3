@@ -363,7 +363,6 @@ namespace e621_ReBot_v3.Modules
 
         internal static int DownloadNodeMax = 28;
         internal static int DownloadTreeViewPage = 0;
-
         internal static void UpdateDownloadTreeView()
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>

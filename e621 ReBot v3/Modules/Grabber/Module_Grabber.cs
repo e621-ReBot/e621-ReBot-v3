@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -358,19 +359,48 @@ namespace e621_ReBot_v3.Modules
                 {
                     HttpClientTemp.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
 
-                    using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, WebAddress))
-                    {
-                        if (NewgroundsSpecialRequest) HttpRequestMessageTemp.Headers.Add("X-Requested-With", "XMLHttpRequest");
+                    return GetPageResponseAsync(HttpClientTemp, WebAddress, NewgroundsSpecialRequest).Result;
+                }
+            }
+        }
 
-                        HttpResponseMessage HttpResponseMessageTemp = HttpClientTemp.SendAsync(HttpRequestMessageTemp).Result;
-                        if (HttpResponseMessageTemp.IsSuccessStatusCode)
+        internal static async Task<string?> GetPageResponseAsync(HttpClient HttpClientTemp, string WebAddress, bool NewgroundsSpecialRequest = false)
+        {
+            int TryCount = 0;
+            do
+            {
+                using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, WebAddress))
+                {
+                    if (NewgroundsSpecialRequest) HttpRequestMessageTemp.Headers.Add("X-Requested-With", "XMLHttpRequest");
+
+                    //Might need to handle timeout here, https://thomaslevesque.com/2018/02/25/better-timeout-handling-with-httpclient/
+                    using (CancellationTokenSource CancellationTokenSourceTemp = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                    {
+                        try
                         {
-                            return HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                            HttpResponseMessage HttpResponseMessageTemp = await HttpClientTemp.SendAsync(HttpRequestMessageTemp, CancellationTokenSourceTemp.Token);
+
+                            if (HttpResponseMessageTemp.IsSuccessStatusCode)
+                            {
+                                return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
+                            }
+                        }
+                        catch (TaskCanceledException) //handle timeout
+                        {
+                            HttpClientTemp.CancelPendingRequests();
+                            TryCount++;
+                            Thread.Sleep(500);
+                        }
+                        catch (Exception ex)
+                        {
+                            var breaker = 0;
                         }
                     }
                 }
-                return null;
             }
+            while (TryCount < 3);
+
+            return null;
         }
 
         internal static uint? GetMediaSize(string MediaURL)
