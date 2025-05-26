@@ -1,6 +1,6 @@
-﻿using System.Windows;
-using e621_ReBot_v3.CustomControls;
+﻿using e621_ReBot_v3.CustomControls;
 using HtmlAgilityPack;
+using System.Windows;
 
 namespace e621_ReBot_v3.Modules
 {

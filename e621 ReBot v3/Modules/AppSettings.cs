@@ -1,4 +1,9 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Uploader;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -6,11 +11,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules;
-using e621_ReBot_v3.Modules.Uploader;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3
 {

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Windows.Media;
-using Newtonsoft.Json;
 
 namespace e621_ReBot_v3.CustomControls
 {

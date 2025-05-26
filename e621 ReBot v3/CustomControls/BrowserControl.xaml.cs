@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CefSharp;
+using e621_ReBot_v3.Modules;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -6,8 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CefSharp;
-using e621_ReBot_v3.Modules;
 
 namespace e621_ReBot_v3.CustomControls
 {

@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using e621_ReBot_v3.Modules;
+using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using e621_ReBot_v3.Modules;
 
 namespace e621_ReBot_v3.CustomControls
 {

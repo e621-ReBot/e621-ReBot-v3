@@ -1,14 +1,14 @@
-﻿using System;
-using System.Drawing;
-using System.Net;
-using System.Web;
-using System.Windows;
-using CefSharp;
+﻿using CefSharp;
 using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using HtmlAgilityPack;
+using System;
+using System.Drawing;
+using System.Net;
+using System.Web;
+using System.Windows;
 
 namespace e621_ReBot_v3.Modules
 {

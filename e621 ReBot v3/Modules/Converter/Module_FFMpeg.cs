@@ -1,4 +1,6 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -8,8 +10,6 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using e621_ReBot_v3.CustomControls;
-using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules.Converter
 {

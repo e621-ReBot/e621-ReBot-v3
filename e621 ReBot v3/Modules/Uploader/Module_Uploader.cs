@@ -1,4 +1,8 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules.Converter;
+using e621_ReBot_v3.Modules.Uploader;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -11,10 +15,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules.Converter;
-using e621_ReBot_v3.Modules.Uploader;
-using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -105,6 +105,7 @@ namespace e621_ReBot_v3.Modules
                 }
             }
 
+            int UploadAdditionCounter = 0;
             lock (_2Upload_MediaItems)
             {
                 for (int i = StartIndex; i <= EndIndex; i++)
@@ -115,9 +116,16 @@ namespace e621_ReBot_v3.Modules
                     {
                         _2Upload_MediaItems.Add(MediaItemTemp);
                         UploadTreeView_CreateJob(MediaItemTemp);
+                        UploadAdditionCounter++;
                     }
                 }
             }
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                Window_Main._RefHolder.GBU_Change.Text = $"+{UploadAdditionCounter}";
+                Window_Main._RefHolder.GBU_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
+                Window_Main._RefHolder.GBU_Change.IsEnabled = false;
+            });
         }
 
         internal static void UploadTreeView_CreateJob(MediaItem MediaItemRef)

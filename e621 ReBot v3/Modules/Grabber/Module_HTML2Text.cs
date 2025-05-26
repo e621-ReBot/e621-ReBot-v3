@@ -1,7 +1,7 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Linq;
 using System.Net;
-using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {

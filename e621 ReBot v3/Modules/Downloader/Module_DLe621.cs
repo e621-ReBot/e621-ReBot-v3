@@ -1,11 +1,11 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using HtmlAgilityPack;
-using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {

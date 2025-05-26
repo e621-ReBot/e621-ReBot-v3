@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using e621_ReBot_v3.CustomControls;
+﻿using e621_ReBot_v3.CustomControls;
+using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Uploader
 {

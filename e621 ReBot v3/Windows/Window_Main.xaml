@@ -6,6 +6,25 @@
         mc:Ignorable="av" 
         Title="e621 ReBot v3" Width="1280" Height="720" Icon="/Windows/ReBot_Icon.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" Activated="Window_Activated" KeyDown="Window_KeyDown" Closing="Window_Closing">
 
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="FadeAnimation">
+            <Setter Property="IsEnabled" Value="False"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.1"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
@@ -162,7 +181,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
-
+                    <customcontrols:Custom_TextWithOutline Text="There is no media to show, please grab something first." FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource ThemeFocus}" StrokeThickness="2"/>
                     <WrapPanel Grid.Row="0" x:Name="Grid_GridVEPanel" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="{DynamicResource ThemeBackground}" Margin="8,8,0,16"/>
 
                     <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,1,0,0"/>
@@ -176,7 +195,9 @@
                     <Border BorderBrush="Black" HorizontalAlignment="Right" Grid.Row="1" BorderThickness="0,0,1,0" Height="22" VerticalAlignment="Top" Margin="0,2,32,0"/>
 
                     <DockPanel LastChildFill="False" Grid.Row="1" HorizontalAlignment="Center" Margin="0,1,0,0">
+
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock x:Name="GBD_Change" Text="+420" IsHitTestVisible="False" Width="32" VerticalAlignment="Center" Foreground="RoyalBlue" Margin="0,0,4,0" Style="{StaticResource FadeAnimation}"/>
                             <Button x:Name="GBD_Download" Width="96" Content="▼ Download ▼" BorderThickness="1,0,1,0" Margin="-1,0,0,0" IsEnabled="False" ToolTip="Download all selected media.&#xA;Shift+Click to download selected media on this page only.&#xA;&#xA;Media that is already downloaded will be skipped." Click="GBD_Download_Click">
                                 <Button.Style>
                                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
@@ -220,7 +241,9 @@
                                     </Style>
                                 </Button.Style>
                             </Button>
+                            <TextBlock x:Name="GBU_Change" Text="+420" IsHitTestVisible="False" Width="32" Foreground="LimeGreen" VerticalAlignment="Center" Margin="4,0,0,0" Style="{StaticResource FadeAnimation}"/>
                         </StackPanel>
+
                     </DockPanel>
 
                     <TextBlock x:Name="GBTB_Center" Grid.Row="0" TextWrapping="Wrap" Text="2 / 3" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsHitTestVisible="False" Foreground="{DynamicResource ThemeForeground}" Margin="0,0,0,2"/>
@@ -378,7 +401,7 @@
                                 <RadioButton x:Name="RadionButton_NPWeb_0" Content="Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its original name." IsChecked="True"/>
                                 <RadioButton x:Name="RadionButton_NPWeb_1" Content="Artist__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named by its artist and original filename."/>
                                 <RadioButton x:Name="RadionButton_NPWeb_2" Content="Artist__Title__Original" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_NamingWeb_Click" ToolTip="All downloaded media will be named (whenever possible) by its artist, title and original name."/>
-                                </StackPanel>
+                            </StackPanel>
                         </Border>
                     </Grid>
                     <Button x:Name="Download_DownloadFolderLocation" Content="Change Download Location" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="165" Height="72" Cursor="Hand" Click="Download_DownloadFolderLocation_Click" Margin="664,0,0,8"/>
@@ -595,7 +618,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <Grid Margin="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>

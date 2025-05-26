@@ -1,11 +1,12 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules.Grabber;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,8 +16,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules.Grabber;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -390,10 +389,6 @@ namespace e621_ReBot_v3.Modules
                             HttpClientTemp.CancelPendingRequests();
                             TryCount++;
                             Thread.Sleep(500);
-                        }
-                        catch (Exception ex)
-                        {
-                            var breaker = 0;
                         }
                     }
                 }

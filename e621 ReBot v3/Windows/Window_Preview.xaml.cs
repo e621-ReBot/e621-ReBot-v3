@@ -1,4 +1,9 @@
-﻿using System;
+﻿using CefSharp;
+using CefSharp.Wpf;
+using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,11 +18,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using CefSharp;
-using CefSharp.Wpf;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules;
-using Newtonsoft.Json.Linq;
 using DownloadItem = e621_ReBot_v3.CustomControls.DownloadItem;
 
 namespace e621_ReBot_v3

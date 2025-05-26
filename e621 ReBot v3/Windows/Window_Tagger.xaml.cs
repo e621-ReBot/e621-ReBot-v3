@@ -1,16 +1,15 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules;
 
 namespace e621_ReBot_v3
 {

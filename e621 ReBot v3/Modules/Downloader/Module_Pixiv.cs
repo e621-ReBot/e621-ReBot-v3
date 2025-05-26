@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -9,7 +10,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.VisualBasic.FileIO;
 
 namespace e621_ReBot_v3.Modules
 {

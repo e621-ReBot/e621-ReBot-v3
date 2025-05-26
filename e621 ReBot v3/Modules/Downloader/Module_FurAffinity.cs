@@ -1,5 +1,5 @@
-﻿using System.Net;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
+using System.Net;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {

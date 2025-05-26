@@ -1,10 +1,10 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using e621_ReBot_v3.CustomControls;
 
 namespace e621_ReBot_v3
 {

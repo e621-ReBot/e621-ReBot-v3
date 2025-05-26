@@ -1,7 +1,10 @@
-﻿using System;
+﻿using CefSharp;
+using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules.Converter;
+using e621_ReBot_v3.Modules.Downloader;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -16,10 +19,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using CefSharp;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules.Converter;
-using e621_ReBot_v3.Modules.Downloader;
 using DownloadItem = e621_ReBot_v3.CustomControls.DownloadItem;
 
 namespace e621_ReBot_v3.Modules

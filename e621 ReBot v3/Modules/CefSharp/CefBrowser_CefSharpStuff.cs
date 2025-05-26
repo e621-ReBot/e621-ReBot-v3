@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Threading;
-using CefSharp.Enums;
+﻿using CefSharp.Enums;
 using CefSharp.Handler;
 using CefSharp.Structs;
 using e621_ReBot_v3;
@@ -16,6 +7,15 @@ using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace CefSharp
 {

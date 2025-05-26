@@ -1,4 +1,9 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Downloader;
+using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,11 +14,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules;
-using e621_ReBot_v3.Modules.Downloader;
-using HtmlAgilityPack;
-using Newtonsoft.Json.Linq;
 
 namespace e621_ReBot_v3
 {

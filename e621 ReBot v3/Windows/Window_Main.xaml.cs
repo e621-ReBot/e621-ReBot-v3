@@ -1,4 +1,11 @@
-﻿using System;
+﻿using CefSharp;
+using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Converter;
+using e621_ReBot_v3.Modules.Downloader;
+using e621_ReBot_v3.Modules.Uploader;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,13 +19,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using CefSharp;
-using e621_ReBot_v3.CustomControls;
-using e621_ReBot_v3.Modules;
-using e621_ReBot_v3.Modules.Converter;
-using e621_ReBot_v3.Modules.Downloader;
-using e621_ReBot_v3.Modules.Uploader;
-using Microsoft.Win32;
 
 namespace e621_ReBot_v3
 {
@@ -421,6 +421,7 @@ namespace e621_ReBot_v3
             GB_Left.Visibility = CurrentPage > 1 ? Visibility.Visible : Visibility.Hidden;
             GB_Right.Visibility = CurrentPage < TotalPages ? Visibility.Visible : Visibility.Hidden;
             GB_Clear.IsEnabled = Grid_GridVEPanel.Children.Count != 0;
+            Grid_GridVEPanel.Opacity = Grid_GridVEPanel.Children.Count == 0 ? 0 : 1;
         }
 
         private void GB_Left_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -533,7 +534,8 @@ namespace e621_ReBot_v3
 
             UploadCounterChange(0);
             DownloadCounterChange(0);
-            GB_Clear.IsEnabled = Grid_GridVEPanel.Children.Count != 0;
+            //GB_Clear.IsEnabled = Grid_GridVEPanel.Children.Count != 0;     
+
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
@@ -663,6 +665,7 @@ namespace e621_ReBot_v3
 
         private void GBD_Download_Click(object sender, RoutedEventArgs e)
         {
+            int DownloadAdditionCounter = 0;
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
                 foreach (GridVE GridVETemp in Grid_GridVEPanel.Children)
@@ -683,6 +686,7 @@ namespace e621_ReBot_v3
                             Title: MediaItemTemp.Grab_Title,
                             MediaFormat: MediaItemTemp.Grid_MediaFormat,
                             MediaItemRef: MediaItemTemp);
+                        DownloadAdditionCounter++;
                     }
                 }
             }
@@ -705,10 +709,14 @@ namespace e621_ReBot_v3
                             Title: MediaItemTemp.Grab_Title,
                             MediaFormat: MediaItemTemp.Grid_MediaFormat,
                             MediaItemRef: MediaItemTemp);
+                        DownloadAdditionCounter++;
                     }
                 }
             }
             Module_Downloader.UpdateDownloadTreeView();
+            GBD_Change.Text = $"+{DownloadAdditionCounter}";
+            GBD_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
+            GBD_Change.IsEnabled = false;
         }
 
         private void GBD_Download_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -808,7 +816,7 @@ namespace e621_ReBot_v3
                     for (int i = 0; i < DifferenceRequired; i++)
                     {
                         Download_DownloadVEPanel.Children.Add(new DownloadVE());
-                        Module_Downloader.DLThreadsWaiting++;     
+                        Module_Downloader.DLThreadsWaiting++;
                     }
                 }
                 else

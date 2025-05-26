@@ -1,12 +1,12 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Media;
-using e621_ReBot_v3.CustomControls;
-using HtmlAgilityPack;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {

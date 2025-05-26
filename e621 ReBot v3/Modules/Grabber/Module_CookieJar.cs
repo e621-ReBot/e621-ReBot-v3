@@ -1,7 +1,7 @@
-﻿using System;
+﻿using CefSharp;
+using System;
 using System.Collections.Generic;
 using System.Net;
-using CefSharp;
 
 namespace e621_ReBot_v3.Modules
 {
