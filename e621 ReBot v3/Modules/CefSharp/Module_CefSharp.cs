@@ -273,7 +273,7 @@ namespace e621_ReBot_v3.Modules
                                     AppSettings.UserID = UserIDString;
                                 }
 
-                                if (!UserNameString.Equals("Anonymous") && AppSettings.UserName.Equals(UserNameString))
+                                if (!UserNameString.Equals("Anonymous") && !AppSettings.UserName.Equals(UserNameString))
                                 {
                                     MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "A different username has been detected, you might have logged in into a different account or changed your username.\n\nWould you like to go and regenerate your API key?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                     if (MessageBoxResultTemp == MessageBoxResult.Yes)

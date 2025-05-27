@@ -121,6 +121,7 @@ namespace e621_ReBot_v3
             }
         }
 
+        private bool DeleteLogAfterCopy = false;
         private void ErrorReporter()
         {
             if (File.Exists("ReBotErrorLog.txt"))
@@ -129,6 +130,7 @@ namespace e621_ReBot_v3
                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                 {
                     Clipboard.SetText(File.ReadAllText("ReBotErrorLog.txt"));
+                    DeleteLogAfterCopy = true;
                 }
             }
         }
@@ -167,6 +169,8 @@ namespace e621_ReBot_v3
 
             if (UploadQueueProcess != null) UploadQueueProcess.Kill();
             if (ConversionQueueProcess != null) ConversionQueueProcess.Kill();
+
+            if (DeleteLogAfterCopy && File.Exists("ReBotErrorLog.txt")) File.Delete("ReBotErrorLog.txt");
         }
 
         private void FormButton_Minimize_Click(object sender, RoutedEventArgs e)

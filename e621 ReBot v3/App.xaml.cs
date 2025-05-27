@@ -105,17 +105,20 @@ namespace e621_ReBot_v3
             //Newer CefSharp version broke something and files are getting locked while the application is running
             //try and clear it up after process exits instead.
 
-            Process CleanupProcess = new Process();
-            ProcessStartInfo ProcessStartInfoTemp = new ProcessStartInfo
+            if (AppSettings.Browser_ClearCache)
             {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = "cmd.exe",
-                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
-                Arguments = "/c timeout /t 1 && rmdir /s /q \"CefSharp Cache\"",
-                UseShellExecute = true,
-            };
-            CleanupProcess.StartInfo = ProcessStartInfoTemp;
-            CleanupProcess.Start();
+                Process CleanupProcess = new Process();
+                ProcessStartInfo ProcessStartInfoTemp = new ProcessStartInfo
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    FileName = "cmd.exe",
+                    WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                    Arguments = "/c timeout /t 1 && rmdir /s /q \"CefSharp Cache\"",
+                    UseShellExecute = true,
+                };
+                CleanupProcess.StartInfo = ProcessStartInfoTemp;
+                CleanupProcess.Start();
+            }
         }
 
         // - - - - - - - - - - - - - - - -

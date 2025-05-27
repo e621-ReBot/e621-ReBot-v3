@@ -120,12 +120,9 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
             }
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-            {
-                Window_Main._RefHolder.GBU_Change.Text = $"+{UploadAdditionCounter}";
-                Window_Main._RefHolder.GBU_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
-                Window_Main._RefHolder.GBU_Change.IsEnabled = false;
-            });
+            Window_Main._RefHolder.GBU_Change.Text = $"+{UploadAdditionCounter}";
+            Window_Main._RefHolder.GBU_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
+            Window_Main._RefHolder.GBU_Change.IsEnabled = false;
         }
 
         internal static void UploadTreeView_CreateJob(MediaItem MediaItemRef)
