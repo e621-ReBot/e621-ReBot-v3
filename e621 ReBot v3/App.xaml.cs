@@ -181,8 +181,8 @@ namespace e621_ReBot_v3
 
         internal static void SetWindow2Square(Window WindowRef)
         {
-            string OSVersion = Environment.OSVersion.Version.ToString();
-            if (OSVersion.StartsWith("10"))
+            Version OSVersion = Environment.OSVersion.Version;
+            if (OSVersion.Major >= 10)
             {
                 if (WindowRef.WindowStyle != WindowStyle.None)
                 {
@@ -190,7 +190,7 @@ namespace e621_ReBot_v3
                     WindowRef.Width += 16;
                     WindowRef.Height += 23;
                 }
-                if (OSVersion.StartsWith("10.0.22"))
+                if (OSVersion.Build >= 22000)
                 {
                     IntPtr hWnd = new WindowInteropHelper(Window.GetWindow(WindowRef)).EnsureHandle();
                     DWM_WINDOW_CORNER_PREFERENCE CornerPreference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_DONOTROUND;
