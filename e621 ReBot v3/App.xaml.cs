@@ -71,7 +71,14 @@ namespace e621_ReBot_v3
             string Source = $"Source: {ExceptionHolder.Source}";
             string Target = $"Target: {ExceptionHolder.TargetSite}";
             string StackTrace = $"Stack Trace: {ExceptionHolder.StackTrace}";
-            File.WriteAllText("ReBotErrorLog.txt", $"{Header}\n{Message}\n{InnerException}\n{Source}\n{Target}\n\n{StackTrace}");
+
+            string? Notice4Readers = null;
+            if (Message.Contains("Could not load file or assembly 'CefSharp"))
+            {
+                Notice4Readers = "This error is likely due to not having the needed version of browser, rather than it missing. Suggestion: Download the latest full package then update that.\n\n";
+            }
+
+            File.WriteAllText("ReBotErrorLog.txt", $"{Notice4Readers}{Header}\n{Message}\n{InnerException}\n{Source}\n{Target}\n\n{StackTrace}");
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -186,7 +193,7 @@ namespace e621_ReBot_v3
             {
                 if (WindowRef.WindowStyle != WindowStyle.None)
                 {
-                    //windows ends up smaller size than specified, fix that.
+                    //windows end up smaller size than specified, fix that.
                     WindowRef.Width += 16;
                     WindowRef.Height += 23;
                 }
