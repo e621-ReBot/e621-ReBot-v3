@@ -610,6 +610,7 @@ namespace e621_ReBot_v3.Modules
         {
             string SiteReferer = $"https://{new Uri(DownloadVERef._DownloadItemRef.Grab_MediaURL).Host}";
             Custom_WebClient? WebClientSelected = null;
+        RetryWebClientSelect:
             foreach (Custom_WebClient WebClientTemp in (DowwnloadType.Equals("Thumb") ? Holder_ThumbClient : Holder_FileClient))
             {
                 if (!WebClientTemp.IsBusy)
@@ -618,10 +619,11 @@ namespace e621_ReBot_v3.Modules
                     break;
                 }
             }
-            //WebClientSelected sometimes null
 
+            //WebClientSelected sometimes null?
+            if (WebClientSelected != null) goto RetryWebClientSelect; //If this causes freezing problem due to infinite loop, will have to rewrite the invoke download parts.
+            
             WebClientSelected.Headers.Add(HttpRequestHeader.Referer, SiteReferer);
-
             switch (SiteReferer)
             {
                 case "https://e621.net":

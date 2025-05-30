@@ -487,36 +487,36 @@ namespace e621_ReBot_v3.Modules
             GrabberActiveHandCount--;
             Report_Status();
 
-            while (_GrabQueue_WorkingOn.Count > 0)
+            lock (_GrabQueue_WorkingOn)
             {
-                if (_GrabQueue_WorkingOn[0] == null)
+                while (_GrabQueue_WorkingOn.Count > 0)
                 {
-                    break;
-                }
-                else
-                {
-                    //lock (_GrabQueue_URLs)
-                    //{
-                    //    _GrabQueue_URLs.Remove(_GrabQueue_WorkingOn.Cast<DictionaryEntry>().ElementAt(0).Key.ToString());
-                    //}
-                    lock (_Grabbed_MediaItems)
+                    if (_GrabQueue_WorkingOn[0] == null)
                     {
-                        ushort CountBeforeCheck = (ushort)_Grabbed_MediaItems.Count;
-                        if (_GrabQueue_WorkingOn[0].GetType() == typeof(MediaItem))
-                        {
-                            _Grabbed_MediaItems.Add((MediaItem)_GrabQueue_WorkingOn[0]);
-                        }
-                        else
-                        {
-                            _Grabbed_MediaItems.AddRange((List<MediaItem>)_GrabQueue_WorkingOn[0]);
-                        }
-                        for (int i = CountBeforeCheck; i < _Grabbed_MediaItems.Count; i++)
-                        {
-                            AppSettings.MediaRecord_Check(_Grabbed_MediaItems[i]);
-                        }
+                        break;
                     }
-                    lock (_GrabQueue_WorkingOn)
+                    else
                     {
+                        //lock (_GrabQueue_URLs)
+                        //{
+                        //    _GrabQueue_URLs.Remove(_GrabQueue_WorkingOn.Cast<DictionaryEntry>().ElementAt(0).Key.ToString());
+                        //}
+                        lock (_Grabbed_MediaItems)
+                        {
+                            ushort CountBeforeCheck = (ushort)_Grabbed_MediaItems.Count;
+                            if (_GrabQueue_WorkingOn[0].GetType() == typeof(MediaItem))
+                            {
+                                _Grabbed_MediaItems.Add((MediaItem)_GrabQueue_WorkingOn[0]);
+                            }
+                            else
+                            {
+                                _Grabbed_MediaItems.AddRange((List<MediaItem>)_GrabQueue_WorkingOn[0]);
+                            }
+                            for (int i = CountBeforeCheck; i < _Grabbed_MediaItems.Count; i++)
+                            {
+                                AppSettings.MediaRecord_Check(_Grabbed_MediaItems[i]);
+                            }
+                        }
                         _GrabQueue_WorkingOn.RemoveAt(0);
                     }
                 }
