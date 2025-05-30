@@ -220,12 +220,13 @@ namespace e621_ReBot_v3.Modules
             _GrabTimer.Stop();
             if (Window_Main._RefHolder.Grab_CheckBox.IsChecked == true && Window_Main._RefHolder.Grab_TreeView.HasItems && GrabberActiveHandCount < _GrabberMaxHandCount)
             {
-                TreeViewItem TreeViewItemSender = (TreeViewItem)Window_Main._RefHolder.Grab_TreeView.Items.GetItemAt(0);
+                TreeViewItem TreeViewItemParent = (TreeViewItem)Window_Main._RefHolder.Grab_TreeView.Items.GetItemAt(0);
+                TreeViewItem TreeViewItemSender = TreeViewItemParent;
                 TreeViewItem TreeViewItemDeleter = TreeViewItemSender;
                 bool SelectorAtTopLevel = true;
-                if (TreeViewItemSender.HasItems)
+                if (TreeViewItemParent.HasItems)
                 {
-                    if (TreeViewItemSender.Items.Count > 1) SelectorAtTopLevel = false;
+                    if (TreeViewItemParent.Items.Count > 1) SelectorAtTopLevel = false;
 
                     TreeViewItemSender = (TreeViewItem)TreeViewItemSender.Items.GetItemAt(0);
                 }
@@ -241,10 +242,21 @@ namespace e621_ReBot_v3.Modules
                 if (SelectorAtTopLevel)
                 {
                     Window_Main._RefHolder.Grab_TreeView.Items.RemoveAt(0);
+
+                    _GrabTimer.Interval = TimeSpan.FromSeconds(1);
                 }
                 else
                 {
                     TreeViewItemDeleter.Items.RemoveAt(0);
+
+                    if (TreeViewItemParent.HasItems && TreeViewItemParent.Header.ToString().StartsWith("https://x.com/"))
+                    {
+                        _GrabTimer.Interval = TimeSpan.FromMilliseconds(100);
+                    }
+                    else
+                    {
+                        _GrabTimer.Interval = TimeSpan.FromSeconds(1);
+                    }
                 }
             }
             _GrabTimer.Start();
