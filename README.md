@@ -30,7 +30,7 @@ Features:
 
 ---
 ## How to install:
-- Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.52
+- Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.63
 - Extract archive, run the ReBot.exe
 - For manual updates, just overwrite older files
 
