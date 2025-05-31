@@ -136,7 +136,7 @@
                     <Button x:Name="Notes_WButton" Content="Open Notes" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,8" Width="128" Height="32" ToolTip="Leave a note for yourself that will appear when application starts." Click="Notes_WButton_Click" Cursor="Hand"/>
                     <Button x:Name="MakeUpdate_WButton" Content="Make Update" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,48" Width="128" Height="32" Click="MakeUpdate_WButton_Click" Cursor="Hand"/>
 
-                    <TextBlock x:Name="Update_TextBlock" Text="Checking for updates..." Foreground="{DynamicResource ThemeFocus}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" FontSize="16" FontStyle="Italic" FontWeight="Bold"/>
+                    <customcontrols:Custom_TextWithOutline x:Name="Update_TextBlock" Text="Checking for updates..." Fill="{DynamicResource ThemeFocus}" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" FontSize="16" FontStyle="Italic" FontWeight="Bold"/>
                     <Image x:Name="SantaHat1" IsHitTestVisible="False" Source="/Resources/MainWindow/2560Santahat.png" Width="110" RenderTransformOrigin="0.5,0.5" Margin="-50,0,0,110" Visibility="Collapsed">
                         <Image.RenderTransform>
                             <TransformGroup>
@@ -181,8 +181,8 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
-                    <customcontrols:Custom_TextWithOutline Text="There is no media to show, please grab something first." FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource ThemeFocus}" StrokeThickness="2"/>
-                    <WrapPanel Grid.Row="0" x:Name="Grid_GridVEPanel" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="{DynamicResource ThemeBackground}" Margin="8,8,0,16"/>
+                    <customcontrols:Custom_TextWithOutline Text="There is no media to show, please grab something first." FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource ThemeFocus}" StrokeThickness="2" FontWeight="Bold"/>
+                    <WrapPanel Grid.Row="0" x:Name="Grid_GridVEPanel" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="{DynamicResource ThemeBackground}" Margin="8,8,0,16" av:IsHidden="True"/>
 
                     <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,1,0,0"/>
 

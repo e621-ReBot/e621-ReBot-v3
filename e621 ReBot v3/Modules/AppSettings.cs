@@ -309,9 +309,6 @@ namespace e621_ReBot_v3
                                     }
                                     Module_RetryQueue._2Retry_MediaItems.Add(MediaItemTemp);
                                 }
-
-                                var test = Module_RetryQueue._2Retry_MediaItems[0];
-                                var test1 = Module_Grabber._Grabbed_MediaItems[0];
                                 break;
                             }
                     }
