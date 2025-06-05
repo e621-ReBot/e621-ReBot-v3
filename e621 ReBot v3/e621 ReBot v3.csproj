@@ -10,7 +10,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<FileVersion>3.0.0.64</FileVersion>
+		<FileVersion>3.0.0.65</FileVersion>
 		<StartupObject>e621_ReBot_v3.App</StartupObject>
 		<IsPublishable>False</IsPublishable>
 		<RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>
@@ -28,6 +28,27 @@
 		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
+	<!-- https://learn.microsoft.com/en-us/dotnet/core/runtime-config/#runtimeconfigjson -->
+	<!-- https://www.meziantou.net/forcing-httpclient-to-use-ipv4-or-ipv6-addresses.htm -->
+	<ItemGroup>
+		<RuntimeHostConfigurationOption Include="System.Net.DisableIPv6" Value="true" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
 	<ItemGroup>
 	  <Compile Remove="Resources\zzz_Unused\**" />
 	  <EmbeddedResource Remove="Resources\zzz_Unused\**" />
@@ -37,11 +58,13 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Browser\BrowserIcon_Baraag.png" />
+	  <None Remove="Resources\Browser\BrowserIcon_Derpibooru.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_e621.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_FurAffinity.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_HentaiFoundry.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_HicceArs.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Inkbunny.png" />
+	  <None Remove="Resources\Browser\BrowserIcon_Itaku.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Mastodon.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Newgrounds.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Pawoo.png" />
@@ -51,6 +74,7 @@
 	  <None Remove="Resources\Browser\BrowserIcon_Twitter.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Weasyl.png" />
 	  <None Remove="Resources\e621ReBot_CursorBrowser.cur" />
+	  <None Remove="Resources\e621ReBot_CursorDefault.cur" />
 	  <None Remove="Resources\e621ReBot_CursorReBot.cur" />
 	  <None Remove="Resources\Files\CefSharp.Wpf.dll" />
 	  <None Remove="Resources\Files\DNPs.txt" />
@@ -83,11 +107,6 @@
 	  <None Remove="Resources\MainWindow\MenuIcon_Welcome.png" />
 	  <None Remove="Resources\MainWindow\ReBot_Logo.png" />
 	  <None Remove="Resources\ReBot_Icon.ico" />
-	  <None Remove="Windows\ReBot_Icon.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Resource Include="Resources\ReBot_Icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -99,73 +118,51 @@
 	  <EmbeddedResource Include="Resources\Files\System.Net.Http.Formatting.dll" />
 	</ItemGroup>
 
-	<!-- https://learn.microsoft.com/en-us/dotnet/core/runtime-config/#runtimeconfigjson -->
-	<!-- https://www.meziantou.net/forcing-httpclient-to-use-ipv4-or-ipv6-addresses.htm -->
 	<ItemGroup>
-		<RuntimeHostConfigurationOption Include="System.Net.DisableIPv6" Value="true" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Properties\Resources.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Resources.resx</DependentUpon>
-		</Compile>
-		<Compile Update="Windows\Window_Notes.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Properties\Resources.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Resource Include="Resources\Browser\BrowserIcon_Baraag.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_e621.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_FurAffinity.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_HentaiFoundry.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_HicceArs.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Inkbunny.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Mastodon.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Newgrounds.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Pawoo.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Pixiv.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Plurk.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_SoFurry.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Twitter.png" />
-		<Resource Include="Resources\Browser\BrowserIcon_Weasyl.png" />
-		<Resource Include="Resources\e621ReBot_CursorBrowser.cur" />
-		<Resource Include="Resources\e621ReBot_CursorDefault.cur" />
-		<Resource Include="Resources\e621ReBot_CursorReBot.cur" />
-		<Resource Include="Resources\MainWindow\2560SantaHat.png" />
-		<Resource Include="Resources\MainWindow\Banner_Tail.png" />
-		<Resource Include="Resources\MainWindow\Button_Close.png" />
-		<Resource Include="Resources\MainWindow\Button_Minimize.png" />
-		<Resource Include="Resources\MainWindow\DiscordLogo.png" />
-		<Resource Include="Resources\MainWindow\E6Image_Deleted.png" />
-		<Resource Include="Resources\MainWindow\E6Image_Flash.png" />
-		<Resource Include="Resources\MainWindow\E6Image_Loading.png" />
-		<Resource Include="Resources\MainWindow\FolderIcon.png" />
-		<Resource Include="Resources\MainWindow\GitHubLogo.png" />
-		<Resource Include="Resources\MainWindow\Icon_Flag.png" />
-		<Resource Include="Resources\MainWindow\Icon_Note.png" />
-		<Resource Include="Resources\MainWindow\Icon_Upload.png" />
-		<Resource Include="Resources\MainWindow\Ko-Fi Button.png" />
-		<Resource Include="Resources\MainWindow\Ko-Fi ButtonSmall.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Browser.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Downloads.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Grid.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Information.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Jobs.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Logs.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Settings.png" />
-		<Resource Include="Resources\MainWindow\MenuIcon_Welcome.png" />
-		<Resource Include="Resources\MainWindow\ReBot_Logo.png" />
-		<Resource Include="Windows\ReBot_Icon.ico" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Baraag.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Derpibooru.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_e621.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_FurAffinity.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_HentaiFoundry.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_HicceArs.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Inkbunny.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Itaku.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Mastodon.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Newgrounds.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Pawoo.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Pixiv.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Plurk.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_SoFurry.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Twitter.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Weasyl.png" />
+	  <Resource Include="Resources\e621ReBot_CursorBrowser.cur" />
+	  <Resource Include="Resources\e621ReBot_CursorDefault.cur" />
+	  <Resource Include="Resources\e621ReBot_CursorReBot.cur" />
+	  <Resource Include="Resources\MainWindow\2560SantaHat.png" />
+	  <Resource Include="Resources\MainWindow\Banner_Tail.png" />
+	  <Resource Include="Resources\MainWindow\Button_Close.png" />
+	  <Resource Include="Resources\MainWindow\Button_Minimize.png" />
+	  <Resource Include="Resources\MainWindow\DiscordLogo.png" />
+	  <Resource Include="Resources\MainWindow\E6Image_Deleted.png" />
+	  <Resource Include="Resources\MainWindow\E6Image_Flash.png" />
+	  <Resource Include="Resources\MainWindow\E6Image_Loading.png" />
+	  <Resource Include="Resources\MainWindow\FolderIcon.png" />
+	  <Resource Include="Resources\MainWindow\GitHubLogo.png" />
+	  <Resource Include="Resources\MainWindow\Icon_Flag.png" />
+	  <Resource Include="Resources\MainWindow\Icon_Note.png" />
+	  <Resource Include="Resources\MainWindow\Icon_Upload.png" />
+	  <Resource Include="Resources\MainWindow\Ko-Fi Button.png" />
+	  <Resource Include="Resources\MainWindow\Ko-Fi ButtonSmall.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Browser.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Downloads.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Grid.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Information.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Jobs.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Logs.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Settings.png" />
+	  <Resource Include="Resources\MainWindow\MenuIcon_Welcome.png" />
+	  <Resource Include="Resources\MainWindow\ReBot_Logo.png" />
+	  <Resource Include="Resources\ReBot_Icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -174,7 +171,7 @@
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
 		<PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="135.0.220" />
 	</ItemGroup>

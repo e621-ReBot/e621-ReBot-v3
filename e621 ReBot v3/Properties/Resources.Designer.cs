@@ -93,6 +93,26 @@ namespace e621_ReBot_v3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] BrowserIcon_Derpibooru {
+            get {
+                object obj = ResourceManager.GetObject("BrowserIcon_Derpibooru", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] BrowserIcon_Derpibooru1 {
+            get {
+                object obj = ResourceManager.GetObject("BrowserIcon_Derpibooru1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] BrowserIcon_e621 {
             get {
                 object obj = ResourceManager.GetObject("BrowserIcon_e621", resourceCulture);
@@ -136,6 +156,16 @@ namespace e621_ReBot_v3.Properties {
         internal static byte[] BrowserIcon_Inkbunny {
             get {
                 object obj = ResourceManager.GetObject("BrowserIcon_Inkbunny", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] BrowserIcon_Itaku {
+            get {
+                object obj = ResourceManager.GetObject("BrowserIcon_Itaku", resourceCulture);
                 return ((byte[])(obj));
             }
         }

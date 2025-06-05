@@ -4,7 +4,7 @@
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:customcontrols="clr-namespace:e621_ReBot_v3.CustomControls"
         mc:Ignorable="av" 
-        Title="e621 ReBot v3" Width="1280" Height="720" Icon="/Windows/ReBot_Icon.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" Activated="Window_Activated" KeyDown="Window_KeyDown" Closing="Window_Closing">
+        Title="e621 ReBot v3" Width="1280" Height="720" Icon="/Resources/ReBot_Icon.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" Activated="Window_Activated" KeyDown="Window_KeyDown" Closing="Window_Closing">
 
     <Window.Resources>
         <Style TargetType="TextBlock" x:Key="FadeAnimation">

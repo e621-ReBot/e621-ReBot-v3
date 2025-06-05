@@ -124,6 +124,12 @@
   <data name="BrowserIcon_Baraag" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_Baraag.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="BrowserIcon_Derpibooru" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Browser\BrowserIcon_Derpibooru.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="BrowserIcon_Derpibooru1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Browser\BrowserIcon_Derpibooru.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="BrowserIcon_e621" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_e621.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -138,6 +144,9 @@
   </data>
   <data name="BrowserIcon_Inkbunny" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_Inkbunny.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="BrowserIcon_Itaku" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Browser\BrowserIcon_Itaku.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="BrowserIcon_Mastodon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Browser\BrowserIcon_Mastodon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
