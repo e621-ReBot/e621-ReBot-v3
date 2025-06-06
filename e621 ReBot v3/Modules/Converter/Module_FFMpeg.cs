@@ -267,7 +267,7 @@ namespace e621_ReBot_v3.Modules.Converter
         internal static void DownloadQueue_Ugoira2WebM(DownloadVE DownloadVERef)
         {
             Uri DomainURL = new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", "");
+            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
             JToken UgoiraJObject = JObject.Parse(UgoiraJSONResponse(DownloadVERef._DownloadItemRef.Grab_PageURL))["body"];
@@ -277,7 +277,7 @@ namespace e621_ReBot_v3.Modules.Converter
             UgoiraFileName = UgoiraFileName.Substring(0, UgoiraFileName.LastIndexOf('.'));
 
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), string.Empty));
+            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
@@ -340,13 +340,13 @@ namespace e621_ReBot_v3.Modules.Converter
         internal static void DownloadQueue_Video2WebM(DownloadVE DownloadVERef)
         {
             Uri DomainURL = new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", "");
+            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
             string VideoFileName = Module_Downloader.MediaFile_GetFileNameOnly(DownloadVERef._DownloadItemRef.Grab_MediaURL, DownloadVERef._DownloadItemRef.Grab_MediaFormat);
             string VideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), string.Empty));
+            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 

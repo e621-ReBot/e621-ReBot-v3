@@ -125,7 +125,7 @@ namespace e621_ReBot_v3.Modules
             }
             if (FullNamePath.Contains("pbs.twimg.com"))
             {
-                FullNamePath = FullNamePath.Replace(":orig", "");
+                FullNamePath = FullNamePath.Replace(":orig", null);
             }
             if (FullNamePath.EndsWith("/download", StringComparison.OrdinalIgnoreCase))
             {
@@ -184,11 +184,11 @@ namespace e621_ReBot_v3.Modules
         internal static bool ReSaveMedia(DownloadItem DownloadItemRef)
         {
             Uri DomainURL = new Uri(DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", "");
+            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), string.Empty));
+            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
@@ -937,11 +937,11 @@ namespace e621_ReBot_v3.Modules
         private static void DownloadFrom_URL(DownloadItem DownloadItemRef)
         {
             Uri DomainURL = new Uri(DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", "");
+            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), string.Empty));
+            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName, DownloadItemRef.e6_PoolName);
             Directory.CreateDirectory(FolderPath);
 

@@ -133,7 +133,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             var PoolPages = new List<string>();
                             if (GetCurrentPage > 1)
                             {
-                                string PoolID = PageNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", "");
+                                string PoolID = PageNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", null);
 
                                 string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
                                 if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;

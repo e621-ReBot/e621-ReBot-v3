@@ -37,7 +37,7 @@ namespace e621_ReBot_v3.CustomControls
                                 string ClipboardText = (string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat);
                                 if (WhitelistedURLs.Any(s => ClipboardText.Contains(s)))
                                 {
-                                    ClipboardText = ClipboardText.Replace("https://e621.net/", "");
+                                    ClipboardText = ClipboardText.Replace("https://e621.net/", null);
                                     if (ClipboardText.Contains('?')) ClipboardText = ClipboardText.Substring(0, ClipboardText.IndexOf('?'));
 
                                     string ClipboardID = ClipboardText.Split('/', StringSplitOptions.RemoveEmptyEntries)[1];

@@ -73,7 +73,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 string SubmissionType = HtmlNodeTemp.SelectSingleNode(".//img[@class='widget_thumbnailFromSubmission_icon'][2]").Attributes["title"].Value;
                 if (SubmissionType.Equals("Type: Writing - Document") || SubmissionType.Equals("Type: Music - Single Track"))
                 {
-                    Module_Grabber.Report_Info($"Skipped grabbing - Unsupported submission type: {SubmissionType.Replace("Type:", "")} [@{URL2Post}]");
+                    Module_Grabber.Report_Info($"Skipped grabbing - Unsupported submission type: {SubmissionType.Replace("Type:", null)} [@{URL2Post}]");
                     continue;
                 }
 
@@ -198,7 +198,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                             Post_MediaURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value;
                         }
                     }
-                    Post_MediaURL = Post_MediaURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", "");
+                    Post_MediaURL = Post_MediaURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", null);
                     Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.Length - 4);
 
                     string MediaLinkFix;

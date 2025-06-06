@@ -267,7 +267,7 @@ namespace e621_ReBot_v3
                             e.Handled = true;
                             if (Clipboard.GetDataObject().GetDataPresent(DataFormats.StringFormat))
                             {
-                                List<string> PasteTags = ((string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat)).ToLower().Replace(Environment.NewLine, "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+                                List<string> PasteTags = ((string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat)).ToLower().Replace(Environment.NewLine, null).Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
 
                                 if (PasteTags.Count == 1 && Tags_TextBox.SelectionStart > 0 && Tags_TextBox.Text.Substring(Tags_TextBox.SelectionStart - 1).Equals(":"))
                                 {

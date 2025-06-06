@@ -267,7 +267,7 @@ namespace e621_ReBot_v3
                 foreach (HtmlNode Post in ResultCollection)
                 {
                     string PostID = Post.SelectSingleNode(".//div[@class='resultmatchinfo']//a").Attributes["href"].Value;
-                    PostID = PostID.Replace("https://e621.net/post/show/", "");
+                    PostID = PostID.Replace("https://e621.net/post/show/", null);
                     string ThumbLink = Post.SelectSingleNode(".//td[@class='resulttableimage']//img").Attributes["src"].Value;
                     ResultList.Add(PostID, ThumbLink);
                 }

@@ -579,8 +579,9 @@ namespace e621_ReBot_v3.Modules
                 {
                     string ParentTag2Remove = PostTags.Substring(PostTags.IndexOf("parent:"));
                     ParentTag2Remove = ParentTag2Remove.Substring(0, ParentTag2Remove.IndexOf(' '));
-                    PostTags = PostTags.Replace(ParentTag2Remove, $"parent:{MediaItemRef.UP_ParentMediaItem.UP_UploadedID}");
+                    PostTags = PostTags.Replace(ParentTag2Remove, null);
                 }
+                PostTags += $" parent:{MediaItemRef.UP_ParentMediaItem.UP_UploadedID}";
             }
 
             // - - - - - - - - - - - - - - - -

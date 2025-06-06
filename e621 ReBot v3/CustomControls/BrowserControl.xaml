@@ -63,7 +63,7 @@
             <ProgressBar x:Name="PageProgressBar" Height="2" Maximum="1" Foreground="{DynamicResource ThemeFocus}" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" IsHitTestVisible="False" IsTabStop="False" Panel.ZIndex="69"/>
         </Border>
 
-        <Grid x:Name="BrowserQuickButtons" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="69" Margin="130,0,0,0">
+        <Grid x:Name="BrowserQuickButtons" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="69" Margin="128,0,0,0">
             <Grid.Style>
                 <Style TargetType="{x:Type Grid}">
                     <Style.Triggers>

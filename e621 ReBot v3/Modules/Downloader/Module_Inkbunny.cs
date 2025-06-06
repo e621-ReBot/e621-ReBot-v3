@@ -67,7 +67,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value;
                             }
                         }
-                        PicURL = PicURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", "");
+                        PicURL = PicURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", null);
                         PicURL = PicURL.Substring(0, PicURL.Length - 4);
 
                         string MediaLinkFix;
