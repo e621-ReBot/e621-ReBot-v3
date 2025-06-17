@@ -81,7 +81,7 @@ namespace e621_ReBot_v3
             else
             {
                 string InputedText = Custom_InputBox.ShowInputBox(this, "Quick Tags Title", "Add Title to Quick Tags button.", CreateQuickTag_Button.PointToScreen(new Point(0, 0))).ToLower();
-                if (InputedText.Equals('☠')) return;
+                if (InputedText.Equals("☠")) return;
 
                 if (string.IsNullOrEmpty(InputedText))
                 {
