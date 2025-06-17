@@ -31,6 +31,18 @@ namespace e621_ReBot_v3
                 {
                     SuggestionPopup = new Custom_SuggestBox();
                 }
+                if (File.Exists("artists.txt"))
+                {
+                    Artist_List = File.ReadAllText("artists.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+                if (File.Exists("DNPs.txt"))
+                {
+                    DNP_List = File.ReadAllText("DNPs.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+                if (File.Exists("genders.txt"))
+                {
+                    Gender_List = File.ReadAllText("genders.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
             }
             if (SuggestionPopup != null)
             {
@@ -121,14 +133,28 @@ namespace e621_ReBot_v3
             Tags_TextBox.Focus();
         }
 
-        List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
-        List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
+        static List<string>? Artist_List;
+        static List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
+        static List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             SuggestionPopup?.SuggestionTimer.Stop();
             if (TagsAdded)
             {
                 List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (Artist_List != null)
+                {
+                    string? AnyArtist = TagListOnClose.Intersect(Artist_List).FirstOrDefault();
+                    if (string.IsNullOrEmpty(AnyArtist) && (MessageBox.Show(this, $"There is no artist tagged for this media, DNP list can not be checked, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
+                    {
+                        Tags_TextBox.AppendText(" ");
+                        Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                        TagsAdded = false;
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+
                 string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
                 if (!string.IsNullOrEmpty(DNPArtist) && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
                 {

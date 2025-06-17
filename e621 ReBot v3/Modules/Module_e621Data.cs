@@ -96,6 +96,7 @@ namespace e621_ReBot_v3.Modules
                 Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Tags..."; });
 
                 List<string> TagList = new List<string>();
+                List<string> ArtistList = new List<string>();
                 DownloadedStream.Position = 0;
                 using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
                 {
@@ -112,13 +113,19 @@ namespace e621_ReBot_v3.Modules
                             while (!CSVParser.EndOfData)
                             {
                                 string[] CSVFields = CSVParser.ReadFields();
-                                if (!CSVFields[3].Equals("0"))
+                                if (!CSVFields[3].Equals("0")) //post_count
                                 {
                                     TagListTemp.Add(new Tuple<int, string>(int.Parse(CSVFields[3]), CSVFields[1]));
                                 }
+                                if (CSVFields[2].Equals("1")) //category
+                                {
+                                    ArtistList.Add(CSVFields[1]);
+                                }
                             }
                             TagListTemp.Sort((x, y) => y.Item1.CompareTo(x.Item1));
-                            TagList = TagListTemp.Select(x => x.Item2).ToList();
+                            //x and y are tuples from list, not items inside a single tuple
+                            //Item1 and Item2 are items of single tuple
+                            TagList = TagListTemp.Select(x => x.Item2).ToList(); //select Item2 - that is string
                             TagListTemp.Clear();
                         }
                     }
@@ -157,6 +164,11 @@ namespace e621_ReBot_v3.Modules
                                         {
                                             TagAliases.Add(CSVFields[2], new List<string> { CSVFields[1] });
                                         }
+
+                                        if (ArtistList.Contains(CSVFields[2]))
+                                        {
+                                            ArtistList.Add(CSVFields[1]); //Also add aliases to Artist list
+                                        }
                                     }
                                 }
                             }
@@ -181,6 +193,12 @@ namespace e621_ReBot_v3.Modules
                     else
                     {
                         File.WriteAllText("tags.txt", string.Join("✄", TagList));
+                    }
+
+                    if (ArtistList.Count > 0)
+                    {
+                        ArtistList.Sort();
+                        File.WriteAllText("artists.txt", string.Join("✄", ArtistList));
                     }
                 }
                 SuccessCount++;
