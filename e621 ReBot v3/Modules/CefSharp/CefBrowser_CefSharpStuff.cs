@@ -9,7 +9,6 @@ using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;

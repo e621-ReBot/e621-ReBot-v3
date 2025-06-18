@@ -143,7 +143,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             //modern or classic
             HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a | .//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
             string Post_MediaURL = $"https:{DownloadNode.Attributes["href"].Value}";
-            
+
             //modern or classic
             HtmlNode MediaSizeNode = PostNode.SelectSingleNode(".//div[@id='submission_page']//section[@class='info text']/div[3]/span | .//div[@id='page-submission']//td[@class='alt1 stats-container']//b[text()='Resolution:']/following-sibling::text()"); //info text
             string[] MediaSizes = MediaSizeNode.InnerText.Trim().Replace(" x ", "x").Split('x', StringSplitOptions.RemoveEmptyEntries);

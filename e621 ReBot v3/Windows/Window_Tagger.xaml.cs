@@ -320,8 +320,6 @@ namespace e621_ReBot_v3
                         break;
                     }
             }
-
-           
         }
 
         private void Tags_TextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
