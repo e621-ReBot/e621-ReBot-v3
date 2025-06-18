@@ -54,10 +54,24 @@ namespace e621_ReBot_v3.CustomControls
             _TextBoxRef = (TextBox?)sender;
         }
 
-        private readonly KeyConverter _KeyConverter = new KeyConverter();
         private void TextBoxRef_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             SuggestionTimer.Stop();
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                switch (e.Key)
+                {
+                    case Key.A: //Don't pop up on select all
+                    case Key.C: //Don't pop up on copy
+                    case Key.V: //Don't pop up on paste
+                    case Key.X: //Don't pop up on cut
+                        {
+                            IsOpen = false;
+                            return;
+                        }
+                }
+            }
+
             switch (e.Key)
             {
                 case Key.Down:
@@ -153,7 +167,7 @@ namespace e621_ReBot_v3.CustomControls
                 case Key.Home:
                 case Key.End:
                     {
-                        //e.Handled = false;
+                        //e.Handled = true;
                         break;
                     }
                 default:
