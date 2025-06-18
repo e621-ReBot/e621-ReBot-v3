@@ -136,23 +136,16 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-id-sub-container' or @class='classic-submission-title information']//a").InnerText.Trim());
 
-            HtmlNode Post_TextNode = PostNode.SelectSingleNode(".//div[@class='submission-description' or @class='submission-description user-submitted-links']");
-            if (Post_TextNode == null) //classic theme selected
-            {
-                ///html/body/div[4]/div/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr[2]
-                ///html/body/div[4]/div/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tr[2]
-                Post_TextNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//table[@class='maintable']//table[@class='maintable']//td[@class='alt1' and @style]");
-            }
+            //modern or classic
+            HtmlNode Post_TextNode = PostNode.SelectSingleNode(".//div[@class='submission-description' or @class='submission-description user-submitted-links'] | .//div[@id='page-submission']//table[@class='maintable']//table[@class='maintable']//td[@class='alt1' and @style]");
             string? Post_Text = Module_Html2Text.Html2Text_FurAffinity(Post_TextNode);
 
-            HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a");
-            if (DownloadNode == null) //classic theme selected
-            {
-                DownloadNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
-            }
+            //modern or classic
+            HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a | .//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
             string Post_MediaURL = $"https:{DownloadNode.Attributes["href"].Value}";
-
-            HtmlNode MediaSizeNode = PostNode.SelectSingleNode(".//section[@class='info text']/div[4]/span | .//td[@class='alt1 stats-container']//b[text()='Resolution:']/following-sibling::text()");
+            
+            //modern or classic
+            HtmlNode MediaSizeNode = PostNode.SelectSingleNode(".//div[@id='submission_page']//section[@class='info text']/div[3]/span | .//div[@id='page-submission']//td[@class='alt1 stats-container']//b[text()='Resolution:']/following-sibling::text()"); //info text
             string[] MediaSizes = MediaSizeNode.InnerText.Trim().Replace(" x ", "x").Split('x', StringSplitOptions.RemoveEmptyEntries);
 
             // - - - - - - - - - - - - - - - -
