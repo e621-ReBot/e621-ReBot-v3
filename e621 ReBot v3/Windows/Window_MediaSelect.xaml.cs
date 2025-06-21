@@ -426,6 +426,7 @@ namespace e621_ReBot_v3
         private DispatcherTimer ThumbLoadTimer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(500) };
         private static void ThumbLoadTimer_Tick(object? sender, EventArgs e)
         {
+            if (_RefHolder == null) return;
             _RefHolder.ThumbLoadTimer.Stop();
             bool LaunchTimer = false;
             ImageSource ThumbImageSource;
