@@ -70,12 +70,12 @@ namespace e621_ReBot_v3.Modules
             Credit_Reset();
             //Member = 20; Privileged = 30; Contributor = 33; Janitor = 35; Moderator = 40; Admin = 50.
             //https://e621.net/wiki_pages/2423
-            //if (UserLevel < 30)
-            //{
-            //    Credit_CheckUpload().Wait();
-            //    Credit_CheckFlags().Wait();
-            //    Credit_CheckNotes().Wait();
-            //}
+            if (UserLevel < 30)
+            {
+                Credit_CheckUpload().Wait();
+                Credit_CheckFlags().Wait();
+                Credit_CheckNotes().Wait();
+            }
             Credit_UpdateDisplay();
         }
 

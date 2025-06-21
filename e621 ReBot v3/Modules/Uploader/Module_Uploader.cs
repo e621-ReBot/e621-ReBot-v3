@@ -338,14 +338,14 @@ namespace e621_ReBot_v3.Modules
             {
                 Window_Main._RefHolder.Upload_CheckBox.IsChecked = false; //already disabled in report error
                 Module_RetryQueue.MoveItem2RetryQueue(_2Upload_MediaItems[0]);
-                if (ParentJobNode.Items.Count == 1)
-                {
-                    Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0);
-                }
-                else
-                {
-                    ParentJobNode.Items.RemoveAt(0);
-                }
+                //if (ParentJobNode.Items.Count == 1)
+                //{
+                Window_Main._RefHolder.Upload_TreeView.Items.RemoveAt(0); //Always remove the entire item
+                //}
+                //else
+                //{
+                //    ParentJobNode.Items.RemoveAt(0);
+                //}
                 //if (ParentJobNode.Items.Count == 1)
                 //{
                 //    ParentJobNode.Visibility = Visibility.Visible;
@@ -615,6 +615,7 @@ namespace e621_ReBot_v3.Modules
                 case HttpStatusCode.PreconditionFailed:
                     {
                         //{{"success": false,"reason": "invalid","message": "error: ActiveRecord::RecordInvalid - Validation failed: Md5 duplicate of pending replacement on post #0123456"}}
+                        //{{"success": false,"reason": "invalid","message": "error: You have reached your upload limit"}}
 
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
                         string Response_Reason = Upload_ReponseData["reason"].Value<string>();
@@ -760,20 +761,26 @@ namespace e621_ReBot_v3.Modules
 
                 case HttpStatusCode.PreconditionFailed:
                     {
+                        //{"success":false,"message":"Creator have reached your upload limit"}
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        string ResponseMessage = Upload_ReponseData["message"].Value<string>();
-                        if (ResponseMessage.Contains("duplicate"))
+                        string Response_Message = Upload_ReponseData["message"].Value<string>();
+                        if (Response_Message.Contains("duplicate"))
                         {
-                            string PostID = ResponseMessage.Substring(ResponseMessage.IndexOf('#') + 1);
+                            string PostID = Response_Message.Substring(Response_Message.IndexOf('#') + 1);
                             if (PostID.Contains(';')) PostID = PostID.Substring(0, PostID.IndexOf(';'));
                             SuccessfulUpload_DisplayUpdates(MediaItemRef, PostID);
                             Report_Info($"Error uploading: {MediaItemRef.Grab_MediaURL}, duplicate of pending replacement on #{PostID}");
+                            break;
                         }
-                        else
+
+                        if (Response_Message.Contains("upload limit"))
                         {
-                            FailedUploadTask = true;
-                            Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
+                            Module_Credit.Credit_UploadHourly = 0;
+                            Module_Credit.Credit_UploadTotal = 0;
+                            Module_Credit.Credit_CheckAll();
                         }
+                        FailedUploadTask = true;
+                        Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Replace Inferior");
                         break;
                     }
 
