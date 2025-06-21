@@ -617,15 +617,34 @@ namespace e621_ReBot_v3.Modules
                         //{{"success": false,"reason": "invalid","message": "error: ActiveRecord::RecordInvalid - Validation failed: Md5 duplicate of pending replacement on post #0123456"}}
 
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        if (Upload_ReponseData["reason"].Value<string>().Equals("duplicate"))
+                        string Response_Reason = Upload_ReponseData["reason"].Value<string>();
+                        string Response_Message = Upload_ReponseData["message"].Value<string>();
+                        switch (Response_Reason)
                         {
-                            SuccessfulUpload_DisplayUpdates(MediaItemRef, Upload_ReponseData["post_id"].Value<string>());
-                            Report_Info($"Error uploading: {UploadedURL4Report}, duplicate of #{Upload_ReponseData["post_id"].Value<string>()}");
-                        }
-                        else
-                        {
-                            FailedUploadTask = true;
-                            Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
+                            case "duplicate":
+                                {
+                                    SuccessfulUpload_DisplayUpdates(MediaItemRef, Upload_ReponseData["post_id"].Value<string>());
+                                    Report_Info($"Error uploading: {UploadedURL4Report}, duplicate of #{Upload_ReponseData["post_id"].Value<string>()}");
+                                    break;
+                                }
+                            case "invalid":
+                                {
+                                    if (Response_Message.Equals("You have reached your upload limit"))
+                                    {
+                                        Module_Credit.Credit_UploadHourly = 0;
+                                        Module_Credit.Credit_UploadTotal = 0;
+                                        Module_Credit.Credit_CheckAll();
+                                    }
+                                    FailedUploadTask = true;
+                                    Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
+                                    break;
+                                }
+                            default:
+                                {
+                                    FailedUploadTask = true;
+                                    Report_Error($"Some other Error - {e621HttpResponseMessage.StatusCode}\n{e621StringResponse}", "e621 ReBot - Upload");
+                                    break;
+                                }
                         }
                         break;
                     }
