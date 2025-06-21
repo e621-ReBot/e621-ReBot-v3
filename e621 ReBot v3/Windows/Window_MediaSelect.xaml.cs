@@ -322,7 +322,7 @@ namespace e621_ReBot_v3
             else
             {
                 MessageBox.Show(Window_Preview._RefHolder, "No probable matches found.", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Information);
-                _RefHolder.Close();
+                if (_RefHolder != null) _RefHolder.Close();
             }
         }
 
@@ -381,7 +381,7 @@ namespace e621_ReBot_v3
             else
             {
                 MessageBox.Show(Window_Preview._RefHolder, "No probable matches found.", "e621 ReBot Similar Search", MessageBoxButton.OK, MessageBoxImage.Information);
-                _RefHolder.Close();
+                if (_RefHolder != null) _RefHolder.Close();
             }
         }
 
