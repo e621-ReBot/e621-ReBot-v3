@@ -19,6 +19,9 @@ namespace e621_ReBot_v3
         internal static Window_Tagger? _RefHolder;
         internal MediaItem? MediaItemHolder;
         internal static Custom_SuggestBox? SuggestionPopup;
+        static List<string>? Artist_List;
+        static List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
+        static List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
         public Window_Tagger()
         {
             InitializeComponent();
@@ -133,47 +136,9 @@ namespace e621_ReBot_v3
             Tags_TextBox.Focus();
         }
 
-        static List<string>? Artist_List;
-        static List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
-        static List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             SuggestionPopup?.SuggestionTimer.Stop();
-            if (TagsAdded)
-            {
-                List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                if (Artist_List != null)
-                {
-                    string? AnyArtist = TagListOnClose.Intersect(Artist_List).FirstOrDefault();
-                    if (string.IsNullOrEmpty(AnyArtist) && (MessageBox.Show(this, $"There is no artist tagged for this media, DNP list can not be checked, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
-                    {
-                        Tags_TextBox.AppendText(" ");
-                        Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                        TagsAdded = false;
-                        e.Cancel = true;
-                        return;
-                    }
-                }
-
-                string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
-                if (!string.IsNullOrEmpty(DNPArtist) && (MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
-                {
-                    Tags_TextBox.AppendText(" ");
-                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                    TagsAdded = false;
-                    e.Cancel = true;
-                    return;
-                }
-                if (!TagListOnClose.Intersect(Gender_List).Any() && (MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No))
-                {
-                    Tags_TextBox.AppendText(" ");
-                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
-                    TagsAdded = false;
-                    e.Cancel = true;
-                    return;
-                }
-                MediaItemHolder.UP_Tags = Tags_TextBox.Text;
-            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -242,7 +207,7 @@ namespace e621_ReBot_v3
                 case Key.Enter:
                     {
                         AddTags();
-                        Close();
+                        PreCloseChecks();
                         e.Handled = true;
                         return;
                     }
@@ -257,6 +222,41 @@ namespace e621_ReBot_v3
                         e.Handled = true;
                         return;
                     }
+            }
+        }
+
+        private void PreCloseChecks()
+        {
+            if (TagsAdded)
+            {
+                List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (Artist_List != null)
+                {
+                    string? AnyArtist = TagListOnClose.Intersect(Artist_List).FirstOrDefault();
+                    if (string.IsNullOrEmpty(AnyArtist) && MessageBox.Show(this, $"There is no artist tagged for this media, DNP list can not be checked, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        Tags_TextBox.AppendText(" ");
+                        Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                        TagsAdded = false;
+                        return;
+                    }
+                }
+                string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
+                if (!string.IsNullOrEmpty(DNPArtist) && MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+                {
+                    Tags_TextBox.AppendText(" ");
+                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                    TagsAdded = false;
+                    return;
+                }
+                if (!TagListOnClose.Intersect(Gender_List).Any() && MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+                {
+                    Tags_TextBox.AppendText(" ");
+                    Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;
+                    TagsAdded = false;
+                    return;
+                }
+                MediaItemHolder.UP_Tags = Tags_TextBox.Text;
             }
         }
 
@@ -341,7 +341,7 @@ namespace e621_ReBot_v3
         {
             AddTags();
             if (ReferenceEquals(Owner, Window_Preview._RefHolder)) Window_Preview._RefHolder.TaggerLocation = new Point(Left, Top);
-            Close();
+            PreCloseChecks();
         }
 
         private bool TagsAdded = false;
