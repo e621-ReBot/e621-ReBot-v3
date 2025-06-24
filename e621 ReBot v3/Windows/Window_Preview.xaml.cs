@@ -351,6 +351,13 @@ namespace e621_ReBot_v3
                                 string CachedImagePath = Module_Downloader.MediaBrowser_MediaCache[Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL)];
                                 MediaItemHolder.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(new BitmapImage(new Uri(CachedImagePath, UriKind.Relative)), MediaItemHolder.Grid_MediaFormat);
                             }
+                            MediaItemHolder.Grid_MediaMD5Checked = true;
+                        }
+
+                        //Also check if uploaded after loading saved grid
+                        if (!MediaItemHolder.Grid_MediaMD5Checked && MediaItemHolder.UP_UploadedID == null)
+                        {
+                            Check4MD5On621();
                         }
 
                         if (MediaItemHolder.Grid_ThumbnailFullInfo == false)

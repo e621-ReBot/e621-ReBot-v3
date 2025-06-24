@@ -27,6 +27,7 @@ namespace e621_ReBot_v3.CustomControls
         public uint Grid_MediaHeight;
         public uint? Grid_MediaByteLength;
         public string? Grid_MediaMD5;
+        [JsonIgnore] public bool Grid_MediaMD5Checked = false;
         public bool? Grid_MediaTooBig;
 
         // = = = Preview stuff

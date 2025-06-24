@@ -475,15 +475,8 @@ namespace e621_ReBot_v3
 
         private void GB_Clear_Click(object sender, RoutedEventArgs e)
         {
-            if (Upload_TreeView.Items.Count > 0)
-            {
-                MessageBox.Show(this, "Images can't be removed while they are queued for upload.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            //if (Form_Tagger._FormReference != null) Form_Tagger._FormReference.Close();
-            if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.Close();
-
             bool ClearAll = true;
+
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
@@ -500,6 +493,7 @@ namespace e621_ReBot_v3
                 }
                 ClearAll = false;
             }
+
             if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
@@ -514,6 +508,7 @@ namespace e621_ReBot_v3
                 }
                 ClearAll = false;
             }
+
             if (ClearAll)
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
