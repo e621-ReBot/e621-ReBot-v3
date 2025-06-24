@@ -531,6 +531,8 @@ namespace e621_ReBot_v3
                 Grid_Populate();
             }
 
+            if (Window_Preview._RefHolder != null && Module_Grabber._Grabbed_MediaItems.Count > 0 && !Module_Grabber._Grabbed_MediaItems.Contains(Window_Preview._RefHolder.MediaItemHolder)) Window_Preview._RefHolder.Close();
+
             UploadCounterChange(0);
             DownloadCounterChange(0);
             //GB_Clear.IsEnabled = Grid_GridVEPanel.Children.Count != 0;     
