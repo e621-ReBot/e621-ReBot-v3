@@ -183,7 +183,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL),
                     Grid_ThumbnailFullInfo = true,
                     UP_Tags = Post_DateTime.Year.ToString(),
-                    UP_IsWhitelisted = true
+                    UP_IsWhitelisted = false //is giving errors so turn it into byte upload
                 };
                 Module_Uploader.Media2BigCheck(MediaItemTemp);
                 MediaItemList.Add(MediaItemTemp);

@@ -441,10 +441,15 @@ namespace e621_ReBot_v3
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 MediaItemHolder.UP_ParentMediaItem = null;
-                return;
+                TB_ParentOffset.Foreground = new SolidColorBrush(Colors.Black);
+
             }
-            Window_MediaSelect.Show_ParentOffset(TB_ParentOffset.PointToScreen(new Point(0, 0)));
-            TB_ParentOffset.Foreground = new SolidColorBrush(MediaItemHolder.UP_ParentMediaItem == null ? Colors.Black : Colors.RoyalBlue);
+            else
+            {
+
+                Window_MediaSelect.Show_ParentOffset(TB_ParentOffset.PointToScreen(new Point(0, 0)));
+                TB_ParentOffset.Foreground = new SolidColorBrush(Colors.RoyalBlue);
+            }
         }
 
         private void Custom_ToggleSwitch_Click(object sender, RoutedEventArgs e)
