@@ -395,20 +395,24 @@ namespace e621_ReBot_v3
                     Grid_GridVEPanel.Children.RemoveRange(Items2Show - 1, Grid_GridVEPanel.Children.Count - Items2Show);
                 }
             }
-            GridVE? TempSelectionHolder = _SelectedGridVE;
             if (Grid_GridVEPanel.Children.Count > 0)
             {
                 int MediaItemIndexTracker = Grid_ItemStartIndex;
+                MediaItem? MediaItemTemp;
                 foreach (GridVE GridVETemp in Grid_GridVEPanel.Children)
                 {
-                    GridVETemp._MediaItemRef = Module_Grabber._Grabbed_MediaItems[MediaItemIndexTracker];
-                    GridVETemp.LoadMediaItem();
+                    MediaItemTemp = Module_Grabber._Grabbed_MediaItems[MediaItemIndexTracker];
+                    if (!ReferenceEquals(GridVETemp._MediaItemRef, MediaItemTemp))
+                    {
+                        GridVETemp._MediaItemRef = MediaItemTemp;
+                        GridVETemp.LoadMediaItem(); //Will change selection
+                        if (ReferenceEquals(_SelectedGridVE, GridVETemp))
+                        {
+                            //ChangeGridVESelection(_SelectedGridVE);
+                            _SelectedGridVE = null;
+                        }
+                    }
                     MediaItemIndexTracker++;
-                }
-                if (TempSelectionHolder != null)
-                {
-                    TempSelectionHolder.IsSelected = true;
-                    _SelectedGridVE = TempSelectionHolder;
                 }
             }
             Grid_Paginator();

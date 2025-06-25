@@ -37,7 +37,6 @@ namespace e621_ReBot_v3.CustomControls
                     BorderHighlight.BorderBrush = new SolidColorBrush(Colors.RoyalBlue);
                     BorderHighlight.BorderThickness = new Thickness(1);
                 }
-                Window_Main._RefHolder.ChangeGridVESelection(this);
             }
         }
 
@@ -155,6 +154,7 @@ namespace e621_ReBot_v3.CustomControls
             {
                 IsSelected = !IsSelected;
             }
+            Window_Main._RefHolder.ChangeGridVESelection(this);
         }
 
         internal void ToggleSelection()
