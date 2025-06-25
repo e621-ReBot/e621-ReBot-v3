@@ -258,6 +258,7 @@ namespace e621_ReBot_v3
                 }
                 MediaItemHolder.UP_Tags = Tags_TextBox.Text;
             }
+            Close();
         }
 
         private void Tags_TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
