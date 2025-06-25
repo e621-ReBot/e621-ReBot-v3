@@ -526,17 +526,30 @@ namespace e621_ReBot_v3.Modules
             byte[]? bytes2Send = null;
             if (isByteUpload)
             {
-                if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
+                bool FileBytesFound = false;
+
+                string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
+
+                //Check Media Browser cache
+                if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(FileName))
                 {
-                    string CachedFileName = MediaItemRef.DL_FilePath;
-                    CachedFileName = CachedFileName.Substring(CachedFileName.LastIndexOf(@"\") + 1);
-                    POST_Dictionary["upload[file]"] = CachedFileName;
-                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
+                    //could check for filepatch but it should always exist since it's created during runtime, there should be no deletions during runtime
+                    bytes2Send = File.ReadAllBytes(Module_Downloader.MediaBrowser_MediaCache[FileName]);
+                    FileBytesFound = true;
                 }
-                else
+
+                //Check Download cache
+                if (!FileBytesFound  && MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                 {
-                    string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
-                    string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
+                    FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf(@"\") + 1);
+                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
+                    FileBytesFound = true;
+                }
+
+                //Go ahead and download from source now since there is no local copy
+                string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
+                if (!FileBytesFound)
+                {
                     switch (MediaItemRef.Grid_MediaFormat)
                     {
                         case "ugoira":
@@ -548,7 +561,7 @@ namespace e621_ReBot_v3.Modules
                         case "mp4":
                         case "swf":
                             {
-                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
+                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
                                 break;
                             }
 
@@ -558,9 +571,10 @@ namespace e621_ReBot_v3.Modules
                                 break;
                             }
                     }
-                    POST_Dictionary["upload[file]"] = FileName;
-                    Upload_Sources = $"{ExtraSourceURL}%0A{Upload_Sources}";
+
                 }
+                POST_Dictionary["upload[file]"] = FileName;
+                Upload_Sources = $"{ExtraSourceURL}%0A{Upload_Sources}";
             }
 
             if (MediaItemRef.UP_Inferior_Description != null)
