@@ -320,6 +320,12 @@ namespace e621_ReBot_v3.CustomControls
             Window_Main._RefHolder.Grid_Populate(true);
         }
 
+        private void MenuItem_Click_RemoveMedia(object sender, RoutedEventArgs e)
+        {
+            AnimateScaleOut();
+            if (IsSelected) Window_Main._RefHolder._SelectedGridVE = null;
+        }
+
         // - - - - - - - - - - - - - - - -
 
         internal void AnimateScaleIn()

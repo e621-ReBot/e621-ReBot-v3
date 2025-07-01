@@ -95,6 +95,8 @@
             <Separator/>
             <MenuItem Name="MoveUp" Header="Decrease Media's Index" Click="MenuItem_Click_Move" Tag="-1"/>
             <MenuItem Name="MoveDown" Header="Increase Media's Index" Click="MenuItem_Click_Move" Tag="1"/>
+            <Separator/>
+            <MenuItem Header="Remove Media" Click="MenuItem_Click_RemoveMedia"/>
         </ContextMenu>
     </UserControl.ContextMenu>
 
