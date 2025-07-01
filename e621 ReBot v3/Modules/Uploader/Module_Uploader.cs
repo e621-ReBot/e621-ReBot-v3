@@ -489,7 +489,7 @@ namespace e621_ReBot_v3.Modules
                         if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
                         {
                             FailedUploadTask = true;
-                            Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior");
+                            Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Upload");
                             return;
                         }
 
@@ -533,53 +533,56 @@ namespace e621_ReBot_v3.Modules
             byte[]? bytes2Send = null;
             if (isByteUpload)
             {
-                bool FileBytesFound = false;
-
                 string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
-
-                //Check Media Browser cache
-                if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(FileName))
-                {
-                    //could check for filepatch but it should always exist since it's created during runtime, there should be no deletions during runtime
-                    bytes2Send = File.ReadAllBytes(Module_Downloader.MediaBrowser_MediaCache[FileName]);
-                    FileBytesFound = true;
-                }
-
-                //Check Download cache
-                if (!FileBytesFound  && MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
-                {
-                    FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf(@"\") + 1);
-                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
-                    FileBytesFound = true;
-                }
-
-                //Go ahead and download from source now since there is no local copy
                 string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
-                if (!FileBytesFound)
+                switch (MediaItemRef.Grid_MediaFormat)
                 {
-                    switch (MediaItemRef.Grid_MediaFormat)
-                    {
-                        case "ugoira":
+                    case "ugoira":
+                        {
+                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                            break;
+                        }
+
+                    case "mp4":
+                    case "swf":
+                        {
+                            //Check Download cache first
+                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                             {
-                                Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
+                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
                                 break;
                             }
 
-                        case "mp4":
-                        case "swf":
+                            //Download if no local copy exists
+                            Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
+                            break;
+                        }
+
+                    default: //jpg, png
+                        {
+                            //Check Media Browser cache
+                            if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(FileName))
                             {
-                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
+                                //could check for filepatch but it should always exist since it's created during runtime, there should be no deletions during runtime
+                                bytes2Send = File.ReadAllBytes(Module_Downloader.MediaBrowser_MediaCache[FileName]);
                                 break;
                             }
 
-                        default:
+                            //Check Download cache
+                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                             {
-                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
+                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
                                 break;
                             }
-                    }
 
+                            //Go ahead and download from source now since there is no local copy
+                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                            break;
+                        }
                 }
+
                 POST_Dictionary["upload[file]"] = FileName;
                 Upload_Sources = $"{ExtraSourceURL}%0A{Upload_Sources}";
             }
@@ -728,40 +731,56 @@ namespace e621_ReBot_v3.Modules
             byte[]? bytes2Send = null;
             if (isByteUpload)
             {
-                if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
+                string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
+                string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
+                switch (MediaItemRef.Grid_MediaFormat)
                 {
-                    string CachedFileName = MediaItemRef.DL_FilePath;
-                    CachedFileName = CachedFileName.Substring(CachedFileName.LastIndexOf('\\') + 1);
-                    POST_Dictionary.Add("post_replacement[replacement_file]", CachedFileName);
-                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
-                }
-                else
-                {
-                    string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
-                    string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
-                    switch (MediaItemRef.Grid_MediaFormat)
-                    {
-                        case "ugoira":
+                    case "ugoira":
+                        {
+                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                            break;
+                        }
+
+                    case "mp4":
+                    case "swf":
+                        {
+                            //Check Download cache first
+                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                             {
-                                Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
+                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
                                 break;
                             }
 
-                        case "mp4":
-                        case "swf":
+                            //Download if no local copy exists
+                            Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
+                            break;
+                        }
+
+                    default: //jpg, png
+                        {
+                            //Check Media Browser cache
+                            if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(FileName))
                             {
-                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
+                                //could check for filepatch but it should always exist since it's created during runtime, there should be no deletions during runtime
+                                bytes2Send = File.ReadAllBytes(Module_Downloader.MediaBrowser_MediaCache[FileName]);
                                 break;
                             }
 
-                        default:
+                            //Check Download cache
+                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                             {
-                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
+                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
                                 break;
                             }
-                    }
-                    POST_Dictionary.Add("post_replacement[replacement_file]", FileName);
+
+                            //Go ahead and download from source now since there is no local copy
+                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                            break;
+                        }
                 }
+                POST_Dictionary.Add("post_replacement[replacement_file]", FileName);
             }
 
             // - - - - - - - - - - - - - - - -
