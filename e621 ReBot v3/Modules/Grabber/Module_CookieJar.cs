@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -23,21 +24,48 @@ namespace e621_ReBot_v3.Modules
 
         internal static void GetCookies(string WebAdress, ref CookieContainer? WhichCookie)
         {
-            if (WhichCookie == null) WhichCookie = new CookieContainer();
-
             string BaseURL = $"{new Uri(WebAdress).Scheme}://{new Uri(WebAdress).Host}";
-            List<CefSharp.Cookie> CookieList = Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true).Result;
-            foreach (CefSharp.Cookie CookieHolder in CookieList)
+            WhichCookie = FindCookie(BaseURL).Result;
+        }
+
+        private static async Task<CookieContainer> FindCookie(string BaseURL)
+        {
+            CookieContainer ReturnCookieContainer = new CookieContainer();
+            if (Cef.GetGlobalCookieManager() != null) //Is null if grid session is loaded but browser isn't used
             {
-                System.Net.Cookie TempCookie = new System.Net.Cookie()
+                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true);
+
+                if (CefCookies != null)
                 {
-                    Domain = CookieHolder.Domain,
-                    Expires = CookieHolder.Expires == null ? DateTime.Now.AddMonths(1) : (DateTime)CookieHolder.Expires,
-                    Name = CookieHolder.Name,
-                    Value = CookieHolder.Value
-                };
-                WhichCookie.Add(TempCookie);
+                    foreach (CefSharp.Cookie CookieHolder in CefCookies)
+                    {
+                        System.Net.Cookie TempCookie = new System.Net.Cookie()
+                        {
+                            Domain = CookieHolder.Domain,
+                            Expires = CookieHolder.Expires == null ? DateTime.Now.AddMonths(1) : (DateTime)CookieHolder.Expires,
+                            Name = CookieHolder.Name,
+                            Value = CookieHolder.Value
+                        };
+                        ReturnCookieContainer.Add(TempCookie);
+                    }
+                }
             }
+
+            return ReturnCookieContainer;
+        }
+
+        internal static bool PixivCookieCheck()
+        {
+            if (Cookies_Pixiv == null || Cookies_Pixiv.Count == 0) //Also try and get them
+            {
+                GetCookies("https://www.pixiv.net", ref Cookies_Pixiv);
+            }
+            if (Cookies_Pixiv.Count == 0) //There are still no cookies
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -466,8 +466,6 @@ namespace e621_ReBot_v3.Modules
         {
             if (!Module_e621APIController.APIEnabled) return;
 
-            Report_Status("Uploading...");
-
             string Upload_Sources = MediaItemRef.Grab_PageURL;
             if (MediaItemRef.UP_Inferior_Sources != null)
             {
@@ -488,6 +486,13 @@ namespace e621_ReBot_v3.Modules
             {
                 case "ugoira":
                     {
+                        if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
+                        {
+                            FailedUploadTask = true;
+                            Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior");
+                            return;
+                        }
+
                         POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
                         string UgoiraFileName = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('/') + 1);
                         UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira1920x1080.webm, converted from {MediaItemRef.Grab_PageURL}";
@@ -522,6 +527,8 @@ namespace e621_ReBot_v3.Modules
                         break;
                     }
             }
+
+            Report_Status("Uploading...");
 
             byte[]? bytes2Send = null;
             if (isByteUpload)
@@ -679,14 +686,22 @@ namespace e621_ReBot_v3.Modules
         {
             if (!Module_e621APIController.APIEnabled) return;
 
-            Report_Status("Flagging for replacement...");
-
             Dictionary<string, string> POST_Dictionary = new Dictionary<string, string>();
             bool isByteUpload = false;
 
             switch (MediaItemRef.Grid_MediaFormat)
             {
                 case "ugoira":
+                    {
+                        if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
+                        {
+                            FailedUploadTask = true;
+                            Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior");
+                            return;
+                        }
+                        isByteUpload = true;
+                        break;
+                    }
                 case "mp4":
                 case "swf":
                     {
@@ -707,6 +722,8 @@ namespace e621_ReBot_v3.Modules
                         break;
                     }
             }
+
+            Report_Status("Flagging for replacement...");
 
             byte[]? bytes2Send = null;
             if (isByteUpload)

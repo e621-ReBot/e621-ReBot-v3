@@ -197,7 +197,7 @@ namespace e621_ReBot_v3.Modules.Converter
             StringBuilder UgoiraConcat = new StringBuilder();
             foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
             {
-                UgoiraConcat.AppendLine($"file {UgoiraFrame["file"].Value<string>()}"); // FFmpeg wants / instead of \
+                UgoiraConcat.AppendLine($"file {UgoiraFileName}.zip/{UgoiraFrame["file"].Value<string>()}"); // FFmpeg wants / instead of \
                 UgoiraConcat.AppendLine($"duration {UgoiraFrame["delay"].Value<int>() / 1000d}");
                 TotalUgoiraLength += UgoiraFrame["delay"].Value<int>();
             }

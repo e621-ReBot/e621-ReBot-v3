@@ -175,6 +175,11 @@ namespace CefSharp
                             //Why are they sending icons now?
                             break;
                         }
+                    case "text/html": //Ignore
+                        {
+                            //Pixiv spamming this now
+                            break;
+                        }
 
                     default:
                         {
