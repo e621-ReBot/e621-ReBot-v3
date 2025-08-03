@@ -117,7 +117,7 @@ namespace CefSharp
 
         protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
         {
-            if (AdBlock.Any(s => request.Url.Contains(s)))
+            if (AdBlock.Any(BlockedUrl => request.Url.Contains(BlockedUrl)))
             {
                 return true;
             }
@@ -149,7 +149,7 @@ namespace CefSharp
             //    return null;
             //}
 
-            if (AdBlock.Any(s => request.Url.Contains(s)))
+            if (AdBlock.Any(BlockedUrl => request.Url.Contains(BlockedUrl)))
             {
                 disableDefaultHandling = true;
                 return new CefSharp_ResourceRequestHandler_AdBlocker();

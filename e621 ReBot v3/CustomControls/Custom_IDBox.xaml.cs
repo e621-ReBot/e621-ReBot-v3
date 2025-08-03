@@ -35,7 +35,7 @@ namespace e621_ReBot_v3.CustomControls
                             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Clipboard.GetDataObject().GetDataPresent(DataFormats.StringFormat))
                             {
                                 string ClipboardText = (string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat);
-                                if (WhitelistedURLs.Any(s => ClipboardText.Contains(s)))
+                                if (WhitelistedURLs.Any(Url => ClipboardText.Contains(Url)))
                                 {
                                     ClipboardText = ClipboardText.Replace("https://e621.net/", null);
                                     if (ClipboardText.Contains('?')) ClipboardText = ClipboardText.Substring(0, ClipboardText.IndexOf('?'));

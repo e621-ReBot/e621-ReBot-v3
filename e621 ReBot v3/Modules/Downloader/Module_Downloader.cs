@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
@@ -83,6 +84,11 @@ namespace e621_ReBot_v3.Modules
                 FileClient.DownloadFileCompleted += Download_FileDLFinished;
                 Holder_FileClient.Add(FileClient);
             }
+
+            ErrorSkipList = new List<string>{
+                "An existing connection was forcibly closed by the remote host.",
+                "An error occurred while sending the request.",
+                "A connection attempt failed because the connected party did not properly respond after a period of time,"};
         }
 
         internal static void Start()
@@ -703,6 +709,7 @@ namespace e621_ReBot_v3.Modules
         }
 
         private static uint SessionDownloads = 0;
+        private static readonly List<string> ErrorSkipList;
         private static void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
@@ -723,48 +730,48 @@ namespace e621_ReBot_v3.Modules
                 DLThreadsWaiting++;
                 DownloadVETemp.DownloadFinish();
                 UpdateDownloadTreeView();
+                return;
             }
-            else
-            {
-                if (e.Error != null)
-                {
-                    string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
-                    if (ErrorMsg.Contains("An existing connection was forcibly closed by the remote host."))
-                    {
 
-                        if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
-                        {
-                            lock (_2Download_DownloadItems)
-                            {
-                                _2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                            }
-                        }
-                        DLThreadsWaiting++;
-                        DownloadVETemp.DownloadFinish();
-                        UpdateDownloadTreeView();
-                    }
-                    else
+            if (e.Error != null)
+            {
+                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
+
+                if (ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
+                {
+                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
                     {
-                        MessageBox.Show(Window_Main._RefHolder, $"{PicURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
-                        throw e.Error;
+                        lock (_2Download_DownloadItems)
+                        {
+                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
+                        }
                     }
+                    DLThreadsWaiting++;
+                    DownloadVETemp.DownloadFinish();
+                    UpdateDownloadTreeView();
                 }
                 else
                 {
-                    string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
-                    FileInfo FileInfoTemp = new FileInfo(TempFilePath);
-                    if (FileInfoTemp.Exists)
-                    {
-                        FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
-                        if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
-                        {
-                            File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
-                        }
-                    }
+                    MessageBox.Show(Window_Main._RefHolder, $"{PicURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw e.Error;
+                }
+                return;
+            }
 
-                    SessionDownloads++;
+            //Passed cancel and error check so it should be finished
+            string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
+            FileInfo FileInfoTemp = new FileInfo(TempFilePath);
+            if (FileInfoTemp.Exists)
+            {
+                FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
+                if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
+                {
+                    File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
                 }
             }
+
+            SessionDownloads++;
 
             DownloadVETemp._DownloadFinished = true;
             _DownloadVEFinisherTimer.Stop();
