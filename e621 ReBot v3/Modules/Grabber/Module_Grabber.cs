@@ -28,7 +28,7 @@ namespace e621_ReBot_v3.Modules
         {
             _GrabEnabler = new List<Regex>
             {
-                new Regex(@"^\w+://www\.furaffinity\.net/((view|full|gallery|scraps|favorites)/.+/|search/)"),
+                new Regex(@"^\w+://www\.furaffinity\.net/((view|full|gallery|scraps|favorites)/.+/?|search/?)"),
                 new Regex(@"^\w+://inkbunny\.net/((s|gallery|scraps)/\w+|submissionsviewall.php)"),
                 new Regex(@"^\w+://www\.pixiv\.net/\w+/(artworks|users)/\d+"),
                 new Regex(@"^\w+://www\.hiccears\.com/((contents|file).+(/.+)?|p/.+/illustrations)"),

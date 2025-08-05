@@ -45,7 +45,7 @@ namespace e621_ReBot_v3.Modules
             _DownloadEnabler = new List<Regex>
             {
                 new Regex(@".+e621.net/(posts(/\d+|\?.+)?|pools/\d+|favorites|popular)"),
-                new Regex(@".+www.furaffinity.net/view/\d+/"),
+                new Regex(@".+www.furaffinity.net/view/\d+/?"),
                 new Regex(@".+inkbunny.net/s/\d+"),
                 //new Regex(@".+www.furaffinity.net/(view|full|gallery|scraps|favorites)/.+/"),
                 //new Regex(@".+www.furaffinity.net/search/"),

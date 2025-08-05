@@ -92,7 +92,7 @@ namespace CefSharp
             ButtonEnableCheck = new List<Regex>
             {
                 new Regex(@"^\w+://e621\.net/(posts|pools|favorites|popular)"),
-                new Regex(@"^\w+://www\.furaffinity\.net/(view|full|gallery|scraps|favorites|search)/"),
+                new Regex(@"^\w+://www\.furaffinity\.net/(view|full|gallery|scraps|favorites|search)/?"),
                 new Regex(@"^\w+://inkbunny\.net/(s|gallery|scraps|submissionsviewall)"),
                 //new Regex(@"^\w+://www.pixiv.net/(\w+/artworks/\d+|ajax/user/\d+/profile/(illusts|top|all))"),
                 //new Regex(@"^\w+://s.pximg.net/www/js/build/spa.\w+.js"),
