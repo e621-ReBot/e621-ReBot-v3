@@ -729,6 +729,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 DLThreadsWaiting++;
                 DownloadVETemp.DownloadFinish();
+                DownloadVETemp._DownloadFinished = true;
                 UpdateDownloadTreeView();
                 return;
             }
@@ -749,6 +750,7 @@ namespace e621_ReBot_v3.Modules
                     }
                     DLThreadsWaiting++;
                     DownloadVETemp.DownloadFinish();
+                    DownloadVETemp._DownloadFinished = true;
                     UpdateDownloadTreeView();
                 }
                 else
