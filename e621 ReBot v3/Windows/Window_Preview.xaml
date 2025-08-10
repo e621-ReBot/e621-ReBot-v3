@@ -17,45 +17,45 @@
 
         <DockPanel Grid.Row="0" HorizontalAlignment="Left" LastChildFill="False" Height="32" Margin="0,1,0,0" >
             <StackPanel x:Name="panel_Navigation" Orientation="Horizontal">
-                <Button x:Name="PB_Previous" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" IsEnabled="False" Cursor="Hand" Tag="-1" ToolTip="Navigate to previous media.&#xA;You can also use '↑' or '←' keys on keyboard." Click="PB_Navigate_Click">
+                <Button x:Name="PB_Previous" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" IsEnabled="False" Cursor="Hand" Tag="-1" ToolTip="Navigate to previous media.&#10;You can also use '↑' or '←' keys on keyboard." Click="PB_Navigate_Click">
                     <TextBlock Text="⯇" Margin="0,-2,0,0" FontSize="24" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Button>
-                <Button x:Name="PB_Next" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" IsEnabled="False" Cursor="Hand" Tag="1" ToolTip="Navigate to next media.&#xA;You can also use '↓' or '→' keys on keyboard." Click="PB_Navigate_Click" Margin="1,0,0,0">
+                <Button x:Name="PB_Next" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" IsEnabled="False" Cursor="Hand" Tag="1" ToolTip="Navigate to next media.&#10;You can also use '↓' or '→' keys on keyboard." Click="PB_Navigate_Click" Margin="1,0,0,0">
                     <TextBlock Text="⯈" Margin="0,-2,0,0" FontSize="24" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
             </StackPanel>
 
             <Border Width="1" Margin="8,0,8,0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left"/>
             <StackPanel x:Name="panel_Rating" Orientation="Horizontal" Width="100">
-                <Button x:Name="PB_Explicit" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="E" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="Red" ToolTip="Set media rating as Explicit.&#xA;You can also use 'E' key on keyboard." Click="PB_Rating_Click" Tag="Red"/>
-                <Button x:Name="PB_Questionable" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="Q" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="Yellow" ToolTip="Set media rating as Questionable.&#xA;You can also use 'Q' key on keyboard." Margin="1,0,0,0" Click="PB_Rating_Click" Tag="Yellow"/>
-                <Button x:Name="PB_Safe" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="S" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="LimeGreen" ToolTip="Set media rating as Safe.&#xA;You can also use 'S' key on keyboard." Margin="1,0,0,0" Click="PB_Rating_Click" Tag="LimeGreen"/>
+                <Button x:Name="PB_Explicit" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="E" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="Red" ToolTip="Set media rating as Explicit.&#10;You can also use 'E' key on keyboard." Click="PB_Rating_Click" Tag="Red"/>
+                <Button x:Name="PB_Questionable" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="Q" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="Yellow" ToolTip="Set media rating as Questionable.&#10;You can also use 'Q' key on keyboard." Margin="1,0,0,0" Click="PB_Rating_Click" Tag="Yellow"/>
+                <Button x:Name="PB_Safe" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="S" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" Foreground="LimeGreen" ToolTip="Set media rating as Safe.&#10;You can also use 'S' key on keyboard." Margin="1,0,0,0" Click="PB_Rating_Click" Tag="LimeGreen"/>
             </StackPanel>
 
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
 
-            <Button x:Name="PB_Tagger" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="T" FontSize="20" FontWeight="Bold" Cursor="Hand" ToolTip="Open Tagger. Press Ctrl to center it.&#xA;You can also use 'T' key on keyboard." Click="PB_Tagger_Click"/>
+            <Button x:Name="PB_Tagger" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="T" FontSize="20" FontWeight="Bold" Cursor="Hand" ToolTip="Open Tagger. Press Ctrl to center it.&#10;You can also use 'T' key on keyboard." Click="PB_Tagger_Click"/>
 
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
 
-            <Button x:Name="PB_Upload" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="▲" HorizontalContentAlignment="Center" FontSize="20" HorizontalAlignment="Center" Cursor="Hand" ToolTip="Toggle upload status.&#xA;You can also use '+' or '-' key on keyboard." IsEnabled="False" Click="PB_Upload_Click" IsEnabledChanged="PB_Upload_IsEnabledChanged"/>
-            <Button x:Name="PB_Download" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="▼" HorizontalContentAlignment="Center" FontSize="20" Margin="1,0,0,0" HorizontalAlignment="Center" Cursor="Hand" ToolTip="Download Media.&#xA;You can also use 'D' key on keyboard." Click="PB_Download_Click"/>
-            <Button x:Name="PB_ViewFile" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="🔍" HorizontalContentAlignment="Center" FontSize="20" Margin="1,0,0,0" HorizontalAlignment="Center" Cursor="Hand" ToolTip="View File.&#xA;Ctrl+Click to view file in folder.&#xA;You can also use 'V' key on keyboard." Click="PB_ViewFile_Click"/>
+            <Button x:Name="PB_Upload" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="▲" HorizontalContentAlignment="Center" FontSize="20" HorizontalAlignment="Center" Cursor="Hand" ToolTip="Toggle upload status.&#10;You can also use '+' or '-' key on keyboard." IsEnabled="False" Click="PB_Upload_Click" IsEnabledChanged="PB_Upload_IsEnabledChanged"/>
+            <Button x:Name="PB_Download" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="▼" HorizontalContentAlignment="Center" FontSize="20" Margin="1,0,0,0" HorizontalAlignment="Center" Cursor="Hand" ToolTip="Download Media.&#10;You can also use 'D' key on keyboard." Click="PB_Download_Click"/>
+            <Button x:Name="PB_ViewFile" Style="{StaticResource ButtonStyle_Window_Preview}" Width="32" Content="🔍" HorizontalContentAlignment="Center" FontSize="20" Margin="1,0,0,0" HorizontalAlignment="Center" Cursor="Hand" ToolTip="View File.&#10;Ctrl+Click to view file in folder.&#10;You can also use 'V' key on keyboard." Click="PB_ViewFile_Click"/>
 
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
             <StackPanel x:Name="panel_Search" Orientation="Horizontal">
-                <Button x:Name="PB_SauceNao" Style="{StaticResource ButtonStyle_Window_Preview}" Width="100" ToolTip="Search for similar media with SauceNao.&#xA;You can also use 'F' key on keyboard.&#xA;&#xA;Ctrl+Click to set as superior manually.&#xA;Shift+Click to set as inferior manually." Content="SauceNao" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" Cursor="Hand" Click="PB_SimilarSearch_Click"/>
-                <Button x:Name="PB_IQDBQ" Style="{StaticResource ButtonStyle_Window_Preview}" Width="80" Margin="1,0,0,0" ToolTip="Search for similar media with IQDB Query.&#xA;You can also use 'I' key on keyboard.&#xA;&#xA;Ctrl+Click to set as superior manually.&#xA;Shift+Click to set as inferior manually." Content="IQDBQ" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" Cursor="Hand" Click="PB_SimilarSearch_Click"/>
+                <Button x:Name="PB_SauceNao" Style="{StaticResource ButtonStyle_Window_Preview}" Width="100" ToolTip="Search for similar media with SauceNao.&#10;You can also use 'F' key on keyboard.&#10;&#10;Ctrl+Click to set as superior manually.&#10;Shift+Click to set as inferior manually." Content="SauceNao" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" Cursor="Hand" Click="PB_SimilarSearch_Click"/>
+                <Button x:Name="PB_IQDBQ" Style="{StaticResource ButtonStyle_Window_Preview}" Width="80" Margin="1,0,0,0" ToolTip="Search for similar media with IQDB Query.&#10;You can also use 'I' key on keyboard.&#10;&#10;Ctrl+Click to set as superior manually.&#10;Shift+Click to set as inferior manually." Content="IQDBQ" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" Cursor="Hand" Click="PB_SimilarSearch_Click"/>
             </StackPanel>
 
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
 
-            <Button x:Name="PB_LoadAllMedia" Style="{StaticResource ButtonStyle_Window_Preview}" Width="20" Height="20" IsEnabled="False" ToolTip="Load all media, click again to stop.&#xA;It just navigate through the media list to cache it for browser." Margin="1,0,0,0" Cursor="Hand" Click="PB_LoadAllMedia_Click" IsEnabledChanged="PB_LoadAllMedia_IsEnabledChanged">
+            <Button x:Name="PB_LoadAllMedia" Style="{StaticResource ButtonStyle_Window_Preview}" Width="20" Height="20" IsEnabled="False" ToolTip="Load all media, click again to stop.&#10;It just navigate through the media list to cache it for browser." Margin="1,0,0,0" Cursor="Hand" Click="PB_LoadAllMedia_Click" IsEnabledChanged="PB_LoadAllMedia_IsEnabledChanged">
                 <TextBlock Text="L" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontWeight="Bold"/>
             </Button>
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
 
-            <CustomControls:Custom_TextWithOutline x:Name="AlreadyUploaded_Label" Fill="Orange" Text="#0123456789" FontWeight="Bold" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="20" Cursor="{StaticResource Cursor_ReBotNav}" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser." MouseLeftButtonDown="AlreadyUploaded_Label_MouseLeftButtonDown"/>
+            <CustomControls:Custom_TextWithOutline x:Name="AlreadyUploaded_Label" Fill="Orange" Text="#0123456789" FontWeight="Bold" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="20" Cursor="{StaticResource Cursor_ReBotNav}" ToolTip="Click to navigate to post.&#10;Alt+Click to open in your default browser." MouseLeftButtonDown="AlreadyUploaded_Label_MouseLeftButtonDown"/>
 
         </DockPanel>
         <Border BorderBrush="Black" Grid.Row="1" BorderThickness="0,1,0,0" Panel.ZIndex="69"/>

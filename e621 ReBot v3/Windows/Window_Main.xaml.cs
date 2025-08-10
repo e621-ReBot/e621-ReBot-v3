@@ -465,14 +465,29 @@ namespace e621_ReBot_v3
 
         private void GB_Left_Click(object sender, RoutedEventArgs e)
         {
-            Grid_ItemStartIndex -= Grid_ItemLimit;
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                Grid_ItemStartIndex = 0;
+            }
+            else
+            {
+                Grid_ItemStartIndex -= Grid_ItemLimit;
+            }            
             if (_SelectedGridVE != null) _SelectedGridVE.ToggleSelection();
             Grid_Populate(true);
         }
 
         private void GB_Right_Click(object sender, RoutedEventArgs e)
         {
-            Grid_ItemStartIndex += Grid_ItemLimit;
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                Grid_ItemStartIndex = Module_Grabber._Grabbed_MediaItems.Count / Grid_ItemLimit; //In C#, integer division is truncated before any multiplication happens which is what is needed but not entirely clear from single line.
+                Grid_ItemStartIndex *= Grid_ItemLimit;
+            }
+            else
+            {
+                Grid_ItemStartIndex += Grid_ItemLimit;
+            }         
             if (_SelectedGridVE != null) _SelectedGridVE.ToggleSelection();
             Grid_Populate(true);
         }

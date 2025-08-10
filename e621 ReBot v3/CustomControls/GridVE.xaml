@@ -104,13 +104,13 @@
         <Image x:Name="cThumbnail_Image" IsHitTestVisible="False" Source="/Resources/MainWindow/E6Image_Loading.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True" StretchDirection="DownOnly"/>
         
         <Grid Margin="2">
-            <local:Custom_TextWithOutline x:Name="cTagWarning_TextBlock" Text="T" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontWeight="Black" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="16" Height="28" Margin="0,0,1,16" ToolTip="Media has less than minimum required tags.&#xA;Uploading like this may lead to getting a record." FontSize="20"/>
+            <local:Custom_TextWithOutline x:Name="cTagWarning_TextBlock" Text="T" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontWeight="Black" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="16" Height="28" Margin="0,0,1,16" ToolTip="Media has less than minimum required tags.&#10;Uploading like this may lead to getting a record." FontSize="20"/>
 
             <CheckBox x:Name="cDL_CheckBox" Style="{StaticResource cCheckBoxDL}"  Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="1" ClickMode="Press" Focusable="False" Checked="CDL_CheckBox_CheckChanged" Unchecked="CDL_CheckBox_CheckChanged" ToolTip="Select for download."/>
 
             <CheckBox x:Name="cUpload_CheckBox" Style="{StaticResource cCheckBoxUP}"  Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="1" ClickMode="Press" Focusable="False" Checked="CUpload_CheckBox_CheckChanged" Unchecked="CUpload_CheckBox_CheckChanged" IsEnabledChanged="CUpload_CheckBox_IsEnabledChanged" ToolTip="Select for upload."/>
 
-            <DockPanel x:Name="IsUploaded_DockPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="{StaticResource Cursor_ReBotNav}" Background="Transparent" MouseLeftButtonDown="IsUploaded_DockPanel_MouseLeftButtonDown" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser.">
+            <DockPanel x:Name="IsUploaded_DockPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="{StaticResource Cursor_ReBotNav}" Background="Transparent" MouseLeftButtonDown="IsUploaded_DockPanel_MouseLeftButtonDown" ToolTip="Click to navigate to post.&#10;Alt+Click to open in your default browser.">
                 <local:Custom_TextWithOutline x:Name="cIsUploaded_TextBlock" Text="#1234567" TextAlignment="Center" Fill="{DynamicResource ThemeFocus}" FontSize="24" FontWeight="Bold" StrokeThickness="2" IsHitTestVisible="False" MinWidth="120"/>
             </DockPanel>
         </Grid>

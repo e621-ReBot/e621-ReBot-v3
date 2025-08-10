@@ -246,7 +246,7 @@ namespace e621_ReBot_v3.Modules
                     if (Window_Tagger.SuggestionPopup != null) Window_Tagger.SuggestionPopup.LoadSuggestionBox();
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "DL Suggestions";
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.IsEnabled = true;
-                    MessageBox.Show(Window_Main._RefHolder, "Downloaded all Tags and Pools for tag suggestions.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(Window_Main._RefHolder, "Downloaded all Tags and Pools for tag suggestions in addition to Artists for DNPs check.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
                     GC.WaitForPendingFinalizers();
                     GC.Collect();
                 });
