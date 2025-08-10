@@ -76,6 +76,7 @@ namespace e621_ReBot_v3
                 { "Download_SaveTags", Download_SaveTags },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },
+                { "Download_IgnoreErrors", Download_IgnoreErrors },
                 { "Browser_ClearCache", Browser_ClearCache },
                 { "Converter_DontConvertVideos", Converter_DontConvertVideos },
                 { "Note", Note }
