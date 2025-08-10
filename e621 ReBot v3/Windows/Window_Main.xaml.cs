@@ -1279,6 +1279,11 @@ namespace e621_ReBot_v3
             AppSettings.Download_SaveTags = ((CheckBox)sender).IsChecked ?? false;
         }
 
+        private void SettingsCheckBox_IgnoreErrors_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.Download_IgnoreErrors = ((CheckBox)sender).IsChecked ?? false;
+        }
+
         private void SettingsButton_Blacklist_Click(object sender, RoutedEventArgs e)
         {
             new Window_Blacklist().ShowDialog();

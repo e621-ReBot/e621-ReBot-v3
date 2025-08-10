@@ -263,37 +263,38 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1">
-                            <TextBlock Text="Downloader" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0"/>
+                        <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+
+                        <TextBlock Text="Downloader" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0"/>
+
+                        <CheckBox x:Name="SettingsCheckBox_IgnoreErrors" Style="{DynamicResource CheckBoxStyle_Large}" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" IsChecked="False" ToolTip="Ignore all errors and just keep trying to download."  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="96,0,0,0" Click="SettingsCheckBox_IgnoreErrors_Click"/>
+                        
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" Margin="128,0,128,0">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Select the number of download threads.">
+                                    <TextBlock Text="Download Threads:" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,8,0"/>
+                                    <StackPanel x:Name="DLThreads_StackPanel" Orientation="Horizontal" Margin="0,2,0,0">
+                                        <RadioButton x:Name="RadionButton_DLT1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT2" Content="2" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT4" Content="4" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" IsChecked="True" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                        <RadioButton x:Name="RadionButton_DLT8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip=".Save media's tags to text file when downloading media from e621" Click="SettingsCheckBox_DownloadSaveTags_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" FlowDirection="RightToLeft"/>
+                            </Grid>
                         </Border>
 
-                        <Grid MinWidth="820">
-                            <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" Margin="128,0,128,0">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Select the number of download threads.">
-                                        <TextBlock Text="Download Threads:" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,8,0"/>
-                                        <StackPanel x:Name="DLThreads_StackPanel" Orientation="Horizontal" Margin="0,2,0,0">
-                                            <RadioButton x:Name="RadionButton_DLT1" Content="1" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Click="RadionButton_DLTX_Click"/>
-                                            <RadioButton x:Name="RadionButton_DLT2" Content="2" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
-                                            <RadioButton x:Name="RadionButton_DLT4" Content="4" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" IsChecked="True" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
-                                            <RadioButton x:Name="RadionButton_DLT8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip=".Save media's tags to text file when downloading media from e621" Click="SettingsCheckBox_DownloadSaveTags_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" FlowDirection="RightToLeft"/>
-                                </Grid>
-                            </Border>
-
-                            <Border BorderBrush="Black" HorizontalAlignment="Right" BorderThickness="1,0,0,0" Width="128">
-                                <Button x:Name="Download_DownloadFolder" BorderThickness="0" Click="Download_DownloadFolder_Click" Height="30" Cursor="Hand" ToolTip="Open Downloads folder.">
-                                    <StackPanel Orientation="Horizontal" Margin="8,2,8,2">
-                                        <Image Source="/Resources/MainWindow/FolderIcon.png" />
-                                        <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="Downloads"/>
-                                    </StackPanel>
-                                </Button>
-                            </Border>
-                        </Grid>
+                        <Border BorderBrush="Black" HorizontalAlignment="Right" BorderThickness="1,0,0,0" Width="128">
+                            <Button x:Name="Download_DownloadFolder" BorderThickness="0" Click="Download_DownloadFolder_Click" Height="30" Cursor="Hand" ToolTip="Open Downloads folder.">
+                                <StackPanel Orientation="Horizontal" Margin="8,2,8,2">
+                                    <Image Source="/Resources/MainWindow/FolderIcon.png" />
+                                    <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="Downloads"/>
+                                </StackPanel>
+                            </Button>
+                        </Border>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
+
                         <WrapPanel x:Name="Download_DownloadVEPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,4,4" IsHitTestVisible="False" LayoutUpdated="Download_DownloadVEPanel_LayoutUpdated">
                             <customcontrols:DownloadVE Margin="4,4,0,0"/>
                             <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>

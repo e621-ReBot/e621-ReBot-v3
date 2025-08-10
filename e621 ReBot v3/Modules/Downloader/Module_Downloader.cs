@@ -717,6 +717,23 @@ namespace e621_ReBot_v3.Modules
 
             if (e.Cancelled) //timeout detected, cancelled it;
             {
+                if (AppSettings.Download_IgnoreErrors)
+                {
+                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                    {
+                        lock (_2Download_DownloadItems)
+                        {
+                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
+                        }
+                    }
+                    DLThreadsWaiting++;
+                    DownloadVETemp.DownloadFinish();
+                    DownloadVETemp._DownloadFinished = true;
+                    UpdateDownloadTreeView();
+                    return;
+                }
+
                 Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
                 MessageBox.Show(Window_Main._RefHolder, "Timeout has been detected, further downloads have been paused!", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Warning);
 
@@ -736,8 +753,24 @@ namespace e621_ReBot_v3.Modules
 
             if (e.Error != null)
             {
-                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
+                if (AppSettings.Download_IgnoreErrors)
+                {
+                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                    {
+                        lock (_2Download_DownloadItems)
+                        {
+                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
+                        }
+                    }
+                    DLThreadsWaiting++;
+                    DownloadVETemp.DownloadFinish();
+                    DownloadVETemp._DownloadFinished = true;
+                    UpdateDownloadTreeView();
+                    return;
+                }
 
+                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
                 if (ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
                 {
                     if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))

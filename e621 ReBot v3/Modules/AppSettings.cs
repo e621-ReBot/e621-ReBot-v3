@@ -38,6 +38,7 @@ namespace e621_ReBot_v3
         internal static bool Download_SaveTags = false;
         internal static ushort NamingPattern_e6 = 0;
         internal static ushort NamingPattern_Web = 0;
+        internal static bool Download_IgnoreErrors = false;
         // - - - - - - - - - - - - - - - -
         internal static bool Browser_ClearCache = false;
         // - - - - - - - - - - - - - - - -
@@ -243,6 +244,11 @@ namespace e621_ReBot_v3
                                 //((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
                                 break;
                             }
+                        case "Download_IgnoreErrors":
+                            {
+                                Download_IgnoreErrors = LoadSettingsJObject["Download_IgnoreErrors"].Value<bool>();
+                                break;
+                            }
                         case "Browser_ClearCache":
                             {
                                 Browser_ClearCache = LoadSettingsJObject["Browser_ClearCache"].Value<bool>();
@@ -351,6 +357,7 @@ namespace e621_ReBot_v3
             Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
+            Window_Main._RefHolder.SettingsCheckBox_IgnoreErrors.IsChecked = Download_IgnoreErrors;
 
             // - - - Grid
 
