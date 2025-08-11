@@ -61,19 +61,21 @@ namespace e621_ReBot_v3.Modules.Downloader
                         else //multi
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
-
-                            //If page has more than 1 page and API key present then ask to grab all
-                            if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey) && CurrentPage == 1)
+                            if (WebAddress.Contains("tags=")) //leave the tags check, don't want download without the tags.
                             {
-                                MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                                if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
-                                if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                //If page has more than 1 page and API key present then ask to grab all
+                                if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey) && CurrentPage == 1)
                                 {
-                                    string TagQuery = WebAddress;
-                                    TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
+                                    MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                                    if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
+                                    if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                    {
+                                        string TagQuery = WebAddress;
+                                        TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
 
-                                    Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
-                                    return;
+                                        Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
+                                        return;
+                                    }
                                 }
                             }
 
