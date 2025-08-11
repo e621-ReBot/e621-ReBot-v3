@@ -65,7 +65,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 //If page has more than 1 page and API key present then ask to grab all
                                 if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                                 {
-                                    MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                                    MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                                    if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
                                     if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                     {
                                         string TagQuery = WebAddress;
@@ -73,7 +74,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                                         Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
                                         return;
-                                    }
+                                    }  
                                 }
                             }
 
@@ -113,7 +114,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                         //If page has more than 1 page and API key present then ask to grab all
                         if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                         {
-                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
                             if (MessageBoxResultTemp == MessageBoxResult.Yes)
                             {
                                 string PoolID = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//li[@id='subnav-show']/a").Attributes["href"].Value;
@@ -213,7 +215,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                         //If page has more than 1 page and API key present then ask to grab all
                         if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
                         {
-                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                            if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
                             if (MessageBoxResultTemp == MessageBoxResult.Yes)
                             {
                                 string TagQuery = PageNode.SelectSingleNode(".//textarea[@id='tags']").InnerText;
