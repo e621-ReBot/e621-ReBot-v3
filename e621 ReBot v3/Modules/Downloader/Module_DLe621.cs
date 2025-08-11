@@ -22,6 +22,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             HtmlNode PageNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='page']");
             HtmlNode BottomMenuHolder = PageNode.SelectSingleNode(".//nav[@class='pagination numbered']");
+            int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
+            int CurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value);
 
             switch (URLParts[2])
             {
@@ -59,22 +61,19 @@ namespace e621_ReBot_v3.Modules.Downloader
                         else //multi
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
-                            if (WebAddress.Contains("/posts?tags="))
-                            {
-                                int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
-                                //If page has more than 1 page and API key present then ask to grab all
-                                if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
-                                {
-                                    MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
-                                    if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
-                                    if (MessageBoxResultTemp == MessageBoxResult.Yes)
-                                    {
-                                        string TagQuery = WebAddress;
-                                        TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
 
-                                        Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
-                                        return;
-                                    }  
+                            //If page has more than 1 page and API key present then ask to grab all
+                            if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey) && CurrentPage == 1)
+                            {
+                                MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all images with current tags?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
+                                if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
+                                if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                {
+                                    string TagQuery = WebAddress;
+                                    TagQuery = TagQuery.Substring(TagQuery.IndexOf("tags=") + 5);
+
+                                    Grab_MediaWithTags(TagQuery, SpecialSaveFolder);
+                                    return;
                                 }
                             }
 
@@ -110,9 +109,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 case "pools":
                     {
-                        int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
                         //If page has more than 1 page and API key present then ask to grab all
-                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
+                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey) && CurrentPage == 1)
                         {
                             MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download the whole pool?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
                             if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
@@ -127,7 +125,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         }
 
                         //If single page or no API key present then just grab this (single) page
-                        HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='a-show']//article");
+                        HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
                             int GetCurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value); ;
@@ -211,9 +209,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                     {
                         SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
 
-                        int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
                         //If page has more than 1 page and API key present then ask to grab all
-                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey))
+                        if (PageCount > 1 && !string.IsNullOrEmpty(AppSettings.APIKey) && CurrentPage == 1)
                         {
                             MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to download all favorites?\nPress no if you want current page only.", "Download", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes); });
                             if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
