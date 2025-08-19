@@ -103,7 +103,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 case "a":
                     {
-                        string aURL = $"https://www.furaffinity.net{WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value)}";
+                        string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
+                        if (aURL.StartsWith('/')) aURL = $"https://www.furaffinity.net{aURL}";
+
                         string TempTextHolder = TextHolderNode.InnerText.Replace("&nbsp;", " ").Trim();
                         if (TextHolderNode.Attributes["class"] != null) // parsed_nav_links doesn't have class attribute
                         {
