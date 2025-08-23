@@ -295,7 +295,7 @@
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
-                        <WrapPanel x:Name="Download_DownloadVEPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,4,4" IsHitTestVisible="False" LayoutUpdated="Download_DownloadVEPanel_LayoutUpdated">
+                        <WrapPanel x:Name="Download_DownloadVEPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,4,4" IsHitTestVisible="False" LayoutUpdated="Download_DownloadVEPanel_LayoutUpdated" MinWidth="816">
                             <customcontrols:DownloadVE Margin="4,4,0,0"/>
                             <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                             <customcontrols:DownloadVE Margin="4,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
