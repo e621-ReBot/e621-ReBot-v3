@@ -45,55 +45,57 @@ namespace e621_ReBot_v3.Modules.Converter
                 }
 
                 FFMpeg.StartInfo.FileName = "ffmpeg.exe";
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -y -f concat -i {TempFolderName}\\input.txt -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
-                FFMpeg.StartInfo.CreateNoWindow = true;
                 FFMpeg.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                FFMpeg.StartInfo.CreateNoWindow = true;
                 FFMpeg.StartInfo.UseShellExecute = false;
+                //FFMpeg.StartInfo.RedirectStandardOutput = true;
                 FFMpeg.StartInfo.RedirectStandardError = true;
-                FFMpeg.Start();
-                while (!FFMpeg.HasExited)
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -f concat -i \"{TempFolderName}\\input.txt\" -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+
+                FFMpeg.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
-                    string ReadLine = FFMpeg.StandardError.ReadLine();
-                    while (ReadLine != null)
+                    if (!string.IsNullOrEmpty(e.Data))
                     {
+                        string ReadLine = e.Data;
                         if (ReadLine.StartsWith("frame= ", StringComparison.OrdinalIgnoreCase))
                         {
-                            string ReadTime = ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11);
-                            if (ReadTime.Substring(0, 1).All(char.IsDigit))
+                            //frame= 1881 fps=139 q=24.0 size=   13568KiB time=00:01:15.16 bitrate=1478.8kbits/s speed=5.56x
+                            //or
+                            //frame=1234
+                            TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11));
+                            switch (ActionTypeEnum)
                             {
-                                TimeSpan CurrentTime = TimeSpan.Parse(ReadTime);
-                                switch (ActionTypeEnum)
-                                {
-                                    case ActionType.Upload:
-                                        {
-                                            Module_Uploader.Report_Status($"Converting Ugoira to WebM...{(CurrentTime.TotalMilliseconds / UgoiraDuration):P0}");
-                                            break;
-                                        }
+                                case ActionType.Upload:
+                                    {
+                                        Module_Uploader.Report_Status($"Converting Ugoira to WebM...{(CurrentTime.TotalMilliseconds / UgoiraDuration):P0}");
+                                        break;
+                                    }
 
-                                    case ActionType.Download:
-                                        {
-                                            ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(CurrentTime.TotalMilliseconds / UgoiraDuration * 100d); });
-                                            break;
-                                        }
+                                case ActionType.Download:
+                                    {
+                                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(CurrentTime.TotalMilliseconds / UgoiraDuration * 100d); });
+                                        break;
+                                    }
 
-                                    case ActionType.Conversion:
-                                        {
-                                            //ReportConversionProgress("CU", CurrentTime.TotalMilliseconds / UgoiraDuration, in DataRowRef);
-                                            break;
-                                        }
-                                }
+                                case ActionType.Conversion:
+                                    {
+                                        //ReportConversionProgress("CU", CurrentTime.TotalMilliseconds / UgoiraDuration, in DataRowRef);
+                                        break;
+                                    }
                             }
                         }
-                        ReadLine = FFMpeg.StandardError.ReadLine(); // doesn't want to exit on first pass otherwise
                     }
-                }
+                });
+                FFMpeg.Start();
+                FFMpeg.BeginErrorReadLine();
                 FFMpeg.WaitForExit();
             }
         }
 
+        private static TimeSpan VideoDuration;
+
         private static void FFMpeg4Video(ActionType ActionTypeEnum, string TempFolderName, string TempVideoFileName, string TempVideoFormat, string? FullFolderPath = null, ProgressBar? ProgressBarRef = null)
         {
-            TimeSpan VideoDuration = TimeSpan.Zero;
             using (Process FFMpeg = new Process())
             {
                 switch (ActionTypeEnum)
@@ -111,32 +113,36 @@ namespace e621_ReBot_v3.Modules.Converter
                         }
                 }
                 FFMpeg.StartInfo.FileName = "ffmpeg.exe";
-                FFMpeg.StartInfo.UseShellExecute = false;
                 FFMpeg.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 FFMpeg.StartInfo.CreateNoWindow = true;
+                FFMpeg.StartInfo.UseShellExecute = false;
+                //FFMpeg.StartInfo.RedirectStandardOutput = true;
                 FFMpeg.StartInfo.RedirectStandardError = true;
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{TempFolderName}\\{TempVideoFileName}.{TempVideoFormat}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1 \"{FullFolderPath}\\{TempVideoFileName}.webm\"";
 
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -y -i {TempFolderName}\\{TempVideoFileName}.{TempVideoFormat} -c:v libvpx-vp9 -pix_fmt yuv420p -b:a 192k -crf 24 -b:v 4M -deadline realtime -cpu-used 2 -row-mt 1 \"{FullFolderPath}\\{TempVideoFileName}.webm\"";
-                FFMpeg.Start();
-
-                Thread.Sleep(1000);
-
-                while (!FFMpeg.HasExited)
+                VideoDuration = TimeSpan.Zero;
+                FFMpeg.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
-                    string ReadLine = FFMpeg.StandardError.ReadLine();
-                    while (ReadLine != null)
+                    if (!string.IsNullOrEmpty(e.Data))
                     {
-                        if (VideoDuration == TimeSpan.Zero && ReadLine.Contains("Duration:"))
+                        string ReadLine = e.Data;
+                        if (VideoDuration == TimeSpan.Zero && ReadLine.Contains("Duration: "))
                         {
                             //__Duration: 00:06:08.40, start: 0.000000, bitrate: 1000 kb/s
-                            VideoDuration = TimeSpan.Parse(ReadLine.Substring(12, 11));
-                            continue;
+                            //or
+                            //total_size=1234567
+                            //out_time_us = 123456789
+                            //out_time_ms = 123456
+                            //out_time = 00:02:03.456000
+                            VideoDuration = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf(": ") + 2, 11));
+                            return;
                         }
-                        //frame= 1881 fps=139 q=24.0 size=   13568KiB time=00:01:15.16 bitrate=1478.8kbits/s speed=5.56x
                         if (ReadLine.StartsWith("frame= ", StringComparison.OrdinalIgnoreCase))
                         {
-                            string ReadTime = ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11);
-                            TimeSpan CurrentTime = TimeSpan.Parse(ReadTime);
+                            //frame= 1881 fps=139 q=24.0 size=   13568KiB time=00:01:15.16 bitrate=1478.8kbits/s speed=5.56x
+                            //or
+                            //frame=1234
+                            TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11));
                             switch (ActionTypeEnum)
                             {
                                 case ActionType.Upload:
@@ -157,14 +163,15 @@ namespace e621_ReBot_v3.Modules.Converter
                                         break;
                                     }
                             }
-                            Thread.Sleep(1000);
                         }
-                        ReadLine = FFMpeg.StandardError.ReadLine();
                     }
-                }
+                });
+                FFMpeg.Start();
+                FFMpeg.BeginErrorReadLine();
                 FFMpeg.WaitForExit();
             }
         }
+
 
         // - - - - - - - - - - - - - - - - 
 
@@ -444,12 +451,12 @@ namespace e621_ReBot_v3.Modules.Converter
             using (Process FFmpeg = new Process())
             {
                 FFmpeg.StartInfo.FileName = "ffmpeg.exe";
-                FFmpeg.StartInfo.UseShellExecute = false;
                 FFmpeg.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 FFmpeg.StartInfo.CreateNoWindow = false;
+                FFmpeg.StartInfo.UseShellExecute = false;
                 FFmpeg.StartInfo.RedirectStandardError = false;
                 FFmpeg.StartInfo.RedirectStandardOutput = false;
-                FFmpeg.StartInfo.Arguments = $"-hide_banner -y -i \"{VideoPath}\" -c:v libvpx-vp9 -pix_fmt yuv420p -b:a 192k -crf 24 -b:v 4M -deadline realtime -cpu-used 2 -row-mt 1 \"{FullFilePath}\"";
+                FFmpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{VideoPath}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1 \"{FullFilePath}\"";
                 FFmpeg.Start();
                 FFmpeg.WaitForExit();
                 if (FFmpeg.ExitCode < 0)

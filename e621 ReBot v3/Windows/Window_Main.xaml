@@ -552,7 +552,7 @@
                             <TextBlock Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
 
-                        <Label x:Name="DragDropConver_Label" Content="Drop Converter" Foreground="{DynamicResource ThemeForeground}" AllowDrop="True" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DragEnter="DragDropConver_Label_DragEnter" Drop="DragDropConver_Label_Drop" Width="128" Height="32"/>
+                        <Label x:Name="DragDropConver_Label" Content="Drop Converter" Foreground="{DynamicResource ThemeForeground}" AllowDrop="True" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Bottom" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DragEnter="DragDropConver_Label_DragEnter" Drop="DragDropConver_Label_Drop" Width="128" Height="32" ToolTip="Drop videos that you want to convert to .webm here.&#10;&#10;Supported formats: mp4, swf.&#10;FFmpeg settings: -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
