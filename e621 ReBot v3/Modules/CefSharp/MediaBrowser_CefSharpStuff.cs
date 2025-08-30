@@ -147,7 +147,7 @@ namespace CefSharp
             {
                 byte[] ByteData = ResponseFilterHolder.ByteData;
 
-                string FileExt = response.Headers["content-type"].Replace("image/", "").Replace("jpeg", "jpg");
+                string FileExt = response.Headers["content-type"].Replace("image/", null).Replace("jpeg", "jpg");
                 switch (FileExt)
                 {
                     case "jpg":

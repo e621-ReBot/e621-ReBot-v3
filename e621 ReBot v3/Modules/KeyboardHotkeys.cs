@@ -102,7 +102,7 @@ namespace e621_ReBot_v3
                             {
                                 for (int i = Application.Current.Windows.Count - 1; i > 0; i--)
                                 {
-                                        Application.Current.Windows[i].Close();                              
+                                    Application.Current.Windows[i].Close();
                                 }
                                 Window_Main._RefHolder.ReBot_Menu_ListBox.SelectedIndex = 0;
                                 Window_Main._RefHolder.ShowInTaskbar = false;

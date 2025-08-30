@@ -472,7 +472,7 @@ namespace e621_ReBot_v3
             else
             {
                 Grid_ItemStartIndex -= Grid_ItemLimit;
-            }            
+            }
             if (_SelectedGridVE != null) _SelectedGridVE.ToggleSelection();
             Grid_Populate(true);
         }
@@ -487,7 +487,7 @@ namespace e621_ReBot_v3
             else
             {
                 Grid_ItemStartIndex += Grid_ItemLimit;
-            }         
+            }
             if (_SelectedGridVE != null) _SelectedGridVE.ToggleSelection();
             Grid_Populate(true);
         }

@@ -295,7 +295,8 @@ namespace e621_ReBot_v3.CustomControls
             MoveUp.IsEnabled = MediaItemIndex > 0;
             MoveDown.IsEnabled = MediaItemIndex < Module_Grabber._Grabbed_MediaItems.Count - 1;
 
-            if (AppSettings.MediaIgnoreList.Contains(_MediaItemRef.Grab_MediaURL))
+            string MediaURL = _MediaItemRef.Grab_MediaURL.Replace(":orig", null);
+            if (AppSettings.MediaIgnoreList.Contains(MediaURL))
             {
                 IgnoreMedia.Header = "Undo Ignore";
                 IgnoreMedia.ToolTip = "Remove Media from the ignore list.";
@@ -335,13 +336,14 @@ namespace e621_ReBot_v3.CustomControls
         {
             lock (AppSettings.MediaIgnoreList)
             {
-                if (AppSettings.MediaIgnoreList.Contains(_MediaItemRef.Grab_MediaURL))
+                string MediaURL = _MediaItemRef.Grab_MediaURL.Replace(":orig", null);
+                if (AppSettings.MediaIgnoreList.Contains(MediaURL))
                 {
-                    AppSettings.MediaIgnoreList.Remove(_MediaItemRef.Grab_MediaURL);
+                    AppSettings.MediaIgnoreList.Remove(MediaURL);
                 }
                 else
                 {
-                    AppSettings.MediaIgnoreList.Add(_MediaItemRef.Grab_MediaURL);
+                    AppSettings.MediaIgnoreList.Add(MediaURL);
                 }
             }
         }

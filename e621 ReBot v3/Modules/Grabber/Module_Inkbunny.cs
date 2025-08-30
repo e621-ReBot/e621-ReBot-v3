@@ -161,7 +161,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));                    
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                 }
                 else
                 {
