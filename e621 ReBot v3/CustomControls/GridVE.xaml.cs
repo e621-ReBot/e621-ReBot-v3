@@ -294,6 +294,17 @@ namespace e621_ReBot_v3.CustomControls
 
             MoveUp.IsEnabled = MediaItemIndex > 0;
             MoveDown.IsEnabled = MediaItemIndex < Module_Grabber._Grabbed_MediaItems.Count - 1;
+
+            if (AppSettings.MediaIgnoreList.Contains(_MediaItemRef.Grab_MediaURL))
+            {
+                IgnoreMedia.Header = "Undo Ignore";
+                IgnoreMedia.ToolTip = "Remove Media from the ignore list.";
+            }
+            else
+            {
+                IgnoreMedia.Header = "Ignore Media";
+                IgnoreMedia.ToolTip = "Ignore this media in future grabs.";
+            }
         }
 
         private void MenuItem_Click_Source(object sender, RoutedEventArgs e)
@@ -318,6 +329,21 @@ namespace e621_ReBot_v3.CustomControls
             if (Window_Main._RefHolder._SelectedGridVE != null) Window_Main._RefHolder._SelectedGridVE.ToggleSelection();
             Window_Main._RefHolder.Grid_LastIndexCheck = -1;
             Window_Main._RefHolder.Grid_Populate(true);
+        }
+
+        private void MenuItem_Click_IgnoreMedia(object sender, RoutedEventArgs e)
+        {
+            lock (AppSettings.MediaIgnoreList)
+            {
+                if (AppSettings.MediaIgnoreList.Contains(_MediaItemRef.Grab_MediaURL))
+                {
+                    AppSettings.MediaIgnoreList.Remove(_MediaItemRef.Grab_MediaURL);
+                }
+                else
+                {
+                    AppSettings.MediaIgnoreList.Add(_MediaItemRef.Grab_MediaURL);
+                }
+            }
         }
 
         private void MenuItem_Click_RemoveMedia(object sender, RoutedEventArgs e)

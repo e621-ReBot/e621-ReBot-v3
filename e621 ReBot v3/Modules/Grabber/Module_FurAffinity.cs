@@ -150,13 +150,13 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             // - - - - - - - - - - - - - - - -
 
-            if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+            if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
             {
                 lock (Module_Grabber._GrabQueue_WorkingOn)
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

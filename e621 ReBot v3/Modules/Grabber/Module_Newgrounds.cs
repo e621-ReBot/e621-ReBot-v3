@@ -164,11 +164,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                         }
                     }
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
                     }
+
                     MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                     if (MediaCounter == 1)
                     {
@@ -205,18 +206,18 @@ namespace e621_ReBot_v3.Modules.Grabber
                 Post_MediaURL = VideoJSON["sources"].First.First.First["src"].Value<string>();
                 if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Remove(Post_MediaURL.IndexOf('?'));
 
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
+                {
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                }
+                else
                 {
                     lock (Module_Grabber._GrabQueue_WorkingOn)
                     {
                         Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                     }
-                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
-                    return;
-                }
-                else
-                {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed or ignored [@{Post_URL}]");
+                    return;                 
                 }
 
             }
@@ -229,7 +230,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

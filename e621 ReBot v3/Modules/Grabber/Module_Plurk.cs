@@ -187,7 +187,8 @@ namespace e621_ReBot_v3.Modules.Grabber
             foreach (string PlurkImage in PlurkImages)
             {
                 Post_MediaURL = PlurkImage;
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+
+                if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
                     SkipCounter++;
                     continue;
@@ -221,7 +222,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

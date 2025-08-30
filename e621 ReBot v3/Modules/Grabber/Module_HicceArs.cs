@@ -162,14 +162,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 Post_ThumbnailURL = $"https://www.hiccears.com{ThumbNodes[NodeIndex].SelectSingleNode(".//img").Attributes["src"].Value}";
 
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    SkipCounter++;
-                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));          
                 }
                 else
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                    SkipCounter++;
+                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed or ignored [@{Post_URL}]");
                 }
             }
             else
@@ -183,11 +183,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = $"https://www.hiccears.com{ThumbNode.Attributes["href"].Value.Replace("/preview", "/download")}";
                     Post_ThumbnailURL = $"https://www.hiccears.com{ThumbNode.SelectSingleNode(".//img").Attributes["src"].Value}";
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
                     }
+
                     MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                     Thread.Sleep(Module_Grabber.PauseBetweenImages);
                 }

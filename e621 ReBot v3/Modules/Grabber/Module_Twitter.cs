@@ -147,7 +147,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = BestVideo["url"].Value<string>();
                     if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter += 1;
                         continue;
@@ -158,7 +158,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = MediaNode["media_url_https"].Value<string>();
                     string TempMediaURL = $"{Post_MediaURL}{(Post_MediaURL.EndsWith(".mp4") ? null : ":orig")}";
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(TempMediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter += 1;
                         continue;
@@ -198,7 +198,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

@@ -159,13 +159,13 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Post_MediaURL = PostNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value.Replace("files/screen", "files/full");
                 }
 
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    SkipCounter++;
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));                    
                 }
                 else
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                    SkipCounter++;
                 }
             }
             else
@@ -212,11 +212,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                         }
                     }
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
                     }
+
                     MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                     Thread.Sleep(Module_Grabber.PauseBetweenImages);
                 }

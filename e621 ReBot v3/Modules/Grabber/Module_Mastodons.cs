@@ -123,11 +123,12 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 Post_MediaURL = MediaNode["url"].Value<string>();
 
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
                     SkipCounter += 1;
                     continue;
                 }
+
                 Post_ThumbnailURL = MediaNode["preview_url"].Value<string>();
 
                 MediaItem MediaItemTemp = new MediaItem
@@ -175,6 +176,5 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             Module_Grabber.Report_Info(PrintText);
         }
-
     }
 }

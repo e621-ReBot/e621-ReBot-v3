@@ -205,14 +205,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                     return;
                 }
 
-                if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    SkipCounter++;
-                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed [@{Post_URL}]");
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, PixivJSON["body"]["urls"]["thumb"].Value<string>(), Post_DateTime, ArtistName, Post_Title, Post_Text, PixivJSON["body"]["width"].Value<uint>(), PixivJSON["body"]["height"].Value<uint>()));
                 }
                 else
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, PixivJSON["body"]["urls"]["thumb"].Value<string>(), Post_DateTime, ArtistName, Post_Title, Post_Text, PixivJSON["body"]["width"].Value<uint>(), PixivJSON["body"]["height"].Value<uint>()));
+                    SkipCounter++;
+                    Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed or ignored [@{Post_URL}]");
                 }
             }
             else
@@ -227,7 +227,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
                     Post_MediaURL = JSONPages["body"][p]["urls"]["original"].Value<string>();
 
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
@@ -248,7 +248,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

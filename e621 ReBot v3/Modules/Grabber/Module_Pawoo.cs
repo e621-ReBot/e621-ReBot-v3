@@ -130,17 +130,15 @@ namespace e621_ReBot_v3.Modules.Grabber
                 if (VideoNodeHitTest != null)
                 {
                     Post_MediaURL = VideoNodeHitTest.Attributes["src"].Value;
-                    if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                    if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
-                        SkipCounter += 1;
+                        Post_ThumbnailURL = VideoNodeHitTest.Attributes["poster"].Value;
+                        MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Text));
+                        
                     }
                     else
                     {
-                        if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
-                        {
-                            Post_ThumbnailURL = VideoNodeHitTest.Attributes["poster"].Value;
-                            MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Text));
-                        }
+                        SkipCounter++;
                     }
                 }
             }
@@ -154,7 +152,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     foreach (HtmlNode MediaNode in MediaNodeHitTest.SelectNodes(".//img"))
                     {
                         Post_MediaURL = MediaNode.ParentNode.Attributes["href"].Value;
-                        if (Module_Grabber._Grabbed_MediaItems.ContainsURL(Post_MediaURL))
+                        if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                         {
                             SkipCounter += 1;
                             continue;
@@ -174,7 +172,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
                 }
-                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed [@{Post_URL}]");
+                Module_Grabber.Report_Info($"Grabbing skipped - {(SkipCounter > 1 ? "All m" : "M")}edia already grabbed or ignored [@{Post_URL}]");
                 return;
             }
 

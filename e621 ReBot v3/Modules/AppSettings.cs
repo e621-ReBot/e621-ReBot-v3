@@ -32,6 +32,7 @@ namespace e621_ReBot_v3
         // - - - - - - - - - - - - - - - -
         internal static bool BigMode = false;
         internal static bool Grid_SaveSession = true;
+        internal static List<string> MediaIgnoreList = new List<string>();
         // - - - - - - - - - - - - - - - -
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
@@ -87,6 +88,7 @@ namespace e621_ReBot_v3
             if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
             if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
             if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
+            if (MediaIgnoreList.Any()) JObjectTemp.Add("MediaIgnoreList", JObject.FromObject(MediaIgnoreList));
 
             JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
             JArray? MediaJArray;
@@ -207,6 +209,11 @@ namespace e621_ReBot_v3
                                     if (MediaItemTokenTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
                                 }
                                 //Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
+                                break;
+                            }
+                        case "MediaIgnoreList":
+                            {
+                                MediaIgnoreList = LoadSettingsJObject["MediaIgnoreList"].ToObject<List<string>>();
                                 break;
                             }
                         case "Download_FolderLocation":

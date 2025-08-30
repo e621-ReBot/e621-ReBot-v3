@@ -479,6 +479,15 @@ namespace e621_ReBot_v3.Modules
             return null;
         }
 
+        internal static bool CheckShouldGrabConditions(string Post_MediaURL)
+        {
+            if (_Grabbed_MediaItems.ContainsURL(Post_MediaURL)) return false;
+
+            if (AppSettings.MediaIgnoreList.Contains(Post_MediaURL)) return false;
+
+            return true;
+        }
+
         // - - - - - - - - - - - - - - - -
 
         internal static MediaItemList _Grabbed_MediaItems = new MediaItemList();
