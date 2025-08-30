@@ -508,7 +508,7 @@ namespace e621_ReBot_v3.Modules
                         string VideoFileName = MediaItemRef.Grab_MediaURL.Remove(MediaItemRef.Grab_MediaURL.Length - 4);
                         VideoFileName = $"{VideoFileName.Substring(VideoFileName.LastIndexOf('/') + 1)}.webm";
                         UploadedURL4Report = $"{VideoFileName}, converted from {MediaItemRef.Grab_PageURL}";
-                        Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1";
+                        Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -c:a libopus -b:a 192k -cpu-used 2 -row-mt 1";
                         isByteUpload = true;
                         break;
                     }

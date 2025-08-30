@@ -118,7 +118,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFMpeg.StartInfo.UseShellExecute = false;
                 //FFMpeg.StartInfo.RedirectStandardOutput = true;
                 FFMpeg.StartInfo.RedirectStandardError = true;
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{TempFolderName}\\{TempVideoFileName}.{TempVideoFormat}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1 \"{FullFolderPath}\\{TempVideoFileName}.webm\"";
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{TempFolderName}\\{TempVideoFileName}.{TempVideoFormat}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -c:a libopus -b:a 192k -cpu-used 2 -row-mt 1 \"{FullFolderPath}\\{TempVideoFileName}.webm\"";
 
                 VideoDuration = TimeSpan.Zero;
                 FFMpeg.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
@@ -456,7 +456,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFmpeg.StartInfo.UseShellExecute = false;
                 FFmpeg.StartInfo.RedirectStandardError = false;
                 FFmpeg.StartInfo.RedirectStandardOutput = false;
-                FFmpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{VideoPath}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -b:a 192k -c:a libopus -cpu-used 2 -row-mt 1 \"{FullFilePath}\"";
+                FFmpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -i \"{VideoPath}\" -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -c:a libopus -b:a 192k -cpu-used 2 -row-mt 1 \"{FullFilePath}\"";
                 FFmpeg.Start();
                 FFmpeg.WaitForExit();
                 if (FFmpeg.ExitCode < 0)

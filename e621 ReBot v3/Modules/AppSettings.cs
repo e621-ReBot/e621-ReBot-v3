@@ -88,7 +88,7 @@ namespace e621_ReBot_v3
             if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
             if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
             if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
-            if (MediaIgnoreList.Any()) JObjectTemp.Add("MediaIgnoreList", JObject.FromObject(MediaIgnoreList));
+            if (MediaIgnoreList.Any()) JObjectTemp.Add("MediaIgnoreList", JArray.FromObject(MediaIgnoreList));
 
             JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
             JArray? MediaJArray;
