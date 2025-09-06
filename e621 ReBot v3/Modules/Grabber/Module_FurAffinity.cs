@@ -124,12 +124,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            string Post_DateTimeTemp = PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["title"].Value;
-            if (!Post_DateTimeTemp.Contains("AM") && !Post_DateTimeTemp.Contains("PM"))
-            {
-                Post_DateTimeTemp = PostNode.SelectSingleNode(".//span[@class='popup_date']").InnerText.Trim();
-            }
-            DateTime Post_DateTime = DateTime.Parse(Post_DateTimeTemp);
+            DateTime Post_DateTime = DateTime.Parse(PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["title"].Value);
 
             string Post_Title = PostNode.SelectSingleNode(".//div[@class='submission-title' or @class='classic-submission-title information']/h2").InnerText.Trim();
             Post_Title = WebUtility.HtmlDecode(Post_Title.Replace('[', '⟦').Replace(']', '⟧'));
