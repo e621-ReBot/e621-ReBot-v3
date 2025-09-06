@@ -622,16 +622,19 @@ namespace e621_ReBot_v3
             {
                 TextBox TextBoxTemp = Window_Tagger._RefHolder.Tags_TextBox;
 
-                int WordStartIndex = TextBoxTemp.Text.Substring(0, TextBoxTemp.SelectionStart).LastIndexOf(' ');
-                int WordEndIndex = TextBoxTemp.Text.IndexOf(' ', WordStartIndex);
-                if (WordEndIndex == -1) WordEndIndex = TextBoxTemp.Text.Length;
-                string SelectedWord = TextBoxTemp.Text.Substring(WordStartIndex, WordEndIndex - WordStartIndex);
-
                 List<string> SortTags = string.Format("{0}{1}{2} {3} {4}", ratio_tag, animated_tag, resolution_tag, TextBoxTemp.Text, MediaItemHolder.UP_Tags).Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
-                SortTags.Remove(SelectedWord);
+
+                int WordStartIndex = TextBoxTemp.Text.Substring(0, TextBoxTemp.SelectionStart).LastIndexOf(' ');
+                if (WordStartIndex != -1)
+                {
+                    int WordEndIndex = TextBoxTemp.Text.IndexOf(' ', WordStartIndex);
+                    if (WordEndIndex == -1) WordEndIndex = TextBoxTemp.Text.Length;
+                    string SelectedWord = TextBoxTemp.Text.Substring(WordStartIndex, WordEndIndex - WordStartIndex);
+                    SortTags.Remove(SelectedWord);
+                    SortTags.Add(SelectedWord); //"move" to end
+                }
 
                 TextBoxTemp.Text = string.Join(' ', SortTags);
-                TextBoxTemp.AppendText(" " + SelectedWord);
                 TextBoxTemp.SelectionStart = TextBoxTemp.Text.Length;
             }
         }
