@@ -22,8 +22,14 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             HtmlNode PageNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='page']");
             HtmlNode BottomMenuHolder = PageNode.SelectSingleNode(".//nav[@class='pagination numbered']");
-            int PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
-            int CurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value);
+            int PageCount = 1; 
+            int CurrentPage = 1;
+
+            if (BottomMenuHolder != null)
+            {
+                PageCount = int.Parse(BottomMenuHolder.Attributes["data-total"].Value);
+                CurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value);
+            }
 
             switch (URLParts[2])
             {
@@ -36,7 +42,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         string? PostTags;
                         if (BottomMenuHolder == null) //(URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
                         {
-                            PicURL = PageNode.SelectSingleNode(".//div[@id='image-download-link']/a").Attributes["href"].Value;
+                            PicURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-url"].Value;
                             if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
                             {
                                 return;
@@ -130,10 +136,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                         HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
-                            int GetCurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value); ;
-
-                            var PoolPages = new List<string>();
-                            if (GetCurrentPage > 1)
+                            List<string> PoolPages = new List<string>();
+                            if (CurrentPage > 1)
                             {
                                 string PoolID = PageNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", null);
 
@@ -157,7 +161,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 string PostID = Post.Attributes["data-id"].Value;
                                 string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
                                 PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
-                                string PoolPostIndex = GetCurrentPage > 1 ? PoolPages.IndexOf(PostID).ToString() : PoolIndex.ToString();
+                                string PoolPostIndex = CurrentPage > 1 ? PoolPages.IndexOf(PostID).ToString() : PoolIndex.ToString();
 
                                 Module_Downloader.AddDownloadItem2Queue(
                                            PageURL: WebAddress,
