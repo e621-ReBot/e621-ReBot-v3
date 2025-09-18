@@ -10,7 +10,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<FileVersion>3.0.0.98</FileVersion>
+		<FileVersion>3.0.0.99</FileVersion>
 		<StartupObject>e621_ReBot_v3.App</StartupObject>
 		<IsPublishable>False</IsPublishable>
 		<RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>

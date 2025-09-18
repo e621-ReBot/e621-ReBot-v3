@@ -113,7 +113,6 @@ namespace e621_ReBot_v3.Modules
         }
 
         internal static Dictionary<string, string> MediaBrowser_MediaCache = new Dictionary<string, string>();
-        internal static List<string> Download_AlreadyDownloaded = new List<string>();
         internal static DownloadItemList _2Download_DownloadItems = new DownloadItemList();
 
         // - - - - - - - - - - - - - - - -
@@ -207,14 +206,6 @@ namespace e621_ReBot_v3.Modules
             string MediaRename = MediaFile_RenameFileName(MediaName, DownloadItemRef);
             string FullFilePath = Path.Combine(FolderPath, MediaRename);
             DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
-
-            if (!Download_AlreadyDownloaded.Contains(DownloadItemRef.Grab_MediaURL))
-            {
-                lock (Download_AlreadyDownloaded)
-                {
-                    Download_AlreadyDownloaded.Add(DownloadItemRef.Grab_MediaURL);
-                }
-            }
 
             if (!File.Exists(FullFilePath) && MediaBrowser_MediaCache.ContainsKey(MediaName))
             {
@@ -451,6 +442,20 @@ namespace e621_ReBot_v3.Modules
         }
 
         // - - - - - - - - - - - - - - - -
+
+        internal static bool CheckDownloadQueue4Duplicate(string MediaURL, string? PoolName = null)
+        {
+            if (_2Download_DownloadItems.ContainsURL(MediaURL))
+            {
+                int GetIndex = _2Download_DownloadItems.FindIndex(MediaURL);
+
+                if (string.IsNullOrEmpty(_2Download_DownloadItems[GetIndex].e6_PoolName) && string.IsNullOrEmpty(PoolName)) return true;
+                if (_2Download_DownloadItems[GetIndex].e6_PoolName.Equals(PoolName)) return true;
+            }
+
+            return false;
+        }
+
         internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null)
         {
             DownloadItem DownloadItemTemp = new DownloadItem()
@@ -712,13 +717,13 @@ namespace e621_ReBot_v3.Modules
         private static void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
-            string PicURL = DownloadVETemp._DownloadItemRef.Grab_MediaURL;
+            string MediaURL = DownloadVETemp._DownloadItemRef.Grab_MediaURL;
 
             if (e.Cancelled) //timeout detected, cancelled it;
             {
                 if (AppSettings.Download_IgnoreErrors)
                 {
-                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                    if (!CheckDownloadQueue4Duplicate(MediaURL))
                     {
                         lock (_2Download_DownloadItems)
                         {
@@ -736,7 +741,7 @@ namespace e621_ReBot_v3.Modules
                 Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
                 MessageBox.Show(Window_Main._RefHolder, "Timeout has been detected, further downloads have been paused!", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                if (!CheckDownloadQueue4Duplicate(MediaURL))
                 {
                     lock (_2Download_DownloadItems)
                     {
@@ -754,7 +759,7 @@ namespace e621_ReBot_v3.Modules
             {
                 if (AppSettings.Download_IgnoreErrors)
                 {
-                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                    if (!CheckDownloadQueue4Duplicate(MediaURL))
                     {
                         lock (_2Download_DownloadItems)
                         {
@@ -772,7 +777,7 @@ namespace e621_ReBot_v3.Modules
                 string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
                 if (ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
                 {
-                    if (!_2Download_DownloadItems.ContainsURL(PicURL) && !Download_AlreadyDownloaded.Contains(PicURL))
+                    if (!CheckDownloadQueue4Duplicate(MediaURL))
                     {
                         lock (_2Download_DownloadItems)
                         {
@@ -787,7 +792,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    MessageBox.Show(Window_Main._RefHolder, $"{PicURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
                     throw e.Error;
                 }
                 return;
@@ -824,10 +829,6 @@ namespace e621_ReBot_v3.Modules
                     //{
                     //    DataRow DataRowTemp = (DataRow)e6_DownloadItemTemp.Tag;
 
-                    lock (Download_AlreadyDownloaded)
-                    {
-                        Download_AlreadyDownloaded.Add(DownloadVETemp._DownloadItemRef.Grab_MediaURL);
-                    }
                     //    Image ImageHolder = e6_DownloadItemTemp.picBox_ImageHolder.Tag == null ? e6_DownloadItemTemp.picBox_ImageHolder.BackgroundImage : null;
 
                     //    AddPic2FLP((string)DataRowTemp["Grab_MediaURL"], e6_DownloadItemTemp.DL_FolderIcon.Tag.ToString(), ImageHolder);
@@ -864,12 +865,6 @@ namespace e621_ReBot_v3.Modules
             if (_2Download_DownloadItems.Count == 0)
             {
                 UpdateDownloadTreeView();
-            }
-
-            if (Download_AlreadyDownloaded.Count % 1000 == 0)
-            {
-                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                GC.Collect();
             }
         }
 
@@ -947,7 +942,7 @@ namespace e621_ReBot_v3.Modules
             }
             if (DownloadItemRef.e6_PoolPostIndex != null)
             {
-                GetFileNameOnly = $"{DownloadItemRef.e6_PoolPostIndex}_{GetFileNameOnly}.{DownloadItemRef.Grab_MediaFormat}";
+                GetFileNameOnly = $"{DownloadItemRef.e6_PoolPostIndex}_{GetFileNameOnly}";
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);

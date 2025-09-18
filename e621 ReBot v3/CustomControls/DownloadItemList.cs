@@ -43,6 +43,15 @@ namespace e621_ReBot_v3.CustomControls
             return -1;
         }
 
+        internal int FindIndex(string URL2Find)
+        {
+            for (int i = 0; i < InnerList.Count; i++)
+            {
+                if (((DownloadItem)InnerList[i]).Grab_MediaURL.Equals(URL2Find)) return i;
+            }
+            return -1;
+        }
+
         internal void Add(DownloadItem DownloadItemRef)
         {
             MediaURLs.Add(DownloadItemRef.Grab_MediaURL);

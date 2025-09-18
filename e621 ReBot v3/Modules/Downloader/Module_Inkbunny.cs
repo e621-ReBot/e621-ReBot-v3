@@ -91,10 +91,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 foreach (string MediaURL in MediaList)
                 {
-                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaURL))
-                    {
-                        continue;
-                    }
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
 
                     Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 

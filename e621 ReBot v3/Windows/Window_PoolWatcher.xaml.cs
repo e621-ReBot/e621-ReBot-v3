@@ -189,6 +189,9 @@ namespace e621_ReBot_v3
                     string MediaURLTemp;
                     string ThumbnailURLTemp;
                     Module_DLe621.MD5_2_URL(PostDataDetailed, out MediaURLTemp, out ThumbnailURLTemp);
+
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp, Pool_Name)) continue;
+
                     Module_Downloader.AddDownloadItem2Queue(
                                           PageURL: $"https://e621.net/posts/{Post_ID}",
                                           MediaURL: MediaURLTemp,

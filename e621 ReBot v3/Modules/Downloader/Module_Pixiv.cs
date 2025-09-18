@@ -25,7 +25,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 return;
             }
 
-            string? PicURL;
+            string? MediaURL;
             string? ThumbURL;
             string? Media_Format;
             if (WebAddress.Contains("/artworks/")) //single
@@ -39,19 +39,16 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 foreach (JToken JTokenTemp in PixivJSON["body"].Children())
                 {
-                    PicURL = JTokenTemp["urls"]["original"].Value<string>();
+                    MediaURL = JTokenTemp["urls"]["original"].Value<string>();
 
-                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                    {
-                        return;
-                    }
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
                     ThumbURL = JTokenTemp["urls"]["thumb_mini"].Value<string>().Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
-                    Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
+                    Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
                     Module_Downloader.AddDownloadItem2Queue(
                         PageURL: WebAddress,
-                        MediaURL: PicURL,
+                        MediaURL: MediaURL,
                         ThumbnailURL: ThumbURL,
                         MediaFormat: Media_Format,
                         Artist: ArtistName);

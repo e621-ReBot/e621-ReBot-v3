@@ -205,43 +205,32 @@ namespace e621_ReBot_v3
             //else
             //{
 
-            if (Module_Downloader.Download_AlreadyDownloaded.Contains(MediaURL))
+            PB_Download.IsEnabled = false;
+            PB_ViewFile.IsEnabled = false;
+            if (MediaItemHolder.DL_FilePath != null && File.Exists(MediaItemHolder.DL_FilePath))
             {
-                PB_Download.IsEnabled = false;
-                if (MediaItemHolder.DL_FilePath != null && File.Exists(MediaItemHolder.DL_FilePath))
+                if (MediaName.Contains("ugoira")
+                || MediaName.ToLower().EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
+                || MediaName.ToLower().EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (MediaName.Contains("ugoira")
-                    || MediaName.ToLower().EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
-                    || MediaName.ToLower().EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
-                    {
-                        PB_ViewFile.Content = "▶";
-                    }
-                    else
-                    {
-                        PB_ViewFile.Content = "🔍";
-                    }
-                    PB_ViewFile.IsEnabled = true;
+                    PB_ViewFile.Content = "▶";
                 }
                 else
                 {
-                    lock (Module_Downloader.Download_AlreadyDownloaded)
-                    {
-                        Module_Downloader.Download_AlreadyDownloaded.Remove(MediaURL);
-                    }
-                    MediaItemHolder.DL_FilePath = null;
-                    PB_Download.IsEnabled = true;
+                    PB_ViewFile.Content = "🔍";
                 }
+                PB_ViewFile.IsEnabled = true;
             }
             else
             {
+                MediaItemHolder.DL_FilePath = null;
                 PB_Download.IsEnabled = true;
-                PB_ViewFile.IsEnabled = false;
-                if (MediaName.Contains("ugoira"))
-                {
-                    //Label_DownloadWarning.Visible = true;
-                    //toolTip_Display.SetToolTip(Label_DownloadWarning, $"This is an Ugoira, you need to download it in order to view the animated version.");
-                }
             }
+
+            //if (MediaName.Contains("ugoira"))
+            //{
+            //    //Label_DownloadWarning.Visible = true;
+            //    //toolTip_Display.SetToolTip(Label_DownloadWarning, $"This is an Ugoira, you need to download it in order to view the animated version.");
             //}
 
             PB_LoadAllMedia.IsEnabled = !(MediaItemIndexHolder == Module_Grabber._Grabbed_MediaItems.Count - 1);
@@ -782,10 +771,7 @@ namespace e621_ReBot_v3
         DownloadInstead:
 
             PB_Download.IsEnabled = false;
-            if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaItemHolder.Grab_MediaURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaItemHolder.Grab_MediaURL))
-            {
-                return;
-            }
+            if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemHolder.Grab_MediaURL)) return;
 
             Module_Downloader.AddDownloadItem2Queue(
                PageURL: MediaItemHolder.Grab_PageURL,

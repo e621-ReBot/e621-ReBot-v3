@@ -31,14 +31,11 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         private static void GetMedia(string WebAddress, JToken ItakuJSONToken, string? FolderName = null)
         {
-            string PicURL = ItakuJSONToken["image"].Value<string>();
+            string MediaURL = ItakuJSONToken["image"].Value<string>();
 
-            if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-            {
-                return;
-            }
+            if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
-            string? Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
+            string? Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
             //https://itaku.ee/api/media/gallery_imgs/xyz/sm_REFLb27.png
             //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png
@@ -52,7 +49,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             Module_Downloader.AddDownloadItem2Queue(
                 PageURL: WebAddress,
-                MediaURL: PicURL,
+                MediaURL: MediaURL,
                 ThumbnailURL: ThumbURL,
                 MediaFormat: Media_Format,
                 Artist: string.Empty,

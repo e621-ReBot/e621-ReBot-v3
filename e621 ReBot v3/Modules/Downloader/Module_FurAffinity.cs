@@ -19,7 +19,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 return;
             }
 
-            string? PicURL;
+            string? MediaURL;
             string? ThumbURL;
             string? Media_Format;
             if (WebAddress.Contains("/view/")) //single
@@ -29,21 +29,18 @@ namespace e621_ReBot_v3.Modules.Downloader
                 {
                     DownloadNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
                 }
-                PicURL = $"https:{DownloadNode.Attributes["href"].Value}";
+                MediaURL = $"https:{DownloadNode.Attributes["href"].Value}";
 
-                if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                {
-                    return;
-                }
+                if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
-                Media_Format = PicURL.Substring(PicURL.LastIndexOf('.') + 1);
+                Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
                 ThumbURL = $"https:{PostNode.SelectSingleNode(".//img[@id='submissionImg']").Attributes["data-preview-src"].Value.Replace("@600-", "@200-")}";
 
                 string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-id-sub-container' or @class='classic-submission-title information']//a").InnerText.Trim());
 
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: WebAddress,
-                    MediaURL: PicURL,
+                    MediaURL: MediaURL,
                     ThumbnailURL: ThumbURL,
                     MediaFormat: Media_Format,
                     Artist: ArtistName);

@@ -31,37 +31,37 @@ namespace e621_ReBot_v3.Modules.Downloader
                 CurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value);
             }
 
+
+            string? Post_MediaURL;
+            string? Post_ID;
+            string? Post_ThumbURL;
+            string? Post_MediaFormat;
+            string? Post_Tags;
+
             switch (URLParts[2])
             {
                 case string Posts when Posts.StartsWith("posts"):
                     {
-                        string? PicURL;
-                        string? PostID;
-                        string? ThumbURL;
-                        string? Media_Format;
-                        string? PostTags;
+
                         if (BottomMenuHolder == null) //(URLParts.Length > 3 && URLParts[3] != null && URLParts[3].All(char.IsDigit)) //single
                         {
-                            PicURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-url"].Value;
-                            if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                            {
-                                return;
-                            }
+                            Post_MediaURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-url"].Value;
+                            if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) return;
 
-                            PostID = WebAddress;
-                            if (PostID.Contains('?')) PostID = PostID.Substring(0, PostID.IndexOf('?'));
-                            PostID = PostID.Substring(PostID.LastIndexOf('/') + 1);
-                            ThumbURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
-                            Media_Format = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
-                            PostTags = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-tags"].Value;
+                            Post_ID = WebAddress;
+                            if (Post_ID.Contains('?')) Post_ID = Post_ID.Substring(0, Post_ID.IndexOf('?'));
+                            Post_ID = Post_ID.Substring(Post_ID.LastIndexOf('/') + 1);
+                            Post_ThumbURL = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-preview-url"].Value;
+                            Post_MediaFormat = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-file-ext"].Value;
+                            Post_Tags = PageNode.SelectSingleNode(".//section[@id='image-container']").Attributes["data-tags"].Value;
 
                             Module_Downloader.AddDownloadItem2Queue(
                                 PageURL: WebAddress,
-                                MediaURL: PicURL,
-                                ThumbnailURL: ThumbURL,
-                                MediaFormat: Media_Format,
-                                e6PostID: PostID,
-                                e6Tags: PostTags,
+                                MediaURL: Post_MediaURL,
+                                ThumbnailURL: Post_ThumbURL,
+                                MediaFormat: Post_MediaFormat,
+                                e6PostID: Post_ID,
+                                e6Tags: Post_Tags,
                                 e6Download: true);
                         }
                         else //multi
@@ -93,15 +93,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 {
                                     if (!Post.Attributes["class"].Value.Contains("blacklisted"))
                                     {
-                                        PicURL = Post.Attributes["data-file-url"].Value;
-                                        if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                                        {
-                                            continue;
-                                        }
+                                        Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                        if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
                                         Module_Downloader.AddDownloadItem2Queue(
                                             PageURL: WebAddress,
-                                            MediaURL: PicURL,
+                                            MediaURL: Post_MediaURL,
                                             ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                             MediaFormat: Post.Attributes["data-file-ext"].Value,
                                             e6PostID: Post.Attributes["data-id"].Value,
@@ -147,25 +144,23 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 PoolPages = JObject.Parse(Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"))["post_ids"].Values<string>().ToList();
                             }
 
+                            string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
+                            PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
+
                             int PoolIndex = 0;
                             foreach (HtmlNode Post in NodeSelector)
                             {
                                 if (Post.Attributes["data-flags"].Value.Equals("deleted")) continue;
 
-                                string PicURL = Post.Attributes["data-file-url"].Value;
-                                if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                                {
-                                    continue;
-                                }
+                                Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL, PoolName)) continue;
 
-                                string PostID = Post.Attributes["data-id"].Value;
-                                string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
-                                PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
-                                string PoolPostIndex = CurrentPage > 1 ? PoolPages.IndexOf(PostID).ToString() : PoolIndex.ToString();
+                                Post_ID = Post.Attributes["data-id"].Value;
+                                string PoolPostIndex = CurrentPage > 1 ? PoolPages.IndexOf(Post_ID).ToString() : PoolIndex.ToString();
 
                                 Module_Downloader.AddDownloadItem2Queue(
                                            PageURL: WebAddress,
-                                           MediaURL: PicURL,
+                                           MediaURL: Post_MediaURL,
                                            ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                            MediaFormat: Post.Attributes["data-file-ext"].Value,
                                            e6PostID: Post.Attributes["data-id"].Value,
@@ -190,15 +185,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                             {
                                 if (!Post.Attributes["class"].Value.Contains("blacklisted"))
                                 {
-                                    string PicURL = Post.Attributes["data-file-url"].Value;
-                                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                                    {
-                                        continue;
-                                    }
+                                    Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                    if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
                                     Module_Downloader.AddDownloadItem2Queue(
                                           PageURL: WebAddress,
-                                          MediaURL: PicURL,
+                                          MediaURL: Post_MediaURL,
                                           ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
                                           e6PostID: Post.Attributes["data-id"].Value,
@@ -236,15 +228,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                             {
                                 if (!Post.Attributes["class"].Value.Contains("blacklisted"))
                                 {
-                                    string PicURL = Post.Attributes["data-file-url"].Value;
-                                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(PicURL) || Module_Downloader.Download_AlreadyDownloaded.Contains(PicURL))
-                                    {
-                                        continue;
-                                    }
+                                    Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                    if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
                                     Module_Downloader.AddDownloadItem2Queue(
                                        PageURL: WebAddress,
-                                       MediaURL: PicURL,
+                                       MediaURL: Post_MediaURL,
                                        ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                        MediaFormat: Post.Attributes["data-file-ext"].Value,
                                        e6PostID: Post.Attributes["data-id"].Value,
@@ -315,10 +304,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                     MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
                     string PostID = cPost["id"].Value<string>();
 
-                    if (Module_Downloader._2Download_DownloadItems.ContainsURL(MediaURLTemp) || Module_Downloader.Download_AlreadyDownloaded.Contains(MediaURLTemp))
-                    {
-                        continue;
-                    }
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
                     Module_Downloader.AddDownloadItem2Queue(
                         PageURL: $"https://e621.net/posts/{PostID}",
