@@ -155,7 +155,7 @@ namespace e621_ReBot_v3
         private static partial Regex Tagger_Regex1();
         internal void CountTags()
         {
-            List<string> SortTags = MediaItemHolder.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
+            List<string> SortTags = Tags_TextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
             Title = $"Tagger - Tags: {SortTags.Count}";
 
             if (Tags_TextBox.SelectionStart > 0)
