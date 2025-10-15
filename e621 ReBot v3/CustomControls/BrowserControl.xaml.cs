@@ -157,8 +157,7 @@ namespace e621_ReBot_v3.CustomControls
         {
             BB_Grab.Visibility = Visibility.Collapsed;
             //Worker_Sound();
-            string TagPass = BB_Grab.Tag.ToString();
-            ThreadPool.QueueUserWorkItem(state => Module_Grabber.Grab_1Link(TagPass));
+            Module_Grabber.Grab_1Link(BB_Grab.Tag.ToString());
         }
 
         private void BB_Download_Click(object sender, RoutedEventArgs e)

@@ -97,19 +97,19 @@ namespace e621_ReBot_v3.Modules
 
         internal static void DownloadEnabler(string WebAddress)
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            foreach (Regex URLTest in _DownloadEnabler)
             {
-                foreach (Regex URLTest in _DownloadEnabler)
+                Match MatchTemp = URLTest.Match(WebAddress);
+                if (MatchTemp.Success)
                 {
-                    Match MatchTemp = URLTest.Match(WebAddress);
-                    if (MatchTemp.Success)
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                     {
                         BrowserControl._RefHolder.BB_Download.Tag = MatchTemp.Value;
                         BrowserControl._RefHolder.BB_Download.Visibility = Visibility.Visible;
-                        return;
-                    }
+                    });
+                    return;
                 }
-            });
+            }
         }
 
         internal static Dictionary<string, string> MediaBrowser_MediaCache = new Dictionary<string, string>();

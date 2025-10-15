@@ -22,9 +22,9 @@ namespace e621_ReBot_v3.Modules
         internal static CookieContainer? Cookies_HentaiFoundry;
         internal static CookieContainer? Cookies_Plurk;
 
-        internal static void GetCookies(string WebAdress, ref CookieContainer? WhichCookie)
+        internal static void GetCookies(string WebAddress, ref CookieContainer? WhichCookie)
         {
-            string BaseURL = $"{new Uri(WebAdress).Scheme}://{new Uri(WebAdress).Host}";
+            string BaseURL = $"{new Uri(WebAddress).Scheme}://{new Uri(WebAddress).Host}";
             WhichCookie = FindCookie(BaseURL).Result;
         }
 
@@ -33,7 +33,8 @@ namespace e621_ReBot_v3.Modules
             CookieContainer ReturnCookieContainer = new CookieContainer();
             if (Cef.GetGlobalCookieManager() != null) //Is null if grid session is loaded but browser isn't used
             {
-                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true);
+                //Must not be called on main thread (or maybe same thread Cef lives on or it will hang the browser)
+                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true); 
 
                 if (CefCookies != null)
                 {

@@ -92,25 +92,30 @@ namespace e621_ReBot_v3
 
             JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
             JArray? MediaJArray;
-            if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
+            lock (Module_Grabber._Grabbed_MediaItems)
             {
-                MediaJArray = new JArray();
-                foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
+                if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
                 {
-                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                    MediaJArray = new JArray();
+                    foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
+                    {
+                        MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                    }
+                    JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
                 }
-                JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
             }
-            if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
+            lock (Module_RetryQueue._2Retry_MediaItems)
             {
-                MediaJArray = new JArray();
-                foreach (MediaItem MediaItemTemp in Module_RetryQueue._2Retry_MediaItems)
+                if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
                 {
-                    MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                    MediaJArray = new JArray();
+                    foreach (MediaItem MediaItemTemp in Module_RetryQueue._2Retry_MediaItems)
+                    {
+                        MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
+                    }
+                    JObjectTemp.Add("RetryQueue", JArray.FromObject(MediaJArray));
                 }
-                JObjectTemp.Add("RetryQueue", JArray.FromObject(MediaJArray));
             }
-
             string SaveSettingsString = JsonConvert.SerializeObject(JObjectTemp, Formatting.Indented);
             File.WriteAllText("settings.json", SaveSettingsString);
         }

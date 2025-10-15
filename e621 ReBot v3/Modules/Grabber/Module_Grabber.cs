@@ -49,21 +49,29 @@ namespace e621_ReBot_v3.Modules
             _GrabTimer.Start();
         }
 
+        internal static bool DoMultiPageGrab = false;
         internal static void GrabEnabler(string WebAddress)
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            foreach (Regex URLTest in _GrabEnabler)
             {
-                foreach (Regex URLTest in _GrabEnabler)
+                Match MatchTemp = URLTest.Match(WebAddress);
+                if (MatchTemp.Success)
                 {
-                    Match MatchTemp = URLTest.Match(WebAddress);
-                    if (MatchTemp.Success)
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                     {
-                        BrowserControl._RefHolder.BB_Grab.Tag = MatchTemp.Value;
-                        BrowserControl._RefHolder.BB_Grab.Visibility = Visibility.Visible;
-                        return;
-                    }
+                        if (DoMultiPageGrab)
+                        {
+                            ThreadPool.QueueUserWorkItem(state => Grab_MultiPageTask(MatchTemp.Value));
+                        }
+                        else
+                        {
+                            BrowserControl._RefHolder.BB_Grab.Tag = MatchTemp.Value;
+                            BrowserControl._RefHolder.BB_Grab.Visibility = Visibility.Visible;
+                        }
+                    });
+                    return;
                 }
-            });
+            }
         }
 
         internal static void Report_Info(string InfoMessage)
@@ -131,80 +139,125 @@ namespace e621_ReBot_v3.Modules
             {
                 case "www.furaffinity.net":
                     {
-                        Module_FurAffinity.Queue_Prepare(WebAddress);
+                        if (TempURI.LocalPath.StartsWith("/gallery/"))
+                        {
+                            string NextPage = Module_FurAffinity.MultiPageCheck(WebAddress);
+                            if (!string.IsNullOrEmpty(NextPage))
+                            {
+                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                {
+                                    BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = false;
+                                    DoMultiPageGrab = true;
+                                    string BaseAddress = $"https://www.furaffinity.net/gallery/{TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[1]}";
+                                    Module_CefSharp.LoadURL(BaseAddress);
+                                    return;
+                                }
+                            }
+                        }
+                        ThreadPool.QueueUserWorkItem(state => Module_FurAffinity.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "inkbunny.net":
                     {
-                        Module_Inkbunny.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Inkbunny.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.pixiv.net":
                     {
-                        Module_Pixiv.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Pixiv.Queue_Prepare(WebAddress));
                         break;
 
                     }
 
                 case "www.hiccears.com":
                     {
-                        Module_HicceArs.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_HicceArs.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "x.com": //was twitter.com before
                     {
-                        Module_Twitter.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Twitter.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
                     {
-                        Module_Newgrounds.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Newgrounds.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case string SoFurry when SoFurry.Contains(".sofurry.com"):
                     {
-                        Module_SoFurry.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_SoFurry.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.weasyl.com":
                     {
-                        Module_Weasyl.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Weasyl.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "mastodon.social":
                     {
-                        Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Mastodon);
+                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Mastodon));
                         break;
                     }
 
                 case "baraag.net":
                     {
-                        Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Baraag);
+                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Baraag));
                         break;
                     }
 
                 case "pawoo.net":
                     {
-                        Module_Pawoo.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Pawoo.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.hentai-foundry.com":
                     {
-                        Module_HentaiFoundry.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_HentaiFoundry.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.plurk.com":
                     {
-                        Module_Plurk.Queue_Prepare(WebAddress);
+                        ThreadPool.QueueUserWorkItem(state => Module_Plurk.Queue_Prepare(WebAddress));
+                        break;
+                    }
+            }
+        }
+
+        private static Random RandomDelay = new Random();
+        internal static void Grab_MultiPageTask(string WebAddress)
+        {
+            Uri TempURI = new Uri(WebAddress);
+            switch (TempURI.Host)
+            {
+                case "www.furaffinity.net":
+                    {
+                        if (TempURI.LocalPath.StartsWith("/gallery/"))
+                        {
+                            string NextPage = Module_FurAffinity.MultiPageCheck(WebAddress);
+                            if (!string.IsNullOrEmpty(NextPage))
+                            {
+                                Thread.Sleep(RandomDelay.Next(100, 500));
+                                Module_FurAffinity.Queue_MultiPage(WebAddress, NextPage);
+                                return;
+                            }
+                            DoMultiPageGrab = false;
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                            {
+                                BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = true;
+                            });
+                            
+                        }
                         break;
                     }
             }

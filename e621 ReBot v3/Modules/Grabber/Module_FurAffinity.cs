@@ -2,9 +2,11 @@
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -180,6 +182,31 @@ namespace e621_ReBot_v3.Modules.Grabber
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemTemp;
             }
             Module_Grabber.Report_Info($"Finished grabbing: {Post_URL}");
+        }
+
+        internal static string MultiPageCheck(string WebAddress)
+        {
+            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+            HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
+
+            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@class='gallery-section']//button[text()='Next']");
+            if (HtmlNodeTemp != null)
+            {
+                string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.ParentNode.Attributes["action"].Value}";
+                return NextPage;
+            }
+
+            return string.Empty;
+        }
+
+        internal static void Queue_MultiPage(string WebAddressNow, string WebAddressNext)
+        {
+            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+            HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
+
+            Queue_Prepare(WebAddressNow);
+            Thread.Sleep(500);
+            Module_CefSharp.LoadURL(WebAddressNext);
         }
     }
 }

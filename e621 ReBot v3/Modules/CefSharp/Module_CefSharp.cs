@@ -227,11 +227,11 @@ namespace e621_ReBot_v3.Modules
 
         private static void BrowserPageLoadedActions()
         {
-            string CefAdress = HttpUtility.UrlDecode(BrowserAddress);
+            string CefAddress = HttpUtility.UrlDecode(BrowserAddress);
 
             if (AppSettings.FirstRun)
             {
-                switch (CefAdress)
+                switch (CefAddress)
                 {
                     case "https://e621.net/posts":
                         {
@@ -257,7 +257,7 @@ namespace e621_ReBot_v3.Modules
             {
                 if (AppSettings.FirstRunSession)
                 {
-                    switch (CefAdress)
+                    switch (CefAddress)
                     {
                         case "https://e621.net/posts":
                             {
@@ -301,14 +301,14 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
 
-                //if (CefAdress.Contains("mastodon.social/@"))
+                //if (CefAddress.Contains("mastodon.social/@"))
                 //{
                 //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='status__content__spoiler-link']\").forEach(button=>button.click())");
                 //    CefSharpBrowser.ExecuteScriptAsync("document.querySelectorAll(\"button[class='spoiler-button__overlay']\").forEach(button=>button.click())");
                 //}
 
-                //Module_Grabber.GrabEnabler(CefAdress);
-                //Module_Downloader.DownloadEnabler(CefAdress);
+                //Module_Grabber.GrabEnabler(CefAddress);
+                //Module_Downloader.DownloadEnabler(CefAddress);
             }
         }
     }
