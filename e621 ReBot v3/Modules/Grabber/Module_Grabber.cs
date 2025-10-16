@@ -256,7 +256,7 @@ namespace e621_ReBot_v3.Modules
                             {
                                 BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = true;
                             });
-                            
+
                         }
                         break;
                     }

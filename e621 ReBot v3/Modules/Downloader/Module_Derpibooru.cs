@@ -21,7 +21,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             if (URLParts[2].Equals("images") && URLParts.Length > 3) //single
             {
                 MediaURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//main[@id='content']//div[@id]//a[@title='Download (tags in filename)']").Attributes["href"].Value;
-                
+
                 if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
                 Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);

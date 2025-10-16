@@ -34,7 +34,7 @@ namespace e621_ReBot_v3.Modules
             if (Cef.GetGlobalCookieManager() != null) //Is null if grid session is loaded but browser isn't used
             {
                 //Must not be called on main thread (or maybe same thread Cef lives on or it will hang the browser)
-                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true); 
+                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true);
 
                 if (CefCookies != null)
                 {

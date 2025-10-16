@@ -692,7 +692,7 @@ namespace e621_ReBot_v3
                 {
                     MediaItem? MediaItemTemp = GridVETemp._MediaItemRef;
                     if (MediaItemTemp.DL_Queued)
-                    {                       
+                    {
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
 
                         Module_Downloader.AddDownloadItem2Queue(

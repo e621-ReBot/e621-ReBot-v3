@@ -22,7 +22,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             HtmlNode PageNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='page']");
             HtmlNode BottomMenuHolder = PageNode.SelectSingleNode(".//nav[@class='pagination numbered']");
-            int PageCount = 1; 
+            int PageCount = 1;
             int CurrentPage = 1;
 
             if (BottomMenuHolder != null)
