@@ -144,11 +144,12 @@ namespace e621_ReBot_v3.Modules
                             string NextPage = Module_FurAffinity.MultiPageCheck(WebAddress);
                             if (!string.IsNullOrEmpty(NextPage))
                             {
-                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                 {
                                     BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = false;
                                     DoMultiPageGrab = true;
+                                    BrowserControl._RefHolder.IsHitTestVisible = false;
                                     string BaseAddress = $"https://www.furaffinity.net/gallery/{TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[1]}";
                                     Module_CefSharp.LoadURL(BaseAddress);
                                     return;
@@ -255,6 +256,7 @@ namespace e621_ReBot_v3.Modules
                             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                             {
                                 BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = true;
+                                BrowserControl._RefHolder.IsHitTestVisible = true;
                             });
 
                         }
