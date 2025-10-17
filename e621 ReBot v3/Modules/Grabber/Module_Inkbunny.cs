@@ -94,6 +94,14 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             if (Posts2Grab.Any())
             {
+                //Cut address to merge in single grabber task
+                string URLTest = WebAddress.Replace("https://inkbunny.net/", null); //https://inkbunny.net/gallery/Name/#/String
+                if (URLTest.Contains('/'))
+                {
+                    string[] URLSplit = URLTest.Split('/',StringSplitOptions.RemoveEmptyEntries);
+                    WebAddress = $"https://inkbunny.net/{URLSplit[0]}/{URLSplit[1]}";
+                }
+
                 TreeViewItem? TreeViewItemParent = Window_Main._RefHolder.Dispatcher.Invoke(() => { return Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress); });
                 Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                 {
@@ -317,6 +325,30 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 return false;
             }
+        }
+
+        internal static string MultiPageCheck()
+        {
+            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+            HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
+
+            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//a[@title='next page']");
+            if (HtmlNodeTemp != null)
+            {
+                string NextPage = $"https://inkbunny.net/{HtmlNodeTemp.Attributes["href"].Value}";
+                return NextPage;
+            }
+
+            return string.Empty;
+        }
+
+        internal static void Queue_MultiPage(string WebAddressNow, string WebAddressNext)
+        {
+            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
+            HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
+
+            Queue_Prepare(WebAddressNow);
+            Module_CefSharp.LoadURL(WebAddressNext);
         }
     }
 }

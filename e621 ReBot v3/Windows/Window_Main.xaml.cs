@@ -1070,7 +1070,7 @@ namespace e621_ReBot_v3
                 }
                 Grab_TreeView.Items.Remove(TreeViewItemTarget);
             }
-            else
+            else //Children Nodes
             {
                 TreeViewItem TreeViewItemParent = (TreeViewItem)TreeViewItemTarget.Parent;
                 if (TreeViewItemParent.Items.Count == 1)
@@ -1080,6 +1080,7 @@ namespace e621_ReBot_v3
                 else
                 {
                     TreeViewItemParent.Items.Remove(TreeViewItemTarget);
+                    TreeViewItemParent.ToolTip = $"Pages left to grab: {TreeViewItemParent.Items.Count}";
                 }
                 lock (Module_Grabber._GrabQueue_URLs)
                 {

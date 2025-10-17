@@ -16,7 +16,7 @@ namespace e621_ReBot_v3
 {
     internal static class AppSettings
     {
-        internal static readonly string GlobalUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0";
+        internal static readonly string GlobalUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
         internal static bool DevMode = false;
         internal static bool FirstRun = true;
         internal static bool FirstRunSession = true;

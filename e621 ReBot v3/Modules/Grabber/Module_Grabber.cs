@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,7 +30,7 @@ namespace e621_ReBot_v3.Modules
             _GrabEnabler = new List<Regex>
             {
                 new Regex(@"^\w+://www\.furaffinity\.net/((view|full|gallery|scraps|favorites)/.+/?|search/?)"),
-                new Regex(@"^\w+://inkbunny\.net/((s|gallery|scraps)/\w+|submissionsviewall.php)"),
+                new Regex(@"^\w+://inkbunny\.net/(s/\d+|(gallery|scraps)/.+/\d+/\w+|submissionsviewall.php)"),
                 new Regex(@"^\w+://www\.pixiv\.net/\w+/(artworks|users)/\d+"),
                 new Regex(@"^\w+://www\.hiccears\.com/((contents|file).+(/.+)?|p/.+/illustrations)"),
                 new Regex(@"^\w+://x\.com/.+/(media|status/\d+/?$)"),
@@ -111,6 +112,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static bool TreeView_MakeChildItem(TreeViewItem TreeViewItemParent, string IteamHeader, string ItemName, object? TagPass = null, bool SkipSearch = false)
         {
+            string URL = ItemName;
             ItemName = $"z{Convert.ToHexString(Encoding.UTF8.GetBytes(ItemName))}";
 
             TreeViewItem? TreeViewItemChild = SkipSearch ? null : Window_Main._RefHolder.Grab_TreeView.FindTreeViewItemByName(ItemName);
@@ -121,9 +123,10 @@ namespace e621_ReBot_v3.Modules
                     Header = IteamHeader,
                     Name = ItemName, //Can't start with number
                     Tag = TagPass,
-                    //ToolTip = NodeName,
+                    ToolTip = URL,
                 };
                 TreeViewItemParent.Items.Add(TreeViewItemChild);
+                TreeViewItemParent.ToolTip = $"Pages left to grab: {TreeViewItemParent.Items.Count}";
                 return true;
             }
             return false;
@@ -135,22 +138,25 @@ namespace e621_ReBot_v3.Modules
         internal static void Grab_1Link(string WebAddress)
         {
             Uri TempURI = new Uri(WebAddress);
+            string[] URISplit = TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
             switch (TempURI.Host)
             {
                 case "www.furaffinity.net":
                     {
-                        if (TempURI.LocalPath.StartsWith("/gallery/"))
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
                         {
-                            string NextPage = Module_FurAffinity.MultiPageCheck(WebAddress);
+                            string NextPage = Module_FurAffinity.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
                                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                 {
-                                    BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = false;
                                     DoMultiPageGrab = true;
+                                    BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = false;
                                     BrowserControl._RefHolder.IsHitTestVisible = false;
-                                    string BaseAddress = $"https://www.furaffinity.net/gallery/{TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries)[1]}";
+
+                                    string BaseAddress = $"https://www.furaffinity.net/{URISplit[0]}/{URISplit[1]}";
                                     Module_CefSharp.LoadURL(BaseAddress);
                                     return;
                                 }
@@ -162,6 +168,24 @@ namespace e621_ReBot_v3.Modules
 
                 case "inkbunny.net":
                     {
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
+                        {
+                            string NextPage = Module_Inkbunny.MultiPageCheck();
+                            if (!string.IsNullOrEmpty(NextPage))
+                            {
+                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                                {
+                                    DoMultiPageGrab = true;
+                                    BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = false;
+                                    BrowserControl._RefHolder.IsHitTestVisible = false;
+
+                                    string BaseAddress = $"https://inkbunny.net/{URISplit[0]}/{URISplit[1]}/1/{URISplit[3]}";
+                                    Module_CefSharp.LoadURL(BaseAddress);
+                                    return;
+                                }
+                            }
+                        }
                         ThreadPool.QueueUserWorkItem(state => Module_Inkbunny.Queue_Prepare(WebAddress));
                         break;
                     }
@@ -239,30 +263,51 @@ namespace e621_ReBot_v3.Modules
         internal static void Grab_MultiPageTask(string WebAddress)
         {
             Uri TempURI = new Uri(WebAddress);
+            string[] URISplit = TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+
+
             switch (TempURI.Host)
             {
                 case "www.furaffinity.net":
                     {
-                        if (TempURI.LocalPath.StartsWith("/gallery/"))
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
                         {
-                            string NextPage = Module_FurAffinity.MultiPageCheck(WebAddress);
+                            string NextPage = Module_FurAffinity.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
                                 Thread.Sleep(RandomDelay.Next(100, 500));
                                 Module_FurAffinity.Queue_MultiPage(WebAddress, NextPage);
                                 return;
                             }
-                            DoMultiPageGrab = false;
-                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                            {
-                                BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = true;
-                                BrowserControl._RefHolder.IsHitTestVisible = true;
-                            });
+
 
                         }
                         break;
                     }
+
+                case "inkbunny.net":
+                    {
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
+                        {
+                            string NextPage = Module_Inkbunny.MultiPageCheck();
+                            if (!string.IsNullOrEmpty(NextPage))
+                            {
+                                Thread.Sleep(RandomDelay.Next(4000, 5000));//Works only when going super slow,otherwise throws 429's
+                                Module_Inkbunny.Queue_MultiPage(WebAddress, NextPage);
+                                return;
+                            }
+                        }
+                        break;
+                    }
             }
+
+            DoMultiPageGrab = false;
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                BrowserControl._RefHolder.BrowserControls_Panel.IsEnabled = true;
+                BrowserControl._RefHolder.IsHitTestVisible = true;
+            });
         }
 
         // - - - - - - - - - - - - - - - -
@@ -289,6 +334,19 @@ namespace e621_ReBot_v3.Modules
                 // - - - - - - - - - - - - - - - -
 
                 string WebAddress = Encoding.UTF8.GetString(Convert.FromHexString(TreeViewItemSender.Name.Substring(1)));
+
+                if (DoMultiPageGrab)
+                {
+                    //Skip media grab if host of currently active browser Multi Page grab is the same to prevent 429's
+                    Uri WebAddressURI = new Uri(WebAddress);
+                    Uri BroserAddressURI = new Uri(Module_CefSharp.BrowserAddress);
+                    if (WebAddressURI.Host == BroserAddressURI.Host)
+                    {
+                        _GrabTimer.Start();
+                        return;
+                    }
+                }
+
                 object? NeededData = TreeViewItemSender.Tag;
                 ThreadPool.QueueUserWorkItem(state => Grab_2Media(WebAddress, NeededData));
 
@@ -303,6 +361,7 @@ namespace e621_ReBot_v3.Modules
                 else
                 {
                     TreeViewItemDeleter.Items.RemoveAt(0);
+                    TreeViewItemDeleter.ToolTip = $"Pages left to grab: {TreeViewItemDeleter.Items.Count}";
 
                     if (TreeViewItemParent.HasItems && TreeViewItemParent.Header.ToString().StartsWith("https://x.com/"))
                     {

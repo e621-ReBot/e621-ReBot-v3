@@ -183,7 +183,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             Module_Grabber.Report_Info($"Finished grabbing: {Post_URL}");
         }
 
-        internal static string MultiPageCheck(string WebAddress)
+        internal static string MultiPageCheck()
         {
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
@@ -204,7 +204,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
             Queue_Prepare(WebAddressNow);
-            Thread.Sleep(500);
             Module_CefSharp.LoadURL(WebAddressNext);
         }
     }
