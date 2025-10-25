@@ -12,7 +12,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -293,7 +292,7 @@ namespace e621_ReBot_v3.Modules
                             string NextPage = Module_Inkbunny.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
-                                Thread.Sleep(RandomDelay.Next(4000, 5000));//Works only when going super slow,otherwise throws 429's
+                                Thread.Sleep(RandomDelay.Next(4000, 5000)); //Works only when going super slow, otherwise throws 429s
                                 Module_Inkbunny.Queue_MultiPage(WebAddress, NextPage);
                                 return;
                             }

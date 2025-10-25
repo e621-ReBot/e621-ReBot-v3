@@ -98,7 +98,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 string URLTest = WebAddress.Replace("https://inkbunny.net/", null); //https://inkbunny.net/gallery/Name/#/String
                 if (URLTest.Contains('/'))
                 {
-                    string[] URLSplit = URLTest.Split('/',StringSplitOptions.RemoveEmptyEntries);
+                    string[] URLSplit = URLTest.Split('/', StringSplitOptions.RemoveEmptyEntries);
                     WebAddress = $"https://inkbunny.net/{URLSplit[0]}/{URLSplit[1]}";
                 }
 
@@ -158,7 +158,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             ushort SkipCounter = 0;
             if (PostNode.SelectSingleNode(".//form[@id='changethumboriginal_form']") == null)
             {
-                if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.ToLower().Contains("download"))
+                if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                 {
                     Post_MediaURL = PostNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;
                 }
@@ -197,7 +197,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     {
                         HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
                         HtmlDocumentTemp2.LoadHtml(Module_Grabber.GetPageSource($"{Post_URL}-p{MediaCounter}", ref Module_CookieJar.Cookies_Inkbunny));
-                        if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.ToLower().Contains("download"))
+                        if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                         {
                             Post_MediaURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;
                         }

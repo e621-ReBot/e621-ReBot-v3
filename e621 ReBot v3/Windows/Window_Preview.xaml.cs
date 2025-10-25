@@ -210,8 +210,8 @@ namespace e621_ReBot_v3
             if (MediaItemHolder.DL_FilePath != null && File.Exists(MediaItemHolder.DL_FilePath))
             {
                 if (MediaName.Contains("ugoira")
-                || MediaName.ToLower().EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
-                || MediaName.ToLower().EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
+                || MediaName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
+                || MediaName.EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
                 {
                     PB_ViewFile.Content = "▶";
                 }

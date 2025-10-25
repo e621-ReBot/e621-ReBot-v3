@@ -30,7 +30,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 if (PostNode.SelectSingleNode(".//form[@id='changethumboriginal_form']") == null)
                 {
-                    if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.ToLower().Contains("download"))
+                    if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", System.StringComparison.OrdinalIgnoreCase))
                     {
                         MediaList.Add(PostNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value);
                     }
@@ -58,7 +58,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         {
                             HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
                             HtmlDocumentTemp2.LoadHtml(Module_Grabber.GetPageSource($"{PicURL}-p{MediaCounter}", ref Module_CookieJar.Cookies_Inkbunny));
-                            if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.ToLower().Contains("download"))
+                            if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", System.StringComparison.OrdinalIgnoreCase))
                             {
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;
                             }

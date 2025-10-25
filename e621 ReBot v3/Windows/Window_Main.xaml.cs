@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1168,6 +1169,7 @@ namespace e621_ReBot_v3
             Retry_TextBlock.Text = $"Retry Queue{(Retry_TreeView.Items.Count > 0 ? $" ({Retry_TreeView.Items.Count})" : null)}";
         }
 
+        private readonly string[] ValidExtensions = { ".mp4", ".swf" };
         private void DragDropConver_Label_DragEnter(object sender, DragEventArgs e)
         {
             e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
@@ -1180,7 +1182,7 @@ namespace e621_ReBot_v3
             string[] DropList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             foreach (string FilePath in DropList)
             {
-                if (FilePath.ToLower().EndsWith(".mp4") || FilePath.ToLower().EndsWith(".swf"))
+                if (ValidExtensions.Any(ext => FilePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
                     FileDropList.Add(FilePath);
                 }

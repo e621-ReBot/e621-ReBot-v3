@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -125,7 +124,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            DateTime Post_DateTime = DateTime.Parse(PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["title"].Value);
+            //epoch will fit int untill 2038
+            int EpochTime = int.Parse(PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["data-time"].Value);
+            DateTime Post_DateTime = DateTimeOffset.FromUnixTimeSeconds(EpochTime).DateTime;
 
             string Post_Title = PostNode.SelectSingleNode(".//div[@class='submission-title' or @class='classic-submission-title information']/h2").InnerText.Trim();
             Post_Title = WebUtility.HtmlDecode(Post_Title.Replace('[', '⟦').Replace(']', '⟧'));
