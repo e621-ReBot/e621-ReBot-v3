@@ -124,7 +124,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            //epoch will fit int untill 2038
+            //epoch will fit into int until 2038
             int EpochTime = int.Parse(PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["data-time"].Value);
             DateTime Post_DateTime = DateTimeOffset.FromUnixTimeSeconds(EpochTime).DateTime;
 

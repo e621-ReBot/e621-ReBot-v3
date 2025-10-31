@@ -1,6 +1,7 @@
 ﻿using CefSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -45,7 +46,10 @@ namespace e621_ReBot_v3.Modules
                             Domain = CookieHolder.Domain,
                             Expires = CookieHolder.Expires == null ? DateTime.Now.AddMonths(1) : (DateTime)CookieHolder.Expires,
                             Name = CookieHolder.Name,
-                            Value = CookieHolder.Value
+                            Value = EscapeCookieValue(CookieHolder.Value),
+                            Secure = CookieHolder.Secure,
+                            HttpOnly = CookieHolder.HttpOnly,
+                            Path = CookieHolder.Path
                         };
                         ReturnCookieContainer.Add(TempCookie);
                     }
@@ -53,6 +57,21 @@ namespace e621_ReBot_v3.Modules
             }
 
             return ReturnCookieContainer;
+        }
+
+        public static string EscapeCookieValue(string CookieValue)
+        {
+            if (string.IsNullOrEmpty(CookieValue)) return string.Empty;
+
+            foreach (char c in CookieValue)
+            {
+                if (c < 0x21 || c > 0x7E || c == ';' || c == ',' || c == '=' || c == '"' || c == '\\' || c == ' ' || c == '\t')
+                {
+                    return Uri.EscapeDataString(CookieValue);
+                }
+            }
+
+            return CookieValue;
         }
 
         internal static bool PixivCookieCheck()
