@@ -100,7 +100,7 @@ namespace e621_ReBot_v3
                 }
             }
 
-            string ThumbnailURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='posts']/section[@class='posts-container']/article[@id]").Attributes["data-md5"].Value;
+            string ThumbnailURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='posts']/section[@class='posts-container']/article[@data-md5]").Attributes["data-md5"].Value;
             ThumbnailURL = $"https://static1.e621.net/data/preview/{ThumbnailURL.Substring(0, 2)}/{ThumbnailURL.Substring(2, 2)}/{ThumbnailURL}.jpg";
 
             string PoolName = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@id='c-pools']/div[@id='a-show']/h2/a").InnerText.Trim();
