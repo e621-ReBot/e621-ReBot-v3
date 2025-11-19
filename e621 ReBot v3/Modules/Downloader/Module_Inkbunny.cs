@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace e621_ReBot_v3.Modules.Downloader
 {
     internal static class Module_Inkbunny
     {
         private static string? SpecialSaveFolder = null;
-        internal static void GrabMediaLinks(string WebAddress)
+        internal static async Task GrabMediaLinks(string WebAddress)
         {
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
@@ -56,8 +57,15 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                         if (PicURL.Contains("overlays/video")) //if video
                         {
+                            string? HTMLSource = await Module_Grabber.GetPageSource($"{PicURL}-p{MediaCounter}", Module_CookieJar.Cookies_Inkbunny);
+                            if (string.IsNullOrEmpty(HTMLSource))
+                            {
+                                Module_Downloader.Report_Info($"Error encountered in Module_Inkbunny.Download [@{WebAddress}]");
+                                return;
+                            }
+
                             HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
-                            HtmlDocumentTemp2.LoadHtml(Module_Grabber.GetPageSource($"{PicURL}-p{MediaCounter}", ref Module_CookieJar.Cookies_Inkbunny));
+                            HtmlDocumentTemp2.LoadHtml(HTMLSource);
                             if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", System.StringComparison.OrdinalIgnoreCase))
                             {
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;

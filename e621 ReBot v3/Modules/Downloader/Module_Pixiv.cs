@@ -10,7 +10,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         [GeneratedRegex(@"(?<=/)\d+(?=/)?")]
         private static partial Regex Pixiv_Regex();
-        internal static void GrabMediaLinks(string WebAddress)
+        internal static async void GrabMediaLinks(string WebAddress)
         {
             Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Pixiv);
 
@@ -34,7 +34,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
 
-                string JSONSourceTest = Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", ref Module_CookieJar.Cookies_Pixiv);
+                string JSONSourceTest = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
                 JObject PixivJSON = JObject.Parse(JSONSourceTest);
 
                 foreach (JToken JTokenTemp in PixivJSON["body"].Children())

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -86,9 +87,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string JSONSource, ref CookieContainer CookieRef)
+        internal static async Task Grab(string WebAddress, string JSONSource, CookieContainer CookieRef)
         {
-            JSONSource = string.IsNullOrEmpty(JSONSource) ? Module_Grabber.GetPageSource(WebAddress, ref CookieRef) : JSONSource;
+            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, CookieRef) : JSONSource;
             if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Mastodons.Grab [@{WebAddress}]");

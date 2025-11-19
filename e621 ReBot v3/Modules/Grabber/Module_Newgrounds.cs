@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -97,9 +98,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string HTMLSource)
+        internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_Newgrounds) : HTMLSource;
+            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Newgrounds) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Newgrounds.Grab [@{WebAddress}]");
@@ -195,7 +196,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
-                string VideoJSONString = Module_Grabber.GetPageSource(Post_URL.Replace("/view/", "/video/"), ref Module_CookieJar.Cookies_Newgrounds, true);
+                string VideoJSONString = await Module_Grabber.GetPageSource(Post_URL.Replace("/view/", "/video/"), Module_CookieJar.Cookies_Newgrounds, true);
                 if (string.IsNullOrEmpty(VideoJSONString))
                 {
                     Module_Grabber.Report_Info($"Grabbing skipped - No media container found [@{Post_URL}]");

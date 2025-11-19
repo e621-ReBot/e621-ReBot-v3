@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -89,18 +90,18 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress)
+        internal static async Task Grab(string WebAddress)
         {
             string Post_ID = WebAddress.Substring(WebAddress.LastIndexOf('/') + 1);
 
-            string JSONSourceTest = Module_Grabber.GetPageSource($"https://api2.sofurry.com/std/getSubmissionDetails?id={Post_ID}", ref Module_CookieJar.Cookies_SoFurry);
-            if (string.IsNullOrEmpty(JSONSourceTest))
+            string JSONSource = await Module_Grabber.GetPageSource($"https://api2.sofurry.com/std/getSubmissionDetails?id={Post_ID}", Module_CookieJar.Cookies_SoFurry);
+            if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_SoFurry.Grab [@{WebAddress}]");
                 return;
             }
 
-            JObject SoFurryJSON = JObject.Parse(JSONSourceTest);
+            JObject SoFurryJSON = JObject.Parse(JSONSource);
 
             if (SoFurryJSON["contentType"].Value<uint>() != 1) // (0=story, 1=art, 2=music, 3=journal, 4=photo)
             {

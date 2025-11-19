@@ -376,7 +376,7 @@ namespace e621_ReBot_v3.Modules
         }
 
         internal static OrderedDictionary _GrabQueue_WorkingOn = new OrderedDictionary();
-        private static void Grab_2Media(string WebAddress, object? NeededData)
+        private static async void Grab_2Media(string WebAddress, object? NeededData)
         {
             GrabberActiveHandCount++;
             lock (_GrabQueue_WorkingOn)
@@ -390,79 +390,79 @@ namespace e621_ReBot_v3.Modules
             {
                 case "www.furaffinity.net":
                     {
-                        Module_FurAffinity.Grab(WebAddress, (string)NeededData);
+                        await Module_FurAffinity.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "inkbunny.net":
                     {
-                        Module_Inkbunny.Grab(WebAddress, (string)NeededData);
+                        await Module_Inkbunny.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "www.pixiv.net":
                     {
-                        Module_Pixiv.Grab(WebAddress);
+                        await Module_Pixiv.Grab(WebAddress);
                         break;
                     }
 
                 case "www.hiccears.com":
                     {
-                        Module_HicceArs.Grab(WebAddress, (string)NeededData);
+                        await Module_HicceArs.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "x.com":
                     {
-                        Module_Twitter.Grab(WebAddress, (string)NeededData);
+                        await Module_Twitter.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
                     {
-                        Module_Newgrounds.Grab(WebAddress, (string)NeededData);
+                        await Module_Newgrounds.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case string SoFurry when SoFurry.Contains(".sofurry.com"):
                     {
-                        Module_SoFurry.Grab(WebAddress);
+                        await Module_SoFurry.Grab(WebAddress);
                         break;
                     }
 
                 case "www.weasyl.com":
                     {
-                        Module_Weasyl.Grab(WebAddress, (string)NeededData);
+                        await Module_Weasyl.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "mastodon.social":
                     {
-                        Module_Mastodons.Grab(WebAddress, (string)NeededData, ref Module_CookieJar.Cookies_Mastodon);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Mastodon);
                         break;
                     }
 
                 case "baraag.net":
                     {
-                        Module_Mastodons.Grab(WebAddress, (string)NeededData, ref Module_CookieJar.Cookies_Baraag);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Baraag);
                         break;
                     }
 
                 case "pawoo.net":
                     {
-                        Module_Pawoo.Grab(WebAddress, (string)NeededData);
+                        await Module_Pawoo.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "www.hentai-foundry.com":
                     {
-                        Module_HentaiFoundry.Grab(WebAddress, (string)NeededData);
+                        await Module_HentaiFoundry.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "www.plurk.com":
                     {
-                        Module_Plurk.Grab(WebAddress, (string)NeededData);
+                        await Module_Plurk.Grab(WebAddress, (string)NeededData);
                         break;
                     }
             }
@@ -474,22 +474,31 @@ namespace e621_ReBot_v3.Modules
             Grab_3Finish();
         }
 
-        internal static string? GetPageSource(string WebAddress, ref CookieContainer CookieRef, bool NewgroundsSpecialRequest = false)
+        private static readonly Dictionary<CookieContainer, HttpClientHandler> HandlerList = new Dictionary<CookieContainer, HttpClientHandler>();
+        private static readonly Dictionary<CookieContainer, HttpClient> ClientList = new Dictionary<CookieContainer, HttpClient>();
+        private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
+        internal static async Task<string?> GetPageSource(string WebAddress, CookieContainer CookieRef, bool NewgroundsSpecialRequest = false)
         {
-            //http client sucks, can't control cookies properly and it has bugs, fu ms, we're going using.
-            using (HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler() { CookieContainer = CookieRef ?? new CookieContainer(), AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate })
+            HttpClientHandler? HandlerFinder;
+            HttpClient? ClientFinder;
+            if (HandlerList.ContainsKey(CookieRef))
             {
-                using (HttpClient HttpClientTemp = new HttpClient(HttpClientHandlerTemp) { Timeout = TimeSpan.FromSeconds(5) })
-                {
-                    HttpClientTemp.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-
-                    return GetPageResponseAsync(HttpClientTemp, WebAddress, NewgroundsSpecialRequest).Result;
-                }
+                HandlerFinder = HandlerList[CookieRef];
+                ClientFinder = ClientList[CookieRef];
             }
-        }
+            else
+            {
+                HandlerFinder = new HttpClientHandler
+                {
+                    CookieContainer = CookieRef,
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                };
+                ClientFinder = new HttpClient(HandlerFinder);
+                ClientFinder.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+                HandlerList.Add(CookieRef, HandlerFinder);
+                ClientList.Add(CookieRef, ClientFinder);
+            }
 
-        internal static async Task<string?> GetPageResponseAsync(HttpClient HttpClientTemp, string WebAddress, bool NewgroundsSpecialRequest = false)
-        {
             int TryCount = 0;
             do
             {
@@ -498,22 +507,31 @@ namespace e621_ReBot_v3.Modules
                     if (NewgroundsSpecialRequest) HttpRequestMessageTemp.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
                     //Might need to handle timeout here, https://thomaslevesque.com/2018/02/25/better-timeout-handling-with-httpclient/
-                    using (CancellationTokenSource CancellationTokenSourceTemp = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                    using (CancellationTokenSource CancellationTokenSourceTemp = new CancellationTokenSource(RequestTimeout))
                     {
                         try
                         {
-                            HttpResponseMessage HttpResponseMessageTemp = await HttpClientTemp.SendAsync(HttpRequestMessageTemp, CancellationTokenSourceTemp.Token);
+                            HttpResponseMessage HttpResponseMessageTemp = await ClientFinder.SendAsync(HttpRequestMessageTemp, CancellationTokenSourceTemp.Token);
 
-                            if (HttpResponseMessageTemp.IsSuccessStatusCode)
-                            {
-                                return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
-                            }
+                            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
                         }
                         catch (TaskCanceledException) //handle timeout
                         {
-                            HttpClientTemp.CancelPendingRequests();
+                            ClientFinder.CancelPendingRequests();
                             TryCount++;
-                            Thread.Sleep(500);
+                            await Task.Delay(500);
+                        }
+                        catch (HttpRequestException)
+                        {
+                            // Connection errors, DNS errors, TLS errors, etc
+                            // log ex if needed
+                            TryCount++;
+                        }
+                        catch (Exception)
+                        {
+                            // Anything else unexpected
+                            // log ex if needed
+                            return null;
                         }
                     }
                 }

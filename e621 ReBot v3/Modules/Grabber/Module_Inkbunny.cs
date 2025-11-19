@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -117,9 +118,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string HTMLSource)
+        internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_Inkbunny) : HTMLSource;
+            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Inkbunny) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");
@@ -195,8 +196,15 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                     if (Post_MediaURL.Contains("overlays/video")) //if video
                     {
+                        HTMLSource = await Module_Grabber.GetPageSource($"{Post_URL}-p{MediaCounter}", Module_CookieJar.Cookies_Inkbunny);
+                        if (string.IsNullOrEmpty(HTMLSource))
+                        {
+                            Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");
+                            return;
+                        }
+
                         HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
-                        HtmlDocumentTemp2.LoadHtml(Module_Grabber.GetPageSource($"{Post_URL}-p{MediaCounter}", ref Module_CookieJar.Cookies_Inkbunny));
+                        HtmlDocumentTemp2.LoadHtml(HTMLSource);
                         if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                         {
                             Post_MediaURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;

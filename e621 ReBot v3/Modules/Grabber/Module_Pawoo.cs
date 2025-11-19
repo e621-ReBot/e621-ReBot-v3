@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -87,9 +88,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string HTMLSource)
+        internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_Pawoo) : HTMLSource;
+            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Pawoo) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Mastodons.Grab_vHTML [@{WebAddress}]");

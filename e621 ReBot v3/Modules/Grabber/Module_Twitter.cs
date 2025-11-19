@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
@@ -94,9 +95,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string JSONSource)
+        internal static async Task Grab(string WebAddress, string JSONSource)
         {
-            JSONSource = string.IsNullOrEmpty(JSONSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_Twitter) : JSONSource;
+            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Twitter) : JSONSource;
             if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Twitter.Grab [@{WebAddress}]");

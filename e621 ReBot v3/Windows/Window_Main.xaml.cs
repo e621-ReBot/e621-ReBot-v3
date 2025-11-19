@@ -482,8 +482,8 @@ namespace e621_ReBot_v3
         {
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                Grid_ItemStartIndex = Module_Grabber._Grabbed_MediaItems.Count / Grid_ItemLimit; //In C#, integer division is truncated before any multiplication happens which is what is needed but not entirely clear from single line.
-                Grid_ItemStartIndex *= Grid_ItemLimit;
+                int LastPageItems = Module_Grabber._Grabbed_MediaItems.Count % Grid_ItemLimit;
+                Grid_ItemStartIndex = Module_Grabber._Grabbed_MediaItems.Count - (LastPageItems == 0 ? Grid_ItemLimit : LastPageItems); //In C#, integer division is truncated before any multiplication happens which is what is needed but not entirely clear from single line.
             }
             else
             {

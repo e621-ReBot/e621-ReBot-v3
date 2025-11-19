@@ -59,7 +59,7 @@ namespace e621_ReBot_v3
         [GeneratedRegex(@"(?:.+/v)(\d\.\d+\.\d+\.\d+)")]
         private static partial Regex VersionRegex();
         private static CookieContainer CookieContainerGitHub = new CookieContainer();
-        internal static void Check4Update()
+        internal static async void Check4Update()
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
@@ -68,7 +68,7 @@ namespace e621_ReBot_v3
             Thread.Sleep(1000);
 
             string UpdateSource = "https://github.com/e621-ReBot/e621-ReBot-v3/releases";
-            string HTMLSource = Module_Grabber.GetPageSource(UpdateSource, ref CookieContainerGitHub);
+            string? HTMLSource = await Module_Grabber.GetPageSource(UpdateSource, CookieContainerGitHub);
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 GitHubError();
@@ -105,9 +105,9 @@ namespace e621_ReBot_v3
             UpdateError();
         }
 
-        private static void DownloadUpdate(string AssetsURL)
+        private static async void DownloadUpdate(string AssetsURL)
         {
-            string HTMLSource = Module_Grabber.GetPageSource(AssetsURL, ref CookieContainerGitHub);
+            string? HTMLSource = await Module_Grabber.GetPageSource(AssetsURL, CookieContainerGitHub);
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 GitHubError();

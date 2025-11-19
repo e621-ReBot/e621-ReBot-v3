@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -94,9 +95,9 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress, string HTMLSource)
+        internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? Module_Grabber.GetPageSource(WebAddress, ref Module_CookieJar.Cookies_HicceArs) : HTMLSource;
+            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_HicceArs) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_HicceArs.Grab [@{WebAddress}]");

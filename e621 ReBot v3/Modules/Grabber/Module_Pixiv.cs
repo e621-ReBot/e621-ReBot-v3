@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -107,11 +108,18 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         [GeneratedRegex(@"(?<=/)\d+(?=/)?")]
         private static partial Regex Pixiv_Regex();
-        private static void Queue_All(string WebAddress)
+        private static async void Queue_All(string WebAddress)
         {
             string UserID = Pixiv_Regex().Match(WebAddress).Value;
 
-            JObject JSONDictionary = JObject.Parse(Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/user/{UserID}/profile/all", ref Module_CookieJar.Cookies_Pixiv));
+            string? JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/user/{UserID}/profile/all", Module_CookieJar.Cookies_Pixiv);
+            if (string.IsNullOrEmpty(JSONSource))
+            {
+                Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
+                return;
+            }
+
+            JObject JSONDictionary = JObject.Parse(JSONSource);
 
             List<string> WorkList = new List<string>();
             // Thanks https://stackoverflow.com/questions/16795045/accessing-all-items-in-the-jtoken-json-net/38253969
@@ -162,18 +170,30 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static void Grab(string WebAddress)
+        internal static async Task Grab(string WebAddress)
         {
             string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
 
-            string JSONSourceTest = Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}", ref Module_CookieJar.Cookies_Pixiv);
-            if (string.IsNullOrEmpty(JSONSourceTest))
+            string? JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}", Module_CookieJar.Cookies_Pixiv);
+            if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
                 return;
             }
 
-            JObject PixivJSON = JObject.Parse(JSONSourceTest);
+            JObject PixivJSON = JObject.Parse(JSONSource);
+
+            if (PixivJSON["error"].Value<bool>())
+            {
+                Module_Grabber.Report_Info($"Error=true in JSON encountered in Module_Pixiv.Grab [@{WebAddress}], message: {PixivJSON["message"].Value<string>()}");
+
+                lock (Module_Grabber._GrabQueue_WorkingOn)
+                {
+                    Module_Grabber._GrabQueue_WorkingOn.Remove(WebAddress);
+                }
+                Window_Main._RefHolder.Dispatcher.Invoke(() => { Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress, SkipSearch: true); }); //re-add it
+                return;
+            }
 
             // - - - - - - - - - - - - - - - -
 
@@ -217,7 +237,14 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
-                JObject JSONPages = JObject.Parse(Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", ref Module_CookieJar.Cookies_Pixiv));
+                JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
+                if (string.IsNullOrEmpty(JSONSource))
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
+                    return;
+                }
+
+                JObject JSONPages = JObject.Parse(JSONSource);
 
                 ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(PicCount));
                 ushort MediaCounter = 0;
