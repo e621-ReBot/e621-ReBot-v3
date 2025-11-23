@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace e621_ReBot_v3.CustomControls
 {
@@ -245,33 +246,30 @@ namespace e621_ReBot_v3.CustomControls
             Check4Suggestions();
         }
 
-        [GeneratedRegex(@"\S")]
-        private static partial Regex SuggestionRegex();
         internal void Check4Suggestions()
         {
+            string TextBoxText = _TextBoxRef.Text;
+            int CursorLocation = _TextBoxRef.SelectionStart;
+
             if (_TextBoxRef.Text.Length < 2)
             {
                 IsOpen = false;
                 return;
             }
 
-            Regex RegexSearch = SuggestionRegex();
-            int iLoop = _TextBoxRef.SelectionStart;
-            while (iLoop >= 0 && iLoop < _TextBoxRef.Text.Length)
+            WordStartIndex = CursorLocation;
+            while (WordStartIndex > 0 && !char.IsWhiteSpace(TextBoxText[WordStartIndex - 1]))
             {
-                if (!RegexSearch.IsMatch(_TextBoxRef.Text[iLoop].ToString())) break;
-                iLoop++;
+                WordStartIndex--;
             }
-            WordEndIndex = iLoop;
 
-            iLoop = _TextBoxRef.SelectionStart;
-            while (iLoop > 0 && (iLoop - 1) < _TextBoxRef.Text.Length)
+            WordEndIndex = CursorLocation;
+            while (WordEndIndex < TextBoxText.Length && !char.IsWhiteSpace(TextBoxText[WordEndIndex]))
             {
-                if (!RegexSearch.IsMatch(_TextBoxRef.Text[iLoop - 1].ToString())) break;
-                iLoop--;
+                WordEndIndex++;
             }
-            WordStartIndex = iLoop;
-            string Word4Suggest = _TextBoxRef.Text[WordStartIndex..WordEndIndex];
+
+            string Word4Suggest = TextBoxText[WordStartIndex..WordEndIndex];
             if (Word4Suggest.Length < 2)
             {
                 IsOpen = false;
@@ -288,7 +286,7 @@ namespace e621_ReBot_v3.CustomControls
 
         internal bool PoolMode = false;
         private readonly List<string[]> SuggestionResultList = new List<string[]>();
-        [GeneratedRegex(@"pool:\d+")]
+        [GeneratedRegex(@"pool:(\d+)")]
         private static partial Regex PoolRegex();
         internal void BuildSuggestionList(string Word4Suggest)
         {
@@ -298,37 +296,38 @@ namespace e621_ReBot_v3.CustomControls
             if (PoolMode)
             {
                 Regex RegexSearcher = PoolRegex();
-                List<KeyValuePair<string, string>> SelectedSource = PoolCollection;
-                foreach (KeyValuePair<string, string> KeyValuePairTemp in SelectedSource)
+                Match RegexMatcher = RegexSearcher.Match(Word4Suggest);
+                foreach (KeyValuePair<string, string> KeyValuePairTemp in PoolCollection)
                 {
-                    if (RegexSearcher.IsMatch(Word4Suggest))
+                    if (RegexMatcher.Success)
                     {
-                        string MakePoolString = $"pool:{KeyValuePairTemp.Key}";
-                        if (MakePoolString.Contains(Word4Suggest, StringComparison.OrdinalIgnoreCase))
+                        if (KeyValuePairTemp.Key.Contains(RegexMatcher.Groups[1].Value, StringComparison.OrdinalIgnoreCase))
                         {
                             SuggestionResultList.Add(new string[] { $"#{KeyValuePairTemp.Key}", KeyValuePairTemp.Value });
                         }
-                        continue;
                     }
-                    if (KeyValuePairTemp.Value.Contains(Word4Suggest, StringComparison.OrdinalIgnoreCase))
+                    else
                     {
-                        SuggestionResultList.Add(new string[] { $"#{KeyValuePairTemp.Key}", KeyValuePairTemp.Value });
-                        continue;
+                        if (KeyValuePairTemp.Value.Contains(Word4Suggest, StringComparison.OrdinalIgnoreCase))
+                        {
+                            SuggestionResultList.Add(new string[] { $"#{KeyValuePairTemp.Key}", KeyValuePairTemp.Value });
+                        }
                     }
                 }
             }
             else
             {
-                List<KeyValuePair<string, string[]?>> SelectedSource = TagCollection;
-                foreach (KeyValuePair<string, string[]?> KeyValuePairTemp in SelectedSource)
+                foreach (KeyValuePair<string, string[]?> KeyValuePairTemp in TagCollection)
                 {
                     string KeyString = KeyValuePairTemp.Key;
                     string[]? ValueArray = KeyValuePairTemp.Value;
+
                     if (KeyString.StartsWith(Word4Suggest, StringComparison.OrdinalIgnoreCase))
                     {
                         SuggestionResultList.Add(new string[] { KeyString, string.Empty });
                         continue;
                     }
+
                     if (ValueArray != null)
                     {
                         foreach (string AlternateValue in ValueArray)
@@ -346,8 +345,8 @@ namespace e621_ReBot_v3.CustomControls
             {
                 if (DuplicatesDisabled)
                 {
-                    List<string> TextBoxRefList = _TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                    SuggestionResultList.RemoveAll(l => TextBoxRefList.Contains(l.First()));
+                    HashSet<string> TextBoxRefList = new HashSet<string>(_TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
+                    SuggestionResultList.RemoveAll(e => TextBoxRefList.Contains(e[0]) && !string.IsNullOrEmpty(e[1])); //Remove duplicates but keep exact match
                     if (SuggestionResultList.Count == 0)
                     {
                         IsOpen = false;
@@ -357,13 +356,10 @@ namespace e621_ReBot_v3.CustomControls
 
                 for (int i = 0; i < SuggestionResultList.Count; i++)
                 {
-                    string ListWord = PoolMode ? $"pool:{SuggestionResultList[i][0].Substring(1)}" : SuggestionResultList[i][0];
-                    if (ListWord.Equals(Word4Suggest))
-                    {
-                        ResultSelectIndex = i;
-                        break;
-                    }
-                    if (SuggestionResultList[i][1] != null && SuggestionResultList[i][1].Equals(Word4Suggest))
+                    string KeyMatch = PoolMode ? $"pool:{SuggestionResultList[i][0].Substring(1)}" : SuggestionResultList[i][0];
+                    string ValueMatch = SuggestionResultList[i][1] ?? string.Empty;
+
+                    if (KeyMatch.Equals(Word4Suggest) || ValueMatch.Equals(Word4Suggest))
                     {
                         ResultSelectIndex = i;
                         break;
