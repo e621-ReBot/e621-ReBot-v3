@@ -2,12 +2,16 @@
 using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
+using e621_ReBot_v3.Modules.Converter;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -51,10 +55,24 @@ namespace e621_ReBot_v3
             Grid.SetRow(MediaBrowser, 2);
 
             ActionAfterDelayTimer.Tick += ActionAfterDelayTimer_Tick;
+
+            if (Module_CookieJar.Cookies_Pixiv == null) Module_CookieJar.GetCookies("https://www.pixiv.net/", ref Module_CookieJar.Cookies_Pixiv);
+            UgoiraHttpClientHandler = new HttpClientHandler
+            {
+                CookieContainer = Module_CookieJar.Cookies_Pixiv,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            };
+            UgoiraHttpClient = new HttpClient(UgoiraHttpClientHandler);
+            UgoiraHttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+            UgoiraHttpClient.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net/");
+
+            AlreadyUploaded_Label.Text = string.Empty;
+            MediaUgoiraPlayer.Visibility = Visibility.Hidden;
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            if (MediaUgoiraPlayer._Loaded) MediaUgoiraPlayer.UnloadUgoira();
             Preview_Grid.Children.Remove(MediaBrowser);
             MediaBrowser.Dispose();
             _RefHolder = null;
@@ -165,6 +183,11 @@ namespace e621_ReBot_v3
         internal void Nav2URL(MediaItem MediaItemRef)
         {
             MediaBrowser.Stop();
+            if (MediaUgoiraPlayer._Loaded)
+            {
+                MediaUgoiraPlayer.Visibility = Visibility.Hidden;
+                MediaUgoiraPlayer.UnloadUgoira();
+            }
 
             MediaItemHolder = MediaItemRef;
             UpdateNavButtons();
@@ -226,6 +249,7 @@ namespace e621_ReBot_v3
                 MediaItemHolder.DL_FilePath = null;
                 PB_Download.IsEnabled = true;
             }
+            PB_PlayUgoira.IsEnabled = MediaName.Contains("ugoira");
 
             //if (MediaName.Contains("ugoira"))
             //{
@@ -1049,6 +1073,60 @@ namespace e621_ReBot_v3
             PB_LoadAllMedia.Foreground = new SolidColorBrush(PB_LoadAllMedia.IsEnabled ? Colors.LightSteelBlue : Colors.Black);
         }
 
+        private readonly HttpClientHandler UgoiraHttpClientHandler;
+        private readonly HttpClient UgoiraHttpClient;
+        private async void PB_PlayUgoira_Click(object sender, RoutedEventArgs e)
+        {
+            PB_PlayUgoira.IsEnabled = false;
+            panel_Navigation.IsEnabled = false;
+
+            //Get Ugoira Data
+            string? UgoiraJSON = Module_FFMpeg.UgoiraJSONResponse(MediaItemHolder.Grab_PageURL);
+            JToken UgoiraJObject = JObject.Parse(UgoiraJSON)["body"];
+
+            //Extract JSON Data
+            List<WriteableBitmap> FrameFiles = new List<WriteableBitmap>();
+            List<int> FrameTimes = new List<int>();
+            foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
+            {
+                FrameTimes.Add(UgoiraFrame["delay"].Value<int>());
+            }
+
+            //Get Images
+            byte[] UgoiraBytes = await UgoiraHttpClient.GetByteArrayAsync(UgoiraJObject["originalSrc"].Value<string>());
+            using (MemoryStream bytes2Stream = new MemoryStream(UgoiraBytes))
+            {
+                using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))
+                {
+                    foreach (ZipArchiveEntry entry in UgoiraZip.Entries)
+                    {
+                        using (Stream entryStream = entry.Open())
+                        {
+                            // Copy to MemoryStream to ensure seekable stream
+                            using (var ms = new MemoryStream())
+                            {
+                                entryStream.CopyTo(ms);
+                                ms.Position = 0;
+
+                                BitmapDecoder decoder = BitmapDecoder.Create(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                                BitmapSource source = decoder.Frames[0];
+
+                                WriteableBitmap wb = new WriteableBitmap(source);
+                                wb.Freeze();
+
+                                FrameFiles.Add(wb);
+                            }
+                        }
+                    }
+                }
+            }
+
+            MediaUgoiraPlayer.LoadUgoira(FrameFiles, FrameTimes);
+            Panel.SetZIndex(MediaUgoiraPlayer, 6969); //bring to front
+            MediaUgoiraPlayer.Visibility = Visibility.Visible;
+            panel_Navigation.IsEnabled = true;
+        }
+
         private void AlreadyUploaded_Label_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             string e6Post = $"https://e621.net/post/show/{MediaItemHolder.UP_UploadedID}";
@@ -1060,7 +1138,7 @@ namespace e621_ReBot_v3
             {
                 Window_Main._RefHolder.Activate();
                 Window_Main._RefHolder.ReBot_Menu_ListBox.SelectedIndex = 1;
-                if (!Module_CefSharp.BrowserAddress.Equals(e6Post)) Module_CefSharp.LoadURL(e6Post);
+                if (Module_CefSharp.BrowserAddress != null && !Module_CefSharp.BrowserAddress.Equals(e6Post)) Module_CefSharp.LoadURL(e6Post);
             }
         }
     }

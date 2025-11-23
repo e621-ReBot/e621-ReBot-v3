@@ -147,7 +147,8 @@ namespace CefSharp
             {
                 byte[] ByteData = ResponseFilterHolder.ByteData;
 
-                string FileExt = response.Headers["content-type"].Replace("image/", null).Replace("jpeg", "jpg");
+                string FileExt = response.Headers["content-type"]?.Replace("image/", null).Replace("jpeg", "jpg");
+                if (FileExt == null) return;
                 switch (FileExt)
                 {
                     case "jpg":
@@ -178,6 +179,13 @@ namespace CefSharp
                     case "text/html": //Ignore
                         {
                             //Pixiv spamming this now
+                            break;
+                        }
+
+                    case "application/javascript":
+                    case "svg+xml":
+                        {
+                            //DevTools
                             break;
                         }
 
@@ -297,5 +305,4 @@ namespace CefSharp
             //}));
         }
     }
-
 }

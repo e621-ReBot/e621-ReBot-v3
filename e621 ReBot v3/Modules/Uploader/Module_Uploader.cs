@@ -643,7 +643,7 @@ namespace e621_ReBot_v3.Modules
 
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
                         string Response_Reason = Upload_ReponseData["reason"].Value<string>();
-                        string Response_Message = Upload_ReponseData["message"].Value<string>();
+                        string? Response_Message = Upload_ReponseData["message"]?.Value<string>();
                         switch (Response_Reason)
                         {
                             case "duplicate":
@@ -813,7 +813,7 @@ namespace e621_ReBot_v3.Modules
                     {
                         //{"success":false,"message":"Creator have reached your upload limit"}
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        string Response_Message = Upload_ReponseData["message"].Value<string>();
+                        string? Response_Message = Upload_ReponseData["message"]?.Value<string>();
                         if (Response_Message.Contains("duplicate"))
                         {
                             string PostID = Response_Message.Substring(Response_Message.IndexOf('#') + 1);

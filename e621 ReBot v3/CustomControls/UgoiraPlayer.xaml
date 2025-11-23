@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="e621_ReBot_v3.CustomControls.UgoiraPlayer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:e621_ReBot_v3.CustomControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="405" d:DesignWidth="720" Loaded="UserControl_Loaded" Background="DimGray">
+    <Grid>
+        <Image x:Name="FrameImage" StretchDirection="DownOnly"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="8">
+            <Button Content="⏮" Click="Previous_Click" Margin="8,8,32,8" Width="32"  FontSize="14" Style="{StaticResource ButtonStyle_Window_Preview}" Foreground="{DynamicResource ThemeFocus}" ToolTip="Previous frame"/>
+            <Button x:Name="PlayButton" Content="▶" Click="Play_Click" Margin="8" FontSize="20" Width="32" Height="32" Style="{StaticResource ButtonStyle_Window_Preview}" Foreground="{DynamicResource ThemeFocus}" ToolTip="Play"/>
+            <Button x:Name="StopButton" Content="⏹" Click="Stop_Click" Margin="8" FontSize="20" Width="32" Height="32" Style="{StaticResource ButtonStyle_Window_Preview}" Foreground="{DynamicResource ThemeFocus}" ToolTip="Stop" IsEnabled="False"/>
+            <Button Content="⏭" Click="Next_Click" Margin="32,8,8,8" Width="32" FontSize="14" Style="{StaticResource ButtonStyle_Window_Preview}" Foreground="{DynamicResource ThemeFocus}" ToolTip="Next frame"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

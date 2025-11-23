@@ -25,19 +25,21 @@ namespace e621_ReBot_v3.Modules
                 CachePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\CefSharp Cache",
                 PersistSessionCookies = true,
                 BackgroundColor = (uint)ColorTranslator.ToWin32(Color.DimGray),
-                LogSeverity = LogSeverity.Disable,
+                LogSeverity = LogSeverity.Disable
             };
             CefSharpSettings.ShutdownOnExit = true;
 
             //if (Properties.Settings.Default.DisableGPU) CefSharp_Settings.CefCommandLineArgs.Add("disable-gpu", "1");
 
-            CefSharp_Settings.RegisterScheme(new CefCustomScheme
+            CefCustomScheme MediaBrowserScheme = new CefCustomScheme
             {
                 SchemeName = MediaBrowser_SchemeHandlerFactory.SchemeName,
                 SchemeHandlerFactory = new MediaBrowser_SchemeHandlerFactory()
-            });
+            };
+            CefSharp_Settings.RegisterScheme(MediaBrowserScheme);
 
             Cef.Initialize(CefSharp_Settings);
+
             //Cef.EnableHighDPISupport();
             CefSharpBrowser = new ChromiumWebBrowser()
             {

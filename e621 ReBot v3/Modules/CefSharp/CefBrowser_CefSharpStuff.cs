@@ -58,6 +58,7 @@ namespace CefSharp
             {
                 // e6
                 "ads.dragonfru.it",
+                "rv.e621.net",
 
                 // FA
                 "rv.furaffinity.net",

@@ -175,7 +175,7 @@ namespace e621_ReBot_v3.Modules.Converter
 
         // - - - - - - - - - - - - - - - - 
 
-        private static string UgoiraJSONResponse(string Grab_URL)
+        internal static string UgoiraJSONResponse(string Grab_URL)
         {
             string WorkID = Grab_URL.Substring(Grab_URL.LastIndexOf('/') + 1);
             Module_CookieJar.GetCookies(Grab_URL, ref Module_CookieJar.Cookies_Pixiv);

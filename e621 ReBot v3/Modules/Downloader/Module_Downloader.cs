@@ -324,12 +324,12 @@ namespace e621_ReBot_v3.Modules
 
                         //if (DownloadFolder != null && Properties.Settings.Default.Converter_KeepOriginal)
                         //{
-                        //    Directory.CreateDirectory(DownloadFolder);
-                        //    DownloadedBytes.Seek(0, SeekOrigin.Begin);
-                        //    using (FileStream TempFileStream = new FileStream($"{DownloadFolder}\\{FileName}", FileMode.Create))
-                        //    {
-                        //        DownloadedBytes.WriteTo(TempFileStream);
-                        //    }
+                        //Directory.CreateDirectory(DownloadFolder);
+                        //bytes2Stream.Seek(0, SeekOrigin.Begin);
+                        //using (FileStream TempFileStream = new FileStream($"{DownloadFolder}\\{FileName}", FileMode.Create))
+                        //{
+                        //    bytes2Stream.WriteTo(TempFileStream);
+                        //}
                         //}
                     }
                 }

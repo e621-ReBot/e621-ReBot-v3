@@ -31,7 +31,6 @@ namespace e621_ReBot_v3.Modules.Downloader
                 CurrentPage = int.Parse(BottomMenuHolder.Attributes["data-current"].Value);
             }
 
-
             string? Post_MediaURL;
             string? Post_ID;
             string? Post_ThumbURL;

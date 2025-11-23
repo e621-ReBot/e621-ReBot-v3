@@ -25,7 +25,7 @@ namespace e621_ReBot_v3.Modules
         internal static void GetCookies(string WebAddress, ref CookieContainer? WhichCookie)
         {
             string BaseURL = $"{new Uri(WebAddress).Scheme}://{new Uri(WebAddress).Host}";
-            WhichCookie = FindCookie(BaseURL).Result;
+            WhichCookie = Task.Run(() => FindCookie(WebAddress)).GetAwaiter().GetResult();
         }
 
         private static async Task<CookieContainer> FindCookie(string BaseURL)
