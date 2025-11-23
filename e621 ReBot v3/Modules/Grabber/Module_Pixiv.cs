@@ -62,7 +62,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
 
-            HtmlNodeCollection ThumbNodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@type='illust']");
+            HtmlNodeCollection ThumbNodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//ul/li//a[@data-gtm-value]");
             if (ThumbNodeSelector.Count == 0)
             {
                 Module_Grabber.Report_Info($"Skipped grabbing - No Media found [@{WebAddress}]");
@@ -73,7 +73,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             List<string> Posts2Grab = new List<string>();
             foreach (HtmlNode HtmlNodeTemp in ThumbNodeSelector)
             {
-                string URL2Post = $"https://www.pixiv.net{HtmlNodeTemp.SelectSingleNode(".//a").Attributes["href"].Value}";
+                string URL2Post = $"https://www.pixiv.net{HtmlNodeTemp.Attributes["href"].Value}";
 
                 if (Module_Grabber._GrabQueue_URLs.Contains(URL2Post))
                 {

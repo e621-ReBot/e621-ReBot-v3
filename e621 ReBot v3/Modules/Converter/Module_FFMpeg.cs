@@ -48,21 +48,21 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFMpeg.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 FFMpeg.StartInfo.CreateNoWindow = true;
                 FFMpeg.StartInfo.UseShellExecute = false;
-                //FFMpeg.StartInfo.RedirectStandardOutput = true;
-                FFMpeg.StartInfo.RedirectStandardError = true;
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel info -y -f concat -i \"{TempFolderName}\\input.txt\" -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+                FFMpeg.StartInfo.RedirectStandardOutput = true;
+                //FFMpeg.StartInfo.RedirectStandardError = true;
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
 
-                FFMpeg.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
+                FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
                         string ReadLine = e.Data;
-                        if (ReadLine.StartsWith("frame= ", StringComparison.OrdinalIgnoreCase))
+                        if (ReadLine.StartsWith("out_time=0", StringComparison.OrdinalIgnoreCase)) //time=N/A why does it sometimes happen?
                         {
                             //frame= 1881 fps=139 q=24.0 size=   13568KiB time=00:01:15.16 bitrate=1478.8kbits/s speed=5.56x
                             //or
                             //frame=1234
-                            TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11));
+                            TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring("out_time=".Length));
                             switch (ActionTypeEnum)
                             {
                                 case ActionType.Upload:
@@ -87,7 +87,7 @@ namespace e621_ReBot_v3.Modules.Converter
                     }
                 });
                 FFMpeg.Start();
-                FFMpeg.BeginErrorReadLine();
+                FFMpeg.BeginOutputReadLine();
                 FFMpeg.WaitForExit();
             }
         }

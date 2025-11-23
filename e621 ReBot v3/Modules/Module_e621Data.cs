@@ -30,7 +30,7 @@ namespace e621_ReBot_v3.Modules
                     {
                         if (HttpResponseMessageTemp.IsSuccessStatusCode)
                         {
-                            return HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                            return HttpResponseMessageTemp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                         }
                     }
                 }

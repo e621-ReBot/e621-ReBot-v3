@@ -16,7 +16,7 @@ namespace e621_ReBot_v3.Modules.Grabber
         internal static void Queue_Prepare(string WebAddress)
         {
             Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Plurk);
-            Module_CefSharp.BrowserHTMLSource = Module_CefSharp.CefSharpBrowser.GetSourceAsync().Result;
+            Module_CefSharp.BrowserHTMLSource = Module_CefSharp.CefSharpBrowser.GetSourceAsync().GetAwaiter().GetResult();
             if (WebAddress.StartsWith("https://www.plurk.com/p/"))
             {
                 Queue_Single(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);

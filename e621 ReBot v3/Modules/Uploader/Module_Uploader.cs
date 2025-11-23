@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -420,8 +421,8 @@ namespace e621_ReBot_v3.Modules
                     Report_Status("Uploading Media...0%");
                     e621_ProgressMessageHandler.HttpSendProgress += E621_ProgressMessageHandler_HttpSendProgress;
                 }
-                HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.Send(HttpRequestMessageTemp);
-                e621StringResponse = HttpResponseMessageTemp.Content.ReadAsStringAsync().Result;
+                HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.SendAsync(HttpRequestMessageTemp).GetAwaiter().GetResult();
+                e621StringResponse = HttpResponseMessageTemp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 e621HttpResponseMessage = HttpResponseMessageTemp;
             }
             if (bytes2Send != null) e621_ProgressMessageHandler.HttpSendProgress -= E621_ProgressMessageHandler_HttpSendProgress;
