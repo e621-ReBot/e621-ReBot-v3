@@ -20,7 +20,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             {
                 if (ItakuMultiJSONHolder == null) return;
 
-                SpecialSaveFolder = ItakuMultiJSONHolder.First["owner_displayname"].Value<string>();
+                SpecialSaveFolder = (string)ItakuMultiJSONHolder.First["owner_displayname"];
                 SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
                 foreach (JToken JTokenTemp in ItakuMultiJSONHolder.Children())
                 {
@@ -31,7 +31,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         private static void GetMedia(string WebAddress, JToken ItakuJSONToken, string? FolderName = null)
         {
-            string MediaURL = ItakuJSONToken["image"].Value<string>();
+            string MediaURL = (string)ItakuJSONToken["image"];
 
             if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
@@ -41,7 +41,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png
             //https://itaku.ee/api/media/gallery_imgs/xyz/xl_GoYCeeW.png
             //https://itaku.ee/api/media/gallery_imgs/xyz.PNG
-            string ThumbURL = ItakuJSONToken["image_xl"].Value<string>();
+            string ThumbURL = (string)ItakuJSONToken["image_xl"];
             if (ThumbURL.Length - ThumbURL.LastIndexOf('/') == 8)
             {
                 ThumbURL = ThumbURL.Replace("/xl", "/sm");

@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -27,7 +26,7 @@ namespace e621_ReBot_v3.Modules
             Upload_BGW.RunWorkerCompleted += UploadBGW_WorkDone;
             _UploadTimer.Tick += UploadTimer_Tick;
             _UploadDisableTimer.Tick += UploadDisableTimer_Tick;
-            e621_HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.AppName);
+            e621Upload_HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.AppName);
         }
 
         internal static void Media2BigCheck(MediaItem MediaItemRef)
@@ -393,7 +392,7 @@ namespace e621_ReBot_v3.Modules
 
         private static readonly HttpClientHandler e621_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
         private static readonly ProgressMessageHandler e621_ProgressMessageHandler = new ProgressMessageHandler(e621_HttpClientHandler);
-        private static readonly HttpClient e621_HttpClient = new HttpClient(e621_ProgressMessageHandler) { Timeout = TimeSpan.FromSeconds(600) };
+        private static readonly HttpClient e621Upload_HttpClient = new HttpClient(e621_ProgressMessageHandler) { Timeout = TimeSpan.FromSeconds(600) };
         internal static void E621UploadRequest(string SendAddress, string SendMethod, Dictionary<string, string> SendDictionary, out HttpResponseMessage? e621HttpResponseMessage, out string? e621StringResponse, in byte[]? bytes2Send = null)
         {
             string MPF_Boundary = $"----e621 ReBot----";
@@ -421,7 +420,7 @@ namespace e621_ReBot_v3.Modules
                     Report_Status("Uploading Media...0%");
                     e621_ProgressMessageHandler.HttpSendProgress += E621_ProgressMessageHandler_HttpSendProgress;
                 }
-                HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.SendAsync(HttpRequestMessageTemp).GetAwaiter().GetResult();
+                HttpResponseMessage HttpResponseMessageTemp = e621Upload_HttpClient.SendAsync(HttpRequestMessageTemp).GetAwaiter().GetResult();
                 e621StringResponse = HttpResponseMessageTemp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 e621HttpResponseMessage = HttpResponseMessageTemp;
             }
@@ -496,7 +495,7 @@ namespace e621_ReBot_v3.Modules
 
                         POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
                         string UgoiraFileName = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('/') + 1);
-                        UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira1920x1080.webm, converted from {MediaItemRef.Grab_PageURL}";
+                        UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira.webm, converted from {MediaItemRef.Grab_PageURL}";
                         Upload_Description += "\nConverted from Ugoira using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an";
                         isByteUpload = true;
                         break;
@@ -540,7 +539,7 @@ namespace e621_ReBot_v3.Modules
                 {
                     case "ugoira":
                         {
-                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
                             break;
                         }
 
@@ -579,7 +578,7 @@ namespace e621_ReBot_v3.Modules
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
                             break;
                         }
                 }
@@ -632,7 +631,7 @@ namespace e621_ReBot_v3.Modules
                             Module_Credit.Credit_UploadTotal--;
                             Module_Credit.Timestamps_Upload.Add(DateTime.UtcNow.AddHours(1));
                         }
-                        SuccessfulUpload_DisplayUpdates(MediaItemRef, Upload_ReponseData["post_id"].Value<string>());
+                        SuccessfulUpload_DisplayUpdates(MediaItemRef, (string)Upload_ReponseData["post_id"]);
                         Report_Info($"Uploaded: {UploadedURL4Report}");
                         break;
                     }
@@ -643,14 +642,14 @@ namespace e621_ReBot_v3.Modules
                         //{{"success": false,"reason": "invalid","message": "error: You have reached your upload limit"}}
 
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        string Response_Reason = Upload_ReponseData["reason"].Value<string>();
-                        string? Response_Message = Upload_ReponseData["message"]?.Value<string>();
+                        string Response_Reason = (string)Upload_ReponseData["reason"];
+                        string? Response_Message = (string?)Upload_ReponseData["message"];
                         switch (Response_Reason)
                         {
                             case "duplicate":
                                 {
-                                    SuccessfulUpload_DisplayUpdates(MediaItemRef, Upload_ReponseData["post_id"].Value<string>());
-                                    Report_Info($"Error uploading: {UploadedURL4Report}, duplicate of #{Upload_ReponseData["post_id"].Value<string>()}");
+                                    SuccessfulUpload_DisplayUpdates(MediaItemRef, (string)Upload_ReponseData["post_id"]);
+                                    Report_Info($"Error uploading: {UploadedURL4Report}, duplicate of #{(string)Upload_ReponseData["post_id"]}");
                                     break;
                                 }
                             case "invalid":
@@ -738,7 +737,7 @@ namespace e621_ReBot_v3.Modules
                 {
                     case "ugoira":
                         {
-                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, out ExtraSourceURL);
+                            Module_FFMpeg.UploadQueue_Ugoira2WebM(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
                             break;
                         }
 
@@ -777,7 +776,7 @@ namespace e621_ReBot_v3.Modules
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload);
+                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
                             break;
                         }
                 }
@@ -814,7 +813,7 @@ namespace e621_ReBot_v3.Modules
                     {
                         //{"success":false,"message":"Creator have reached your upload limit"}
                         JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
-                        string? Response_Message = Upload_ReponseData["message"]?.Value<string>();
+                        string? Response_Message = (string?)Upload_ReponseData["message"];
                         if (Response_Message.Contains("duplicate"))
                         {
                             string PostID = Response_Message.Substring(Response_Message.IndexOf('#') + 1);
@@ -864,7 +863,7 @@ namespace e621_ReBot_v3.Modules
             JArray NoteList = JArray.Parse(JSON_NoteData);
             foreach (JObject Note in NoteList.Reverse())
             {
-                if (!Note["is_active"].Value<bool>())
+                if (!(bool)Note["is_active"])
                 {
                     NoteList.Remove(Note);
                 }
@@ -878,11 +877,11 @@ namespace e621_ReBot_v3.Modules
                 Dictionary<string, string> POST_Dictionary = new Dictionary<string, string>()
                 {
                     { "note[post_id]", MediaItemRef.UP_UploadedID },
-                    { "note[x]", (NoteList[i]["x"].Value<int>() * RatioData).ToString() },
-                    { "note[y]", (NoteList[i]["y"].Value<int>() * RatioData).ToString() },
-                    { "note[width]", (NoteList[i]["width"].Value<int>() * RatioData).ToString() },
-                    { "note[height]", (NoteList[i]["height"].Value<int>() * RatioData).ToString() },
-                    { "note[body]", NoteList[i]["body"].Value<string>() },
+                    { "note[x]", ((int)NoteList[i]["x"] * RatioData).ToString() },
+                    { "note[y]", ((int)NoteList[i]["y"] * RatioData).ToString() },
+                    { "note[width]", ((int)NoteList[i]["width"] * RatioData).ToString() },
+                    { "note[height]", ((int)NoteList[i]["height"] * RatioData).ToString() },
+                    { "note[body]", (string)NoteList[i]["body"] },
                     { "login",AppSettings.UserName },
                     { "api_key", Module_Cryptor.Decrypt(AppSettings.APIKey) }
                 };

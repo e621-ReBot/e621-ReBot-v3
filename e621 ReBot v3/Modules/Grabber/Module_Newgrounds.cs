@@ -204,7 +204,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 JObject VideoJSON = JObject.Parse(VideoJSONString);
 
-                Post_MediaURL = VideoJSON["sources"].First.First.First["src"].Value<string>();
+                Post_MediaURL = (string)VideoJSON["sources"].First.First.First["src"];
                 if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Remove(Post_MediaURL.IndexOf('?'));
 
                 if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))

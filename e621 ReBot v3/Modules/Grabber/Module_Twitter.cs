@@ -62,8 +62,8 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 JToken ExtendedContainer = JTokenTemp["extended_entities"];
 
-                string URL2Post = ExtendedContainer["media"][0]["expanded_url"].Value<string>();
-                URL2Post = $"{URL2Post.Substring(0, URL2Post.IndexOf("/status/") + 8)}{JTokenTemp["id_str"].Value<string>()}";
+                string URL2Post = (string)ExtendedContainer["media"][0]["expanded_url"];
+                URL2Post = $"{URL2Post.Substring(0, URL2Post.IndexOf("/status/") + 8)}{(string)JTokenTemp["id_str"]}";
 
                 URL2Post = URL2Post.Replace("//twitter.com", "//x.com"); //They still have twitter in api.
 
@@ -114,12 +114,12 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            DateTime Post_DateTime = DateTime.ParseExact(TweeterJSON["created_at"].Value<string>(), "ddd MMM dd HH:mm:ss K yyyy", CultureInfo.InvariantCulture);
+            DateTime Post_DateTime = DateTime.ParseExact((string)TweeterJSON["created_at"], "ddd MMM dd HH:mm:ss K yyyy", CultureInfo.InvariantCulture);
 
-            string ArtistName = TweeterJSON["extended_entities"]["media"][0]["expanded_url"].Value<string>();
+            string ArtistName = (string)TweeterJSON["extended_entities"]["media"][0]["expanded_url"];
             ArtistName = ArtistName.Split('/', StringSplitOptions.RemoveEmptyEntries)[2];
 
-            string Post_Text = TweeterJSON["full_text"].Value<string>();
+            string Post_Text = (string)TweeterJSON["full_text"];
 
             string? Post_MediaURL;
             string? Post_ThumbnailURL;
@@ -139,13 +139,13 @@ namespace e621_ReBot_v3.Modules.Grabber
                                 BestVideo = VideoCheck;
                                 continue;
                             }
-                            if (VideoCheck["bitrate"].Value<int>() > BestVideo["bitrate"].Value<int>())
+                            if ((int)VideoCheck["bitrate"] > (int)BestVideo["bitrate"])
                             {
                                 BestVideo = VideoCheck;
                             }
                         }
                     }
-                    Post_MediaURL = BestVideo["url"].Value<string>();
+                    Post_MediaURL = (string?)BestVideo["url"];
                     if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
 
                     if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
@@ -156,7 +156,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 else
                 {
-                    Post_MediaURL = MediaNode["media_url_https"].Value<string>();
+                    Post_MediaURL = (string)MediaNode["media_url_https"];
                     string TempMediaURL = $"{Post_MediaURL}{(Post_MediaURL.EndsWith(".mp4") ? null : ":orig")}";
 
                     if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
@@ -165,7 +165,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         continue;
                     }
                 }
-                Post_ThumbnailURL = MediaNode["media_url_https"].Value<string>();
+                Post_ThumbnailURL = (string)MediaNode["media_url_https"];
                 string FormatHolder = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1);
                 Post_MediaURL = $"{Post_MediaURL}{(Post_MediaURL.EndsWith(".mp4") ? null : ":orig")}";
 
@@ -179,8 +179,8 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Grab_Title = $"Tweet by @{ArtistName}",
                     Grab_TextBody = Post_Text,
                     Grid_MediaFormat = FormatHolder,
-                    Grid_MediaWidth = MediaNode["original_info"]["width"].Value<uint>(),
-                    Grid_MediaHeight = MediaNode["original_info"]["height"].Value<uint>(),
+                    Grid_MediaWidth = (uint)MediaNode["original_info"]["width"],
+                    Grid_MediaHeight = (uint)MediaNode["original_info"]["height"],
                     Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL),
                     Grid_ThumbnailFullInfo = true,
                     UP_Tags = Post_DateTime.Year.ToString(),

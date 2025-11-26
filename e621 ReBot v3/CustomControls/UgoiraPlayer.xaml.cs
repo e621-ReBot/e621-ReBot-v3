@@ -11,7 +11,7 @@ namespace e621_ReBot_v3.CustomControls
     {
         private Image? _image;
         private List<WriteableBitmap>? _frames;
-        private List<int>? _delays;
+        private List<uint>? _delays;
         private int _currentFrame = 0;
         private bool _isPlaying = false;
 
@@ -26,7 +26,7 @@ namespace e621_ReBot_v3.CustomControls
         }
 
         public bool _Loaded = false;
-        internal void LoadUgoira(List<WriteableBitmap> FrameFiles, List<int> FrameTimes)
+        internal void LoadUgoira(List<WriteableBitmap> FrameFiles, List<uint> FrameTimes)
         {
             _frames = FrameFiles;
             _delays = FrameTimes;

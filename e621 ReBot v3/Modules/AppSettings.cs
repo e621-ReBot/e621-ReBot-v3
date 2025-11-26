@@ -132,77 +132,77 @@ namespace e621_ReBot_v3
                     {
                         case "DevMode":
                             {
-                                DevMode = LoadSettingsJObject["DevMode"].Value<bool>();
+                                DevMode = (bool)LoadSettingsJObject["DevMode"];
                                 break;
                             }
                         case "FirstRun":
                             {
-                                FirstRun = LoadSettingsJObject["FirstRun"].Value<bool>();
+                                FirstRun = (bool)LoadSettingsJObject["FirstRun"];
                                 break;
                             }
                         case "UserName":
                             {
-                                UserName = LoadSettingsJObject["UserName"].Value<string>();
+                                UserName = (string)LoadSettingsJObject["UserName"];
                                 AppName = $"e621 ReBot ({UserName ?? "<Name>"})";
                                 Window_Main._RefHolder.STB_AppName.Text = AppName;
                                 break;
                             }
                         case "UserID":
                             {
-                                UserID = LoadSettingsJObject["UserID"].Value<string>();
+                                UserID = (string)LoadSettingsJObject["UserID"];
                                 break;
                             }
                         case "APIKey":
                             {
-                                APIKey = LoadSettingsJObject["APIKey"].Value<string>();
+                                APIKey = (string)LoadSettingsJObject["APIKey"];
                                 break;
                             }
                         case "Volume":
                             {
-                                Volume = LoadSettingsJObject["Volume"].Value<ushort>();
+                                Volume = (ushort)LoadSettingsJObject["Volume"];
                                 Window_Main._RefHolder.Settings_VolumeSlider.SetVolume(Volume);
                                 break;
                             }
                         case "ThemeBackground":
                             {
-                                string BackgroundColorHex = LoadSettingsJObject["ThemeBackground"].Value<string>();
+                                string BackgroundColorHex = (string)LoadSettingsJObject["ThemeBackground"];
                                 Application.Current.Resources["ThemeBackground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(BackgroundColorHex));
                                 Window_Main._RefHolder.ColorBox_Background.Text = BackgroundColorHex.Substring(3);
                                 break;
                             }
                         case "ThemeForeground":
                             {
-                                string ForegroundColorHex = LoadSettingsJObject["ThemeForeground"].Value<string>();
+                                string ForegroundColorHex = (string)LoadSettingsJObject["ThemeForeground"];
                                 Application.Current.Resources["ThemeForeground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(ForegroundColorHex));
                                 Window_Main._RefHolder.ColorBox_Foreground.Text = ForegroundColorHex.Substring(3);
                                 break;
                             }
                         case "ThemeFocus":
                             {
-                                string FocusColorHex = LoadSettingsJObject["ThemeFocus"].Value<string>();
+                                string FocusColorHex = (string)LoadSettingsJObject["ThemeFocus"];
                                 Application.Current.Resources["ThemeFocus"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(FocusColorHex));
                                 Window_Main._RefHolder.ColorBox_Focus.Text = FocusColorHex.Substring(3);
                                 break;
                             }
                         case "Update_Interval":
                             {
-                                Update_Interval = LoadSettingsJObject["Update_Interval"].Value<ushort>();
+                                Update_Interval = (ushort)LoadSettingsJObject["Update_Interval"];
                                 //((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
                                 break;
                             }
                         case "Update_LastCheck":
                             {
-                                Update_LastCheck = LoadSettingsJObject["Update_LastCheck"].Value<DateTime>();
+                                Update_LastCheck = (DateTime)LoadSettingsJObject["Update_LastCheck"];
                                 break;
                             }
                         case "BigMode":
                             {
-                                BigMode = LoadSettingsJObject["BigMode"].Value<bool>();
+                                BigMode = (bool)LoadSettingsJObject["BigMode"];
                                 break;
                             }
                         case "Grid_SaveSession":
                             {
-                                Grid_SaveSession = LoadSettingsJObject["Grid_SaveSession"].Value<bool>();
+                                Grid_SaveSession = (bool)LoadSettingsJObject["Grid_SaveSession"];
                                 break;
                             }
                         case "Grid_Session":
@@ -223,13 +223,13 @@ namespace e621_ReBot_v3
                             }
                         case "Download_FolderLocation":
                             {
-                                Download_FolderLocation = LoadSettingsJObject["Download_FolderLocation"].Value<string>();
+                                Download_FolderLocation = (string)LoadSettingsJObject["Download_FolderLocation"];
                                 Window_Main._RefHolder.Download_DownloadFolderLocation.ToolTip = $"Current path: {Download_FolderLocation}";
                                 break;
                             }
                         case "Download_ThreadsCount":
                             {
-                                Download_ThreadsCount = LoadSettingsJObject["Download_ThreadsCount"].Value<ushort>();
+                                Download_ThreadsCount = (ushort)LoadSettingsJObject["Download_ThreadsCount"];
                                 //((RadioButton)Window_Main._RefHolder.DLThreads_StackPanel.FindName($"RadionButton_DLT{Download_ThreadsCount}")).IsChecked = true;
                                 Module_Downloader.DLThreadsWaiting = Download_ThreadsCount;
                                 //Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
@@ -241,36 +241,36 @@ namespace e621_ReBot_v3
                             }
                         case "Download_SaveTags":
                             {
-                                Download_SaveTags = LoadSettingsJObject["Download_SaveTags"].Value<bool>();
+                                Download_SaveTags = (bool)LoadSettingsJObject["Download_SaveTags"];
                                 //(Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags).IsChecked = Download_SaveTags;
                                 break;
                             }
                         case "NamingPattern_e6":
                             {
-                                NamingPattern_e6 = LoadSettingsJObject["NamingPattern_e6"].Value<ushort>();
+                                NamingPattern_e6 = (ushort)LoadSettingsJObject["NamingPattern_e6"];
                                 //((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
                                 break;
                             }
                         case "NamingPattern_Web":
                             {
-                                NamingPattern_Web = LoadSettingsJObject["NamingPattern_Web"].Value<ushort>();
+                                NamingPattern_Web = (ushort)LoadSettingsJObject["NamingPattern_Web"];
                                 //((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
                                 break;
                             }
                         case "Download_IgnoreErrors":
                             {
-                                Download_IgnoreErrors = LoadSettingsJObject["Download_IgnoreErrors"].Value<bool>();
+                                Download_IgnoreErrors = (bool)LoadSettingsJObject["Download_IgnoreErrors"];
                                 break;
                             }
                         case "Browser_ClearCache":
                             {
-                                Browser_ClearCache = LoadSettingsJObject["Browser_ClearCache"].Value<bool>();
+                                Browser_ClearCache = (bool)LoadSettingsJObject["Browser_ClearCache"];
                                 //(Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
                                 break;
                             }
                         case "Converter_DontConvertVideos":
                             {
-                                Converter_DontConvertVideos = LoadSettingsJObject["Converter_DontConvertVideos"].Value<bool>();
+                                Converter_DontConvertVideos = (bool)LoadSettingsJObject["Converter_DontConvertVideos"];
                                 break;
                             }
                         case "Blacklist":
@@ -301,7 +301,7 @@ namespace e621_ReBot_v3
                             }
                         case "Note":
                             {
-                                Note = LoadSettingsJObject["Note"].Value<string>();
+                                Note = (string)LoadSettingsJObject["Note"];
                                 break;
                             }
                         case "QuickTags":

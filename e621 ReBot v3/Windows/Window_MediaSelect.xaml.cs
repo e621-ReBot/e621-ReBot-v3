@@ -297,7 +297,7 @@ namespace e621_ReBot_v3
                 {
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                     {
-                        PostID = e6Post["id"].Value<string>(),
+                        PostID = (string)e6Post["id"],
                         Tag = string.Join(' ', e6Post.SelectTokens("$.tags.*[*]")),
                         Cursor = Cursors.No
                     };
@@ -306,10 +306,10 @@ namespace e621_ReBot_v3
                     MediaSelectItemTemp.cIsUploaded_TextBlock.VerticalAlignment = VerticalAlignment.Top;
                     MediaSelectItemTemp.cIsUploaded_TextBlock.TextAlignment = TextAlignment.Left;
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Margin = new Thickness(4, 4, 0, 0);
-                    MediaSelectItemTemp.ChangeRating(e6Post["rating"].Value<string>().ToUpper());
-                    string PostID = $"#{e6Post["id"].Value<string>()}";
-                    string MediaSizeFormat = $"{e6Post["file"]["width"].Value<ushort>()} x {e6Post["file"]["height"].Value<ushort>()} .{e6Post["file"]["ext"].Value<string>()}";
-                    string ByteSize = $"{(uint)(e6Post["file"]["size"].Value<uint>() / 1024f)} kB";
+                    MediaSelectItemTemp.ChangeRating(((string)e6Post["rating"]).ToUpper());
+                    string PostID = $"#{(string)e6Post["id"]}";
+                    string MediaSizeFormat = $"{(ushort)e6Post["file"]["width"]} x {(ushort)e6Post["file"]["height"]} .{(string)e6Post["file"]["ext"]}";
+                    string ByteSize = $"{(uint)((uint)e6Post["file"]["size"] / 1024f)} kB";
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Text = $"{PostID} - {MediaSizeFormat}\n{ByteSize}";
 
                     string ThumbLink = ResultList[MediaSelectItemTemp.PostID];
@@ -348,8 +348,8 @@ namespace e621_ReBot_v3
                     JToken PostHolder = e6Post["post"]["posts"];
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                     {
-                        PostID = PostHolder["id"].Value<string>(),
-                        Tag = PostHolder["tag_string"].Value<string>(),
+                        PostID = (string)PostHolder["id"],
+                        Tag = (string)PostHolder["tag_string"],
                         Cursor = Cursors.No,
                     };
                     MediaSelectItemTemp.cIsUploaded_TextBlock.FontSize = 14;
@@ -357,19 +357,19 @@ namespace e621_ReBot_v3
                     MediaSelectItemTemp.cIsUploaded_TextBlock.VerticalAlignment = VerticalAlignment.Top;
                     MediaSelectItemTemp.cIsUploaded_TextBlock.TextAlignment = TextAlignment.Left;
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Margin = new Thickness(4, 4, 0, 0);
-                    MediaSelectItemTemp.ChangeRating(PostHolder["rating"].Value<string>().ToUpper());
-                    string PostID = $"#{PostHolder["id"].Value<string>()}";
-                    string MediaSize = $"{PostHolder["image_width"].Value<ushort>()} x {PostHolder["image_height"].Value<ushort>()}";
+                    MediaSelectItemTemp.ChangeRating(((string)PostHolder["rating"]).ToUpper());
+                    string PostID = $"#{(string)PostHolder["id"]}";
+                    string MediaSize = $"{(ushort)PostHolder["image_width"]} x {(ushort)PostHolder["image_height"]}";
                     string? MediaFormat = null;
-                    string ByteSize = $"{(uint)(PostHolder["file_size"].Value<uint>() / 1024f)} kB";
-                    if (PostHolder["is_deleted"].Value<bool>())
+                    string ByteSize = $"{(uint)((uint)PostHolder["file_size"] / 1024f)} kB";
+                    if ((bool)PostHolder["is_deleted"])
                     {
                         MediaSelectItemTemp.cThumbnail_Image.Source = MediaDeletedThumb;
                     }
                     else
                     {
-                        MediaFormat = $".{PostHolder["file_ext"].Value<string>()}";
-                        MediaSelectItemTemp.cThumbnail_Image.Source = new BitmapImage(new Uri(PostHolder["preview_file_url"].Value<string>(), UriKind.Absolute));
+                        MediaFormat = $".{(string)PostHolder["file_ext"]}";
+                        MediaSelectItemTemp.cThumbnail_Image.Source = new BitmapImage(new Uri((string)PostHolder["preview_file_url"], UriKind.Absolute));
                     }
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Text = $"{PostID} - {MediaSize}{(MediaFormat == null ? null : $" {MediaFormat}")}\n{ByteSize}";
 

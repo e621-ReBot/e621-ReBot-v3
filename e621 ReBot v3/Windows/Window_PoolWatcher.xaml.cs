@@ -134,10 +134,10 @@ namespace e621_ReBot_v3
                     Dictionary<int, PoolItem> PoolPosts2Get = new Dictionary<int, PoolItem>();
                     foreach (JToken SinglePoolData in PoolArray.Children())
                     {
-                        int Pool_ID = SinglePoolData["id"].Value<int>();
-                        string Pool_Name = SinglePoolData["name"].Value<string>().Replace('_', ' ').Trim();
+                        int Pool_ID = (int)SinglePoolData["id"];
+                        string Pool_Name = ((string)SinglePoolData["name"]).Replace('_', ' ').Trim();
                         List<int> Pool_IDs = SinglePoolData["post_ids"].Values<int>().ToList();
-                        int Pool_PostCount = SinglePoolData["post_count"].Value<int>();
+                        int Pool_PostCount = (int)SinglePoolData["post_count"];
 
                         PoolItem? PoolItemTemp = AppSettings.PoolWatcher.Where(PoolItem => PoolItem.ID == Pool_ID).SingleOrDefault();
                         if (PoolItemTemp != null)
@@ -182,7 +182,7 @@ namespace e621_ReBot_v3
                 JToken PostData = JObject.Parse(e6JSONResult)["posts"];
                 foreach (JToken PostDataDetailed in PostData.Children())
                 {
-                    int Post_ID = PostDataDetailed["id"].Value<int>();
+                    int Post_ID = (int)PostDataDetailed["id"];
                     string Pool_Name = PoolPosts2Get[Post_ID].Name;
                     Pool_Name = string.Join(null, Pool_Name.Split(Path.GetInvalidFileNameChars()));
 
@@ -196,7 +196,7 @@ namespace e621_ReBot_v3
                                           PageURL: $"https://e621.net/posts/{Post_ID}",
                                           MediaURL: MediaURLTemp,
                                           ThumbnailURL: ThumbnailURLTemp,
-                                          MediaFormat: PostDataDetailed["file"]["ext"].Value<string>(),
+                                          MediaFormat: (string)PostDataDetailed["file"]["ext"],
                                           e6PostID: Post_ID.ToString(),
                                           e6PoolName: Pool_Name,
                                           e6PoolPostIndex: PoolPosts2Get[Post_ID].PostIDs.IndexOf(Post_ID).ToString(),

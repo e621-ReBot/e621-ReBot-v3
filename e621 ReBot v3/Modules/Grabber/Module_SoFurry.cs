@@ -103,7 +103,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             JObject SoFurryJSON = JObject.Parse(JSONSource);
 
-            if (SoFurryJSON["contentType"].Value<uint>() != 1) // (0=story, 1=art, 2=music, 3=journal, 4=photo)
+            if ((uint)SoFurryJSON["contentType"] != 1) // (0=story, 1=art, 2=music, 3=journal, 4=photo)
             {
                 Module_Grabber.Report_Info($"Skipped grabbing - Unsupported submission type [@{WebAddress}]");
                 return;
@@ -115,18 +115,18 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             DateTime Post_DateTime = DateTime.UtcNow;
 
-            string Post_Title = SoFurryJSON["title"].Value<string>();
+            string Post_Title = (string)SoFurryJSON["title"];
             Post_Title = Post_Title.Replace('[', '⟦').Replace(']', '⟧');
 
-            string ArtistName = SoFurryJSON["author"].Value<string>();
+            string ArtistName = (string)SoFurryJSON["author"];
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(SoFurryJSON["description"].Value<string>());
+            HtmlDocumentTemp.LoadHtml((string)SoFurryJSON["description"]);
             HtmlNode Post_TextNode = HtmlDocumentTemp.DocumentNode;
             string? Post_Text = Module_Html2Text.Html2Text_SoFurry(Post_TextNode);
 
             // contentSourceUrl is enough but combine with FileName
-            string Post_MediaURL = $"{SoFurryJSON["contentSourceUrl"].Value<string>()}&{SoFurryJSON["fileName"].Value<string>()}";
+            string Post_MediaURL = $"{(string)SoFurryJSON["contentSourceUrl"]}&{(string)SoFurryJSON["fileName"]}";
 
             // - - - - - - - - - - - - - - - -
 
@@ -140,7 +140,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 return;
             }
 
-            string Post_ThumbnailURL = SoFurryJSON["thumbnailSourceUrl"].Value<string>();
+            string Post_ThumbnailURL = (string)SoFurryJSON["thumbnailSourceUrl"];
             MediaItem MediaItemTemp = new MediaItem
             {
                 Grab_PageURL = Post_URL,
@@ -157,8 +157,8 @@ namespace e621_ReBot_v3.Modules.Grabber
             };
             if (Post_MediaURL.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || Post_MediaURL.EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
             {
-                MediaItemTemp.Grid_MediaWidth = SoFurryJSON["width"].Value<uint>();
-                MediaItemTemp.Grid_MediaHeight = SoFurryJSON["height"].Value<uint>();
+                MediaItemTemp.Grid_MediaWidth = (uint)SoFurryJSON["width"];
+                MediaItemTemp.Grid_MediaHeight = (uint)SoFurryJSON["height"];
                 //MediaItemTemp.Grid_ThumbnailFullInfo = true;
             }
 

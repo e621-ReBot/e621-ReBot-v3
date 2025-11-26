@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace e621_ReBot_v3.CustomControls
 {

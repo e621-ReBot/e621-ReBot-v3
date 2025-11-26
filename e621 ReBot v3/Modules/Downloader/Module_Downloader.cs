@@ -10,8 +10,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Controls;
@@ -87,6 +89,15 @@ namespace e621_ReBot_v3.Modules
                 "An existing connection was forcibly closed by the remote host.",
                 "An error occurred while sending the request.",
                 "A connection attempt failed because the connected party did not properly respond after a period of time,"};
+
+            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                CookieContainer = new CookieContainer()
+            };
+            _GeneralClient = new HttpClient(HttpClientHandlerTemp);
+            _GeneralClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+            _GeneralClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
         internal static void Start()
@@ -191,7 +202,7 @@ namespace e621_ReBot_v3.Modules
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
@@ -217,106 +228,237 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        internal static byte[] DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null)
+
+
+        //internal static byte[] DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null)
+        //{
+        //    HttpWebRequest FileDownloader = (HttpWebRequest)WebRequest.Create(DownloadURL);
+        //    FileDownloader.Timeout = 5000;
+        //    switch (DownloadURL)
+        //    {
+        //        case string Ugoira when Ugoira.Contains("ugoira"):
+        //            {
+        //                FileDownloader.Referer = "https://www.pixiv.net/";
+        //                break;
+        //            }
+        //        case string Ugoira when Ugoira.StartsWith("https://www.hiccears.com/file/"):
+        //            {
+        //                FileDownloader.CookieContainer = Module_CookieJar.Cookies_HicceArs;
+        //                break;
+        //            }
+        //    }
+
+        //    using (MemoryStream DownloadedBytes = new MemoryStream())
+        //    {
+        //        using (WebResponse DownloaderReponse = FileDownloader.GetResponse())
+        //        {
+        //            using (Stream DownloadStream = DownloaderReponse.GetResponseStream())
+        //            {
+        //                byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
+        //                while (DownloadedBytes.Length < DownloaderReponse.ContentLength)
+        //                {
+        //                    int DownloadStreamPartLength = DownloadStream.Read(DownloadBuffer, 0, DownloadBuffer.Length);
+        //                    if (DownloadStreamPartLength > 0)
+        //                    {
+        //                        DownloadedBytes.Write(DownloadBuffer, 0, DownloadStreamPartLength);
+        //                        float ReportPercentage = (float)DownloadedBytes.Length / DownloaderReponse.ContentLength;
+
+        //                        switch (ActionTypeEnum)
+        //                        {
+        //                            case ActionType.Upload:
+        //                                {
+        //                                    Module_Uploader.Report_Status($"Downloading Media...{ReportPercentage:P0}");
+        //                                    break;
+        //                                }
+        //                            case ActionType.Download:
+        //                                {
+        //                                    ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ReportPercentage * 100); });
+        //                                    break;
+        //                                }
+
+        //                            case ActionType.Conversion:
+        //                                {
+
+        //                                    //string ReportType = isUgoira ? "CDU" : "CDV";
+        //                                    //Module_FFmpeg.ReportConversionProgress(ReportType, ReportPercentage, in DataRowRef);
+        //                                    break;
+        //                                }
+
+        //                            case ActionType.Manual:
+        //                                {
+        //                                    //if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, DataRowRef))
+        //                                    //{
+        //                                    //    Form_Preview._FormReference.BeginInvoke(new Action(() =>
+        //                                    //    {
+        //                                    //        if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated)
+        //                                    //        {
+        //                                    //            Form_Preview._FormReference.Label_Download.Text = $"{ReportPercentage:P0}";
+        //                                    //            Form_Preview._FormReference.Label_Download.Visible = true;
+        //                                    //            Form_Preview._FormReference.PB_Download.Visible = false;
+        //                                    //            Form_Preview._FormReference.Label_DownloadWarning.Visible = false;
+        //                                    //        }
+        //                                    //    }));
+        //                                    //}
+        //                                    break;
+        //                                }
+
+        //                            case ActionType.Update:
+        //                                {
+
+        //                                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+        //                                    {
+        //                                        Window_Main._RefHolder.Update_TextBlock.Text = $"Downloading Update...{ReportPercentage:P0}";
+        //                                    });
+        //                                    break;
+        //                                }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        DownloadedBytes.Seek(0, SeekOrigin.Begin);
+        //        return DownloadedBytes.ToArray();
+        //    }
+        //}
+
+        private static readonly HttpClient _GeneralClient;
+        internal static HttpClient _PixivClient;
+        private static HttpClient _HicceArsClient;
+
+        internal static void MakePixivClient()
         {
-            HttpWebRequest FileDownloader = (HttpWebRequest)WebRequest.Create(DownloadURL);
-            FileDownloader.Timeout = 5000;
-            switch (DownloadURL)
+            if (Module_CookieJar.Cookies_Pixiv == null) Module_CookieJar.GetCookies("https://www.pixiv.net/", ref Module_CookieJar.Cookies_Pixiv);
+            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
             {
-                case string Ugoira when Ugoira.Contains("ugoira"):
-                    {
-                        FileDownloader.Referer = "https://www.pixiv.net/";
-                        break;
-                    }
-                case string Ugoira when Ugoira.StartsWith("https://www.hiccears.com/file/"):
-                    {
-                        FileDownloader.CookieContainer = Module_CookieJar.Cookies_HicceArs;
-                        break;
-                    }
+                CookieContainer = Module_CookieJar.Cookies_Pixiv,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            };
+            _PixivClient = new HttpClient(HttpClientHandlerTemp);
+            _PixivClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+            _PixivClient.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net/");
+            _PixivClient.Timeout = TimeSpan.FromSeconds(5);
+        }
+
+        private static void MakeHicceArsClient()
+        {
+            if (Module_CookieJar.Cookies_HicceArs == null) Module_CookieJar.GetCookies("https://www.hiccears.com/", ref Module_CookieJar.Cookies_HicceArs);
+            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
+            {
+                CookieContainer = Module_CookieJar.Cookies_Pixiv,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            };
+            _HicceArsClient = new HttpClient(HttpClientHandlerTemp);
+            _HicceArsClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+            _HicceArsClient.Timeout = TimeSpan.FromSeconds(5);
+        }
+
+        private static HttpClient SelectClient(string URL)
+        {
+            if (URL.Contains("ugoira"))
+            {
+                if (_PixivClient == null) MakePixivClient();
+                return _PixivClient;
             }
-
-            using (MemoryStream DownloadedBytes = new MemoryStream())
+            if (URL.StartsWith("https://www.hiccears.com/file/"))
             {
-                using (WebResponse DownloaderReponse = FileDownloader.GetResponse())
+                if (_HicceArsClient == null) MakeHicceArsClient();
+                return _HicceArsClient;
+            }
+            return _GeneralClient;
+        }
+
+        internal static async Task<byte[]> DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null, float PercentageMod = 1, float MultiProgressBase = 0)
+        {
+            HttpClient ClientSelector = SelectClient(DownloadURL);
+
+            HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.GetAsync(DownloadURL, HttpCompletionOption.ResponseHeadersRead);
+            HttpResponseMessageTemp.EnsureSuccessStatusCode();
+
+            long? BytesInTotal = HttpResponseMessageTemp.Content.Headers.ContentLength;
+            //New version of using, lasts until async ends or end of scope
+            await using Stream DownloadStream = await HttpResponseMessageTemp.Content.ReadAsStreamAsync();
+            await using MemoryStream DownloadedBytes = new MemoryStream();
+
+            byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
+            int BytesRead = 0;
+            int BytesReadSoFar = 0;
+
+            while ((BytesRead = await DownloadStream.ReadAsync(DownloadBuffer, 0, DownloadBuffer.Length)) > 0)
+            {
+                DownloadedBytes.Write(DownloadBuffer, 0, BytesRead);
+                BytesReadSoFar += BytesRead;
+
+                if (BytesInTotal.HasValue)
                 {
-                    using (Stream DownloadStream = DownloaderReponse.GetResponseStream())
-                    {
-                        byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
-                        while (DownloadedBytes.Length < DownloaderReponse.ContentLength)
-                        {
-                            int DownloadStreamPartLength = DownloadStream.Read(DownloadBuffer, 0, DownloadBuffer.Length);
-                            if (DownloadStreamPartLength > 0)
-                            {
-                                DownloadedBytes.Write(DownloadBuffer, 0, DownloadStreamPartLength);
-                                float ReportPercentage = (float)DownloadedBytes.Length / DownloaderReponse.ContentLength;
-
-                                switch (ActionTypeEnum)
-                                {
-                                    case ActionType.Upload:
-                                        {
-                                            Module_Uploader.Report_Status($"Downloading Media...{ReportPercentage:P0}");
-                                            break;
-                                        }
-                                    case ActionType.Download:
-                                        {
-                                            ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ReportPercentage * 100); });
-                                            break;
-                                        }
-
-                                    case ActionType.Conversion:
-                                        {
-
-                                            //string ReportType = isUgoira ? "CDU" : "CDV";
-                                            //Module_FFmpeg.ReportConversionProgress(ReportType, ReportPercentage, in DataRowRef);
-                                            break;
-                                        }
-
-                                    case ActionType.Manual:
-                                        {
-                                            //if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, DataRowRef))
-                                            //{
-                                            //    Form_Preview._FormReference.BeginInvoke(new Action(() =>
-                                            //    {
-                                            //        if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated)
-                                            //        {
-                                            //            Form_Preview._FormReference.Label_Download.Text = $"{ReportPercentage:P0}";
-                                            //            Form_Preview._FormReference.Label_Download.Visible = true;
-                                            //            Form_Preview._FormReference.PB_Download.Visible = false;
-                                            //            Form_Preview._FormReference.Label_DownloadWarning.Visible = false;
-                                            //        }
-                                            //    }));
-                                            //}
-                                            break;
-                                        }
-
-                                    case ActionType.Update:
-                                        {
-
-                                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                                            {
-                                                Window_Main._RefHolder.Update_TextBlock.Text = $"Downloading Update...{ReportPercentage:P0}";
-                                            });
-                                            break;
-                                        }
-                                }
-                            }
-                        }
-                    }
+                    float percentage = (float)BytesReadSoFar / BytesInTotal.Value;
+                    if (PercentageMod < 1) percentage *= PercentageMod;
+                    percentage += MultiProgressBase;
+                    ReportProgress(percentage, ActionTypeEnum, ProgressBarRef);
                 }
+            }
+            return DownloadedBytes.ToArray();
+        }
 
-                DownloadedBytes.Seek(0, SeekOrigin.Begin);
-                return DownloadedBytes.ToArray();
+        private static void ReportProgress(float ProgressPercentage, ActionType ActionTypeEnum, ProgressBar ProgressBarRef)
+        {
+            switch (ActionTypeEnum)
+            {
+                case ActionType.Upload:
+                    {
+                        Module_Uploader.Report_Status($"Downloading Media...{ProgressPercentage:P0}");
+                        break;
+                    }
+                case ActionType.Download:
+                    {
+                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ProgressPercentage * 100); });
+                        break;
+                    }
+
+                case ActionType.Conversion:
+                    {
+
+                        //string ReportType = isUgoira ? "CDU" : "CDV";
+                        //Module_FFmpeg.ReportConversionProgress(ReportType, ReportPercentage, in DataRowRef);
+                        break;
+                    }
+
+                case ActionType.Manual:
+                    {
+                        //if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, DataRowRef))
+                        //{
+                        //    Form_Preview._FormReference.BeginInvoke(new Action(() =>
+                        //    {
+                        //        if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated)
+                        //        {
+                        //            Form_Preview._FormReference.Label_Download.Text = $"{ReportPercentage:P0}";
+                        //            Form_Preview._FormReference.Label_Download.Visible = true;
+                        //            Form_Preview._FormReference.PB_Download.Visible = false;
+                        //            Form_Preview._FormReference.Label_DownloadWarning.Visible = false;
+                        //        }
+                        //    }));
+                        //}
+                        break;
+                    }
+
+                case ActionType.Update:
+                    {
+
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        {
+                            Window_Main._RefHolder.Update_TextBlock.Text = $"Downloading Update...{ProgressPercentage:P0}";
+                        });
+                        break;
+                    }
             }
         }
 
-        internal static void SaveFileBytes(ActionType ActionTypeEnum, in byte[] bytes2Save, string FileName, string? DownloadFolder = null)
+        internal static void SaveFileBytes(in byte[] bytes2Save, string FileName, string SavePath)
         {
             //HicceArs filename fix for extension is not needed, e621 detects it.
-
-            string SavePath = $"FFMpegTemp\\{(ActionTypeEnum == ActionType.Upload ? "Upload\\" : null)}{FileName}";
             using (MemoryStream bytes2Stream = new MemoryStream(bytes2Save))
             {
-                if (FileName.Contains("ugoira"))
+                if (Path.GetExtension(FileName).Equals(".zip"))
                 {
                     using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))
                     {
@@ -335,7 +477,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    using (FileStream FileStreamTemp = new FileStream(SavePath, FileMode.Create))
+                    using (FileStream FileStreamTemp = new FileStream(Path.Combine(SavePath, FileName), FileMode.Create))
                     {
                         bytes2Stream.WriteTo(FileStreamTemp);
                     }
@@ -908,12 +1050,9 @@ namespace e621_ReBot_v3.Modules
         {
             string PicURL = DownloadItemRef.Grab_MediaURL;
 
-            string GetFileNameOnly = MediaFile_GetFileNameOnly(PicURL);
-            GetFileNameOnly = GetFileNameOnly.Substring(0, GetFileNameOnly.LastIndexOf('.'));
+            string GetFileNameOnly = Path.GetFileNameWithoutExtension(MediaFile_GetFileNameOnly(PicURL));
 
-            string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\");
-            string PoolName = DownloadItemRef.e6_PoolName;
-            if (PoolName != null) DownloadPath += $"{PoolName}\\";
+            string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, "e621", DownloadItemRef.e6_PoolName);
             Directory.CreateDirectory(DownloadPath);
 
             switch (AppSettings.NamingPattern_e6)
@@ -971,13 +1110,15 @@ namespace e621_ReBot_v3.Modules
 
         private static void DownloadFrom_URL(DownloadItem DownloadItemRef)
         {
-            Uri DomainURL = new Uri(DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
-            HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
-
+            //Get Artist for folder name
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
-            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName, DownloadItemRef.e6_PoolName);
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+
+            //Get Host for folder name
+            string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
+
+            //Make Download path and folder
+            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName, DownloadItemRef.e6_PoolName); //e6_PoolName is re-used as a separate folder
             Directory.CreateDirectory(FolderPath);
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);
@@ -990,21 +1131,13 @@ namespace e621_ReBot_v3.Modules
             {
                 case string UgoiraTest when UgoiraTest.Contains("ugoira"):
                     {
-                        string WebMName = $"{GetFileNameOnly.Substring(0, GetFileNameOnly.IndexOf("_ugoira0"))}_ugoira1920x1080.webm";
+                        string WebMName = $"{GetFileNameOnly.Substring(0, GetFileNameOnly.IndexOf("_ugoira0"))}_ugoira.webm";
                         string ImageRename = MediaFile_RenameFileName(WebMName, DownloadItemRef);
 
                         string FilePath = Path.Combine(FolderPath, ImageRename);
                         if (File.Exists(FilePath))
                         {
-                            Report_Info($"Ugoira WebM already exists, skipped coverting {DownloadItemRef.Grab_MediaURL}");
-                            //Form_Loader._FormReference.BeginInvoke(new Action(() =>
-                            //{
-                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.SuspendLayout();
-                            //    UIDrawController.SuspendDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
-                            //    AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
-                            //    Form_Loader._FormReference.DownloadFLP_Downloaded.ResumeLayout();
-                            //    UIDrawController.ResumeDrawing(Form_Loader._FormReference.DownloadFLP_Downloaded);
-                            //}));
+                            Report_Info($"Ugoira WebM already exists, skipped downloading {DownloadItemRef.Grab_PageURL}");
                             DLThreadsWaiting++;
                             return;
                         }

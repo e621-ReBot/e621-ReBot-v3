@@ -69,7 +69,7 @@ namespace e621_ReBot_v3
                             JObject JObjectTemp = JObject.Parse(JSONReponse);
                             if (JObjectTemp.Count > 32)
                             {
-                                Module_Credit.UserLevel = JObjectTemp["level"].Value<ushort>();
+                                Module_Credit.UserLevel = (ushort)JObjectTemp["level"];
                                 AppSettings.AppName = $"e621 ReBot ({AppSettings.UserName})";
                                 Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
                                 return true;

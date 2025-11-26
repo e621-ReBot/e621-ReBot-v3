@@ -57,7 +57,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             Dictionary<string, string> Posts2Grab = new Dictionary<string, string>();
             foreach (JToken JTokenTemp in MastodonsJSONHolder.Children())
             {
-                string URL2Post = JTokenTemp["url"].Value<string>();
+                string URL2Post = (string)JTokenTemp["url"];
 
                 if (Module_Grabber._GrabQueue_URLs.Contains(URL2Post))
                 {
@@ -107,12 +107,12 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            DateTime Post_DateTime = MastodonsJSON["created_at"].Value<DateTime>();
+            DateTime Post_DateTime = (DateTime)MastodonsJSON["created_at"];
 
-            string ArtistName = MastodonsJSON["account"]["username"].Value<string>();
+            string ArtistName = (string)MastodonsJSON["account"]["username"];
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(MastodonsJSON["content"].Value<string>());
+            HtmlDocumentTemp.LoadHtml((string)MastodonsJSON["content"]);
             HtmlNode Post_TextNode = HtmlDocumentTemp.DocumentNode;
             string? Post_Text = Module_Html2Text.Html2Text_Mastodon(Post_TextNode);
 
@@ -122,7 +122,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             ushort SkipCounter = 0;
             foreach (JToken MediaNode in MastodonsJSON["media_attachments"])
             {
-                Post_MediaURL = MediaNode["url"].Value<string>();
+                Post_MediaURL = (string)MediaNode["url"];
 
                 if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
@@ -130,7 +130,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     continue;
                 }
 
-                Post_ThumbnailURL = MediaNode["preview_url"].Value<string>();
+                Post_ThumbnailURL = (string)MediaNode["preview_url"];
 
                 MediaItem MediaItemTemp = new MediaItem
                 {
@@ -142,8 +142,8 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Grab_Title = $"Created by @{ArtistName}",
                     Grab_TextBody = Post_Text,
                     Grid_MediaFormat = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1),
-                    Grid_MediaWidth = MediaNode["meta"]["original"]["width"].Value<uint>(),
-                    Grid_MediaHeight = MediaNode["meta"]["original"]["height"].Value<uint>(),
+                    Grid_MediaWidth = (uint)MediaNode["meta"]["original"]["width"],
+                    Grid_MediaHeight = (uint)MediaNode["meta"]["original"]["height"],
                     Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL),
                     Grid_ThumbnailFullInfo = true,
                     UP_Tags = Post_DateTime.Year.ToString(),

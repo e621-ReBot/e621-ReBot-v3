@@ -260,8 +260,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         internal static void MD5_2_URL(JToken cPost, out string MediaURL, out string ThumbnailURL)
         {
-            string MD5 = cPost["file"]["md5"].Value<string>();
-            MediaURL = $"https://static1.e621.net/data/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.{cPost["file"]["ext"].Value<string>()}";
+            string MD5 = (string)cPost["file"]["md5"];
+            MediaURL = $"https://static1.e621.net/data/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.{(string)cPost["file"]["ext"]}";
             ThumbnailURL = $"https://static1.e621.net/data/preview/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.jpg";
         }
 
@@ -295,13 +295,13 @@ namespace e621_ReBot_v3.Modules.Downloader
             JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
             foreach (JToken cPost in JSON_Object.Children())
             {
-                List<string> TempTagList = CreateTagList(cPost["tags"], cPost["rating"].Value<string>());
+                List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
                 if (!Blacklist_Check(TempTagList))
                 {
                     string MediaURLTemp;
                     string ThumbnailURLTemp;
                     MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
-                    string PostID = cPost["id"].Value<string>();
+                    string PostID = (string)cPost["id"];
 
                     if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
@@ -309,7 +309,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         PageURL: $"https://e621.net/posts/{PostID}",
                         MediaURL: MediaURLTemp,
                         ThumbnailURL: ThumbnailURLTemp,
-                        MediaFormat: cPost["file"]["ext"].Value<string>(),
+                        MediaFormat: (string)cPost["file"]["ext"],
                         e6PostID: PostID,
                         e6PoolName: FolderName,
                         e6Tags: string.Join(' ', TempTagList),
@@ -340,7 +340,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
 
             JToken PoolJSON = JObject.Parse(JSON_PoolData);
-            string PoolName = PoolJSON["name"].Value<string>().Replace('_', ' ').Trim();
+            string PoolName = ((string)PoolJSON["name"]).Replace('_', ' ').Trim();
             PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\", PoolName);
 
@@ -387,14 +387,14 @@ namespace e621_ReBot_v3.Modules.Downloader
                     continue;
                 }
 
-                List<string> TempTagList = CreateTagList(cPost["tags"], cPost["rating"].Value<string>());
+                List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
 
-                string? PostID = cPost["id"].Value<string>();
+                string? PostID = (string?)cPost["id"];
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: $"https://e621.net/posts/{PostID}",
                     MediaURL: MediaURLTemp,
                     ThumbnailURL: ThumbnailURLTemp,
-                    MediaFormat: cPost["file"]["ext"].Value<string>(),
+                    MediaFormat: (string)cPost["file"]["ext"],
                     e6PostID: PostID,
                     e6PoolName: PoolName,
                     e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),

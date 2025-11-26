@@ -27,7 +27,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
                 JObject PostUris = JObject.Parse(HttpUtility.HtmlDecode(HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//main[@id='content']//div[@class='image-show-container']").Attributes["data-uris"].Value));
-                ThumbURL = PostUris["thumb"].Value<string>();
+                ThumbURL = (string?)PostUris["thumb"];
 
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: WebAddress,
@@ -50,12 +50,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                     foreach (HtmlNode Post in NodeSelector)
                     {
                         JObject PostUris = JObject.Parse(HttpUtility.HtmlDecode(Post.SelectSingleNode(".//div[@data-uris]").Attributes["data-uris"].Value));
-                        MediaURL = PostUris["full"].Value<string>();
+                        MediaURL = (string)PostUris["full"];
 
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
 
                         Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
-                        ThumbURL = PostUris["thumb"].Value<string>();
+                        ThumbURL = (string)PostUris["thumb"];
 
                         Module_Downloader.AddDownloadItem2Queue(
                             PageURL: WebAddress,

@@ -57,12 +57,12 @@ namespace e621_ReBot_v3
             ActionAfterDelayTimer.Tick += ActionAfterDelayTimer_Tick;
 
             if (Module_CookieJar.Cookies_Pixiv == null) Module_CookieJar.GetCookies("https://www.pixiv.net/", ref Module_CookieJar.Cookies_Pixiv);
-            UgoiraHttpClientHandler = new HttpClientHandler
+            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
             {
                 CookieContainer = Module_CookieJar.Cookies_Pixiv,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
-            UgoiraHttpClient = new HttpClient(UgoiraHttpClientHandler);
+            UgoiraHttpClient = new HttpClient(HttpClientHandlerTemp);
             UgoiraHttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
             UgoiraHttpClient.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net/");
 
@@ -182,7 +182,9 @@ namespace e621_ReBot_v3
         internal MediaItem? MediaItemHolder;
         internal void Nav2URL(MediaItem MediaItemRef)
         {
-            MediaBrowser.Stop();
+
+
+            if (MediaBrowser.IsBrowserInitialized) MediaBrowser.Stop(); //Error: "IBrowser instance is null" Null sometimes?
             if (MediaUgoiraPlayer._Loaded)
             {
                 MediaUgoiraPlayer.Visibility = Visibility.Hidden;
@@ -463,16 +465,16 @@ namespace e621_ReBot_v3
             if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
             JObject MD5CheckJSON = JObject.Parse(MD5Check);
-            MediaItemHolder.UP_UploadedID = MD5CheckJSON["post"]["id"].Value<string>();
+            MediaItemHolder.UP_UploadedID = (string)MD5CheckJSON["post"]["id"];
             AppSettings.MediaRecord_Add(MediaItemHolder);
 
-            MediaItemHolder.UP_Rating = MD5CheckJSON["post"]["rating"].Value<string>().ToUpper();
+            MediaItemHolder.UP_Rating = ((string)MD5CheckJSON["post"]["rating"]).ToUpper();
             List<string> TagList = new List<string>();
             foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
             {
                 foreach (JToken cTag in pTag.First)
                 {
-                    TagList.Add(cTag.Value<string>());
+                    TagList.Add((string)cTag);
                 }
             }
             ;
@@ -805,6 +807,7 @@ namespace e621_ReBot_v3
                Title: MediaItemHolder.Grab_Title,
                MediaFormat: MediaItemHolder.Grid_MediaFormat,
                MediaItemRef: MediaItemHolder);
+            Module_Downloader.UpdateDownloadTreeView();
         }
 
         private void PB_ViewFile_Click(object sender, RoutedEventArgs e)
@@ -873,7 +876,7 @@ namespace e621_ReBot_v3
             }
 
             JToken PostData = JObject.Parse(PostTest)["post"];
-            MediaItemHolder.UP_Rating = PostData["rating"].Value<string>().ToUpper();
+            MediaItemHolder.UP_Rating = ((string)PostData["rating"]).ToUpper();
             MediaItemHolder.UP_UploadedID = PostID;
 
             List<string> SortTags = new List<string>();
@@ -881,7 +884,7 @@ namespace e621_ReBot_v3
             {
                 foreach (JToken cTag in pTag.First)
                 {
-                    SortTags.Add(cTag.Value<string>());
+                    SortTags.Add((string)cTag);
                 }
             }
             SortTags.Sort();
@@ -889,7 +892,7 @@ namespace e621_ReBot_v3
             {
                 foreach (JToken pPool in PostData["pools"].Children())
                 {
-                    SortTags.Add($"pool:{pPool.Value<string>()}");
+                    SortTags.Add($"pool:{(string)pPool}");
                 }
             }
             MediaItemHolder.UP_Tags = string.Join(' ', SortTags);
@@ -930,13 +933,13 @@ namespace e621_ReBot_v3
             }
 
             JToken PostData = JObject.Parse(PostTest)["post"];
-            _RefHolder.MediaItemHolder.UP_Rating = PostData["rating"].Value<string>().ToUpper();
+            _RefHolder.MediaItemHolder.UP_Rating = ((string)PostData["rating"]).ToUpper();
             List<string> SortTags = new List<string>();
             foreach (JProperty pTag in PostData["tags"].Children())
             {
                 foreach (JToken cTag in pTag.First)
                 {
-                    SortTags.Add(cTag.Value<string>());
+                    SortTags.Add((string)cTag);
                 }
             }
             SortTags.Sort();
@@ -944,10 +947,10 @@ namespace e621_ReBot_v3
             {
                 foreach (JToken pPool in PostData["pools"].Children())
                 {
-                    SortTags.Add($"pool:{pPool.Value<string>()}");
+                    SortTags.Add($"pool:{(string)pPool}");
                 }
             }
-            string InferiorParentID = PostData["relationships"]["parent_id"].Value<string>();
+            string InferiorParentID = (string)PostData["relationships"]["parent_id"];
             if (InferiorParentID != null)
             {
                 SortTags.Add($"parent:{InferiorParentID}");
@@ -956,7 +959,7 @@ namespace e621_ReBot_v3
             MediaItemRef.UP_Tags = string.Join(' ', SortTags);
 
             MediaItemRef.UP_Inferior_ID = PostID;
-            string InferiorDescription = PostData["description"].Value<string>();
+            string InferiorDescription = (string)PostData["description"];
             string CurrentDescriptionConstruct = MediaItemRef.Grab_TextBody == null ? $"[code]{MediaItemRef.Grab_Title}[/code]" : $"[section,expanded={MediaItemRef.Grab_Title}]\n{MediaItemRef.Grab_TextBody}\n[/section]"; ;
             if (!string.IsNullOrEmpty(InferiorDescription) && !CurrentDescriptionConstruct.Contains(InferiorDescription))
             {
@@ -968,22 +971,22 @@ namespace e621_ReBot_v3
                 List<string> SourceList = new List<string>();
                 foreach (JToken cChild in PostData["sources"])
                 {
-                    SourceList.Add(cChild.Value<string>());
+                    SourceList.Add((string)cChild);
                 }
                 MediaItemRef.UP_Inferior_Sources = SourceList;
             }
 
-            if (PostData["relationships"]["has_children"].Value<bool>())
+            if ((bool)PostData["relationships"]["has_children"])
             {
                 List<string> ChildList = new List<string>();
                 foreach (JToken cChild in PostData["relationships"]["children"])
                 {
-                    ChildList.Add(cChild.Value<string>());
+                    ChildList.Add((string)cChild);
                 }
                 MediaItemRef.UP_Inferior_Children = ChildList;
             }
 
-            if (PostData["has_notes"].Value<bool>())
+            if ((bool)PostData["has_notes"])
             {
                 // when they fix api this should no longer take 2 requests to get notes
                 RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={PostID}", true));
@@ -996,7 +999,7 @@ namespace e621_ReBot_v3
                 if (!string.IsNullOrEmpty(PostTest) && !PostTest.StartsWith('ⓔ') && !PostTest.StartsWith('{'))
                 {
                     MediaItemRef.UP_Inferior_HasNotes = true;
-                    float NewNoteSizeRatio = Math.Max((float)MediaItemRef.Grid_MediaWidth, (float)MediaItemRef.Grid_MediaHeight) / Math.Max(PostData["file"]["width"].Value<uint>(), PostData["file"]["height"].Value<uint>());
+                    float NewNoteSizeRatio = Math.Max((float)MediaItemRef.Grid_MediaWidth, (float)MediaItemRef.Grid_MediaHeight) / Math.Max((uint)PostData["file"]["width"], (uint)PostData["file"]["height"]);
                     MediaItemRef.UP_Inferior_NoteSizeRatio = NewNoteSizeRatio;
                 }
             }
@@ -1073,7 +1076,6 @@ namespace e621_ReBot_v3
             PB_LoadAllMedia.Foreground = new SolidColorBrush(PB_LoadAllMedia.IsEnabled ? Colors.LightSteelBlue : Colors.Black);
         }
 
-        private readonly HttpClientHandler UgoiraHttpClientHandler;
         private readonly HttpClient UgoiraHttpClient;
         private async void PB_PlayUgoira_Click(object sender, RoutedEventArgs e)
         {
@@ -1081,19 +1083,19 @@ namespace e621_ReBot_v3
             panel_Navigation.IsEnabled = false;
 
             //Get Ugoira Data
-            string? UgoiraJSON = Module_FFMpeg.UgoiraJSONResponse(MediaItemHolder.Grab_PageURL);
+            string? UgoiraJSON = await Module_FFMpeg.UgoiraJSONResponse(MediaItemHolder.Grab_PageURL);
             JToken UgoiraJObject = JObject.Parse(UgoiraJSON)["body"];
 
             //Extract JSON Data
             List<WriteableBitmap> FrameFiles = new List<WriteableBitmap>();
-            List<int> FrameTimes = new List<int>();
+            List<uint> FrameTimes = new List<uint>();
             foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
             {
-                FrameTimes.Add(UgoiraFrame["delay"].Value<int>());
+                FrameTimes.Add((uint)UgoiraFrame["delay"]);
             }
 
             //Get Images
-            byte[] UgoiraBytes = await UgoiraHttpClient.GetByteArrayAsync(UgoiraJObject["originalSrc"].Value<string>());
+            byte[] UgoiraBytes = await UgoiraHttpClient.GetByteArrayAsync((string)UgoiraJObject["src"]); //originalSrc
             using (MemoryStream bytes2Stream = new MemoryStream(UgoiraBytes))
             {
                 using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))

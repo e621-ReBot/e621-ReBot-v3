@@ -122,7 +122,7 @@ namespace e621_ReBot_v3
             {
                 if (UpdateZipFile.SelectSingleNode("./span").InnerText.Trim().StartsWith("e621.ReBot-v3"))
                 {
-                    byte[] UpdateBytes = Module_Downloader.DownloadFileBytes($"https://github.com/{UpdateZipFile.Attributes["href"].Value}", ActionType.Update);
+                    byte[] UpdateBytes = Module_Downloader.DownloadFileBytes($"https://github.com/{UpdateZipFile.Attributes["href"].Value}", ActionType.Update).GetAwaiter().GetResult();
                     Directory.CreateDirectory("ReBotUpdate").Attributes = FileAttributes.Hidden;
                     using (MemoryStream bytes2Stream = new MemoryStream(UpdateBytes))
                     {

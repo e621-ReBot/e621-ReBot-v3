@@ -39,11 +39,11 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 foreach (JToken JTokenTemp in PixivJSON["body"].Children())
                 {
-                    MediaURL = JTokenTemp["urls"]["original"].Value<string>();
+                    MediaURL = (string)JTokenTemp["urls"]["original"];
 
                     if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
-                    ThumbURL = JTokenTemp["urls"]["thumb_mini"].Value<string>().Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
+                    ThumbURL = ((string)JTokenTemp["urls"]["thumb_mini"]).Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
                     Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
                     Module_Downloader.AddDownloadItem2Queue(

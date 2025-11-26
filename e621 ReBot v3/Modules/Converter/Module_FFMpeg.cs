@@ -6,8 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -50,7 +52,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFMpeg.StartInfo.UseShellExecute = false;
                 FFMpeg.StartInfo.RedirectStandardOutput = true;
                 //FFMpeg.StartInfo.RedirectStandardError = true;
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
 
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
@@ -126,7 +128,7 @@ namespace e621_ReBot_v3.Modules.Converter
                     if (!string.IsNullOrEmpty(e.Data))
                     {
                         string ReadLine = e.Data;
-                        if (VideoDuration == TimeSpan.Zero && ReadLine.Contains("Duration: "))
+                        if (VideoDuration == TimeSpan.Zero && ReadLine.StartsWith("  Duration: "))
                         {
                             //__Duration: 00:06:08.40, start: 0.000000, bitrate: 1000 kb/s
                             //or
@@ -134,32 +136,34 @@ namespace e621_ReBot_v3.Modules.Converter
                             //out_time_us = 123456789
                             //out_time_ms = 123456
                             //out_time = 00:02:03.456000
-                            VideoDuration = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf(": ") + 2, 11));
+                            VideoDuration = TimeSpan.Parse(ReadLine.Substring("  Duration: ".Length, 11));
                             return;
                         }
-                        if (ReadLine.StartsWith("frame= ", StringComparison.OrdinalIgnoreCase))
+                        if (ReadLine.StartsWith("frame= ") && !ReadLine.Contains("time=N/A")) //time=N/A why does it sometimes happen?
                         {
                             //frame= 1881 fps=139 q=24.0 size=   13568KiB time=00:01:15.16 bitrate=1478.8kbits/s speed=5.56x
                             //or
                             //frame=1234
                             TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring(ReadLine.IndexOf("time=") + 5, 11));
+
+                            double ProgressPercentage = CurrentTime.TotalMilliseconds / VideoDuration.TotalMilliseconds;
                             switch (ActionTypeEnum)
                             {
                                 case ActionType.Upload:
                                     {
-                                        Module_Uploader.Report_Status($"Converting Video to WebM...{(CurrentTime.TotalMilliseconds / VideoDuration.TotalMilliseconds):P0}");
+                                        Module_Uploader.Report_Status($"Converting Video to WebM...{ProgressPercentage:P0}");
                                         break;
                                     }
 
                                 case ActionType.Download:
                                     {
-                                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(CurrentTime.TotalMilliseconds / VideoDuration.TotalMilliseconds * 100d); });
+                                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ProgressPercentage * 100); });
                                         break;
                                     }
 
                                 case ActionType.Conversion:
                                     {
-                                        //ReportConversionProgress("CV", CurrentTime.TotalMilliseconds / VideoDuration.TotalMilliseconds, in DataRowRef);
+                                        //ReportConversionProgress("CV", ProgressPercentage, in DataRowRef);
                                         break;
                                     }
                             }
@@ -175,161 +179,209 @@ namespace e621_ReBot_v3.Modules.Converter
 
         // - - - - - - - - - - - - - - - - 
 
-        internal static string UgoiraJSONResponse(string Grab_URL)
+        internal static async Task<string> UgoiraJSONResponse(string Grab_URL)
         {
+            if (Module_Downloader._PixivClient == null) Module_Downloader.MakePixivClient();
             string WorkID = Grab_URL.Substring(Grab_URL.LastIndexOf('/') + 1);
             Module_CookieJar.GetCookies(Grab_URL, ref Module_CookieJar.Cookies_Pixiv);
-            HttpWebRequest PixivDownload = (HttpWebRequest)WebRequest.Create($"https://www.pixiv.net/ajax/illust/{WorkID}/ugoira_meta");
-            PixivDownload.CookieContainer = Module_CookieJar.Cookies_Pixiv;
-            PixivDownload.Timeout = 5000;
-            PixivDownload.UserAgent = AppSettings.GlobalUserAgent;
-            using (StreamReader PixivStreamReader = new StreamReader(PixivDownload.GetResponse().GetResponseStream()))
+            using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, $"https://www.pixiv.net/ajax/illust/{WorkID}/ugoira_meta");
+            using HttpResponseMessage HttpResponseMessageTemp = await Module_Downloader._PixivClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead);
+            HttpResponseMessageTemp.EnsureSuccessStatusCode();
+            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
+        }
+
+        private static async Task<int> DownloadUgoira(string PageURL, string MediaURL, string TempFolderPath, ActionType ActionTypEnum, ProgressBar ProgressBarRef = null)
+        {
+            string JSONResponse = await UgoiraJSONResponse(PageURL);
+            JToken UgoiraJObject = JObject.Parse(JSONResponse)["body"];
+
+            //Do a head check to see if last image exists as original
+            string URLBase = MediaURL.Remove(MediaURL.LastIndexOf('.') - 1); //want to turn "ugoira0." into "ugoira" only
+            string MediaExtension = Path.GetExtension(MediaURL); //includes the dot
+
+            int TotalUgoiraLength = 0;
+            int FrameCount = UgoiraJObject["frames"].Count();
+            StringBuilder UgoiraConcat = new StringBuilder();
+
+            using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Head, $"{URLBase}{FrameCount - 1}{MediaExtension}");
+            using HttpResponseMessage HttpResponseMessageTemp = await Module_Downloader._PixivClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead);
+            if (HttpResponseMessageTemp.IsSuccessStatusCode)
             {
-                return PixivStreamReader.ReadToEnd();
+                float MultiDLFactor = 1f / FrameCount;
+                float MultiProgressBase = 0;
+                for (int x = 0; x < FrameCount; x++)
+                {
+                    string NewURL = $"{URLBase}{x}{MediaExtension}";
+                    string FileName = Path.GetFileName(NewURL);
+
+                    //download each file
+                    byte[] TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef, MultiDLFactor, MultiProgressBase);
+                    Module_Downloader.SaveFileBytes(TempBytes, FileName, TempFolderPath);
+                    MultiProgressBase += MultiDLFactor;
+
+                    UgoiraConcat.AppendLine($"file {FileName}"); // FFmpeg wants / instead of \
+                    int FrameDelay = (int)UgoiraJObject["frames"][x]["delay"];
+                    UgoiraConcat.AppendLine($"duration {FrameDelay / 1000d}");
+                    TotalUgoiraLength += FrameDelay;
+
+                    await Task.Delay(500);
+                }
             }
+            else
+            {
+                if (HttpResponseMessageTemp.StatusCode == HttpStatusCode.NotFound)
+                {
+                    string NewURL = (string)UgoiraJObject["originalSrc"];
+                    string FileName = Path.GetFileName(NewURL);
+
+                    //download zip
+                    byte[] TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef);
+                    //extract zip
+                    Module_Downloader.SaveFileBytes(TempBytes, FileName, TempFolderPath);
+
+                    foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
+                    {
+                        UgoiraConcat.AppendLine($"file {(string)UgoiraFrame["file"]}"); // FFmpeg wants / instead of \
+                        UgoiraConcat.AppendLine($"duration {(int)UgoiraFrame["delay"] / 1000d}");
+                        TotalUgoiraLength += (int)UgoiraFrame["delay"];
+                    }
+                }
+                else
+                {
+                    throw new Exception($"HTTP error {HttpResponseMessageTemp.StatusCode}");
+                }
+            }
+
+            File.WriteAllText(Path.Combine(TempFolderPath, "input.txt"), UgoiraConcat.ToString());
+
+            return TotalUgoiraLength;
         }
 
         // - - - - - - - - - - - - - - - -
 
-        internal static void UploadQueue_Ugoira2WebM(string Grab_URL, out byte[] bytes2Send, out string FileName, out string ExtraSourceURL)
+        internal static void UploadQueue_Ugoira2WebM(string Grab_URL, out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
         {
-            JToken UgoiraJObject = JObject.Parse(UgoiraJSONResponse(Grab_URL))["body"];
+            //Get FileName
+            string UgoiraFileName = Path.GetFileNameWithoutExtension(ExtraSourceURL);
+            UgoiraFileName = UgoiraFileName.TrimEnd('0'); ; //turn "ugoira0" into "ugoira"
 
-            string UgoiraFileName = UgoiraJObject["originalSrc"].Value<string>();
-            ExtraSourceURL = UgoiraFileName;
-            UgoiraFileName = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('/') + 1);
-            UgoiraFileName = UgoiraFileName.Substring(0, UgoiraFileName.LastIndexOf('.'));
+            //check if file exists as download before doing separate dl and conversion?
 
-            int TotalUgoiraLength = 0;
-            StringBuilder UgoiraConcat = new StringBuilder();
-            foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
-            {
-                UgoiraConcat.AppendLine($"file {UgoiraFileName}.zip/{UgoiraFrame["file"].Value<string>()}"); // FFmpeg wants / instead of \
-                UgoiraConcat.AppendLine($"duration {UgoiraFrame["delay"].Value<int>() / 1000d}");
-                TotalUgoiraLength += UgoiraFrame["delay"].Value<int>();
-            }
-            if (Directory.Exists("FFMpegTemp\\Upload"))
-            {
-                Directory.Delete("FFMpegTemp\\Upload", true);
-            }
-            Directory.CreateDirectory("FFMpegTemp\\Upload").Attributes = FileAttributes.Hidden;
-            File.WriteAllText(@"FFMpegTemp\\Upload\input.txt", UgoiraConcat.ToString());
+            //Make temp work folder for Ugoira job
+            string TempFolderName = Path.Combine("FFMpegTemp", "Upload");
+            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
-            byte[] TempBytes = Module_Downloader.DownloadFileBytes(UgoiraJObject["originalSrc"].Value<string>(), ActionType.Upload);
-            Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{UgoiraFileName}.zip");
+            //Download the images, either originals or samples from zip
+            int TotalUgoiraLength = DownloadUgoira(Grab_URL, ExtraSourceURL, TempFolderName, ActionType.Upload).GetAwaiter().GetResult();
 
+            //Convert to Webm
             Module_Uploader.Report_Status("Converting Ugoira to WebM...");
-            FFMpeg4Ugoira(ActionType.Upload, "FFMpegTemp\\Upload", "FFMpegTemp\\Upload", UgoiraFileName, TotalUgoiraLength);
+            FFMpeg4Ugoira(ActionType.Upload, TempFolderName, TempFolderName, UgoiraFileName, TotalUgoiraLength);
             Module_Uploader.Report_Status("Converting Ugoira to WebM...100%");
             Window_Main._RefHolder.UploadQueueProcess = null;
 
+            //Read bytes for upload
             FileName = $"{UgoiraFileName}.webm";
-            bytes2Send = File.ReadAllBytes($"FFMpegTemp\\Upload\\{FileName}");
-            Directory.Delete("FFMpegTemp\\Upload", true);
+            bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
+
+            //Delete temp work folder
+            Directory.Delete(TempFolderName, true);
         }
 
         internal static void UploadQueue_Videos2WebM(out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
         {
-            string WorkURL = ExtraSourceURL;
-
-            string VideoFileName = WorkURL.Substring(WorkURL.LastIndexOf('/') + 1);
+            //Get FileName
+            string VideoFileName = Path.GetFileName(ExtraSourceURL);
             string VideoFormat = VideoFileName.Substring(VideoFileName.LastIndexOf('.') + 1);
             VideoFileName = VideoFileName.Substring(0, VideoFileName.LastIndexOf('.'));
 
-            if (Directory.Exists("FFMpegTemp\\Upload")) Directory.Delete("FFMpegTemp\\Upload", true);
-            Directory.CreateDirectory("FFMpegTemp\\Upload").Attributes = FileAttributes.Hidden;
+            //Make temp work folder for job
+            string TempFolderName = Path.Combine("FFMpegTemp", "Upload");
+            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
+            //Download the video
             ushort RetryCount = 0;
-            byte[] TempBytes;
-            do
+            byte[] TempBytes = Array.Empty<byte>();
+            while (RetryCount < 3)
             {
                 RetryCount++;
-                TempBytes = Module_Downloader.DownloadFileBytes(WorkURL, ActionType.Upload);
-                if (TempBytes.Length == 0)
-                {
-                    Thread.Sleep(500);
-                    continue;
-                }
-                Module_Downloader.SaveFileBytes(ActionType.Upload, TempBytes, $"{VideoFileName}.{VideoFormat}");
-                RetryCount = 69;
-            } while (RetryCount < 4);
-
+                TempBytes = Module_Downloader.DownloadFileBytes(ExtraSourceURL, ActionType.Upload).GetAwaiter().GetResult();
+                if (TempBytes.Length > 0) break;
+                Thread.Sleep(500);
+            }
             if (TempBytes.Length == 0)
             {
                 throw new Exception("0 bytes error @Upload Video");
             }
+            Module_Downloader.SaveFileBytes(TempBytes, $"{VideoFileName}.{VideoFormat}", TempFolderName);
 
+            //Convert to Webm
             Module_Uploader.Report_Status($"Converting Video to WebM...");
-            FFMpeg4Video(ActionType.Upload, "FFMpegTemp\\Upload", VideoFileName, VideoFormat, "FFMpegTemp\\Upload");
+            FFMpeg4Video(ActionType.Upload, TempFolderName, VideoFileName, VideoFormat, TempFolderName);
             Module_Uploader.Report_Status($"Converting Video to WebM...100%");
             Window_Main._RefHolder.UploadQueueProcess = null;
 
+            //Read bytes for upload
             FileName = $"{VideoFileName}.webm";
-            bytes2Send = File.ReadAllBytes($"FFMpegTemp\\Upload\\{FileName}");
-            Directory.Delete("FFMpegTemp\\Upload", true);
+            bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
+
+            //Delete temp work folder
+            Directory.Delete(TempFolderName, true);
         }
 
         // - - - - - - - - - - - - - - - -
 
-        internal static void DownloadQueue_Ugoira2WebM(DownloadVE DownloadVERef)
+        internal static async Task DownloadQueue_Ugoira2WebM(DownloadVE DownloadVERef)
         {
-            Uri DomainURL = new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
-            HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
+            //Get FileName
+            string UgoiraFileName = Path.GetFileNameWithoutExtension(DownloadVERef._DownloadItemRef.Grab_MediaURL);
+            UgoiraFileName = UgoiraFileName.TrimEnd('0'); ; //turn "ugoira0" into "ugoira"
 
-            JToken UgoiraJObject = JObject.Parse(UgoiraJSONResponse(DownloadVERef._DownloadItemRef.Grab_PageURL))["body"];
-
-            string UgoiraFileName = UgoiraJObject["originalSrc"].Value<string>();
-            UgoiraFileName = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('/') + 1);
-            UgoiraFileName = UgoiraFileName.Substring(0, UgoiraFileName.LastIndexOf('.'));
-
+            //Get Artist for folder name
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+
+            //Get Host for folder name
+            string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
+
+            //Make Download path and folder
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
-            string FullFilePath = $"{FolderPath}\\{UgoiraFileName}.webm";
-            bool SkippedConvert = false;
+            //Check if file already exist, if it does skip the task
+            string FullFilePath = Path.Combine(FolderPath, $"{UgoiraFileName}.webm");
             if (File.Exists(FullFilePath))
             {
-                SkippedConvert = true;
-                goto SkipDLandConvert;
+                //Report task finish
+                Module_Converter.Report_Info($"Ugoira WebM already exists, skipped coverting {DownloadVERef._DownloadItemRef.Grab_MediaURL}");
+                if (DownloadVERef._DownloadItemRef.MediaItemRef != null)
+                {
+                    DownloadVERef._DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
+                }
+                DownloadQueue_ConvertFinished(DownloadVERef, FullFilePath);
+                return;
             }
 
-            int TotalUgoiraLength = 0;
-            StringBuilder UgoiraConcat = new StringBuilder();
-            foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
-            {
-                UgoiraConcat.AppendLine($"file {UgoiraFrame["file"].Value<string>()}"); // FFmpeg wants / instead of \
-                UgoiraConcat.AppendLine($"duration {UgoiraFrame["delay"].Value<int>() / 1000d}");
-                TotalUgoiraLength += UgoiraFrame["delay"].Value<int>();
-            }
-            string TempFolderName = $"FFMpegTemp\\{UgoiraFileName}";
+            //Make temp work folder for Ugoira job
+            string TempFolderName = Path.Combine("FFMpegTemp", UgoiraFileName);
             if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
-            File.WriteAllText($"{TempFolderName}\\input.txt", UgoiraConcat.ToString());
 
-            byte[] TempBytes = Module_Downloader.DownloadFileBytes(UgoiraJObject["originalSrc"].Value<string>(), ActionType.Download, DownloadVERef.DownloadProgress);
-            Module_Downloader.SaveFileBytes(ActionType.Download, TempBytes, UgoiraFileName, FolderPath);
+            //Download the images, either originals or samples from zip
+            int TotalUgoiraLength = await DownloadUgoira(DownloadVERef._DownloadItemRef.Grab_PageURL, DownloadVERef._DownloadItemRef.Grab_MediaURL, TempFolderName, ActionType.Download, DownloadVERef.DownloadProgress);
 
-            string OriginalVideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
+            //check for 0 error here?
+
+            //Convert to Webm
             FFMpeg4Ugoira(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, TotalUgoiraLength, DownloadVERef.ConversionProgress);
+
+            //Delete temp work folder
             Directory.Delete(TempFolderName, true);
 
-            if (DownloadVERef._DownloadItemRef.MediaItemRef != null)
-            {
-                DownloadVERef._DownloadItemRef.MediaItemRef.UP_Tags += $"{(TotalUgoiraLength < 30000 ? " short_playtime" : " long_playtime")} animated no_sound webm";
-            }
-
-        SkipDLandConvert:
-            if (SkippedConvert)
-            {
-                Module_Converter.Report_Info($"Ugoira WebM already exists, skipped coverting {DownloadVERef._DownloadItemRef.Grab_MediaURL}");
-            }
-            else
-            {
-                Module_Converter.Report_Info($"Converted Ugoira from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
-            }
+            //Report task finish
+            Module_Converter.Report_Info($"Converted Ugoira from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
             //Form_Loader._FormReference.BeginInvoke(new Action(() =>
             //{
             //    if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, GridDataRow))
@@ -339,52 +391,61 @@ namespace e621_ReBot_v3.Modules.Converter
             //}));
             if (DownloadVERef._DownloadItemRef.MediaItemRef != null)
             {
+                DownloadVERef._DownloadItemRef.MediaItemRef.UP_Tags += $"{(TotalUgoiraLength < 30000 ? " short_playtime" : " long_playtime")} animated no_sound webm";
                 DownloadVERef._DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
             }
             DownloadQueue_ConvertFinished(DownloadVERef, FullFilePath);
         }
 
-        internal static void DownloadQueue_Video2WebM(DownloadVE DownloadVERef)
+        internal static async Task DownloadQueue_Video2WebM(DownloadVE DownloadVERef)
         {
-            Uri DomainURL = new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL);
-            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
-            HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
-
+            //Get FileName
             string VideoFileName = Module_Downloader.MediaFile_GetFileNameOnly(DownloadVERef._DownloadItemRef.Grab_MediaURL, DownloadVERef._DownloadItemRef.Grab_MediaFormat);
             string VideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
+
+            //Get Artist for folder name
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = Path.GetInvalidFileNameChars().Aggregate(PurgeArtistName, (current, c) => current.Replace(c.ToString(), null));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+
+            //Get Host for folder name
+            string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
+
+            //Make Download path and folder
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
-            string FullFilePath = $"{FolderPath}\\{VideoFileName}.webm";
-            bool SkippedConvert = false;
+            //Check if file already exist, if it does skip the task
+            string FullFilePath = Path.Combine(FolderPath, $"{VideoFileName}.webm");
             if (File.Exists(FullFilePath))
             {
-                SkippedConvert = true;
-                goto SkipDLandConvert;
+                //Report task finish
+                Module_Converter.Report_Info($"Video WebM already exists, skipped coverting {DownloadVERef._DownloadItemRef.Grab_MediaURL}");
+                if (DownloadVERef._DownloadItemRef.MediaItemRef != null)
+                {
+                    DownloadVERef._DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
+                }
+                DownloadQueue_ConvertFinished(DownloadVERef, FullFilePath);
             }
 
-            string TempFolderName = $"FFMpegTemp\\{VideoFileName}";
+            //Make temp work folder for job
+            string TempFolderName = Path.Combine("FFMpegTemp", VideoFileName);
             if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
-            byte[] TempBytes = Module_Downloader.DownloadFileBytes(DownloadVERef._DownloadItemRef.Grab_MediaURL, ActionType.Download, DownloadVERef.DownloadProgress);
-            Module_Downloader.SaveFileBytes(ActionType.Download, TempBytes, VideoFileName, FolderPath);
+            //Download the video
+            byte[] TempBytes = await Module_Downloader.DownloadFileBytes(DownloadVERef._DownloadItemRef.Grab_MediaURL, ActionType.Download, DownloadVERef.DownloadProgress);
+            Module_Downloader.SaveFileBytes(TempBytes, VideoFileName, FolderPath);
 
+            //Convert to Webm
             string OriginalVideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
             FFMpeg4Video(ActionType.Download, TempFolderName, VideoFileName, OriginalVideoFormat, FolderPath, DownloadVERef.ConversionProgress);
+
+
+            //Delete temp work folder
             Directory.Delete(TempFolderName, true);
 
-        SkipDLandConvert:
-            if (SkippedConvert)
-            {
-                Module_Converter.Report_Info($"Video WebM already exists, skipped coverting {DownloadVERef._DownloadItemRef.Grab_MediaURL}");
-            }
-            else
-            {
-                Module_Converter.Report_Info($"Converted Video from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
-            }
+            //Report task finish
+            Module_Converter.Report_Info($"Converted Video from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
             //Form_Loader._FormReference.BeginInvoke(new Action(() =>
             //{
             //    if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, GridDataRow))
@@ -433,11 +494,10 @@ namespace e621_ReBot_v3.Modules.Converter
 
         internal static void DragDropConvert(string VideoPath)
         {
-            string VideoFileName = VideoPath.Substring(VideoPath.LastIndexOf('\\') + 1);
-            VideoFileName = VideoFileName.Substring(0, VideoFileName.LastIndexOf('.'));
+            string VideoFileName = Path.GetFileNameWithoutExtension(VideoPath);
 
             string FullFolderPath = Path.GetDirectoryName(VideoPath);
-            string FullFilePath = $"{FullFolderPath}\\{VideoFileName}.webm";
+            string FullFilePath = Path.Combine(FullFolderPath, $"{VideoFileName}.webm");
 
             if (File.Exists(FullFilePath))
             {

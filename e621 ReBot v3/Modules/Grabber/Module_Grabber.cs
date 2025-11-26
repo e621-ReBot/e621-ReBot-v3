@@ -474,16 +474,14 @@ namespace e621_ReBot_v3.Modules
             Grab_3Finish();
         }
 
-        private static readonly Dictionary<CookieContainer, HttpClientHandler> HandlerList = new Dictionary<CookieContainer, HttpClientHandler>();
         private static readonly Dictionary<CookieContainer, HttpClient> ClientList = new Dictionary<CookieContainer, HttpClient>();
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
         internal static async Task<string?> GetPageSource(string WebAddress, CookieContainer CookieRef, bool NewgroundsSpecialRequest = false)
         {
             HttpClientHandler? HandlerFinder;
             HttpClient? ClientFinder;
-            if (HandlerList.ContainsKey(CookieRef))
+            if (ClientList.ContainsKey(CookieRef))
             {
-                HandlerFinder = HandlerList[CookieRef];
                 ClientFinder = ClientList[CookieRef];
             }
             else
@@ -495,7 +493,6 @@ namespace e621_ReBot_v3.Modules
                 };
                 ClientFinder = new HttpClient(HandlerFinder);
                 ClientFinder.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                HandlerList.Add(CookieRef, HandlerFinder);
                 ClientList.Add(CookieRef, ClientFinder);
             }
 

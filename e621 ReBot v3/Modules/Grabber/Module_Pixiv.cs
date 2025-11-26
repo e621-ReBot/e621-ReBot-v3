@@ -183,9 +183,9 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             JObject PixivJSON = JObject.Parse(JSONSource);
 
-            if (PixivJSON["error"].Value<bool>())
+            if ((bool)PixivJSON["error"])
             {
-                Module_Grabber.Report_Info($"Error=true in JSON encountered in Module_Pixiv.Grab [@{WebAddress}], message: {PixivJSON["message"].Value<string>()}");
+                Module_Grabber.Report_Info($"Error=true in JSON encountered in Module_Pixiv.Grab [@{WebAddress}], message: {(string)PixivJSON["message"]}");
 
                 lock (Module_Grabber._GrabQueue_WorkingOn)
                 {
@@ -199,25 +199,25 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            DateTime Post_DateTime = PixivJSON["body"]["createDate"].Value<DateTime>();
+            DateTime Post_DateTime = (DateTime)PixivJSON["body"]["createDate"];
 
-            string Post_Title = PixivJSON["body"]["illustTitle"].Value<string>();
+            string Post_Title = (string)PixivJSON["body"]["illustTitle"];
             Post_Title = WebUtility.HtmlDecode(Post_Title.Replace('[', '⟦').Replace(']', '⟧'));
 
-            string ArtistName = PixivJSON["body"]["userName"].Value<string>();
+            string ArtistName = (string)PixivJSON["body"]["userName"];
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(PixivJSON["body"]["illustComment"].Value<string>());
+            HtmlDocumentTemp.LoadHtml((string)PixivJSON["body"]["illustComment"]);
             HtmlNode Post_TextNode = HtmlDocumentTemp.DocumentNode;
             string? Post_Text = Module_Html2Text.Html2Text_Pixiv(Post_TextNode);
 
-            int PicCount = PixivJSON["body"]["pageCount"].Value<int>();
+            int PicCount = (int)PixivJSON["body"]["pageCount"];
             string Post_MediaURL;
             List<MediaItem> MediaItemList = new List<MediaItem>();
             ushort SkipCounter = 0;
             if (PicCount == 1)
             {
-                Post_MediaURL = PixivJSON["body"]["urls"]["original"].Value<string>();
+                Post_MediaURL = (string)PixivJSON["body"]["urls"]["original"];
 
                 if (Post_MediaURL == null)
                 {
@@ -227,7 +227,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, PixivJSON["body"]["urls"]["thumb"].Value<string>(), Post_DateTime, ArtistName, Post_Title, Post_Text, PixivJSON["body"]["width"].Value<uint>(), PixivJSON["body"]["height"].Value<uint>()));
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, (string)PixivJSON["body"]["urls"]["thumb"], Post_DateTime, ArtistName, Post_Title, Post_Text, (uint)PixivJSON["body"]["width"], (uint)PixivJSON["body"]["height"]));
                 }
                 else
                 {
@@ -252,7 +252,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 {
                     MediaCounter++;
                     Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
-                    Post_MediaURL = JSONPages["body"][p]["urls"]["original"].Value<string>();
+                    Post_MediaURL = (string)JSONPages["body"][p]["urls"]["original"];
 
                     if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
@@ -260,8 +260,8 @@ namespace e621_ReBot_v3.Modules.Grabber
                         continue;
                     }
 
-                    string Post_ThumbnailURL = JSONPages["body"][p]["urls"]["thumb_mini"].Value<string>().Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text, JSONPages["body"][p]["width"].Value<ushort>(), JSONPages["body"][p]["height"].Value<ushort>()));
+                    string Post_ThumbnailURL = ((string)JSONPages["body"][p]["urls"]["thumb_mini"]).Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text, (uint)JSONPages["body"][p]["width"], (uint)JSONPages["body"][p]["height"]));
                     Thread.Sleep(Module_Grabber.PauseBetweenImages);
                 }
                 Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);

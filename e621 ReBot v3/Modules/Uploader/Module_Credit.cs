@@ -94,13 +94,13 @@ namespace e621_ReBot_v3.Modules
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JObject UserJObject = JObject.Parse(JSON_UserInfo);
-                UserLevel = UserJObject["level"].Value<ushort>();
+                UserLevel = (ushort)UserJObject["level"];
 
-                CanReplace = UserJObject["replacements_beta"].Value<bool>();
+                CanReplace = (bool)UserJObject["replacements_beta"];
 
-                Credit_UploadTotal = UserJObject["upload_limit"].Value<ushort>();
+                Credit_UploadTotal = (ushort)UserJObject["upload_limit"];
 
-                AppSettings.UserName = UserJObject["name"].Value<string>(); //In case user changes name
+                AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 
                 RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}"));
                 lock (Module_e621APIController.BackgroundTasks)
@@ -114,7 +114,7 @@ namespace e621_ReBot_v3.Modules
                 JObject PostHistory = JObject.Parse(JSON_UserInfo);
                 foreach (JObject UploadedPost in PostHistory["posts"])
                 {
-                    DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    DateTime TempTime = ((DateTime)UploadedPost["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)
                     {
                         break;
@@ -138,7 +138,7 @@ namespace e621_ReBot_v3.Modules
                 JArray PostHistoryArray = JArray.Parse(JSON_UserInfo);
                 foreach (JObject UploadedPost in PostHistoryArray)
                 {
-                    DateTime TempTime = UploadedPost["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    DateTime TempTime = ((DateTime)UploadedPost["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)
                     {
                         break;
@@ -171,7 +171,7 @@ namespace e621_ReBot_v3.Modules
                 JArray FlagHistory = JArray.Parse(JSON_UserInfo);
                 for (int x = 0; x <= 10; x++)
                 {
-                    DateTime TempTime = FlagHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    DateTime TempTime = ((DateTime)FlagHistory[x]["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)
                     {
                         break;
@@ -203,7 +203,7 @@ namespace e621_ReBot_v3.Modules
                 JArray NoteHistory = JArray.Parse(JSON_UserInfo);
                 for (int x = 0; x <= 50; x++)
                 {
-                    DateTime TempTime = NoteHistory[x]["created_at"].Value<DateTime>().ToUniversalTime().AddHours(1);
+                    DateTime TempTime = ((DateTime)NoteHistory[x]["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)
                         break;
                     else

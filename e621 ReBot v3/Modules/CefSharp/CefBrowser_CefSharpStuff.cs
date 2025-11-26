@@ -9,7 +9,6 @@ using e621_ReBot_v3.Modules.Grabber;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -250,11 +249,11 @@ namespace CefSharp
                                         //clear duplicates, happens rarely
                                         if (Module_Twitter.TwitterJSONHolder.Count > 1)
                                         {
-                                            //Module_Twitter.TwitterJSONHolder.OrderBy(token => token["id_str"].Value<uint>());
+                                            //Module_Twitter.TwitterJSONHolder.OrderBy(token => (uint)token["id_str"]);
                                             List<string> TweetIDList = new List<string>();
                                             for (int i = Module_Twitter.TwitterJSONHolder.Count - 1; i >= 0; i--)
                                             {
-                                                string TweetID = Module_Twitter.TwitterJSONHolder[i]["id_str"].Value<string>();
+                                                string TweetID = (string)Module_Twitter.TwitterJSONHolder[i]["id_str"];
                                                 if (TweetIDList.Contains(TweetID))
                                                 {
                                                     Module_Twitter.TwitterJSONHolder.RemoveAt(i);
@@ -393,7 +392,7 @@ namespace CefSharp
                                             List<string> ItakuIDList = new List<string>();
                                             for (int i = Module_Itaku.ItakuMultiJSONHolder.Count - 1; i >= 0; i--)
                                             {
-                                                string ItakuID = Module_Itaku.ItakuMultiJSONHolder[i]["id"].Value<string>();
+                                                string ItakuID = (string)Module_Itaku.ItakuMultiJSONHolder[i]["id"];
                                                 if (ItakuIDList.Contains(ItakuID))
                                                 {
                                                     Module_Itaku.ItakuMultiJSONHolder.RemoveAt(i);
