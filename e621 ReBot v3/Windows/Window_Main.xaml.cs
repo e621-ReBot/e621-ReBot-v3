@@ -830,7 +830,12 @@ namespace e621_ReBot_v3
                 {
                     for (int i = 0; i < DifferenceRequired; i++)
                     {
-                        Download_DownloadVEPanel.Children.Add(new DownloadVE());
+                        DownloadVE DownloadVETemp = new DownloadVE();
+                        lock (_DownloadVEList)
+                        {
+                            _DownloadVEList.Add(DownloadVETemp);
+                        }
+                        Download_DownloadVEPanel.Children.Add(DownloadVETemp);
                         Module_Downloader.DLThreadsWaiting++;
                     }
                 }
@@ -842,7 +847,12 @@ namespace e621_ReBot_v3
                         {
                             for (int i = Download_DownloadVEPanel.Children.Count - 1; i >= 0; i--)
                             {
-                                Download_DownloadVEPanel.Children.RemoveAt(i);
+                                DownloadVE DownloadVETemp = (DownloadVE)Download_DownloadVEPanel.Children[i];
+                                lock (_DownloadVEList)
+                                {
+                                    _DownloadVEList.Remove(DownloadVETemp);
+                                }
+                                Download_DownloadVEPanel.Children.Remove(DownloadVETemp);
                                 Module_Downloader.DLThreadsWaiting--;
                                 DifferenceRequired++;
                                 if (DifferenceRequired == 0) break;
@@ -855,7 +865,12 @@ namespace e621_ReBot_v3
                         {
                             for (int i = Download_DownloadVEPanel.Children.Count - 1; i >= 0; i--)
                             {
-                                Download_DownloadVEPanel.Children.RemoveAt(i);
+                                DownloadVE DownloadVETemp = (DownloadVE)Download_DownloadVEPanel.Children[i];
+                                lock (_DownloadVEList)
+                                {
+                                    _DownloadVEList.Remove(DownloadVETemp);
+                                }
+                                Download_DownloadVEPanel.Children.Remove(DownloadVETemp);
                                 Module_Downloader.DLThreadsWaiting--;
                                 DifferenceRequired++;
                                 if (DifferenceRequired == 0) break;
@@ -866,6 +881,7 @@ namespace e621_ReBot_v3
             }
         }
 
+        internal List<DownloadVE> _DownloadVEList = new List<DownloadVE>();
         private void Download_DownloadVEPanel_LayoutUpdated(object sender, EventArgs e)
         {
             for (int i = 0; i < Download_DownloadVEPanel.Children.Count; i++)

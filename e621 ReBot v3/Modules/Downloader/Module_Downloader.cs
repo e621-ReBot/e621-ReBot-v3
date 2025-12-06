@@ -622,7 +622,7 @@ namespace e621_ReBot_v3.Modules
 
         private static DownloadVE? FindDownloadVE()
         {
-            foreach (DownloadVE DownloadVETemp in Window_Main._RefHolder.Download_DownloadVEPanel.Children)
+            foreach (DownloadVE DownloadVETemp in Window_Main._RefHolder._DownloadVEList)
             {
                 if (DownloadVETemp._DownloadFinished && DownloadVETemp._AlreadyCopied)
                 {
@@ -995,7 +995,11 @@ namespace e621_ReBot_v3.Modules
                     DownloadVETemp = (DownloadVE?)Window_Main._RefHolder.Download_DownloadVEPanel.Children[i];
                     if (DownloadVETemp._DownloadFinished && DownloadVETemp._AlreadyCopied)
                     {
-                        Window_Main._RefHolder.Download_DownloadVEPanel.Children.RemoveAt(i);
+                        lock (Window_Main._RefHolder._DownloadVEList)
+                        {
+                            Window_Main._RefHolder._DownloadVEList.Remove(DownloadVETemp);
+                        }
+                        Window_Main._RefHolder.Download_DownloadVEPanel.Children.Remove(DownloadVETemp);
                         DLThreadsWaiting--;
                         DifferenceRequired++;
                         if (DifferenceRequired == 0) break;
@@ -1028,25 +1032,30 @@ namespace e621_ReBot_v3.Modules
             while (DLThreadsWaiting > 0 && _2Download_DownloadItems.Count > 0)
             {
                 DownloadItemTemp = _2Download_DownloadItems[0];
-                lock (_2Download_DownloadItems)
-                {
-                    _2Download_DownloadItems.RemoveAt(0);
-                }
+                bool DownloadStarted = false;
 
                 DLThreadsWaiting--;
                 if (DownloadItemTemp.Is_e6Download)
                 {
-                    DownloadFrom_e6URL(DownloadItemTemp);
+                    DownloadStarted = DownloadFrom_e6URL(DownloadItemTemp);
                 }
                 else
                 {
-                    DownloadFrom_URL(DownloadItemTemp);
+                    DownloadStarted = DownloadFrom_URL(DownloadItemTemp);
+                }
+
+                if (DownloadStarted)
+                {
+                    lock (_2Download_DownloadItems)
+                    {
+                        _2Download_DownloadItems.RemoveAt(0);
+                    }
                 }
             }
             UpdateDownloadTreeView();
         }
 
-        private static void DownloadFrom_e6URL(DownloadItem DownloadItemRef)
+        private static bool DownloadFrom_e6URL(DownloadItem DownloadItemRef)
         {
             string PicURL = DownloadItemRef.Grab_MediaURL;
 
@@ -1087,12 +1096,18 @@ namespace e621_ReBot_v3.Modules
             if (File.Exists(FilePath))
             {
                 DLThreadsWaiting++;
-                return; // Don't need duplicates
+                return true; // Don't need duplicates
             }
 
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            DownloadVE? DownloadVETemp = FindDownloadVE();
+            if (DownloadVETemp == null) //Not found somehow
             {
-                DownloadVE DownloadVETemp = FindDownloadVE();
+                DLThreadsWaiting++;
+                return false;
+            }
+
+            Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+            {
                 DownloadVETemp._DownloadItemRef = DownloadItemRef;
                 DownloadVETemp.FolderIcon.Tag = FilePath;
                 DownloadVETemp.DownloadStartup();
@@ -1105,10 +1120,12 @@ namespace e621_ReBot_v3.Modules
                     Download_StartDLClient(DownloadVETemp, "Thumb");
                 }
                 Download_StartDLClient(DownloadVETemp, "File");
-            });
+            }).Task.Wait();
+
+            return true;
         }
 
-        private static void DownloadFrom_URL(DownloadItem DownloadItemRef)
+        private static bool DownloadFrom_URL(DownloadItem DownloadItemRef)
         {
             //Get Artist for folder name
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
@@ -1139,12 +1156,18 @@ namespace e621_ReBot_v3.Modules
                         {
                             Report_Info($"Ugoira WebM already exists, skipped downloading {DownloadItemRef.Grab_PageURL}");
                             DLThreadsWaiting++;
-                            return;
+                            return true;
                         }
 
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        DownloadVE? DownloadVETemp = FindDownloadVE();
+                        if (DownloadVETemp == null) //Not found somehow
                         {
-                            DownloadVE DownloadVETemp = FindDownloadVE();
+                            DLThreadsWaiting++;
+                            return false;
+                        }
+
+                        Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+                        {
                             DownloadVETemp._DownloadItemRef = DownloadItemRef;
                             DownloadVETemp.FolderIcon.Tag = FilePath;
                             DownloadVETemp.DownloadStartup();
@@ -1169,7 +1192,8 @@ namespace e621_ReBot_v3.Modules
                                 }
                             }
                             ThreadPool.QueueUserWorkItem(state => Module_FFMpeg.DownloadQueue_Ugoira2WebM(DownloadVETemp));
-                        });
+                        }).Task.Wait();
+
                         break;
                     }
 
@@ -1185,12 +1209,18 @@ namespace e621_ReBot_v3.Modules
                             //    AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
                             //}));
                             DLThreadsWaiting++;
-                            return;
+                            return true;
                         }
 
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        DownloadVE? DownloadVETemp = FindDownloadVE();
+                        if (DownloadVETemp == null) //Not found somehow
                         {
-                            DownloadVE DownloadVETemp = FindDownloadVE();
+                            DLThreadsWaiting++;
+                            return false;
+                        }
+
+                        Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+                        {
                             DownloadVETemp._DownloadItemRef = DownloadItemRef;
                             DownloadVETemp.FolderIcon.Tag = FilePath;
                             DownloadVETemp.DownloadStartup();
@@ -1245,10 +1275,13 @@ namespace e621_ReBot_v3.Modules
                                         break;
                                     }
                             }
-                        });
+                        }).Task.Wait();
+
                         break;
                     }
             }
+
+            return true;
         }
     }
 }

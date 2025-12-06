@@ -365,7 +365,10 @@ namespace e621_ReBot_v3
             Window_Main._RefHolder.Download_DownloadVEPanel.Children.Clear();
             for (int i = 0; i < Download_ThreadsCount; i++)
             {
-                Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(new DownloadVE());
+                DownloadVE DownloadVETemp = new DownloadVE();
+                Window_Main._RefHolder._DownloadVEList.Add(DownloadVETemp);
+                Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(DownloadVETemp);
+
             }
             Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;

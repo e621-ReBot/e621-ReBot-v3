@@ -344,8 +344,9 @@ namespace e621_ReBot_v3.CustomControls
             {
                 if (DuplicatesDisabled)
                 {
-                    HashSet<string> TextBoxRefList = new HashSet<string>(_TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
-                    SuggestionResultList.RemoveAll(e => TextBoxRefList.Contains(e[0]) && !string.IsNullOrEmpty(e[1])); //Remove duplicates but keep exact match
+                    List<string> TextBoxRefList = new List<string>(_TextBoxRef.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries)); //Use list, need the duplicates
+                    TextBoxRefList.Remove(Word4Suggest); //remove current word
+                    SuggestionResultList.RemoveAll(e => TextBoxRefList.Contains(e[0]));
                     if (SuggestionResultList.Count == 0)
                     {
                         IsOpen = false;
