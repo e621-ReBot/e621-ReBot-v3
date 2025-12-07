@@ -24,13 +24,6 @@ namespace e621_ReBot_v3.Modules.Converter
         {
             using (Process FFMpeg = new Process())
             {
-                // APNGs are too big.
-                // If TotalUgoiraLength < 10000 Then '10 seconds
-                // Dim Framerate As Double = 1 / (TotalUgoiraLength / 1000 / UgoiraJObject("frames").Count)
-                //FFMpeg.StartInfo.Arguments = string.Format("-hide_banner -y  -f concat -i {0}\input.txt apng -plays 0 ""{2}\{3}.png"" -y", Framerate, TempFolderName, FolderPath, UgoiraFileName) '-r is framerate
-                //FFMpeg.StartInfo.Arguments = $"-hide_banner -y -f concat -i {TempFolderName}\\input.txt -plays 0 \"{FolderPath}\\{UgoiraFileName}.apng\"";
-                // else
-
                 switch (ActionTypeEnum)
                 {
                     case ActionType.Upload:
@@ -52,7 +45,16 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFMpeg.StartInfo.UseShellExecute = false;
                 FFMpeg.StartInfo.RedirectStandardOutput = true;
                 //FFMpeg.StartInfo.RedirectStandardError = true;
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+
+                if (ActionTypeEnum == ActionType.Upload)
+                {
+                    // APNGs have bigger file size but are the only ones that are fully compatible with iOS.
+                    FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v apng -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";
+                }
+                else
+                {
+                    FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+                }
 
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
@@ -69,7 +71,7 @@ namespace e621_ReBot_v3.Modules.Converter
                             {
                                 case ActionType.Upload:
                                     {
-                                        Module_Uploader.Report_Status($"Converting Ugoira to WebM...{(CurrentTime.TotalMilliseconds / UgoiraDuration):P0}");
+                                        Module_Uploader.Report_Status($"Converting Ugoira to APNG...{(CurrentTime.TotalMilliseconds / UgoiraDuration):P0}");
                                         break;
                                     }
 
@@ -219,7 +221,7 @@ namespace e621_ReBot_v3.Modules.Converter
                     Module_Downloader.SaveFileBytes(TempBytes, FileName, TempFolderPath);
                     MultiProgressBase += MultiDLFactor;
 
-                    UgoiraConcat.AppendLine($"file {FileName}"); // FFmpeg wants / instead of \
+                    UgoiraConcat.AppendLine($"file '{FileName}'"); // FFmpeg wants / instead of \
                     int FrameDelay = (int)UgoiraJObject["frames"][x]["delay"];
                     UgoiraConcat.AppendLine($"duration {FrameDelay / 1000d}");
                     TotalUgoiraLength += FrameDelay;
@@ -259,7 +261,7 @@ namespace e621_ReBot_v3.Modules.Converter
 
         // - - - - - - - - - - - - - - - -
 
-        internal static void UploadQueue_Ugoira2WebM(string Grab_URL, out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
+        internal static void UploadQueue_Ugoira2APNG(string Grab_URL, out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
         {
             //Get FileName
             string UgoiraFileName = Path.GetFileNameWithoutExtension(ExtraSourceURL);
@@ -276,13 +278,13 @@ namespace e621_ReBot_v3.Modules.Converter
             int TotalUgoiraLength = DownloadUgoira(Grab_URL, ExtraSourceURL, TempFolderName, ActionType.Upload).GetAwaiter().GetResult();
 
             //Convert to Webm
-            Module_Uploader.Report_Status("Converting Ugoira to WebM...");
+            Module_Uploader.Report_Status("Converting Ugoira to APNG...");
             FFMpeg4Ugoira(ActionType.Upload, TempFolderName, TempFolderName, UgoiraFileName, TotalUgoiraLength);
-            Module_Uploader.Report_Status("Converting Ugoira to WebM...100%");
+            Module_Uploader.Report_Status("Converting Ugoira to APNG...100%");
             Window_Main._RefHolder.UploadQueueProcess = null;
 
             //Read bytes for upload
-            FileName = $"{UgoiraFileName}.webm";
+            FileName = $"{UgoiraFileName}.apng";
             bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
 
             //Delete temp work folder
