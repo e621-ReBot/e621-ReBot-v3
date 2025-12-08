@@ -504,7 +504,7 @@ namespace e621_ReBot_v3
                 {
                     case "ugoira":
                         {
-                            animated_tag = " animated no_sound animted_png";
+                            animated_tag = " animated  animated_png";
                             break;
                         }
                     case "gif":

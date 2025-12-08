@@ -245,7 +245,7 @@ namespace e621_ReBot_v3
                         case Key.OemPlus:
                         case Key.Add:
                             {
-                                _SelectedGridVE.cUpload_CheckBox.IsChecked = true;
+                                if (_SelectedGridVE.cUpload_CheckBox.IsVisible) _SelectedGridVE.cUpload_CheckBox.IsChecked = true;
                                 break;
                             }
 
@@ -259,7 +259,7 @@ namespace e621_ReBot_v3
                         case Key.OemMinus:
                         case Key.Subtract:
                             {
-                                _SelectedGridVE.cUpload_CheckBox.IsChecked = false;
+                                if (_SelectedGridVE.cUpload_CheckBox.IsVisible) _SelectedGridVE.cUpload_CheckBox.IsChecked = false;
                                 break;
                             }
 
