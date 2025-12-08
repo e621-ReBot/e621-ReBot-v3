@@ -496,7 +496,7 @@ namespace e621_ReBot_v3.Modules
                         POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
                         string UgoiraFileName = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('/') + 1);
                         UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira.png, converted from {MediaItemRef.Grab_PageURL}";
-                        Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -plays 0";
+                        Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
                         isByteUpload = true;
                         break;
                     }

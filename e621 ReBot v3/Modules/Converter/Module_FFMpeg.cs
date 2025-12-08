@@ -49,7 +49,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 if (ActionTypeEnum == ActionType.Upload)
                 {
                     // APNGs have bigger file size but are the only ones that are fully compatible with iOS.
-                    FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v apng -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";
+                    FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v apng -pred mixed -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";
                 }
                 else
                 {
