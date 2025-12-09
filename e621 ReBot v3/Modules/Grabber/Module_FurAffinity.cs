@@ -199,14 +199,5 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             return string.Empty;
         }
-
-        internal static void Queue_MultiPage(string WebAddressNow, string WebAddressNext)
-        {
-            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
-
-            Queue_Prepare(WebAddressNow);
-            Module_CefSharp.LoadURL(WebAddressNext);
-        }
     }
 }

@@ -264,19 +264,19 @@ namespace e621_ReBot_v3.Modules
             Uri TempURI = new Uri(WebAddress);
             string[] URISplit = TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-
-
             switch (TempURI.Host)
             {
                 case "www.furaffinity.net":
                     {
                         if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
                         {
+                            Module_FurAffinity.Queue_Prepare(WebAddress);
+
                             string NextPage = Module_FurAffinity.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
                                 Thread.Sleep(RandomDelay.Next(100, 500));
-                                Module_FurAffinity.Queue_MultiPage(WebAddress, NextPage);
+                                Module_CefSharp.LoadURL(NextPage);
                                 return;
                             }
 
@@ -289,11 +289,13 @@ namespace e621_ReBot_v3.Modules
                     {
                         if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
                         {
+                            Module_Inkbunny.Queue_Prepare(WebAddress);
+
                             string NextPage = Module_Inkbunny.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
                                 Thread.Sleep(RandomDelay.Next(4000, 5000)); //Works only when going super slow, otherwise throws 429s
-                                Module_Inkbunny.Queue_MultiPage(WebAddress, NextPage);
+                                Module_CefSharp.LoadURL(NextPage);
                                 return;
                             }
                         }
