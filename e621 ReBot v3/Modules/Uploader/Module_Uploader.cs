@@ -496,7 +496,7 @@ namespace e621_ReBot_v3.Modules
                         POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
                         string UgoiraFileName = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('/') + 1);
                         UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira.png, converted from {MediaItemRef.Grab_PageURL}";
-                        Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
+                        //Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
                         isByteUpload = true;
                         break;
                     }
@@ -540,6 +540,15 @@ namespace e621_ReBot_v3.Modules
                     case "ugoira":
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
+
+                            int TwentyMiB = 20 * 1024 * 1024;
+                            if (bytes2Send.Length > TwentyMiB)
+                            {
+                                Module_FFMpeg.UploadQueue_Ugoira2WebM(out bytes2Send, out FileName, FileName);
+                                Upload_Description += "\nConverted from Ugoira using FFmpeg: -framerate {avgFPS} -i {input} -r {avgFPS} -c:v libvpx-vp9 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an";
+                                break;
+                            }
+                            Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
                             break;
                         }
 
@@ -738,6 +747,12 @@ namespace e621_ReBot_v3.Modules
                     case "ugoira":
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
+
+                            int TwentyMiB = 20 * 1024 * 1024;
+                            if (bytes2Send.Length > TwentyMiB)
+                            {
+                                Module_FFMpeg.UploadQueue_Ugoira2WebM(out bytes2Send, out FileName, FileName);
+                            }
                             break;
                         }
 
