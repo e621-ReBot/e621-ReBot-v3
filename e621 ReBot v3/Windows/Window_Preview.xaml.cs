@@ -1035,8 +1035,8 @@ namespace e621_ReBot_v3
             {
                 AppSettings.MediaRecord_Remove(MediaItemRef);
                 MediaItemRef.UP_UploadedID = null;
-                _RefHolder.AlreadyUploaded_Label.Text = string.Empty;
                 if (GridVETemp != null) GridVETemp.IsUploaded_SetText(null);
+                _RefHolder.AlreadyUploaded_Label.Text = string.Empty;
             }
             _RefHolder.SetRatingColour();
             _RefHolder.SetUPColour();

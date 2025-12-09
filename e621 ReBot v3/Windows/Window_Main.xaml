@@ -761,7 +761,9 @@
 
                                 <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
 
-                                <CheckBox x:Name="SettingsCheckBox_BrowserClearCache" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Browser cache on exit" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clear web browser cache when closing the app." Click="SettingsCheckBox_BrowserClearCache_Click"/>
+                                <CheckBox x:Name="SettingsCheckBox_BrowserClearCache" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Browser cache on exit" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clear web browser cache when closing the app." Margin="0,0,0,4" Click="SettingsCheckBox_BrowserClearCache_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_MediaSaveManualInferiorRecord" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save inferior media record" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save inferior media record so that it can be checked for in future sessions." Click="SettingsCheckBox_MediaSaveManualInferiorRecord_Click"/>
                             </StackPanel>
                         </Border>
                     </Grid>

@@ -98,6 +98,8 @@
             <Separator/>
             <MenuItem Name="IgnoreMedia" Header="Ignore Media" Click="MenuItem_Click_IgnoreMedia" ToolTip="Ignore this media in future grabs."/>
             <Separator/>
+            <MenuItem Name="RemoveRecord" Header="Remove Media Record" Click="MenuItem_Click_RemoveMediaRecord"/>
+            <Separator/>
             <MenuItem Header="Remove Media" Click="MenuItem_Click_RemoveMedia"/>
         </ContextMenu>
     </UserControl.ContextMenu>

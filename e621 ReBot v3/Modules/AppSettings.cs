@@ -32,7 +32,8 @@ namespace e621_ReBot_v3
         // - - - - - - - - - - - - - - - -
         internal static bool BigMode = false;
         internal static bool Grid_SaveSession = true;
-        internal static List<string> MediaIgnoreList = new List<string>();
+        internal static bool Browser_ClearCache = false;
+        internal static bool MediaSaveManualInferiorRecord = false;
         // - - - - - - - - - - - - - - - -
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
@@ -41,18 +42,15 @@ namespace e621_ReBot_v3
         internal static ushort NamingPattern_Web = 0;
         internal static bool Download_IgnoreErrors = false;
         // - - - - - - - - - - - - - - - -
-        internal static bool Browser_ClearCache = false;
-        // - - - - - - - - - - - - - - - -
-        internal static bool Upload_DontConvertVideos = true;
-        // - - - - - - - - - - - - - - - -
         internal static bool Converter_DontConvertVideos = true;
         // - - - - - - - - - - - - - - - -
         internal static OrderedDictionary Bookmarks = new OrderedDictionary();
-        internal static List<string> Blacklist = new List<string>();
         private static Dictionary<string, string> MediaRecords = new Dictionary<string, string>();
+        internal static List<string> MediaIgnoreList = new List<string>();
         private static Dictionary<string, string> ArtistAliases = new Dictionary<string, string>();
-        internal static List<PoolItem> PoolWatcher = new List<PoolItem>();
         internal static Dictionary<string, string> QuickTags = new Dictionary<string, string>();
+        internal static List<string> Blacklist = new List<string>();
+        internal static List<PoolItem> PoolWatcher = new List<PoolItem>();
         // - - - - - - - - - - - - - - - -
         internal static string? Note;
 
@@ -65,37 +63,39 @@ namespace e621_ReBot_v3
                 { "UserID",  UserID },
                 { "APIKey",  APIKey },
                 { "Volume", Volume },
+                { "Update_Interval", Update_Interval },
+                { "Update_LastCheck", Update_LastCheck },
                 { "ThemeBackground", ((SolidColorBrush)Application.Current.Resources["ThemeBackground"]).Color.ToString()},
                 { "ThemeForeground", ((SolidColorBrush)Application.Current.Resources["ThemeForeground"]).Color.ToString()},
                 { "ThemeFocus", ((SolidColorBrush)Application.Current.Resources["ThemeFocus"]).Color.ToString()},
-                { "Update_Interval", Update_Interval },
-                { "Update_LastCheck", Update_LastCheck },
                 { "BigMode", BigMode },
                 { "Grid_SaveSession", Grid_SaveSession },
+                { "Browser_ClearCache", Browser_ClearCache },
+                { "MediaSaveManualInferiorRecord", MediaSaveManualInferiorRecord },
                 { "Download_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
                 { "Download_SaveTags", Download_SaveTags },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },
                 { "Download_IgnoreErrors", Download_IgnoreErrors },
-                { "Browser_ClearCache", Browser_ClearCache },
                 { "Converter_DontConvertVideos", Converter_DontConvertVideos },
                 { "Note", Note }
             };
             if (Bookmarks.Count > 0) JObjectTemp.Add("Bookmarks", JObject.FromObject(Bookmarks));
-            if (Blacklist.Any()) JObjectTemp.Add("Blacklist", JArray.FromObject(Blacklist));
             if (MediaRecords.Any()) JObjectTemp.Add("MediaRecords", JObject.FromObject(MediaRecords));
-            if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
-            if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
-            if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
             if (MediaIgnoreList.Any()) JObjectTemp.Add("MediaIgnoreList", JArray.FromObject(MediaIgnoreList));
+            if (ArtistAliases.Any()) JObjectTemp.Add("ArtistAliases", JObject.FromObject(ArtistAliases));
+            if (QuickTags.Any()) JObjectTemp.Add("QuickTags", JObject.FromObject(QuickTags));
+            if (Blacklist.Any()) JObjectTemp.Add("Blacklist", JArray.FromObject(Blacklist));
+            if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
 
             JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
             JArray? MediaJArray;
-            lock (Module_Grabber._Grabbed_MediaItems)
+            if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
             {
-                if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
+                lock (Module_Grabber._Grabbed_MediaItems)
                 {
+
                     MediaJArray = new JArray();
                     foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
                     {
@@ -104,10 +104,11 @@ namespace e621_ReBot_v3
                     JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
                 }
             }
-            lock (Module_RetryQueue._2Retry_MediaItems)
+            if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
             {
-                if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
+                lock (Module_RetryQueue._2Retry_MediaItems)
                 {
+
                     MediaJArray = new JArray();
                     foreach (MediaItem MediaItemTemp in Module_RetryQueue._2Retry_MediaItems)
                     {
@@ -116,6 +117,7 @@ namespace e621_ReBot_v3
                     JObjectTemp.Add("RetryQueue", JArray.FromObject(MediaJArray));
                 }
             }
+
             string SaveSettingsString = JsonConvert.SerializeObject(JObjectTemp, Formatting.Indented);
             File.WriteAllText("settings.json", SaveSettingsString);
         }
@@ -163,6 +165,17 @@ namespace e621_ReBot_v3
                                 Window_Main._RefHolder.Settings_VolumeSlider.SetVolume(Volume);
                                 break;
                             }
+                        case "Update_Interval":
+                            {
+                                Update_Interval = (ushort)LoadSettingsJObject["Update_Interval"];
+                                //((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
+                                break;
+                            }
+                        case "Update_LastCheck":
+                            {
+                                Update_LastCheck = (DateTime)LoadSettingsJObject["Update_LastCheck"];
+                                break;
+                            }
                         case "ThemeBackground":
                             {
                                 string BackgroundColorHex = (string)LoadSettingsJObject["ThemeBackground"];
@@ -184,17 +197,7 @@ namespace e621_ReBot_v3
                                 Window_Main._RefHolder.ColorBox_Focus.Text = FocusColorHex.Substring(3);
                                 break;
                             }
-                        case "Update_Interval":
-                            {
-                                Update_Interval = (ushort)LoadSettingsJObject["Update_Interval"];
-                                //((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
-                                break;
-                            }
-                        case "Update_LastCheck":
-                            {
-                                Update_LastCheck = (DateTime)LoadSettingsJObject["Update_LastCheck"];
-                                break;
-                            }
+
                         case "BigMode":
                             {
                                 BigMode = (bool)LoadSettingsJObject["BigMode"];
@@ -216,9 +219,15 @@ namespace e621_ReBot_v3
                                 //Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
                                 break;
                             }
-                        case "MediaIgnoreList":
+                        case "Browser_ClearCache":
                             {
-                                MediaIgnoreList = LoadSettingsJObject["MediaIgnoreList"].ToObject<List<string>>();
+                                Browser_ClearCache = (bool)LoadSettingsJObject["Browser_ClearCache"];
+                                //(Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
+                                break;
+                            }
+                        case "MediaSaveManualInferiorRecord":
+                            {
+                                MediaSaveManualInferiorRecord = (bool)LoadSettingsJObject["MediaSaveManualInferiorRecord"];
                                 break;
                             }
                         case "Download_FolderLocation":
@@ -262,20 +271,14 @@ namespace e621_ReBot_v3
                                 Download_IgnoreErrors = (bool)LoadSettingsJObject["Download_IgnoreErrors"];
                                 break;
                             }
-                        case "Browser_ClearCache":
-                            {
-                                Browser_ClearCache = (bool)LoadSettingsJObject["Browser_ClearCache"];
-                                //(Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache).IsChecked = Browser_ClearCache;
-                                break;
-                            }
                         case "Converter_DontConvertVideos":
                             {
                                 Converter_DontConvertVideos = (bool)LoadSettingsJObject["Converter_DontConvertVideos"];
                                 break;
                             }
-                        case "Blacklist":
+                        case "Note":
                             {
-                                Blacklist = LoadSettingsJObject["Blacklist"].ToObject<List<string>>();
+                                Note = (string)LoadSettingsJObject["Note"];
                                 break;
                             }
                         case "Bookmarks":
@@ -288,25 +291,30 @@ namespace e621_ReBot_v3
                                 MediaRecords = LoadSettingsJObject["MediaRecords"].ToObject<Dictionary<string, string>>();
                                 break;
                             }
+                        case "MediaIgnoreList":
+                            {
+                                MediaIgnoreList = LoadSettingsJObject["MediaIgnoreList"].ToObject<List<string>>();
+                                break;
+                            }
                         case "ArtistAliases":
                             {
                                 ArtistAliases = LoadSettingsJObject["ArtistAliases"].ToObject<Dictionary<string, string>>();
+                                break;
+                            }
+                        case "QuickTags":
+                            {
+                                QuickTags = LoadSettingsJObject["QuickTags"].ToObject<Dictionary<string, string>>();
+                                break;
+                            }
+                        case "Blacklist":
+                            {
+                                Blacklist = LoadSettingsJObject["Blacklist"].ToObject<List<string>>();
                                 break;
                             }
                         case "PoolWatcher":
                             {
                                 PoolWatcher = LoadSettingsJObject["PoolWatcher"].ToObject<List<PoolItem>>();
                                 Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = PoolWatcher.Any();
-                                break;
-                            }
-                        case "Note":
-                            {
-                                Note = (string)LoadSettingsJObject["Note"];
-                                break;
-                            }
-                        case "QuickTags":
-                            {
-                                QuickTags = LoadSettingsJObject["QuickTags"].ToObject<Dictionary<string, string>>();
                                 break;
                             }
                         case "RetryQueue":
@@ -350,6 +358,7 @@ namespace e621_ReBot_v3
             Window_Main._RefHolder.SettingsCheckBox_BigMode.IsChecked = BigMode;
             Window_Main._RefHolder.SettingsCheckBox_GridSaveSession.IsChecked = Grid_SaveSession;
             Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache.IsChecked = Browser_ClearCache;
+            Window_Main._RefHolder.SettingsCheckBox_MediaSaveManualInferiorRecord.IsChecked = MediaSaveManualInferiorRecord;
 
             // - - - Jobs
 

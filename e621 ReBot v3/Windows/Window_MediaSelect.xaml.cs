@@ -413,11 +413,11 @@ namespace e621_ReBot_v3
             }
             Window_Preview._RefHolder.Tags_TextBlock.Text = MediaSelectItemTemp.Tag.ToString();
             Window_Preview._RefHolder.AlreadyUploaded_Label.Text = $"#{MediaSelectItemTemp.PostID}";
+            Window_Preview._RefHolder.PB_Upload.IsEnabled = false;
             Window_Preview._RefHolder.SetRatingColour();
-            //if (Properties.Settings.Default.ManualInferiorSave)
-            //{
-            //    Module_DB.DB_Media_CreateRecord(DataRowTemp);
-            //}
+
+            if (AppSettings.MediaSaveManualInferiorRecord) AppSettings.MediaRecord_Add(Window_Preview._RefHolder.MediaItemHolder);
+
             _RefHolder.Close();
         }
 

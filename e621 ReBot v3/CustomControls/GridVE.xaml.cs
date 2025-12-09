@@ -235,6 +235,7 @@ namespace e621_ReBot_v3.CustomControls
             {
                 cIsUploaded_TextBlock.Text = string.Empty;
                 IsUploaded_DockPanel.Visibility = Visibility.Hidden;
+                cUpload_CheckBox.IsEnabled = true;
             }
             else
             {
@@ -306,6 +307,8 @@ namespace e621_ReBot_v3.CustomControls
                 IgnoreMedia.Header = "Ignore Media";
                 IgnoreMedia.ToolTip = "Ignore this media in future grabs.";
             }
+
+            RemoveRecord.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
         }
 
         private void MenuItem_Click_Source(object sender, RoutedEventArgs e)
@@ -354,6 +357,21 @@ namespace e621_ReBot_v3.CustomControls
             if (IsSelected) Window_Main._RefHolder._SelectedGridVE = null;
         }
 
+        private void MenuItem_Click_RemoveMediaRecord(object sender, RoutedEventArgs e)
+        {
+            AppSettings.MediaRecord_Remove(_MediaItemRef);
+            _MediaItemRef.UP_UploadedID = null;
+            IsUploaded_SetText(null);
+            if (Window_Preview._RefHolder != null)
+            {
+                if (ReferenceEquals(_MediaItemRef, Window_Preview._RefHolder.MediaItemHolder))
+                {
+                    Window_Preview._RefHolder.AlreadyUploaded_Label.Text = string.Empty;
+                    Window_Preview._RefHolder.PB_Upload.IsEnabled = true;
+                }
+            }
+        }
+
         // - - - - - - - - - - - - - - - -
 
         internal void AnimateScaleIn()
@@ -367,5 +385,6 @@ namespace e621_ReBot_v3.CustomControls
             ((Storyboard)FindResource("ScaleOut")).Begin(this);
             GettingDestroyed = true;
         }
+
     }
 }

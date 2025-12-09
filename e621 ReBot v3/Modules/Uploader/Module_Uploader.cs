@@ -447,8 +447,6 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    GridVETemp.cUpload_CheckBox.IsChecked = false;
-                    GridVETemp.cUpload_CheckBox.IsEnabled = false;
                     GridVETemp.IsUploaded_SetText(MediaItemRef.UP_UploadedID);
                 }
 

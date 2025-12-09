@@ -1287,6 +1287,11 @@ namespace e621_ReBot_v3
             AppSettings.Browser_ClearCache = ((CheckBox)sender).IsChecked ?? false;
         }
 
+        private void SettingsCheckBox_MediaSaveManualInferiorRecord_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.MediaSaveManualInferiorRecord = ((CheckBox)sender).IsChecked ?? false;
+        }
+
         private void SettingsCheckBox_DownloadSaveTags_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Download_SaveTags = ((CheckBox)sender).IsChecked ?? false;
@@ -1383,6 +1388,8 @@ namespace e621_ReBot_v3
             SettingsButton_DLDNPs.IsEnabled = false;
             ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLDNPs());
         }
+
+
 
         #endregion
 
