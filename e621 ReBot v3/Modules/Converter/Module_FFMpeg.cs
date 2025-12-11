@@ -43,7 +43,6 @@ namespace e621_ReBot_v3.Modules.Converter
                 // APNGs have bigger file size but are the only ones that are fully compatible with iOS.
                 FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{inputTXTFile}\" -vsync vfr -c:v apng -pred mixed -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";
 
-
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
@@ -68,6 +67,8 @@ namespace e621_ReBot_v3.Modules.Converter
 
         private static void FFMpeg4Ugoira2WebM(ActionType ActionTypeEnum, string TempFolderName, string FullFolderPath, string UgoiraFileName, ProgressBar? ProgressBarRef = null)
         {
+            string ImageExtension = Path.GetExtension(UgoiraFileName);
+            UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
             int UgoiraDuration = 0;
             int avgFPS = 15;
             string inputTXTFile = Path.Combine(TempFolderName, "input.txt");
@@ -118,7 +119,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 //FFMpeg.StartInfo.RedirectStandardError = true;
 
                 //FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -framerate {avgFPS} -i \"{FullFolderPath}/{UgoiraFileName}%d.jpg\" -r {avgFPS} -c:v libvpx-vp9 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -framerate {avgFPS} -i \"{FullFolderPath}\\{UgoiraFileName}%d.{ImageExtension}\" -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
 
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
@@ -365,7 +366,6 @@ namespace e621_ReBot_v3.Modules.Converter
         internal static void UploadQueue_Ugoira2WebM(out byte[] bytes2Send, out string FileName, string UgoiraFileName)
         {
             string TempFolderName = Path.Combine("FFMpegTemp", "Upload");
-            UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
 
             //Convert to Webm
             Module_Uploader.Report_Status("Converting Ugoira to WebM...");
@@ -373,6 +373,7 @@ namespace e621_ReBot_v3.Modules.Converter
             Module_Uploader.Report_Status("Converting Ugoira to WebM...100%");
             Window_Main._RefHolder.UploadQueueProcess = null;
 
+            UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
             //Read bytes for upload
             FileName = $"{UgoiraFileName}.webm";
             bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
