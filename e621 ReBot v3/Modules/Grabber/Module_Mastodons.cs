@@ -13,6 +13,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 {
     internal static class Module_Mastodons
     {
+        internal static JArray? MastodonsJSONHolder;
+
         internal static void Queue_Prepare(string WebAddress, ref CookieContainer CookieRef)
         {
             Module_CookieJar.GetCookies(WebAddress, ref CookieRef);
@@ -27,7 +29,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static JArray? MastodonsJSONHolder;
         private static void Queue_Single(string WebAddress)
         {
             if (Module_Grabber._GrabQueue_URLs.Contains(WebAddress))
@@ -89,13 +90,12 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static async Task Grab(string WebAddress, string JSONSource, CookieContainer CookieRef)
         {
-            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, CookieRef) : JSONSource;
+            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, CookieRef) : JSONSource; //Why source? I don't remember.
             if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Mastodons.Grab [@{WebAddress}]");
                 return;
             }
-
 
             JObject MastodonsJSON = JObject.Parse(JSONSource);
 
@@ -142,13 +142,20 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Grab_Title = $"Created by @{ArtistName}",
                     Grab_TextBody = Post_Text,
                     Grid_MediaFormat = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1),
-                    Grid_MediaWidth = (uint)MediaNode["meta"]["original"]["width"],
-                    Grid_MediaHeight = (uint)MediaNode["meta"]["original"]["height"],
                     Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL),
                     Grid_ThumbnailFullInfo = true,
                     UP_Tags = Post_DateTime.Year.ToString(),
                     UP_IsWhitelisted = true
                 };
+
+                //Sometimes meta is null value or doesn't exist
+                if (MediaNode["meta"] != null && MediaNode["meta"].HasValues)
+                {
+                    //Sometimes meta types don't exist
+                    MediaItemTemp.Grid_MediaWidth = (uint)(MediaNode["meta"]["original"] == null ? MediaNode["meta"]["width"] : MediaNode["meta"]["original"]["width"]);
+                    MediaItemTemp.Grid_MediaHeight = (uint)(MediaNode["meta"]["original"] == null ? MediaNode["meta"]["height"] : MediaNode["meta"]["original"]["height"]);
+                }
+
                 Module_Uploader.Media2BigCheck(MediaItemTemp);
                 MediaItemList.Add(MediaItemTemp);
                 Thread.Sleep(Module_Grabber.PauseBetweenImages);

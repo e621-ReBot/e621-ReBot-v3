@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Windows;
 
 namespace CefSharp
 {
@@ -147,14 +146,16 @@ namespace CefSharp
             {
                 byte[] ByteData = ResponseFilterHolder.ByteData;
 
-                string FileExt = response.Headers["content-type"]?.Replace("image/", null).Replace("jpeg", "jpg");
+                string FileExt = response.Headers["content-type"].ToString();
                 if (FileExt == null) return;
+
                 switch (FileExt)
                 {
-                    case "jpg":
-                    case "png":
-                    case "gif":
-                    case "webp":
+                    case "image/jpg":
+                    case "image/jpeg":
+                    case "image/png":
+                    case "image/gif":
+                    case "image/webp":
                         {
                             Window_Preview._RefHolder.MediaItemHolder.Grid_MediaByteLength = (uint?)ByteData.Length;
                             string FileName = Module_Downloader.MediaFile_GetFileNameOnly(request.Url);
@@ -171,27 +172,10 @@ namespace CefSharp
                             }
                             break;
                         }
-                    case "x-icon": //Ignore
-                        {
-                            //Why are they sending icons now?
-                            break;
-                        }
-                    case "text/html": //Ignore
-                        {
-                            //Pixiv spamming this now
-                            break;
-                        }
 
-                    case "application/javascript":
-                    case "svg+xml":
+                    default: //Just ignore all others
                         {
-                            //DevTools
-                            break;
-                        }
-
-                    default:
-                        {
-                            Window_Preview._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Preview._RefHolder, $"{FileExt} file extension is not supported.", "e621 Rebot Preview Caching Error", MessageBoxButton.OK, MessageBoxImage.Error); });
+                            //Window_Preview._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Preview._RefHolder, $"{FileExt} file extension is not supported.", "e621 Rebot Preview Caching Error", MessageBoxButton.OK, MessageBoxImage.Error); });
                             break;
                         }
                 }

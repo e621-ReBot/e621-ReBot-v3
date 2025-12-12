@@ -13,6 +13,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 {
     internal static partial class Module_Twitter
     {
+        internal static JArray? TwitterJSONHolder;
+
         internal static void Queue_Prepare(string WebAddress)
         {
             Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Twitter);
@@ -26,7 +28,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static JArray? TwitterJSONHolder;
         [GeneratedRegex(@"(?<=status/)\d+(?=/)?")]
         private static partial Regex Twitter_Regex();
         private static void Queue_Single(string WebAddress)
@@ -215,6 +216,59 @@ namespace e621_ReBot_v3.Modules.Grabber
             Module_Grabber.Report_Info(PrintText);
         }
 
-        //internal static string? TwitterAuthorizationHolder;
+        internal static bool VerifyJSONValid(string WebAddress, string JSONPassed)
+        {
+            JObject JObjectTemp = JObject.Parse(JSONPassed);
+
+            //Only check for entries that contain media
+            IEnumerable<JToken>? TweetsContainer = null;
+            if (WebAddress.StartsWith("https://x.com/i/api/graphql/")) //logged in
+            {
+                //[@something]makes it go two levels deep.
+                TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //media page
+                if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //status page
+            }
+            if (WebAddress.StartsWith("https://api.x.com/graphql/")) //not logged in
+            {
+                TweetsContainer = JObjectTemp.SelectTokens("$..tweetResult.result.legacy").Where(token => token["extended_entities"] != null);
+            }
+
+            // Exit if no valid tweets
+            if (!TweetsContainer.Any()) return false;
+
+            //Hold onto JSON for later, combine with existing entries if any
+            JArray TweetHolder = new JArray(TweetsContainer);
+            bool SkipUnion = false;
+            if (TwitterJSONHolder == null)
+            {
+                TwitterJSONHolder = TweetHolder;
+                SkipUnion = true;
+            }
+
+            lock (TwitterJSONHolder)
+            {
+                if (!SkipUnion) TwitterJSONHolder.Merge(TweetHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
+
+                //clear duplicates, happens rarely
+                if (TwitterJSONHolder.Count > 1)
+                {
+                    //Module_Twitter.TwitterJSONHolder.OrderBy(token => (uint)token["id_str"]);
+                    HashSet<string> TweetIDList = new HashSet<string>();
+                    for (int i = TwitterJSONHolder.Count - 1; i >= 0; i--)
+                    {
+                        string TweetID = (string)TwitterJSONHolder[i]["id_str"];
+                        if (TweetIDList.Contains(TweetID))
+                        {
+                            TwitterJSONHolder.RemoveAt(i);
+                        }
+                        else
+                        {
+                            TweetIDList.Add(TweetID);
+                        }
+                    }
+                }
+            }
+            return true;
+        }
     }
 }

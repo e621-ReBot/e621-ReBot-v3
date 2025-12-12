@@ -104,8 +104,8 @@ namespace CefSharp
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies|portal|art)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view|artwork|browse)"),
                 new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?submissions|search)"),
-                new Regex(@"^\w+://\w+\.\w+/api/v1/(accounts/\d+/statuses|statuses/\d+)"), //Mastodons
-                new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
+                new Regex(@"^\w+://\w+\.\w+/api/v1/(accounts/\d+/)?statuses(/\d+/?|\?\w+=)"), //Mastodons
+                //new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures|user)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)"),
 
@@ -193,7 +193,6 @@ namespace CefSharp
                 case string HicceArs when HicceArs.StartsWith("https://www.hiccears.com/"):
                 case string SoFurry when SoFurry.Contains(".sofurry.com/"):
                 case string Weasyl when Weasyl.Contains(".weasyl.com/"):
-                case string Pawoo when Pawoo.StartsWith("https://pawoo.net/@"):
                 case string HentaiFoundry when HentaiFoundry.StartsWith("https://www.hentai-foundry.com/"):
                     {
                         if (response.MimeType.Equals("text/html"))
@@ -217,57 +216,9 @@ namespace CefSharp
                         if (response.MimeType.Equals("application/json"))
                         {
                             string Data2String = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            if (Data2String.Length > 64)
+                            if (Data2String.Length > 64 && Module_Twitter.VerifyJSONValid(Twitter, Data2String))
                             {
-                                JObject JObjectTemp = JObject.Parse(Data2String);
-
-                                IEnumerable<JToken>? TweetsContainer = null;
-                                if (Twitter.StartsWith("https://x.com/i/api/graphql/")) //logged in
-                                {
-                                    //[@something]makes it go two levels deep.
-                                    TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //media page
-                                    if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //status page
-                                }
-                                if (Twitter.StartsWith("https://api.x.com/graphql/")) //not logged in
-                                {
-                                    //TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result.legacy").Where(token => token["extended_entities"] != null);
-                                    TweetsContainer = JObjectTemp.SelectTokens("$..tweetResult.result.legacy").Where(token => token["extended_entities"] != null);
-                                }
-                                if (TweetsContainer.Any())
-                                {
-                                    bool SkipUnion = false;
-                                    JArray TweetHolder = new JArray(TweetsContainer);
-                                    if (Module_Twitter.TwitterJSONHolder == null)
-                                    {
-                                        Module_Twitter.TwitterJSONHolder = TweetHolder;
-                                        SkipUnion = true;
-                                    }
-
-                                    lock (Module_Twitter.TwitterJSONHolder)
-                                    {
-                                        if (!SkipUnion) Module_Twitter.TwitterJSONHolder.Merge(TweetHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
-
-                                        //clear duplicates, happens rarely
-                                        if (Module_Twitter.TwitterJSONHolder.Count > 1)
-                                        {
-                                            //Module_Twitter.TwitterJSONHolder.OrderBy(token => (uint)token["id_str"]);
-                                            List<string> TweetIDList = new List<string>();
-                                            for (int i = Module_Twitter.TwitterJSONHolder.Count - 1; i >= 0; i--)
-                                            {
-                                                string TweetID = (string)Module_Twitter.TwitterJSONHolder[i]["id_str"];
-                                                if (TweetIDList.Contains(TweetID))
-                                                {
-                                                    Module_Twitter.TwitterJSONHolder.RemoveAt(i);
-                                                }
-                                                else
-                                                {
-                                                    TweetIDList.Add(TweetID);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
-                                }
+                                Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                             }
                         }
                         break;
@@ -296,6 +247,7 @@ namespace CefSharp
 
                 case string Mastodon when Mastodon.StartsWith("https://mastodon.social/api/"):
                 case string Baraag when Baraag.StartsWith("https://baraag.net/api/"):
+                case string Pawoo when Pawoo.StartsWith("https://pawoo.net/api/"):
                     {
                         if (response.MimeType.Equals("application/json"))
                         {

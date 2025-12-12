@@ -67,7 +67,7 @@ namespace e621_ReBot_v3.Modules.Converter
 
         private static void FFMpeg4Ugoira2WebM(ActionType ActionTypeEnum, string TempFolderName, string FullFolderPath, string UgoiraFileName, ProgressBar? ProgressBarRef = null)
         {
-            string ImageExtension = Path.GetExtension(UgoiraFileName);
+            string ImageExtension = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('.') + 1);
             UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
             int UgoiraDuration = 0;
             int avgFPS = 15;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -36,7 +37,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies/?|portal/view/\d+|art/?(view/.+|\w+)?)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view/\d+|artwork|browse/\w+/art\?uid=\d+)"),
                 new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?(submissions/\w+(/.+)?)|search.+find=submit)"),
-                new Regex(@"^\w+://\w+\.\w+/@.+/(\d+|media)"), //mastodon, baraag, pawoo
+                new Regex(@"^\w+://\w+\.\w+/@.+/(\d+/?|media)"), //mastodon, baraag, pawoo
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures/(user/.+|featured|popular|random|recent/)|user/.+/faves/pictures|users/FaveUsersRecentPictures)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)(.+)?"),
             };
@@ -240,7 +241,7 @@ namespace e621_ReBot_v3.Modules
 
                 case "pawoo.net":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Pawoo.Queue_Prepare(WebAddress));
+                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Pawoo));
                         break;
                     }
 
@@ -316,6 +317,7 @@ namespace e621_ReBot_v3.Modules
         internal readonly static ushort _GrabberMaxHandCount = 4;
         private static ushort GrabberActiveHandCount = 0;
         internal static DispatcherTimer _GrabTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        private static readonly HashSet<string> FastSites = new HashSet<string>() { "https://x.com/", "https://mastodon.social/", "https://baraag.net/", "https://pawoo.net/" };
         private static void GrabTimer_Tick(object sender, EventArgs e)
         {
             _GrabTimer.Stop();
@@ -364,7 +366,7 @@ namespace e621_ReBot_v3.Modules
                     TreeViewItemDeleter.Items.RemoveAt(0);
                     TreeViewItemDeleter.ToolTip = $"Pages left to grab: {TreeViewItemDeleter.Items.Count}";
 
-                    if (TreeViewItemParent.HasItems && TreeViewItemParent.Header.ToString().StartsWith("https://x.com/"))
+                    if (TreeViewItemParent.HasItems && FastSites.Any(url => TreeViewItemParent.Header.ToString().StartsWith(url)))
                     {
                         _GrabTimer.Interval = TimeSpan.FromMilliseconds(100);
                     }
@@ -452,7 +454,7 @@ namespace e621_ReBot_v3.Modules
 
                 case "pawoo.net":
                     {
-                        await Module_Pawoo.Grab(WebAddress, (string)NeededData);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Pawoo);
                         break;
                     }
 
