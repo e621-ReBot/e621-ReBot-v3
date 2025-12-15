@@ -56,50 +56,58 @@ namespace e621_ReBot_v3
             };
             Window_MediaSelectTemp.SearchStatus.Visibility = Visibility.Collapsed;
 
-            int RowIndex = Module_Grabber._Grabbed_MediaItems.FindIndex(Window_Tagger._RefHolder.MediaItemHolder);
+            MediaItemList GrabbedList = Module_Grabber._Grabbed_MediaItems;
+
+            int RowIndex = GrabbedList.FindIndex(Window_Tagger._RefHolder.MediaItemHolder);
             bool LaunchTimer = false;
-            for (int i = 0; i <= RowIndex - 1; i++)
+
+            int MinIndex = Math.Max(0, RowIndex - 32);
+            for (int i = MinIndex; i <= RowIndex - 1; i++)
             {
                 MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                 {
-                    Tag = Module_Grabber._Grabbed_MediaItems[i],
+                    Tag = GrabbedList[i],
                     Cursor = Cursors.Hand
                 };
-                if (Module_Grabber._Grabbed_MediaItems[i].Grid_Thumbnail == null && Module_Grabber._Grabbed_MediaItems[i].Grid_ThumbnailDLStart != true)
+                if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart != true)
                 {
-                    Module_Grabber.Grab_Thumbnail(Module_Grabber._Grabbed_MediaItems[i]);
+                    Module_Grabber.Grab_Thumbnail(GrabbedList[i]);
                     LaunchTimer = true;
                 }
                 else
                 {
-                    MediaSelectItemTemp.cThumbnail_Image.Source = Module_Grabber._Grabbed_MediaItems[i].Grid_Thumbnail;
+                    MediaSelectItemTemp.cThumbnail_Image.Source = GrabbedList[i].Grid_Thumbnail;
                 }
                 MediaSelectItemTemp.cIsUploaded_TextBlock.Visibility = Visibility.Hidden;
                 MediaSelectItemTemp.MouseLeftButtonDown += MediaSelectItemTemp_MouseLeftButtonDownOffset;
                 Window_MediaSelectTemp.ItemPanel.Children.Add(MediaSelectItemTemp);
             }
 
-            for (int i = RowIndex + 1; i <= Module_Grabber._Grabbed_MediaItems.Count - 1; i++)
+            int AfterCounter = 0;
+            for (int i = RowIndex + 1; i <= GrabbedList.Count - 1; i++)
             {
-                if (Module_Grabber._Grabbed_MediaItems[i].UP_UploadedID != null)
+                if (GrabbedList[i].UP_UploadedID != null)
                 {
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                     {
-                        Tag = Module_Grabber._Grabbed_MediaItems[i],
+                        Tag = GrabbedList[i],
                         Cursor = Cursors.Hand
                     };
-                    if (Module_Grabber._Grabbed_MediaItems[i].Grid_Thumbnail == null && Module_Grabber._Grabbed_MediaItems[i].Grid_ThumbnailDLStart != true)
+                    if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart != true)
                     {
-                        Module_Grabber.Grab_Thumbnail(Module_Grabber._Grabbed_MediaItems[i]);
+                        Module_Grabber.Grab_Thumbnail(GrabbedList[i]);
                         LaunchTimer = true;
                     }
                     else
                     {
-                        MediaSelectItemTemp.cThumbnail_Image.Source = Module_Grabber._Grabbed_MediaItems[i].Grid_Thumbnail;
+                        MediaSelectItemTemp.cThumbnail_Image.Source = GrabbedList[i].Grid_Thumbnail;
                     }
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Visibility = Visibility.Hidden;
                     MediaSelectItemTemp.MouseLeftButtonDown += MediaSelectItemTemp_MouseLeftButtonDownOffset;
                     Window_MediaSelectTemp.ItemPanel.Children.Add(MediaSelectItemTemp);
+                    AfterCounter++;
+
+                    if (AfterCounter == 32) break;
                 }
             }
 

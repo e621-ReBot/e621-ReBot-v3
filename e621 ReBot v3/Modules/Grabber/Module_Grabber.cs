@@ -724,7 +724,7 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             GridVERef._MediaItemRef.Grid_ThumbnailDLStart = false;
-                            GridVERef.SetErrorText($"Thumb {(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
+                            GridVERef?.SetErrorText($"Thumb {(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
                         }
                     }
                 }
@@ -735,7 +735,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 catch (Exception)
                 {
-                    GridVERef.SetErrorText("Thumb Exception");
+                    GridVERef?.SetErrorText("Thumb Exception");
                 }
             }
         }
