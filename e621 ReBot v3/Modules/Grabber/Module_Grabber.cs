@@ -684,7 +684,7 @@ namespace e621_ReBot_v3.Modules
 
         private static readonly HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
         private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
-        internal static async void Grab_Thumbnail(MediaItem MediaItemRef)
+        internal static async Task Grab_Thumbnail(MediaItem MediaItemRef)
         {
             MediaItemRef.Grid_ThumbnailDLStart = true;
             using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, MediaItemRef.Grab_ThumbnailURL))
@@ -711,21 +711,6 @@ namespace e621_ReBot_v3.Modules
                                 DownloadedImage.CacheOption = BitmapCacheOption.OnLoad;
                                 DownloadedImage.StreamSource = MemoryStreamTemp;
                                 DownloadedImage.EndInit();
-                                //DownloadedImage.Freeze(); //Might need to be outside stream using
-
-                                //string MediaType = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('.'));
-                                //if (MediaType.Length > 5)
-                                //{
-                                //    throw new Exception($"{MediaType} is not a supported format for media.");
-                                //}
-
-                                //if (MediaItemRef.Grab_ThumbnailURL.EndsWith(".gif") || MediaItemRef.Grab_ThumbnailURL.Contains(".gif"))
-                                //{
-                                //    using (GifBitmapDecoder GifBitmapDecoderTemp = new GifBitmapDecoder(MemoryStreamTemp, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default))
-                                //    {
-                                //        Debug.WriteLine(GifBitmapDecoderTemp.Frames.Count);
-                                //    }
-                                //}
 
                                 MediaItemRef.Grid_Thumbnail = Grab_ResizeThumbnail(DownloadedImage, $".{MediaItemRef.Grid_MediaFormat}");
                                 Grab_MakeThumbnailInfoText(MediaItemRef);
@@ -733,18 +718,24 @@ namespace e621_ReBot_v3.Modules
                                 DownloadedImage.Freeze();
                                 DownloadedImage = null;
 
-                                if (GridVERef != null) GridVERef.LoadImage();
+                                GridVERef?.LoadImage();
                             }
+                        }
+                        else
+                        {
+                            GridVERef._MediaItemRef.Grid_ThumbnailDLStart = false;
+                            GridVERef.SetErrorText($"Thumb {(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
                         }
                     }
                 }
                 catch (TaskCanceledException) //Timout that was manually set
                 {
-                    GridVERef.IsUploaded_SetText("Timeout!");
+                    GridVERef._MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                    GridVERef?.SetErrorText("Thumb Timeout");
                 }
                 catch (Exception)
                 {
-                    GridVERef.IsUploaded_SetText("Exception!");
+                    GridVERef.SetErrorText("Thumb Exception");
                 }
             }
         }

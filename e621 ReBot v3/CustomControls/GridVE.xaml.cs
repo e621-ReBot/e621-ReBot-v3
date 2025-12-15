@@ -246,6 +246,13 @@ namespace e621_ReBot_v3.CustomControls
             }
         }
 
+        internal void SetErrorText(string Error)
+        {
+            cIsUploaded_TextBlock.Text = Error;
+            IsUploaded_DockPanel.Visibility = Visibility.Visible;
+            cThumbnail_Image.Source = null;
+        }
+
         private void IsUploaded_DockPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             string e6Post = $"https://e621.net/post/show/{_MediaItemRef.UP_UploadedID}";
