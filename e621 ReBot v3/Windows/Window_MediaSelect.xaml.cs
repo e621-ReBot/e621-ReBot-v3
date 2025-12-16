@@ -62,7 +62,7 @@ namespace e621_ReBot_v3
             bool LaunchTimer = false;
 
             int MinIndex = Math.Max(0, RowIndex - 32);
-            for (int i = MinIndex; i <= RowIndex - 1; i++)
+            for (int i = MinIndex; i < RowIndex; i++)
             {
                 MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                 {
