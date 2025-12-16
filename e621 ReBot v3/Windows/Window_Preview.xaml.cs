@@ -430,29 +430,34 @@ namespace e621_ReBot_v3
         private void GetCachedMedia(string? FilePath = null)
         {
             string MediaName = FilePath ?? Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL, MediaItemHolder.Grid_MediaFormat);
-            byte[]? MediaBytes = null;
-            for (int numTries = 0; numTries < 10; numTries++)
-            {
-                try
-                {
-                    MediaBytes = File.ReadAllBytes(FilePath ?? Module_Downloader.MediaBrowser_MediaCache[MediaName]);
-                    break;
-                }
-                catch (IOException)
-                {
-                    Thread.Sleep(500);
-                }
-            }
-            if (MediaBytes == null || MediaBytes.Length == 0)
-            {
-                return;
-            }
+            string? EitherFilePath = FilePath ?? Module_Downloader.MediaBrowser_MediaCache[MediaName];
 
-            // Get MD5
-            using (MD5 MD5Provider = MD5.Create())
+            if (EitherFilePath != null)
             {
-                byte[] hashBytes = MD5Provider.ComputeHash(MediaBytes);
-                MediaItemHolder.Grid_MediaMD5 = Convert.ToHexString(hashBytes).ToLower();
+                byte[]? MediaBytes = null;
+                for (int numTries = 0; numTries < 10; numTries++)
+                {
+                    try
+                    {
+                        MediaBytes = File.ReadAllBytes(EitherFilePath);
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        Thread.Sleep(500);
+                    }
+                }
+                if (MediaBytes == null || MediaBytes.Length == 0)
+                {
+                    return;
+                }
+
+                // Get MD5
+                using (MD5 MD5Provider = MD5.Create())
+                {
+                    byte[] hashBytes = MD5Provider.ComputeHash(MediaBytes);
+                    MediaItemHolder.Grid_MediaMD5 = Convert.ToHexString(hashBytes).ToLower();
+                }
             }
         }
 
