@@ -1,4 +1,5 @@
-﻿using e621_ReBot_v3.CustomControls;
+﻿using CefSharp.DevTools.Network;
+using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Grabber;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -683,7 +685,7 @@ namespace e621_ReBot_v3.Modules
         }
 
         private static readonly HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
-        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
+        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15), DefaultRequestVersion = HttpVersion.Version11 };
         internal static async Task Grab_Thumbnail(MediaItem MediaItemRef)
         {
             MediaItemRef.Grid_ThumbnailDLStart = true;
@@ -699,12 +701,22 @@ namespace e621_ReBot_v3.Modules
                     {
                         if (HttpResponseMessageTemp.IsSuccessStatusCode)
                         {
-                            if (!_Grabbed_MediaItems.Contains(MediaItemRef)) return;
+                            if (!_Grabbed_MediaItems.Contains(MediaItemRef)) return; //When item gets deleted before thumb is downloaded
+
 
                             using (MemoryStream MemoryStreamTemp = new MemoryStream())
                             {
                                 await HttpResponseMessageTemp.Content.CopyToAsync(MemoryStreamTemp);
+                                await MemoryStreamTemp.FlushAsync(); //CopyToAsync does not guarantee flush completion before decode in some edge cases.
                                 MemoryStreamTemp.Seek(0, SeekOrigin.Begin);
+
+                                if (MemoryStreamTemp.Length == 0)
+                                {
+                                    //Mastodons are returning Status OK but with no data as protection on thumbnails or maybe CDN error, since they do so on browser as well, but only some images and I don't see why
+                                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                                    GridVERef?.SetErrorText("e:Mastodons");
+                                    return;
+                                }
 
                                 BitmapImage? DownloadedImage = new BitmapImage();
                                 DownloadedImage.BeginInit();
@@ -723,26 +735,20 @@ namespace e621_ReBot_v3.Modules
                         }
                         else
                         {
-                            if (GridVERef != null)
-                            {
-                                GridVERef._MediaItemRef.Grid_ThumbnailDLStart = false;
-                                GridVERef.SetErrorText($"Thumb {(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
-                            }
+                            MediaItemRef.Grid_ThumbnailDLStart = false;
+                            GridVERef?.SetErrorText($"e:{(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
                         }
                     }
                 }
                 catch (TaskCanceledException) //Timout that was manually set
                 {
-                    if (GridVERef != null)
-                    {
-                        GridVERef._MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
-                        GridVERef.SetErrorText("Thumb Timeout");
-                    }
-
+                        MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                        GridVERef?.SetErrorText("e:Timeout");
                 }
                 catch (Exception)
                 {
-                    GridVERef?.SetErrorText("Thumb Exception");
+                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                    GridVERef?.SetErrorText("e:Exception");
                 }
             }
         }
