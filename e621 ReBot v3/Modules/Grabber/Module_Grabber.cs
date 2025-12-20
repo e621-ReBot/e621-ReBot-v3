@@ -1,5 +1,4 @@
-﻿using CefSharp.DevTools.Network;
-using e621_ReBot_v3.CustomControls;
+﻿using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Grabber;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -685,7 +683,7 @@ namespace e621_ReBot_v3.Modules
         }
 
         private static readonly HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
-        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15), DefaultRequestVersion = HttpVersion.Version11 };
+        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15), DefaultRequestVersion = HttpVersion.Version30 };
         internal static async Task Grab_Thumbnail(MediaItem MediaItemRef)
         {
             MediaItemRef.Grid_ThumbnailDLStart = true;
@@ -742,8 +740,8 @@ namespace e621_ReBot_v3.Modules
                 }
                 catch (TaskCanceledException) //Timout that was manually set
                 {
-                        MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
-                        GridVERef?.SetErrorText("e:Timeout");
+                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                    GridVERef?.SetErrorText("e:Timeout");
                 }
                 catch (Exception)
                 {
