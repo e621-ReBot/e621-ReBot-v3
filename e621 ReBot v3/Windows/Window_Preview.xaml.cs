@@ -196,7 +196,7 @@ namespace e621_ReBot_v3
             SetRatingColour();
             SetUPColour();
 
-            Title = $"Preview ({MediaItemIndexHolder + 1})";
+            Title = $"Preview ({MediaItemIndexHolder + 1}) - .{MediaItemHolder.Grid_MediaFormat}";
             if (Window_Tagger._RefHolder != null) Window_Tagger._RefHolder.Close();
 
             PB_Upload.IsEnabled = true;
@@ -343,7 +343,7 @@ namespace e621_ReBot_v3
 
                 default:
                     {
-                        if (MediaItemHolder.Grid_MediaMD5 == null)
+                        if (MediaItemHolder.Grid_MediaMD5 == null) //Acts as first load
                         {
                             MatchCollection ImageResolution = Preview_Regex().Matches(DocumentTitle);
 
@@ -353,46 +353,42 @@ namespace e621_ReBot_v3
                             MediaItemHolder.Grid_MediaHeight = ushort.Parse(ImageResolution[0].Groups[2].Value);
 
                             GetCachedMedia();
-                            if (MediaItemHolder.UP_UploadedID == null)
-                            {
-                                Check4MD5On621();
-                                Module_Uploader.Media2BigCheck(MediaItemHolder);
-                            }
+                            Module_Uploader.Media2BigCheck(MediaItemHolder);
                             AutoTags();
+                        }
 
-                            //load newgrounds image from cache
-                            if (MediaItemHolder.Grab_PageURL.Contains(".newgrounds.com"))
+                        //Load image from cache to make a thumbnail if needed
+                        if (MediaItemHolder.Grid_Thumbnail == null && MediaItemHolder.Grid_ThumbnailDLStart == false)
+                        {
+                            //gives error about it not being in cache sometimes, how?
+                            string fileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL);
+                            if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(fileName))
                             {
-                                string CachedImagePath = Module_Downloader.MediaBrowser_MediaCache[Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL)];
+                                string CachedImagePath = Module_Downloader.MediaBrowser_MediaCache[fileName];
                                 MediaItemHolder.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(new BitmapImage(new Uri(CachedImagePath, UriKind.Relative)), MediaItemHolder.Grid_MediaFormat);
+
+                                if (MediaItemHolder.Grid_ThumbnailFullInfo == false)
+                                {
+                                    Module_Grabber.Grab_MakeThumbnailInfoText(MediaItemHolder);
+                                    MediaItemHolder.Grid_ThumbnailFullInfo = true;
+                                }
+
+                                GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+                                if (GridVETemp != null)
+                                {
+                                    GridVETemp.LoadImage();
+                                    //Also hide error label
+                                    if (GridVETemp.IsUploaded_DockPanel.IsVisible && MediaItemHolder.UP_UploadedID == null) GridVETemp.IsUploaded_DockPanel.Visibility = Visibility.Hidden;
+                                }
                             }
-                            MediaItemHolder.Grid_MediaMD5Checked = true;
                         }
 
                         //Also check if uploaded after loading saved grid
-                        if (!MediaItemHolder.Grid_MediaMD5Checked && MediaItemHolder.UP_UploadedID == null)
+                        if (MediaItemHolder.Grid_MediaMD5Checked == false && MediaItemHolder.UP_UploadedID == null)
                         {
                             Check4MD5On621();
                         }
 
-                        if (MediaItemHolder.Grid_ThumbnailFullInfo == false)
-                        {
-                            MediaItemHolder.Grid_ThumbnailFullInfo = true;
-                            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
-                            if (GridVETemp == null)
-                            {
-                                if (MediaItemHolder.Grid_Thumbnail == null && MediaItemHolder.Grid_ThumbnailDLStart == false)
-                                {
-                                    string CachedImagePath = Module_Downloader.MediaBrowser_MediaCache[Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL)];
-                                    MediaItemHolder.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(new BitmapImage(new Uri(CachedImagePath, UriKind.Relative)), MediaItemHolder.Grid_MediaFormat);
-                                }
-                                Module_Grabber.Grab_MakeThumbnailInfoText(MediaItemHolder);
-                            }
-                            else
-                            {
-                                GridVETemp.LoadImage();
-                            }
-                        }
                         Title = string.Format("Preview ({0}) - {1}×{2}.{3} ({4:N2} kB)   [MD5: {5}]", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaWidth, MediaItemHolder.Grid_MediaHeight, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f, MediaItemHolder.Grid_MediaMD5);
                         break;
                     }

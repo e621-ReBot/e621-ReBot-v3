@@ -7,6 +7,7 @@
         <Cursor x:Key="Cursor_ReBotNav">Resources/e621ReBot_CursorReBot.cur</Cursor>
         <Cursor x:Key="Cursor_BrowserNav">Resources/e621ReBot_CursorBrowser.cur</Cursor>
 
+        <!-- These brushes are frozen by default by XAML -->
         <SolidColorBrush x:Key="ThemeBackground">#FF012E56</SolidColorBrush>
         <SolidColorBrush x:Key="ThemeForeground">LightSteelBlue</SolidColorBrush>
         <SolidColorBrush x:Key="ThemeBorder">Black</SolidColorBrush>

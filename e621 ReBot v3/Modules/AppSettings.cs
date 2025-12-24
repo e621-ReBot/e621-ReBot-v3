@@ -179,21 +179,21 @@ namespace e621_ReBot_v3
                         case "ThemeBackground":
                             {
                                 string BackgroundColorHex = (string)LoadSettingsJObject["ThemeBackground"];
-                                Application.Current.Resources["ThemeBackground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(BackgroundColorHex));
+                                Application.Current.Resources["ThemeBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
                                 Window_Main._RefHolder.ColorBox_Background.Text = BackgroundColorHex.Substring(3);
                                 break;
                             }
                         case "ThemeForeground":
                             {
                                 string ForegroundColorHex = (string)LoadSettingsJObject["ThemeForeground"];
-                                Application.Current.Resources["ThemeForeground"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(ForegroundColorHex));
+                                Application.Current.Resources["ThemeForeground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
                                 Window_Main._RefHolder.ColorBox_Foreground.Text = ForegroundColorHex.Substring(3);
                                 break;
                             }
                         case "ThemeFocus":
                             {
                                 string FocusColorHex = (string)LoadSettingsJObject["ThemeFocus"];
-                                Application.Current.Resources["ThemeFocus"] = (SolidColorBrush)(new BrushConverter().ConvertFrom(FocusColorHex));
+                                Application.Current.Resources["ThemeFocus"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(FocusColorHex));
                                 Window_Main._RefHolder.ColorBox_Focus.Text = FocusColorHex.Substring(3);
                                 break;
                             }

@@ -61,6 +61,7 @@ namespace e621_ReBot_v3
             int RowIndex = GrabbedList.FindIndex(Window_Tagger._RefHolder.MediaItemHolder);
             bool LaunchTimer = false;
 
+            int BeforeCounter = 0;
             int MinIndex = Math.Max(0, RowIndex - 32);
             for (int i = MinIndex; i < RowIndex; i++)
             {
@@ -69,7 +70,7 @@ namespace e621_ReBot_v3
                     Tag = GrabbedList[i],
                     Cursor = Cursors.Hand
                 };
-                if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart != true)
+                if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart == false)
                 {
                     Module_Grabber.Grab_Thumbnail(GrabbedList[i]);
                     LaunchTimer = true;
@@ -81,6 +82,14 @@ namespace e621_ReBot_v3
                 MediaSelectItemTemp.cIsUploaded_TextBlock.Visibility = Visibility.Hidden;
                 MediaSelectItemTemp.MouseLeftButtonDown += MediaSelectItemTemp_MouseLeftButtonDownOffset;
                 Window_MediaSelectTemp.ItemPanel.Children.Add(MediaSelectItemTemp);
+                BeforeCounter++;
+
+                //Modify last item border to highlight current position
+                if (i == RowIndex - 1)
+                {
+                    MediaSelectItemTemp.BorderThickness = new Thickness(0, 0, 4, 0);
+                    MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                }
             }
 
             int AfterCounter = 0;
@@ -93,7 +102,7 @@ namespace e621_ReBot_v3
                         Tag = GrabbedList[i],
                         Cursor = Cursors.Hand
                     };
-                    if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart != true)
+                    if (GrabbedList[i].Grid_Thumbnail == null && GrabbedList[i].Grid_ThumbnailDLStart == false)
                     {
                         Module_Grabber.Grab_Thumbnail(GrabbedList[i]);
                         LaunchTimer = true;
@@ -108,10 +117,28 @@ namespace e621_ReBot_v3
                     AfterCounter++;
 
                     if (AfterCounter == 32) break;
+
+                    //Modify first item border to highlight current position
+                    if (AfterCounter == 1)
+                    {
+                        MediaSelectItemTemp.BorderThickness = new Thickness(4, 0, 0, 0);
+                        MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                    }
                 }
             }
 
-            _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(Math.Floor(Math.Max(0, RowIndex - 1) / 3d) * 204); //202 + 1 + 1
+
+
+            //Scroll to current image position
+            if (BeforeCounter > 0)
+            {
+                int imagesPerRow = 3;
+                int rowHeight = 204;  //202 + 1 + 1
+
+                int rowIndex = BeforeCounter / imagesPerRow;
+                int scollOffset = rowIndex * rowHeight;
+                _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(scollOffset);
+            } 
 
             if (LaunchTimer)
             {
