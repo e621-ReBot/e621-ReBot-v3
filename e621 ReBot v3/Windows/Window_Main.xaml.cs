@@ -1367,7 +1367,7 @@ namespace e621_ReBot_v3
         private void ResetTheme_Button_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Resources["ThemeBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#012E56")); //#FF012E56
-            Application.Current.Resources["ThemeForeground"] = new SolidColorBrush(Colors.LightSteelBlue);
+            Application.Current.Resources["ThemeForeground"] = Brushes.LightSteelBlue;
             Application.Current.Resources["ThemeFocus"] = Brushes.Orange;
         }
 

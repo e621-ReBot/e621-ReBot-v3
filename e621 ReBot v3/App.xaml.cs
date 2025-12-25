@@ -159,7 +159,7 @@ namespace e621_ReBot_v3
                     SetForegroundWindow(process.MainWindowHandle);
                     if (!IsIconic(process.MainWindowHandle) && !IsWindowVisible(process.MainWindowHandle))
                     {
-                        MessageBox.Show("I'm still here, just hidden. Did you forget about me?\nPress F1 if it's safe to unhide.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Information, MessageBoxResult.No);
+                        MessageBox.Show("I'm still here, just hidden. Did you forget about me?\nPress F1 if it's safe to unhide.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
                         //https://michlg.wordpress.com/2013/02/05/wpf-send-keys/ - meh, doesn't work
                     }
                     return;

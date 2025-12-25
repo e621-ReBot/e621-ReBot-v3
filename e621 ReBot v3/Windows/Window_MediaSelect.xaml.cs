@@ -30,6 +30,8 @@ namespace e621_ReBot_v3
 
         private void Window_Closed(object sender, EventArgs e)
         {
+
+            ThumbLoadTimer.Stop();
             _RefHolder = null;
             Owner.Activate();
         }
@@ -138,7 +140,7 @@ namespace e621_ReBot_v3
                 int rowIndex = BeforeCounter / imagesPerRow;
                 int scollOffset = rowIndex * rowHeight;
                 _RefHolder.MediaSelect_ScrollViewer.ScrollToVerticalOffset(scollOffset);
-            } 
+            }
 
             if (LaunchTimer)
             {
@@ -468,6 +470,7 @@ namespace e621_ReBot_v3
             foreach (MediaSelectItem MediaSelectItemTemp in _RefHolder.ItemPanel.Children)
             {
                 ThumbImageSource = ((MediaItem)MediaSelectItemTemp.Tag).Grid_Thumbnail;
+
                 if (ThumbImageSource == null)
                 {
                     LaunchTimer = true;
