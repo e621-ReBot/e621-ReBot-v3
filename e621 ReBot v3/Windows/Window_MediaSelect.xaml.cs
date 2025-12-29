@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -86,11 +87,18 @@ namespace e621_ReBot_v3
                 Window_MediaSelectTemp.ItemPanel.Children.Add(MediaSelectItemTemp);
                 BeforeCounter++;
 
+                //Make a higlight for current parent
+                if (Window_Tagger._RefHolder.MediaItemHolder.UP_ParentMediaItem != null && Window_Tagger._RefHolder.MediaItemHolder.UP_ParentMediaItem == GrabbedList[i])
+                {
+                    MediaSelectItemTemp.ParentBorder.BorderThickness = new Thickness(8);
+                    MediaSelectItemTemp.ParentBorder.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                }
+
                 //Modify last item border to highlight current position
                 if (i == RowIndex - 1)
                 {
-                    MediaSelectItemTemp.BorderThickness = new Thickness(0, 0, 4, 0);
-                    MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                    MediaSelectItemTemp.BorderThickness = new Thickness(0, 0, 8, 0);
+                    MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeBackground"];
                 }
             }
 
@@ -120,11 +128,18 @@ namespace e621_ReBot_v3
 
                     if (AfterCounter == 32) break;
 
+                    //Make a higlight for current parent
+                    if (Window_Tagger._RefHolder.MediaItemHolder.UP_ParentMediaItem != null && Window_Tagger._RefHolder.MediaItemHolder.UP_ParentMediaItem == GrabbedList[i])
+                    {
+                        MediaSelectItemTemp.ParentBorder.BorderThickness = new Thickness(8);
+                        MediaSelectItemTemp.ParentBorder.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                    }
+
                     //Modify first item border to highlight current position
                     if (AfterCounter == 1)
                     {
-                        MediaSelectItemTemp.BorderThickness = new Thickness(4, 0, 0, 0);
-                        MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeFocus"];
+                        MediaSelectItemTemp.BorderThickness = new Thickness(8, 0, 0, 0);
+                        MediaSelectItemTemp.BorderBrush = (SolidColorBrush)Application.Current.Resources["ThemeBackground"];
                     }
                 }
             }
@@ -246,7 +261,7 @@ namespace e621_ReBot_v3
         }
 
         //Has 100 daily search and 5 per 30s search limit.
-        private static async void SaunceNaoSearch()
+        private static async Task SaunceNaoSearch()
         {
             string? ResponseString = null;
             using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, $"https://saucenao.com/search.php?db=29&url={Window_Preview._RefHolder.MediaItemHolder.Grab_MediaURL}"))
@@ -318,7 +333,7 @@ namespace e621_ReBot_v3
 
             _RefHolder.SearchStatus.Text = "Getting image data...";
 
-            string? JSON_SimilarData = Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{string.Join(',', ResultList)}");
+            string? JSON_SimilarData = await Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{string.Join(',', ResultList)}");
             if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
             {
                 if (JSON_SimilarData.StartsWith('ⓔ'))
@@ -364,11 +379,11 @@ namespace e621_ReBot_v3
         }
 
         private static readonly ImageSource MediaDeletedThumb = new ImageSourceConverter().ConvertFrom(Properties.Resources.E6Image_Deleted) as ImageSource;
-        private static void IQDBQSearch()
+        private static async Task IQDBQSearch()
         {
             _RefHolder.SearchStatus.Text = "Getting image data...";
             //no md5 or extension without auth
-            string? JSON_SimilarData = Module_e621Data.DataDownload($"https://e621.net/iqdb_queries.json?url={Window_Preview._RefHolder.MediaItemHolder.Grab_MediaURL}", true);
+            string? JSON_SimilarData = await Module_e621Data.DataDownload($"https://e621.net/iqdb_queries.json?url={Window_Preview._RefHolder.MediaItemHolder.Grab_MediaURL}", true);
             if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
             {
                 if (JSON_SimilarData.StartsWith('ⓔ'))

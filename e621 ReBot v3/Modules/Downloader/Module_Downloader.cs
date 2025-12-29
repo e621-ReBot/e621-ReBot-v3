@@ -634,14 +634,14 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        internal static void Grab_DownloadMedia(string WebAddress)
+        internal static async Task Grab_DownloadMedia(string WebAddress)
         {
             Uri TempURI = new Uri(WebAddress);
             switch (TempURI.Host)
             {
                 case "e621.net":
                     {
-                        Module_DLe621.GrabMediaLinks(WebAddress);
+                        await Module_DLe621.GrabMediaLinks(WebAddress);
                         break;
                     }
 

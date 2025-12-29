@@ -14,7 +14,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         internal static string? SpecialSaveFolder;
         internal static bool CancellationPending = false;
 
-        internal static void GrabMediaLinks(string WebAddress)
+        internal static async Task GrabMediaLinks(string WebAddress)
         {
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
@@ -137,10 +137,10 @@ namespace e621_ReBot_v3.Modules.Downloader
                             {
                                 string PoolID = PageNode.SelectSingleNode(".//div[@id='a-show']//a").Attributes["href"].Value.Replace("/posts?tags=pool%3A", null);
 
-                                string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
+                                string? JSON_PoolData = await Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
                                 if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
 
-                                PoolPages = JObject.Parse(Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"))["post_ids"].Values<string>().ToList();
+                                PoolPages = JObject.Parse(JSON_PoolData)["post_ids"].Values<string>().ToList();
                             }
 
                             string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
@@ -283,7 +283,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         GrabAnotherAPIPage:
             Update_APIStatus($"Working on Tags - Page {PageCounter}", true);
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PostRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}"));
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PostRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);
@@ -336,7 +336,13 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         internal async static void Grab_Pool(string PoolID)
         {
-            string? JSON_PoolData = Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json");
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json").GetAwaiter().GetResult());
+            lock (Module_e621APIController.UserTasks)
+            {
+                Module_e621APIController.UserTasks.Add(RunTaskFirst);
+            }
+
+            string? JSON_PoolData = await RunTaskFirst;
             if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
 
             JToken PoolJSON = JObject.Parse(JSON_PoolData);
@@ -364,7 +370,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         GrabAnotherAPIPage:
             Update_APIStatus($"Working on Pool#{PoolID} - Page {PageCounter}", true);
 
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PoolRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}"));
+            RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PoolRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);

@@ -180,11 +180,10 @@ namespace e621_ReBot_v3
         // - - - - - - - - - - - - - - - -
 
         internal MediaItem? MediaItemHolder;
-        internal void Nav2URL(MediaItem MediaItemRef)
+        bool _isLoading = false;
+        internal async Task Nav2URL(MediaItem MediaItemRef)
         {
-
-
-            if (MediaBrowser.IsBrowserInitialized) MediaBrowser.Stop(); //Error: "IBrowser instance is null" Null sometimes?
+            if (MediaBrowser.IsBrowserInitialized && _isLoading) MediaBrowser.Stop(); //Error: "IBrowser instance is null" Null sometimes?
             if (MediaUgoiraPlayer._Loaded)
             {
                 MediaUgoiraPlayer.Visibility = Visibility.Hidden;
@@ -260,19 +259,20 @@ namespace e621_ReBot_v3
             //}
 
             PB_LoadAllMedia.IsEnabled = !(MediaItemIndexHolder == Module_Grabber._Grabbed_MediaItems.Count - 1);
-            MediaBrowser.LoadUrl(MediaURL);
+            MediaBrowser.LoadUrlAsync(MediaURL);
         }
 
         private string? DocumentTitle;
         private void MediaBrowser_TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            DocumentTitle = e.NewValue.ToString();
+            DocumentTitle = e.NewValue?.ToString();
         }
 
         DateTime LoadFinishedDateTime;
         private void MediaBrowser_LoadingStateChanged(object? sender, LoadingStateChangedEventArgs e)
         {
             //if (MediaBrowser.Address.Equals("about:blank")) return;
+            _isLoading = e.IsLoading;
 
             if (e.IsLoading)
             {
@@ -281,7 +281,7 @@ namespace e621_ReBot_v3
             else
             {
                 LoadFinishedDateTime = DateTime.Now;
-                Dispatcher.Invoke(BrowserLoadedActions);
+                Dispatcher.BeginInvoke(BrowserLoadedActions);
             }
         }
 
@@ -316,7 +316,7 @@ namespace e621_ReBot_v3
 
         [GeneratedRegex(@"[(](\d+)×(\d+)[)]")]
         private static partial Regex Preview_Regex();
-        private void MediaLoadedActions()
+        private async Task MediaLoadedActions()
         {
             switch (MediaItemHolder.Grid_MediaFormat)
             {
@@ -330,14 +330,14 @@ namespace e621_ReBot_v3
                 case "mp4":
                 case "swf":
                     {
-
                         if (MediaItemHolder.Grid_MediaMD5 == null && MediaItemHolder.DL_FilePath != null && File.Exists(MediaItemHolder.DL_FilePath))
                         {
                             GetCachedMedia(MediaItemHolder.DL_FilePath);
                         }
-                        if (MediaItemHolder.Grid_MediaMD5 != null && MediaItemHolder.UP_UploadedID == null) Check4MD5On621();
                         AutoTags();
                         Title = string.Format("Preview ({0}) - .{1} ({2:N2} kB)   ", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f);
+
+                        if (MediaItemHolder.Grid_MediaMD5Checked == false && MediaItemHolder.UP_UploadedID == null) await Check4MD5On621(MediaItemHolder);
                         break;
                     }
 
@@ -382,14 +382,10 @@ namespace e621_ReBot_v3
                                 }
                             }
                         }
+                        Title = string.Format("Preview ({0}) - {1}×{2}.{3} ({4:N2} kB)   [MD5: {5}]", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaWidth, MediaItemHolder.Grid_MediaHeight, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f, MediaItemHolder.Grid_MediaMD5);
 
                         //Also check if uploaded after loading saved grid
-                        if (MediaItemHolder.Grid_MediaMD5Checked == false && MediaItemHolder.UP_UploadedID == null)
-                        {
-                            Check4MD5On621();
-                        }
-
-                        Title = string.Format("Preview ({0}) - {1}×{2}.{3} ({4:N2} kB)   [MD5: {5}]", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaWidth, MediaItemHolder.Grid_MediaHeight, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f, MediaItemHolder.Grid_MediaMD5);
+                        if (MediaItemHolder.Grid_MediaMD5Checked == false && MediaItemHolder.UP_UploadedID == null) await Check4MD5On621(MediaItemHolder);
                         break;
                     }
             }
@@ -457,19 +453,28 @@ namespace e621_ReBot_v3
             }
         }
 
-        private void Check4MD5On621()
+        private async Task Check4MD5On621(MediaItem MediaItemHolderRef)
         {
-            if (MediaItemHolder.Grid_MediaMD5 == null) return;
-            MediaItemHolder.Preview_DontDelay = true;
+            if (MediaItemHolderRef.Grid_MediaMD5 == null) return;
+            MediaItemHolderRef.Preview_DontDelay = true;
 
-            string MD5Check = Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolder.Grid_MediaMD5}");
+            Title += " | Checking MD5...";
+
+            string MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}");
+
+            MediaItemHolderRef.Grid_MediaMD5Checked = true;
+
+            //When navigating away, don't cut the title
+            if (MediaItemHolderRef == MediaItemHolder) Title = Title.Substring(0, Title.Length - 18); //"MediaBrowser.Title".Length
+
             if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
             JObject MD5CheckJSON = JObject.Parse(MD5Check);
-            MediaItemHolder.UP_UploadedID = (string)MD5CheckJSON["post"]["id"];
-            AppSettings.MediaRecord_Add(MediaItemHolder);
+            MediaItemHolderRef.UP_UploadedID = (string)MD5CheckJSON["post"]["id"];
 
-            MediaItemHolder.UP_Rating = ((string)MD5CheckJSON["post"]["rating"]).ToUpper();
+            AppSettings.MediaRecord_Add(MediaItemHolderRef);
+
+            MediaItemHolderRef.UP_Rating = ((string)MD5CheckJSON["post"]["rating"]).ToUpper();
             List<string> TagList = new List<string>();
             foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
             {
@@ -478,20 +483,17 @@ namespace e621_ReBot_v3
                     TagList.Add((string)cTag);
                 }
             }
-            ;
-            MediaItemHolder.UP_Tags = string.Join(' ', TagList);
-            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+            MediaItemHolderRef.UP_Tags = string.Join(' ', TagList);
+            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolderRef);
             if (GridVETemp != null)
             {
-                GridVETemp.IsUploaded_SetText(MediaItemHolder.UP_UploadedID);
+                GridVETemp.IsUploaded_SetText(MediaItemHolderRef.UP_UploadedID);
             }
         }
 
         private void AutoTags()
         {
-            List<string> CurrentTags = new List<string>();
-            CurrentTags.AddRange(MediaItemHolder.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-            CurrentTags = CurrentTags.Distinct().ToList();
+            List<string> CurrentTags = MediaItemHolder.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
             string? animated_tag = null;
 
             // /// = = = = = Check if GIF is animated
@@ -858,7 +860,7 @@ namespace e621_ReBot_v3
 
         private async void InferiorSub(string PostID)
         {
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json"));
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);
@@ -915,7 +917,7 @@ namespace e621_ReBot_v3
 
         internal static async void SuperiorSub(string PostID, MediaItem MediaItemRef)
         {
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json"));
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);
@@ -990,7 +992,7 @@ namespace e621_ReBot_v3
             if ((bool)PostData["has_notes"])
             {
                 // when they fix api this should no longer take 2 requests to get notes
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={PostID}", true));
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={PostID}", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.UserTasks)
                 {
                     Module_e621APIController.UserTasks.Insert(0, RunTaskFirst);

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -864,7 +865,7 @@ namespace e621_ReBot_v3.Modules
 
             Report_Status("Getting Notes data...");
 
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={MediaItemRef.UP_Inferior_ID}"));
+            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={MediaItemRef.UP_Inferior_ID}").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)
             {
                 Module_e621APIController.UserTasks.Add(RunTaskFirst);

@@ -734,7 +734,11 @@ namespace e621_ReBot_v3.Modules
                         else
                         {
                             MediaItemRef.Grid_ThumbnailDLStart = false;
-                            GridVERef?.SetErrorText($"e:{(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
+                            //Show error text only if it's not uploaded already
+                            if (MediaItemRef.UP_UploadedID == null)
+                            {
+                                GridVERef?.SetErrorText($"e:{(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
+                            } 
                         }
                     }
                 }

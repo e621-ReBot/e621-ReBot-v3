@@ -84,7 +84,7 @@ namespace e621_ReBot_v3.Modules
             Timestamps_Upload.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/users/{AppSettings.UserID}.json", true));
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/users/{AppSettings.UserID}.json", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -102,7 +102,7 @@ namespace e621_ReBot_v3.Modules
 
                 AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}"));
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -126,7 +126,7 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?search[creator_id]={AppSettings.UserID}"));
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?search[creator_id]={AppSettings.UserID}").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -159,7 +159,7 @@ namespace e621_ReBot_v3.Modules
             Timestamps_Flags.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?search[creator_id]={AppSettings.UserID}", true));
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?search[creator_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -191,7 +191,7 @@ namespace e621_ReBot_v3.Modules
             Timestamps_Notes.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?search[updater_id]={AppSettings.UserID}", true));
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?search[updater_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);

@@ -637,6 +637,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                         break;
                     }
 
+                case "span":
+                    {
+                        TextHolder += TextHolderNode.InnerText;
+                        break;
+                    }
+
                 default:
                     {
                         TextHolder += "UNKNOWN ELEMENT";

@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,7 +18,7 @@ namespace e621_ReBot_v3.Modules
     {
         private static readonly HttpClientHandler e621_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
         private static readonly HttpClient e621_HttpClient = new HttpClient(e621_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
-        internal static string? DataDownload(string Address, bool Authentication = false)
+        internal static async Task<string?> DataDownload(string Address, bool Authentication = false)
         {
             using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, Address))
             {
@@ -26,11 +27,11 @@ namespace e621_ReBot_v3.Modules
 
                 try
                 {
-                    using (HttpResponseMessage HttpResponseMessageTemp = e621_HttpClient.Send(HttpRequestMessageTemp))
+                    using (HttpResponseMessage HttpResponseMessageTemp = await e621_HttpClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead))
                     {
                         if (HttpResponseMessageTemp.IsSuccessStatusCode)
                         {
-                            return HttpResponseMessageTemp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
                         }
                     }
                 }

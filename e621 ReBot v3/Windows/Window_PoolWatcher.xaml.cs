@@ -121,7 +121,7 @@ namespace e621_ReBot_v3
                 for (int i = 0; i < Math.Ceiling(AppSettings.PoolWatcher.Count / (double)PageSize); i++)
                 {
                     string ListSlice = string.Join(',', AppSettings.PoolWatcher.Select(PoolItem => PoolItem.ID).Skip(i * PageSize).Take(PageSize));
-                    Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools.json?search[id]={ListSlice}"));
+                    Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools.json?search[id]={ListSlice}").GetAwaiter().GetResult());
                     lock (Module_e621APIController.BackgroundTasks)
                     {
                         Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -171,7 +171,7 @@ namespace e621_ReBot_v3
             for (int i = 0; i < Math.Ceiling(PoolPosts2Get.Keys.Count / (double)PageSize); i++)
             {
                 string ListSlice = string.Join(',', PoolPosts2Get.Keys.ToList().Skip(i * PageSize).Take(PageSize));
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{ListSlice}"));
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{ListSlice}").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
