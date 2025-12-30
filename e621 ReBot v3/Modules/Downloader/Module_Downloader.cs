@@ -740,7 +740,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static string? SelectFolderPopup(string? LastValue)
         {
-            string? InputedText = Window_Main._RefHolder.Dispatcher.Invoke(() => { return Custom_InputBox.ShowInputBox(Window_Main._RefHolder, "e621 ReBot", "If you want to download media to a separate folder, enter a folder name below.", BrowserControl._RefHolder.BQB_Start.PointToScreen(new Point(0, 0)), LastValue ?? string.Empty); });
+            string? InputedText = Window_Main._RefHolder.Dispatcher.Invoke(() => { return Custom_InputBox.ShowInputBox(Window_Main._RefHolder, "e621 ReBot", "If you want to download media to a separate folder, enter a folder name below.", Window_Main._RefHolder.PointToScreen(new Point(Window_Main._RefHolder.ReBot_TabControl.ActualWidth / 2 + 24 - 160, Window_Main._RefHolder.ReBot_TabControl.ActualHeight / 2 - 40)), LastValue ?? string.Empty); }); //320x80 is input box, so need half that to center it
             if (InputedText.Equals("☠") || string.IsNullOrEmpty(InputedText))
             {
                 InputedText = null;
@@ -1132,10 +1132,13 @@ namespace e621_ReBot_v3.Modules
             PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
 
             //Get Host for folder name
-            string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
+            Uri DomainURL = new Uri(DownloadItemRef.Grab_PageURL);
+            string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
+            HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(HostString);
 
             //Make Download path and folder
-            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName, DownloadItemRef.e6_PoolName); //e6_PoolName is re-used as a separate folder
+            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName); //e6_PoolName is re-used as a separate folder
+            if (!string.IsNullOrEmpty(DownloadItemRef.e6_PoolName)) FolderPath = Path.Combine(AppSettings.Download_FolderLocation, DownloadItemRef.e6_PoolName);
             Directory.CreateDirectory(FolderPath);
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);

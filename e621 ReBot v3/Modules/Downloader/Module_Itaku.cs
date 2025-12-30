@@ -37,9 +37,9 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             string? Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
-            //https://itaku.ee/api/media/gallery_imgs/xyz/sm_REFLb27.png
-            //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png
-            //https://itaku.ee/api/media/gallery_imgs/xyz/xl_GoYCeeW.png
+            //https://itaku.ee/api/media/gallery_imgs/xyz/sm_REFLb27.png //small
+            //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png //large
+            //https://itaku.ee/api/media/gallery_imgs/xyz/xl_GoYCeeW.png //extra large
             //https://itaku.ee/api/media/gallery_imgs/xyz.PNG
             string ThumbURL = (string)ItakuJSONToken["image_xl"];
             if (ThumbURL.Length - ThumbURL.LastIndexOf('/') == 8)

@@ -7,22 +7,10 @@
         Title="e621 ReBot v3" Width="1280" Height="720" Icon="/Resources/ReBot_Icon.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" Activated="Window_Activated" KeyDown="Window_KeyDown" Closing="Window_Closing">
 
     <Window.Resources>
-        <Style TargetType="TextBlock" x:Key="FadeAnimation">
-            <Setter Property="IsEnabled" Value="False"/>
-            <Setter Property="Opacity" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="True">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.1"/>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <Storyboard x:Key="FadeAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
+        </Storyboard>
     </Window.Resources>
 
     <Grid>
@@ -197,7 +185,7 @@
                     <DockPanel LastChildFill="False" Grid.Row="1" HorizontalAlignment="Center" Margin="0,1,0,0">
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBlock x:Name="GBD_Change" Text="+420" IsHitTestVisible="False" Width="32" VerticalAlignment="Center" Foreground="RoyalBlue" Margin="0,0,4,0" Style="{StaticResource FadeAnimation}"/>
+                            <TextBlock x:Name="GBD_Change" Text="+420" IsHitTestVisible="False" Width="32" VerticalAlignment="Center" Foreground="RoyalBlue" Margin="0,0,4,0"/>
                             <Button x:Name="GBD_Download" Width="96" Content="▼ Download ▼" BorderThickness="1,0,1,0" Margin="-1,0,0,0" IsEnabled="False" ToolTip="Download all selected media.&#10;Shift+Click to download selected media on this page only.&#10;&#10;Media that is already downloaded will be skipped." Click="GBD_Download_Click">
                                 <Button.Style>
                                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
@@ -241,7 +229,7 @@
                                     </Style>
                                 </Button.Style>
                             </Button>
-                            <TextBlock x:Name="GBU_Change" Text="+420" IsHitTestVisible="False" Width="32" Foreground="LimeGreen" VerticalAlignment="Center" Margin="4,0,0,0" Style="{StaticResource FadeAnimation}"/>
+                            <TextBlock x:Name="GBU_Change" Text="+420" IsHitTestVisible="False" Width="32" Foreground="LimeGreen" VerticalAlignment="Center" Margin="4,0,0,0"/>
                         </StackPanel>
 
                     </DockPanel>

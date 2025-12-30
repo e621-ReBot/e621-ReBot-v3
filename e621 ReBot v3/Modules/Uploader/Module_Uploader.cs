@@ -10,11 +10,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
-using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace e621_ReBot_v3.Modules
@@ -122,8 +122,7 @@ namespace e621_ReBot_v3.Modules
                 }
             }
             Window_Main._RefHolder.GBU_Change.Text = $"+{UploadAdditionCounter}";
-            Window_Main._RefHolder.GBU_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
-            Window_Main._RefHolder.GBU_Change.IsEnabled = false;
+            ((Storyboard)Window_Main._RefHolder.FindResource("FadeAnimation")).Begin(Window_Main._RefHolder.GBU_Change);
         }
 
         internal static void UploadTreeView_CreateJob(MediaItem MediaItemRef)

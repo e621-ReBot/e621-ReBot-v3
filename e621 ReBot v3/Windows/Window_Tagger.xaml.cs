@@ -449,7 +449,7 @@ namespace e621_ReBot_v3
 
                 Window_MediaSelect.Show_ParentOffset(TB_ParentOffset.PointToScreen(new Point(0, 0)));
                 //Only set color if parent offset was selected
-                if (MediaItemHolder.UP_ParentMediaItem != null)  TB_ParentOffset.Foreground = new SolidColorBrush(Colors.RoyalBlue);
+                if (MediaItemHolder.UP_ParentMediaItem != null) TB_ParentOffset.Foreground = new SolidColorBrush(Colors.RoyalBlue);
             }
         }
 

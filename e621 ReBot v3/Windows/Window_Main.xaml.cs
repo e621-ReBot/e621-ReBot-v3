@@ -19,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace e621_ReBot_v3
@@ -46,6 +47,8 @@ namespace e621_ReBot_v3
             GBTB_Center.Visibility = Visibility.Hidden;
             GBTB_Left.Visibility = Visibility.Hidden;
             GBTB_Right.Visibility = Visibility.Hidden;
+            GBD_Change.Opacity = 0;
+            GBU_Change.Opacity = 0;
             Upload_ProgressCanvas.Visibility = Visibility.Hidden;
             SettingsButton_DLGenders.Visibility = Visibility.Hidden;
             SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
@@ -687,51 +690,32 @@ namespace e621_ReBot_v3
         private void GBD_Download_Click(object sender, RoutedEventArgs e)
         {
             int DownloadAdditionCounter = 0;
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-            {
-                foreach (GridVE GridVETemp in Grid_GridVEPanel.Children)
-                {
-                    MediaItem? MediaItemTemp = GridVETemp._MediaItemRef;
-                    if (MediaItemTemp.DL_Queued)
-                    {
-                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
 
-                        Module_Downloader.AddDownloadItem2Queue(
-                            PageURL: MediaItemTemp.Grab_PageURL,
-                            MediaURL: MediaItemTemp.Grab_MediaURL,
-                            ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
-                            Artist: MediaItemTemp.Grab_Artist,
-                            Title: MediaItemTemp.Grab_Title,
-                            MediaFormat: MediaItemTemp.Grid_MediaFormat,
-                            MediaItemRef: MediaItemTemp);
-                        DownloadAdditionCounter++;
-                    }
+            string? SpecialSaveFolder = Module_Downloader.SelectFolderPopup(string.Empty);
+
+            IEnumerable<MediaItem> MediaItemList = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? Module_Grabber._Grabbed_MediaItems.Skip(Grid_ItemStartIndex).Take(Grid_ItemLimit) : Module_Grabber._Grabbed_MediaItems;
+            foreach (MediaItem? MediaItemTemp in MediaItemList)
+            {
+                if (MediaItemTemp.DL_Queued)
+                {
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
+
+                    Module_Downloader.AddDownloadItem2Queue(
+                        PageURL: MediaItemTemp.Grab_PageURL,
+                        MediaURL: MediaItemTemp.Grab_MediaURL,
+                        ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
+                        Artist: MediaItemTemp.Grab_Artist,
+                        Title: MediaItemTemp.Grab_Title,
+                        MediaFormat: MediaItemTemp.Grid_MediaFormat,
+                        MediaItemRef: MediaItemTemp,
+                        e6PoolName: SpecialSaveFolder); //Save to user specified folder
+                    DownloadAdditionCounter++;
                 }
             }
-            else
-            {
-                foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
-                {
-                    if (MediaItemTemp.DL_Queued)
-                    {
-                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
 
-                        Module_Downloader.AddDownloadItem2Queue(
-                            PageURL: MediaItemTemp.Grab_PageURL,
-                            MediaURL: MediaItemTemp.Grab_MediaURL,
-                            ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
-                            Artist: MediaItemTemp.Grab_Artist,
-                            Title: MediaItemTemp.Grab_Title,
-                            MediaFormat: MediaItemTemp.Grid_MediaFormat,
-                            MediaItemRef: MediaItemTemp);
-                        DownloadAdditionCounter++;
-                    }
-                }
-            }
             Module_Downloader.UpdateDownloadTreeView();
             GBD_Change.Text = $"+{DownloadAdditionCounter}";
-            GBD_Change.IsEnabled = true; //Makes it local, so animation no longer work becase it takes priority over style
-            GBD_Change.IsEnabled = false;
+            ((Storyboard)this.FindResource("FadeAnimation")).Begin(GBD_Change);
         }
 
         private void GBD_Download_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)

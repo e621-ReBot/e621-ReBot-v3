@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace e621_ReBot_v3.CustomControls
 {
-    internal class MediaItemList : CollectionBase, IList, IEnumerable
+    internal class MediaItemList : CollectionBase, IList, IEnumerable, IEnumerable<MediaItem>
     {
         private List<string> MediaURLs = new List<string>();
 
@@ -131,6 +131,14 @@ namespace e621_ReBot_v3.CustomControls
         {
             MediaURLs.Clear();
             InnerList.Clear();
+        }
+
+        IEnumerator<MediaItem> IEnumerable<MediaItem>.GetEnumerator()
+        {
+            foreach (MediaItem MediaItemTemp in InnerList)
+            {
+                yield return MediaItemTemp;
+            }
         }
     }
 }

@@ -355,7 +355,14 @@ namespace e621_ReBot_v3
                             GetCachedMedia();
                             Module_Uploader.Media2BigCheck(MediaItemHolder);
                             AutoTags();
+
+                            //Reload thumb for Seasyl as it is using a PH thumb
+                            if (MediaItemHolder.Grab_PageURL.Contains("www.weasyl.com"))
+                            {
+                                MediaItemHolder.Grid_Thumbnail = null; //set to null so it will be loaded in the following code automatically
+                            }
                         }
+
 
                         //Load image from cache to make a thumbnail if needed
                         if (MediaItemHolder.Grid_Thumbnail == null && MediaItemHolder.Grid_ThumbnailDLStart == false)
@@ -366,22 +373,26 @@ namespace e621_ReBot_v3
                             {
                                 string CachedImagePath = Module_Downloader.MediaBrowser_MediaCache[fileName];
                                 MediaItemHolder.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(new BitmapImage(new Uri(CachedImagePath, UriKind.Relative)), MediaItemHolder.Grid_MediaFormat);
+                            }
 
-                                if (MediaItemHolder.Grid_ThumbnailFullInfo == false)
-                                {
-                                    Module_Grabber.Grab_MakeThumbnailInfoText(MediaItemHolder);
-                                    MediaItemHolder.Grid_ThumbnailFullInfo = true;
-                                }
-
-                                GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
-                                if (GridVETemp != null)
-                                {
-                                    GridVETemp.LoadImage();
-                                    //Also hide error label
-                                    if (GridVETemp.IsUploaded_DockPanel.IsVisible && MediaItemHolder.UP_UploadedID == null) GridVETemp.IsUploaded_DockPanel.Visibility = Visibility.Hidden;
-                                }
+                            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+                            if (GridVETemp != null)
+                            {
+                                GridVETemp.LoadImage();
+                                //Also hide error label
+                                if (GridVETemp.IsUploaded_DockPanel.IsVisible && MediaItemHolder.UP_UploadedID == null) GridVETemp.IsUploaded_DockPanel.Visibility = Visibility.Hidden;
                             }
                         }
+
+                        if (MediaItemHolder.Grid_ThumbnailFullInfo == false)
+                        {
+                            Module_Grabber.Grab_MakeThumbnailInfoText(MediaItemHolder);
+                            MediaItemHolder.Grid_ThumbnailFullInfo = true;
+
+                            GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
+                            GridVETemp?.LoadImage();
+                        }
+
                         Title = string.Format("Preview ({0}) - {1}×{2}.{3} ({4:N2} kB)   [MD5: {5}]", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaWidth, MediaItemHolder.Grid_MediaHeight, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f, MediaItemHolder.Grid_MediaMD5);
 
                         //Also check if uploaded after loading saved grid
