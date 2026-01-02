@@ -439,6 +439,8 @@ namespace e621_ReBot_v3
         private static void MediaSelectItemTemp_MouseLeftButtonDownSimilar(object sender, MouseButtonEventArgs e)
         {
             MediaSelectItem MediaSelectItemTemp = (MediaSelectItem)sender;
+
+            //Set as superior for uploading as replacement  
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 Window_Preview.SuperiorSub(MediaSelectItemTemp.PostID, Window_Preview._RefHolder.MediaItemHolder);
@@ -446,6 +448,7 @@ namespace e621_ReBot_v3
                 return;
             }
 
+            //Open it in default browser
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
             {
                 string e6Post = $"https://e621.net/post/show/{MediaSelectItemTemp.PostID}";
@@ -453,6 +456,7 @@ namespace e621_ReBot_v3
                 return;
             }
 
+            //Set as inferior for saving it as "already uploaded"
             Window_Preview._RefHolder.MediaItemHolder.UP_Rating = MediaSelectItemTemp.Rating;
             Window_Preview._RefHolder.MediaItemHolder.UP_UploadedID = MediaSelectItemTemp.PostID;
             Window_Preview._RefHolder.MediaItemHolder.UP_Tags = MediaSelectItemTemp.Tag.ToString();

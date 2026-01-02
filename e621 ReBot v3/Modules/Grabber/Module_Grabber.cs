@@ -816,9 +816,9 @@ namespace e621_ReBot_v3.Modules
                     DrawingContextTemp.DrawText(FormattedTextTemp, TextCenterPoint);
                 }
             }
-            RenderTargetBitmap RenderTargetBitmapTemp = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Default);
+            RenderTargetBitmap RenderTargetBitmapTemp = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Pbgra32);
             RenderTargetBitmapTemp.Render(DrawingVisualTemp);
-            RenderTargetBitmapTemp.Freeze();
+            if (RenderTargetBitmapTemp.CanFreeze && !RenderTargetBitmapTemp.IsFrozen) RenderTargetBitmapTemp.Freeze();
 
             MediaItemRef.Grid_Thumbnail = null;
             MediaItemRef.Grid_Thumbnail = RenderTargetBitmapTemp;

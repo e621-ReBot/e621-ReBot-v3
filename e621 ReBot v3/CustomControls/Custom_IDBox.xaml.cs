@@ -35,40 +35,42 @@ namespace e621_ReBot_v3.CustomControls
                             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Clipboard.GetDataObject().GetDataPresent(DataFormats.StringFormat))
                             {
                                 string ClipboardText = (string)Clipboard.GetDataObject().GetData(DataFormats.StringFormat);
+                                if (ClipboardText.Length < 8 && uint.TryParse(ClipboardText, out _))
+                                {
+                                    //Delay so text selection gets removed
+                                    ID_TextBox.Dispatcher.BeginInvoke(() =>
+                                    {
+                                        ID_TextBox.SelectionStart = ID_TextBox.Text.Length;
+                                    });
+
+                                    return; //Allow
+                                }
+
                                 if (WhitelistedURLs.Any(Url => ClipboardText.Contains(Url)))
                                 {
                                     ClipboardText = ClipboardText.Replace("https://e621.net/", null);
-                                    if (ClipboardText.Contains('?')) ClipboardText = ClipboardText.Substring(0, ClipboardText.IndexOf('?'));
+                                    if (ClipboardText.Contains('?')) ClipboardText = ClipboardText.Remove(ClipboardText.IndexOf('?'));
 
-                                    string ClipboardID = ClipboardText.Split('/', StringSplitOptions.RemoveEmptyEntries)[1];
-                                    if (int.TryParse(ClipboardID, out _))
+                                    string ClipboardID = ClipboardText.Split('/', StringSplitOptions.RemoveEmptyEntries).Last(); //ID is at the end
+                                    if (uint.TryParse(ClipboardID, out _))
                                     {
                                         ID_TextBox.Text = ClipboardID;
                                         ID_TextBox.SelectionStart = ID_TextBox.Text.Length;
                                     }
-                                    return;
-                                }
-
-                                if (ClipboardText.Length < 8 && int.TryParse(ClipboardText, out _))
-                                {
-                                    ID_TextBox.Text = ClipboardText;
-                                    ID_TextBox.SelectionStart = ID_TextBox.Text.Length;
-                                    return;
                                 }
                             }
-                            e.Handled = true;
-                            return;
+                            break;
                         }
 
                     case Key.A:
                         {
-                            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) return;
+                            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) return; //Allow
                             break;
                         }
 
                     case Key.Back:
                         {
-                            return;
+                            return; //Allow
                         }
 
                     case Key.Escape:
@@ -76,7 +78,7 @@ namespace e621_ReBot_v3.CustomControls
                             NotCancel = false;
                             e.Handled = true;
                             Close();
-                            return;
+                            break;
                         }
 
                     case Key.Enter:
@@ -84,7 +86,7 @@ namespace e621_ReBot_v3.CustomControls
                             NotCancel = true;
                             e.Handled = true;
                             Close();
-                            return;
+                            break;
                         }
                 }
                 e.Handled = true;

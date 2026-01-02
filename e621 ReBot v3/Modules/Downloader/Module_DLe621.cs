@@ -274,7 +274,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             });
         }
 
-        internal async static void Grab_MediaWithTags(string TagQuery, string FolderName)
+        internal async static void Grab_MediaWithTags(string TagQuery, string? FolderName)
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.DownloadQueue_CancelAPIDL.IsEnabled = true; });
 

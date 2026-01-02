@@ -852,6 +852,8 @@ namespace e621_ReBot_v3
         private void PB_SimilarSearch_Click(object sender, RoutedEventArgs e)
         {
             Button SenderButton = (Button)sender;
+
+            //Set as inferior for saving it as "already uploaded"
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
                 string? PostIDReturned = Custom_IDBox.ShowIDBox(this, SenderButton.PointToScreen(new Point(0, 0)), "Enter Post ID", new SolidColorBrush(Colors.DarkOrange));
@@ -859,6 +861,7 @@ namespace e621_ReBot_v3
                 return;
             }
 
+            //Set as superior for uploading as replacement      
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 string? PostIDReturned = Custom_IDBox.ShowIDBox(this, SenderButton.PointToScreen(new Point(0, 0)), "Enter Post ID");

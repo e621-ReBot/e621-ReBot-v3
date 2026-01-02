@@ -294,8 +294,7 @@ namespace e621_ReBot_v3.CustomControls
             int ResultSelectIndex = -1;
             if (PoolMode)
             {
-                Regex RegexSearcher = PoolRegex();
-                Match RegexMatcher = RegexSearcher.Match(Word4Suggest);
+                Match RegexMatcher = PoolRegex().Match(Word4Suggest);
                 foreach (KeyValuePair<string, string> KeyValuePairTemp in PoolCollection)
                 {
                     if (RegexMatcher.Success)
