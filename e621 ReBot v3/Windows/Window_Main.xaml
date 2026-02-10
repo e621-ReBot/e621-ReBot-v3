@@ -268,7 +268,7 @@
                                         <RadioButton x:Name="RadionButton_DLT8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
                                     </StackPanel>
                                 </StackPanel>
-                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip=".Save media's tags to text file when downloading media from e621" Click="SettingsCheckBox_DownloadSaveTags_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" FlowDirection="RightToLeft"/>
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip=".Save media's tags to text file when downloading from e621" Click="SettingsCheckBox_DownloadSaveTags_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" FlowDirection="RightToLeft"/>
                             </Grid>
                         </Border>
 

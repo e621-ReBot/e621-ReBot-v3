@@ -186,7 +186,7 @@ namespace e621_ReBot_v3.Modules
                         }
 
                         TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
-                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName}.{DownloadItemRef.Grab_MediaFormat}";
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
                         break;
                     }

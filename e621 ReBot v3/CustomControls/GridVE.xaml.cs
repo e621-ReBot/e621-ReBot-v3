@@ -375,6 +375,7 @@ namespace e621_ReBot_v3.CustomControls
                 {
                     Window_Preview._RefHolder.AlreadyUploaded_Label.Text = string.Empty;
                     Window_Preview._RefHolder.PB_Upload.IsEnabled = true;
+                    Window_Preview._RefHolder.panel_Search.IsEnabled = true;
                 }
             }
         }
