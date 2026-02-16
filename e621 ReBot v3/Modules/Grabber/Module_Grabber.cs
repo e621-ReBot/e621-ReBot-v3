@@ -157,6 +157,14 @@ namespace e621_ReBot_v3.Modules
                                     BrowserControl._RefHolder.IsHitTestVisible = false;
 
                                     string BaseAddress = $"https://www.furaffinity.net/{URISplit[0]}/{URISplit[1]}";
+
+                                    //Also handle folders
+                                    if (NextPage.Contains("/folder/"))
+                                    {
+                                        // 0-gallery, 1-Artist, 2-folder, 3-FolderID, 4-FolderName
+                                        BaseAddress = $"https://www.furaffinity.net/{URISplit[0]}/{URISplit[1]}/{URISplit[2]}/{URISplit[3]}/{URISplit[4]}";
+                                    }
+
                                     Module_CefSharp.LoadURL(BaseAddress);
                                     return;
                                 }
