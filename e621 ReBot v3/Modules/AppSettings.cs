@@ -38,6 +38,7 @@ namespace e621_ReBot_v3
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
         internal static bool Download_SaveTags = false;
+        internal static bool Download_Save2ArtistsFolder = false;
         internal static ushort NamingPattern_e6 = 0;
         internal static ushort NamingPattern_Web = 0;
         internal static bool Download_IgnoreErrors = false;
@@ -75,6 +76,7 @@ namespace e621_ReBot_v3
                 { "Download_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
                 { "Download_SaveTags", Download_SaveTags },
+                { "Download_Save2ArtistsFolder", Download_Save2ArtistsFolder },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },
                 { "Download_IgnoreErrors", Download_IgnoreErrors },
@@ -254,6 +256,11 @@ namespace e621_ReBot_v3
                                 //(Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags).IsChecked = Download_SaveTags;
                                 break;
                             }
+                        case "Download_Save2ArtistsFolder":
+                            {
+                                Download_Save2ArtistsFolder = (bool)LoadSettingsJObject["Download_Save2ArtistsFolder"];
+                                break;
+                            }
                         case "NamingPattern_e6":
                             {
                                 NamingPattern_e6 = (ushort)LoadSettingsJObject["NamingPattern_e6"];
@@ -347,6 +354,19 @@ namespace e621_ReBot_v3
                     Window_Main._RefHolder.SettingsButton_DLGenders.Visibility = Visibility.Visible;
                     Window_Main._RefHolder.SettingsButton_DLDNPs.Visibility = Visibility.Visible;
                 }
+
+                if (File.Exists("artists.txt"))
+                {
+                    Window_Tagger.Artist_List = new HashSet<string>(File.ReadAllText("artists.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                }
+                if (File.Exists("DNPs.txt"))
+                {
+                    Window_Tagger.DNP_List = new HashSet<string>(File.ReadAllText("DNPs.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                }
+                if (File.Exists("genders.txt"))
+                {
+                    Window_Tagger.Gender_List = new HashSet<string>(File.ReadAllText("genders.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                }
             }
         }
 
@@ -380,6 +400,7 @@ namespace e621_ReBot_v3
 
             }
             Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
+            Window_Main._RefHolder.SettingsCheckBox_DownloadSave2ArtistsFolder.IsChecked = Download_Save2ArtistsFolder;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
             Window_Main._RefHolder.SettingsCheckBox_IgnoreErrors.IsChecked = Download_IgnoreErrors;

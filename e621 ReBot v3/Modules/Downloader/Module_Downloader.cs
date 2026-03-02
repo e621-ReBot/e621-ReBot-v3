@@ -584,20 +584,33 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        internal static bool CheckDownloadQueue4Duplicate(string MediaURL, string? PoolName = null)
+        internal static bool CheckDownloadQueue4Duplicate(string MediaURL, string? DLFolder = null)
         {
             if (_2Download_DownloadItems.ContainsURL(MediaURL))
             {
-                int GetIndex = _2Download_DownloadItems.FindIndex(MediaURL);
+                //If Special Download Folder is provided, check if a download is already queued for the same folder
+                if (!string.IsNullOrEmpty(DLFolder))
+                {
+                    int GetIndex = _2Download_DownloadItems.FindIndex(MediaURL);
+                    string? DownloadFolder = _2Download_DownloadItems[GetIndex].DL_Folder;
 
-                if (string.IsNullOrEmpty(_2Download_DownloadItems[GetIndex].e6_PoolName) && string.IsNullOrEmpty(PoolName)) return true;
-                if (_2Download_DownloadItems[GetIndex].e6_PoolName.Equals(PoolName)) return true;
+                    if (!string.IsNullOrEmpty(DownloadFolder))
+                    {
+                        return string.Equals(DLFolder, DownloadFolder);
+                    }
+
+                    //Return false folders are different (folder missing also means different folder)
+                    return false;
+                }
+
+                //Return true as both queued and current url have no special folder so they are going to the same folder
+                return true;
             }
 
-            return false;
+            return false; //default
         }
 
-        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null)
+        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null, string? DL_Folder = null)
         {
             DownloadItem DownloadItemTemp = new DownloadItem()
             {
@@ -608,11 +621,12 @@ namespace e621_ReBot_v3.Modules
                 Grab_Title = Title,
                 Grab_MediaFormat = MediaFormat,
                 e6_PostID = e6PostID,
-                e6_PoolName = e6PoolName ?? string.Empty,
+                e6_PoolName = e6PoolName,
                 e6_PoolPostIndex = e6PoolPostIndex,
                 e6_Tags = e6Tags,
                 Is_e6Download = e6Download,
-                MediaItemRef = MediaItemRef
+                MediaItemRef = MediaItemRef,
+                DL_Folder = DL_Folder ?? string.Empty
             };
             lock (_2Download_DownloadItems)
             {
@@ -1061,7 +1075,35 @@ namespace e621_ReBot_v3.Modules
 
             string GetFileNameOnly = Path.GetFileNameWithoutExtension(MediaFile_GetFileNameOnly(PicURL));
 
-            string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, "e621", DownloadItemRef.e6_PoolName);
+            string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, "e621");
+            if (!string.IsNullOrEmpty(DownloadItemRef.DL_Folder))
+            {
+                DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.DL_Folder);
+
+                //If user wants to save to folders by artists as well
+                if (AppSettings.Download_Save2ArtistsFolder)
+                {
+                    //And artist lists exists
+                    if (Window_Tagger.Artist_List != null)
+                    {
+                        HashSet<string> TagList = new HashSet<string>(DownloadItemRef.e6_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                        //Search for artist tag
+                        string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
+
+                        //And add that artists as a folder
+                        if (AnyArtist != null)
+                        {
+                            //And remove characters that are not allowed
+                            string PurgeArtistName = string.Concat(AnyArtist.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+                            DownloadPath = Path.Combine(DownloadPath, PurgeArtistName);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.e6_PoolName ?? string.Empty);
+            }
             Directory.CreateDirectory(DownloadPath);
 
             switch (AppSettings.NamingPattern_e6)
@@ -1137,8 +1179,9 @@ namespace e621_ReBot_v3.Modules
             HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(HostString);
 
             //Make Download path and folder
-            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName); //e6_PoolName is re-used as a separate folder
-            if (!string.IsNullOrEmpty(DownloadItemRef.e6_PoolName)) FolderPath = Path.Combine(AppSettings.Download_FolderLocation, DownloadItemRef.e6_PoolName);
+            string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
+            //Overwrite path with special folder location
+            if (!string.IsNullOrEmpty(DownloadItemRef.DL_Folder)) FolderPath = Path.Combine(AppSettings.Download_FolderLocation, DownloadItemRef.DL_Folder);
             Directory.CreateDirectory(FolderPath);
 
             string GetFileNameOnly = MediaFile_GetFileNameOnly(DownloadItemRef.Grab_MediaURL, DownloadItemRef.Grab_MediaFormat);

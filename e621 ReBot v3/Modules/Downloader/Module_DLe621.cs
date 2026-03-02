@@ -101,9 +101,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                                             ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                             MediaFormat: Post.Attributes["data-file-ext"].Value,
                                             e6PostID: Post.Attributes["data-id"].Value,
-                                            e6PoolName: SpecialSaveFolder,
                                             e6Tags: Post.Attributes["data-tags"].Value,
-                                            e6Download: true);
+                                            e6Download: true,
+                                            DL_Folder: SpecialSaveFolder);
                                     }
                                 }
                             }
@@ -193,9 +193,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                                           ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
                                           e6PostID: Post.Attributes["data-id"].Value,
-                                          e6PoolName: SpecialSaveFolder,
                                           e6Tags: Post.Attributes["data-tags"].Value,
-                                          e6Download: true);
+                                          e6Download: true,
+                                          DL_Folder: SpecialSaveFolder);
                                 }
                             }
                         }
@@ -236,9 +236,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                                        ThumbnailURL: Post.Attributes["data-preview-url"].Value,
                                        MediaFormat: Post.Attributes["data-file-ext"].Value,
                                        e6PostID: Post.Attributes["data-id"].Value,
-                                       e6PoolName: SpecialSaveFolder,
                                        e6Tags: Post.Attributes["data-tags"].Value,
-                                       e6Download: true);
+                                       e6Download: true,
+                                       DL_Folder: SpecialSaveFolder);
                                 }
                             }
                         }
@@ -311,10 +311,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                         ThumbnailURL: ThumbnailURLTemp,
                         MediaFormat: (string)cPost["file"]["ext"],
                         e6PostID: PostID,
-                        e6PoolName: FolderName,
                         e6Tags: string.Join(' ', TempTagList),
-                        e6Download: true
-                        );
+                        e6Download: true,
+                        DL_Folder: FolderName);
                 }
             }
             PageCounter += 1;
@@ -405,8 +404,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                     e6PoolName: PoolName,
                     e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
                     e6Tags: string.Join(' ', TempTagList),
-                    e6Download: true
-                    );
+                    e6Download: true);
             }
             Module_Downloader.UpdateDownloadTreeView();
 

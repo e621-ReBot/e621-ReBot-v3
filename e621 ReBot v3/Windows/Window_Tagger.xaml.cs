@@ -19,9 +19,9 @@ namespace e621_ReBot_v3
         internal static Window_Tagger? _RefHolder;
         internal MediaItem? MediaItemHolder;
         internal static Custom_SuggestBox? SuggestionPopup;
-        static List<string>? Artist_List;
-        static List<string> DNP_List = Properties.Resources.DNPs.Split('✄').ToList();
-        static List<string> Gender_List = Properties.Resources.genders.Split('✄').ToList();
+        internal static HashSet<string>? Artist_List;
+        internal static HashSet<string> DNP_List = new HashSet<string>(Properties.Resources.DNPs.Split('✄', StringSplitOptions.RemoveEmptyEntries));
+        internal static HashSet<string> Gender_List = new HashSet<string>(Properties.Resources.genders.Split('✄', StringSplitOptions.RemoveEmptyEntries));
         public Window_Tagger()
         {
             InitializeComponent();
@@ -34,18 +34,18 @@ namespace e621_ReBot_v3
                 {
                     SuggestionPopup = new Custom_SuggestBox();
                 }
-                if (File.Exists("artists.txt"))
-                {
-                    Artist_List = File.ReadAllText("artists.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
-                if (File.Exists("DNPs.txt"))
-                {
-                    DNP_List = File.ReadAllText("DNPs.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
-                if (File.Exists("genders.txt"))
-                {
-                    Gender_List = File.ReadAllText("genders.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
+                //if (File.Exists("artists.txt"))
+                //{
+                //    Artist_List = new HashSet<string>(File.ReadAllText("artists.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                //}
+                //if (File.Exists("DNPs.txt"))
+                //{
+                //    DNP_List = new HashSet<string>(File.ReadAllText("DNPs.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                //}
+                //if (File.Exists("genders.txt"))
+                //{
+                //    Gender_List = new HashSet<string>(File.ReadAllText("genders.txt").Split('✄', StringSplitOptions.RemoveEmptyEntries));
+                //}
             }
             if (SuggestionPopup != null)
             {
@@ -229,10 +229,10 @@ namespace e621_ReBot_v3
         {
             if (TagsAdded)
             {
-                List<string> TagListOnClose = Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                HashSet<string> TagListOnClose = new HashSet<string>(Tags_TextBox.Text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
                 if (Artist_List != null)
                 {
-                    string? AnyArtist = TagListOnClose.Intersect(Artist_List).FirstOrDefault();
+                    string? AnyArtist = TagListOnClose.FirstOrDefault(tag => Artist_List.Contains(tag));
                     if (string.IsNullOrEmpty(AnyArtist) && MessageBox.Show(this, $"There is no artist tagged for this media, DNP list can not be checked, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
                     {
                         Tags_TextBox.AppendText(" ");
@@ -241,7 +241,7 @@ namespace e621_ReBot_v3
                         return;
                     }
                 }
-                string? DNPArtist = TagListOnClose.Intersect(DNP_List).FirstOrDefault();
+                string? DNPArtist = TagListOnClose.FirstOrDefault(tag => DNP_List.Contains(tag));
                 if (!string.IsNullOrEmpty(DNPArtist) && MessageBox.Show(this, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
                 {
                     Tags_TextBox.AppendText(" ");
@@ -249,7 +249,7 @@ namespace e621_ReBot_v3
                     TagsAdded = false;
                     return;
                 }
-                if (!TagListOnClose.Intersect(Gender_List).Any() && MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+                if (!TagListOnClose.Any(tag => Gender_List.Contains(tag)) && MessageBox.Show(this, "You have not added any gender tags, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
                 {
                     Tags_TextBox.AppendText(" ");
                     Tags_TextBox.SelectionStart = Tags_TextBox.Text.Length;

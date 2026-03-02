@@ -63,7 +63,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             ThumbnailURL: ThumbURL,
                             MediaFormat: Media_Format,
                             Artist: string.Empty,
-                            e6PoolName: SpecialSaveFolder);
+                            DL_Folder: SpecialSaveFolder);
                     }
                 }
             }

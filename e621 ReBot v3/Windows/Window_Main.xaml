@@ -256,7 +256,7 @@
                         <TextBlock Text="Downloader" Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,8,0,0"/>
 
                         <CheckBox x:Name="SettingsCheckBox_IgnoreErrors" Style="{DynamicResource CheckBoxStyle_Large}" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" IsChecked="False" ToolTip="Ignore all errors and just keep trying to download."  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="96,0,0,0" Click="SettingsCheckBox_IgnoreErrors_Click"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,0,0,0" Margin="128,0,128,0">
                             <Grid>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Select the number of download threads.">
@@ -268,7 +268,6 @@
                                         <RadioButton x:Name="RadionButton_DLT8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="4,0,0,0" Click="RadionButton_DLTX_Click"/>
                                     </StackPanel>
                                 </StackPanel>
-                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip=".Save media's tags to text file when downloading from e621" Click="SettingsCheckBox_DownloadSaveTags_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" FlowDirection="RightToLeft"/>
                             </Grid>
                         </Border>
 
@@ -738,6 +737,17 @@
                                 <RadioButton x:Name="RadionButton_UI4" Content="4" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 4 days."/>
 
                                 <RadioButton x:Name="RadionButton_UI8" Content="8" Foreground="{DynamicResource ThemeForeground}" ClickMode="Press" Cursor="Hand" Margin="8,0,0,0" Click="RadionButton_UI_Click" ToolTip="Every 8 days."/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,128">
+                        <Border BorderBrush="Black" BorderThickness="1">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Download Tab" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Save media tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media's tags to text file when downloading from e621."  Margin="0,0,0,4" Click="SettingsCheckBox_DownloadSaveTags_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSave2ArtistsFolder" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Download to Artists' folder" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media to a separate folders by artist when bulk downloading from e621." Click="SettingsCheckBox_DownloadSave2ArtistsFolder_Click"/>
                             </StackPanel>
                         </Border>
                     </Grid>

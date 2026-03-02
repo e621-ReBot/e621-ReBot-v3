@@ -708,7 +708,7 @@ namespace e621_ReBot_v3
                         Title: MediaItemTemp.Grab_Title,
                         MediaFormat: MediaItemTemp.Grid_MediaFormat,
                         MediaItemRef: MediaItemTemp,
-                        e6PoolName: SpecialSaveFolder); //Save to user specified folder
+                        DL_Folder: SpecialSaveFolder); //Save to user specified folder
                     DownloadAdditionCounter++;
                 }
             }
@@ -1281,6 +1281,11 @@ namespace e621_ReBot_v3
             AppSettings.Download_SaveTags = ((CheckBox)sender).IsChecked ?? false;
         }
 
+        private void SettingsCheckBox_DownloadSave2ArtistsFolder_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.Download_Save2ArtistsFolder = ((CheckBox)sender).IsChecked ?? false;
+        }
+
         private void SettingsCheckBox_IgnoreErrors_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Download_IgnoreErrors = ((CheckBox)sender).IsChecked ?? false;
@@ -1372,8 +1377,6 @@ namespace e621_ReBot_v3
             SettingsButton_DLDNPs.IsEnabled = false;
             ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLDNPs());
         }
-
-
 
         #endregion
 

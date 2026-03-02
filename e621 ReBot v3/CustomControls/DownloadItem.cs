@@ -22,5 +22,6 @@
         // = = = Grid stiff
 
         internal MediaItem? MediaItemRef;
+        internal string? DL_Folder;
     }
 }
