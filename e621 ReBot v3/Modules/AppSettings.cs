@@ -31,9 +31,12 @@ namespace e621_ReBot_v3
         internal static DateTime Update_LastCheck = DateTime.UtcNow.AddYears(-1);
         // - - - - - - - - - - - - - - - -
         internal static bool BigMode = false;
-        internal static bool Grid_SaveSession = true;
         internal static bool Browser_ClearCache = false;
         internal static bool MediaSaveManualInferiorRecord = false;
+        // - - - - - - - - - - - - - - - -
+        internal static bool Grid_SaveSession = true;
+        internal static bool GridAltClear_DoubleClick = false;
+        internal static bool GridAltClear_Confirmation = false;
         // - - - - - - - - - - - - - - - -
         internal static string Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
         internal static ushort Download_ThreadsCount = 4;
@@ -70,9 +73,11 @@ namespace e621_ReBot_v3
                 { "ThemeForeground", ((SolidColorBrush)Application.Current.Resources["ThemeForeground"]).Color.ToString()},
                 { "ThemeFocus", ((SolidColorBrush)Application.Current.Resources["ThemeFocus"]).Color.ToString()},
                 { "BigMode", BigMode },
-                { "Grid_SaveSession", Grid_SaveSession },
                 { "Browser_ClearCache", Browser_ClearCache },
                 { "MediaSaveManualInferiorRecord", MediaSaveManualInferiorRecord },
+                { "Grid_SaveSession", Grid_SaveSession },
+                { "GridAltClear_DoubleClick", GridAltClear_DoubleClick },
+                { "GridAltClear_Confirmation", GridAltClear_Confirmation },
                 { "Download_FolderLocation", Download_FolderLocation },
                 { "Download_ThreadsCount", Download_ThreadsCount },
                 { "Download_SaveTags", Download_SaveTags },
@@ -205,11 +210,6 @@ namespace e621_ReBot_v3
                                 BigMode = (bool)LoadSettingsJObject["BigMode"];
                                 break;
                             }
-                        case "Grid_SaveSession":
-                            {
-                                Grid_SaveSession = (bool)LoadSettingsJObject["Grid_SaveSession"];
-                                break;
-                            }
                         case "Grid_Session":
                             {
                                 JToken JTokenMedia = LoadSettingsJObject["Grid_Session"];
@@ -230,6 +230,21 @@ namespace e621_ReBot_v3
                         case "MediaSaveManualInferiorRecord":
                             {
                                 MediaSaveManualInferiorRecord = (bool)LoadSettingsJObject["MediaSaveManualInferiorRecord"];
+                                break;
+                            }
+                        case "Grid_SaveSession":
+                            {
+                                Grid_SaveSession = (bool)LoadSettingsJObject["Grid_SaveSession"];
+                                break;
+                            }
+                        case "GridAltClear_DoubleClick":
+                            {
+                                GridAltClear_DoubleClick = (bool)LoadSettingsJObject["GridAltClear_DoubleClick"];
+                                break;
+                            }
+                        case "GridAltClear_Confirmation":
+                            {
+                                GridAltClear_Confirmation = (bool)LoadSettingsJObject["GridAltClear_Confirmation"];
                                 break;
                             }
                         case "Download_FolderLocation":
@@ -376,9 +391,15 @@ namespace e621_ReBot_v3
 
             ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
             Window_Main._RefHolder.SettingsCheckBox_BigMode.IsChecked = BigMode;
-            Window_Main._RefHolder.SettingsCheckBox_GridSaveSession.IsChecked = Grid_SaveSession;
             Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache.IsChecked = Browser_ClearCache;
             Window_Main._RefHolder.SettingsCheckBox_MediaSaveManualInferiorRecord.IsChecked = MediaSaveManualInferiorRecord;
+
+            Window_Main._RefHolder.SettingsCheckBox_GridSaveSession.IsChecked = Grid_SaveSession;
+            Window_Main._RefHolder.SettingsCheckBox_GridAltClear_DoubleClick.IsChecked = GridAltClear_DoubleClick;
+            Window_Main._RefHolder.SettingsCheckBox_GridAltClear_Confirmation.IsChecked = GridAltClear_Confirmation;
+
+            Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
+            Window_Main._RefHolder.SettingsCheckBox_DownloadSave2ArtistsFolder.IsChecked = Download_Save2ArtistsFolder;
 
             // - - - Jobs
 
@@ -399,8 +420,6 @@ namespace e621_ReBot_v3
                 Window_Main._RefHolder.Download_DownloadVEPanel.Children.Add(DownloadVETemp);
 
             }
-            Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
-            Window_Main._RefHolder.SettingsCheckBox_DownloadSave2ArtistsFolder.IsChecked = Download_Save2ArtistsFolder;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_e6_StackPanel.FindName($"RadionButton_NPe6_{NamingPattern_e6}")).IsChecked = true;
             ((RadioButton)Window_Main._RefHolder.NamingPattern_Web_StackPanel.FindName($"RadionButton_NPWeb_{NamingPattern_Web}")).IsChecked = true;
             Window_Main._RefHolder.SettingsCheckBox_IgnoreErrors.IsChecked = Download_IgnoreErrors;

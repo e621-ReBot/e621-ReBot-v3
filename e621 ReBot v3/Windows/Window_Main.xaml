@@ -202,7 +202,7 @@
                             <Button x:Name="GBD_Unselect" Width="80" Style="{StaticResource ButtonStyle_Grid}" Content="▼ ✘" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Unselect_Click" ToolTip="Unselect media on current page.&#10;Ctrl+Click to unselect all media." IsEnabled="False"/>
                         </StackPanel>
 
-                        <Button x:Name="GB_Clear" Width="128" Content="☠   Clear   ☠" BorderThickness="1,0,1,0" Margin="96,0,96,0" Click="GB_Clear_Click" ToolTip="Remove all media.&#10;Shift+Click to remove media on current page.&#10;Ctrl+Click to remove only the media that is already uploaded." IsEnabled="False">
+                        <Button x:Name="GB_Clear" Width="128" Content="☠   Clear   ☠" BorderThickness="1,0,1,0" Margin="96,0,96,0" ToolTip="Remove all media.&#10;Shift+Click to remove media on current page.&#10;Ctrl+Click to remove only the media that is already uploaded." IsEnabled="False" PreviewMouseLeftButtonDown="GB_Clear_PreviewMouseLeftButtonDown">
                             <Button.Style>
                                 <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
                                     <Style.Triggers>
@@ -671,7 +671,7 @@
 
             <TabItem x:Name="ReBot_SettingsTab" Background="Transparent">
                 <Grid>
-                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="512" Height="32" Margin="16,16,0,0">
+                    <Grid x:Name="Grid4AppName" HorizontalAlignment="Left" VerticalAlignment="Top" Width="512" Height="32" Margin="16,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
@@ -686,7 +686,7 @@
                         <TextBlock x:Name="STB_AppName" Text="e621 ReBot (&lt;Name&gt;)" Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" Margin="16,0,0,0" Grid.ColumnSpan="1" Grid.Column="1" HorizontalAlignment="Left"/>
                     </Grid>
 
-                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Height="32" Margin="16,64,0,0">
+                    <Grid x:Name="Grid4APIKey" HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Height="32" Margin="16,64,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
@@ -701,7 +701,7 @@
                         <Button x:Name="SB_APIKey" Content="Add API key" Grid.Column="1" BorderThickness="0" BorderBrush="{x:Null}" Height="28" Margin="1" Cursor="Hand" Click="SB_APIKey_Click" />
                     </Grid>
 
-                    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="512" Height="32" Margin="0,16,16,0">
+                    <Grid x:Name="Grid4Volume" HorizontalAlignment="Right" VerticalAlignment="Top" Width="512" Height="32" Margin="0,16,16,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
@@ -716,7 +716,7 @@
                         <customcontrols:VolumeSlider x:Name="Settings_VolumeSlider" VerticalAlignment="Top" Grid.Column="1" Margin="8,0,8,0"/>
                     </Grid>
 
-                    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="320" Height="32" Margin="0,64,16,0">
+                    <Grid x:Name="Grid4Update" HorizontalAlignment="Right" VerticalAlignment="Top" Width="320" Height="32" Margin="0,64,16,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
@@ -740,7 +740,19 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,128">
+                    <Grid x:Name="Grid4GridTab" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,198">
+                        <Border BorderBrush="Black" BorderThickness="1">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Grid Tab" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
+                                <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_GridAltClear_DoubleClick" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Alt Mode: Double Click" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clearing all media from the grid will require a Double-Click." Margin="0,0,0,4" Click="SettingsCheckBox_GridAltClear_DoubleClick_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_GridAltClear_Confirmation" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Alt Mode: Confirmation" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clearing all media from the grid will require a confirmation." Click="SettingsCheckBox_GridAltClear_Confirmation_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Grid x:Name="Grid4DownloadTab" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,112">
                         <Border BorderBrush="Black" BorderThickness="1">
                             <StackPanel Margin="8">
                                 <TextBlock Text="Download Tab" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
@@ -757,8 +769,6 @@
                             <StackPanel Margin="8">
                                 <CheckBox x:Name="SettingsCheckBox_BigMode" Style="{DynamicResource CheckBoxStyle_Large}" Content="Big Mode" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Makes the app window bigger (1080p sized). Requires app restart." Margin="0,0,0,4" Click="SettingsCheckBox_BigMode_Click"/>
 
-                                <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
-
                                 <CheckBox x:Name="SettingsCheckBox_BrowserClearCache" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Browser cache on exit" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clear web browser cache when closing the app." Margin="0,0,0,4" Click="SettingsCheckBox_BrowserClearCache_Click"/>
 
                                 <CheckBox x:Name="SettingsCheckBox_MediaSaveManualInferiorRecord" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save inferior media record" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save inferior media record so that it can be checked for in future sessions." Click="SettingsCheckBox_MediaSaveManualInferiorRecord_Click"/>
@@ -766,7 +776,7 @@
                         </Border>
                     </Grid>
                     <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand" ToolTip="Blacklist Tags you do not want to download.&#10;Blacklist applies to downloads from e621 via API (pool downloads ignore it)."/>
-                    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
+                    <Grid x:Name="Grid4Colours" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>

@@ -446,7 +446,7 @@ namespace e621_ReBot_v3
             GBTB_Right.Visibility = GB_Right.Visibility;
         }
 
-        private readonly DispatcherTimer ScrollDisableTimer = new DispatcherTimer { Interval = TimeSpan.FromMicroseconds(250) };
+        private readonly DispatcherTimer ScrollDisableTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         private void ScrollDisableTimer_Tick(object? sender, EventArgs e)
         {
             ScrollDisableTimer.Stop();
@@ -496,7 +496,7 @@ namespace e621_ReBot_v3
             Grid_Populate(true);
         }
 
-        private void GB_Clear_Click(object sender, RoutedEventArgs e)
+        private void GB_Clear_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             bool ClearAll = true;
 
@@ -534,6 +534,17 @@ namespace e621_ReBot_v3
 
             if (ClearAll)
             {
+                if (AppSettings.GridAltClear_DoubleClick)
+                {
+                    if (e.ClickCount != 2) return;
+                }
+
+                if (AppSettings.GridAltClear_Confirmation)
+                {
+                    MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "Are you sure you want to clear the grid?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                    if (MessageBoxResultTemp != MessageBoxResult.Yes) return;
+                }
+
                 lock (Module_Grabber._Grabbed_MediaItems)
                 {
                     Module_Grabber._Grabbed_MediaItems.Clear();
@@ -1256,14 +1267,11 @@ namespace e621_ReBot_v3
             }
         }
 
+        // - - -
+
         private void SettingsCheckBox_BigMode_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.BigMode = ((CheckBox)sender).IsChecked ?? false;
-        }
-
-        private void SettingsCheckBox_GridSaveSession_Click(object sender, RoutedEventArgs e)
-        {
-            AppSettings.Grid_SaveSession = ((CheckBox)sender).IsChecked ?? false;
         }
 
         private void SettingsCheckBox_BrowserClearCache_Click(object sender, RoutedEventArgs e)
@@ -1276,6 +1284,25 @@ namespace e621_ReBot_v3
             AppSettings.MediaSaveManualInferiorRecord = ((CheckBox)sender).IsChecked ?? false;
         }
 
+        // - - -
+
+        private void SettingsCheckBox_GridSaveSession_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.Grid_SaveSession = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        private void SettingsCheckBox_GridAltClear_DoubleClick_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.GridAltClear_DoubleClick = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        private void SettingsCheckBox_GridAltClear_Confirmation_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.GridAltClear_Confirmation = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        // - - -
+
         private void SettingsCheckBox_DownloadSaveTags_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Download_SaveTags = ((CheckBox)sender).IsChecked ?? false;
@@ -1285,6 +1312,8 @@ namespace e621_ReBot_v3
         {
             AppSettings.Download_Save2ArtistsFolder = ((CheckBox)sender).IsChecked ?? false;
         }
+
+        // - - -
 
         private void SettingsCheckBox_IgnoreErrors_Click(object sender, RoutedEventArgs e)
         {
