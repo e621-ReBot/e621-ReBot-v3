@@ -274,7 +274,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             });
         }
 
-        internal async static void Grab_MediaWithTags(string TagQuery, string? FolderName)
+        internal async static Task Grab_MediaWithTags(string TagQuery, string? FolderName)
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.DownloadQueue_CancelAPIDL.IsEnabled = true; });
 
@@ -333,7 +333,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             Update_APIStatus("Suspended.", false);
         }
 
-        internal async static void Grab_Pool(string PoolID)
+        internal async static Task Grab_Pool(string PoolID)
         {
             Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json").GetAwaiter().GetResult());
             lock (Module_e621APIController.UserTasks)

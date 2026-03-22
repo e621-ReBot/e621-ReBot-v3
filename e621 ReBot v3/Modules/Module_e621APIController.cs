@@ -16,6 +16,7 @@ namespace e621_ReBot_v3.Modules
             //Form_Loader._FormReference.cCheckGroupBox_Retry.Checked = APIEnabled;
             Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = APIEnabled;
             //Form_Loader._FormReference.bU_RefreshCredit.Enabled = APIEnabled;
+            Window_Main._RefHolder.DownloadQueue_JobImport.IsEnabled = APIEnabled;
             if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.panel_Search.IsEnabled = APIEnabled;
 
             if (APIEnabled)

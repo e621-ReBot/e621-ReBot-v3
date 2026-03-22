@@ -1,7 +1,9 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
@@ -81,7 +83,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 case "hr":
                     {
-                        TextHolder += "--------------------------------";
+                        TextHolder += "\n--------------------------------\n";
                         break;
                     }
 
@@ -115,7 +117,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                             }
                             TempTextHolder = TempTextHolder ?? TextHolderNode.Attributes["title"].Value.Trim();
                         }
-                        TextHolder += $"\"{TempTextHolder}\":{aURL}";
+                        TextHolder += $"\"{TempTextHolder}\":[{aURL}] ";
                         break;
                     }
 
@@ -270,7 +272,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                             }
                             else
                             {
-                                TextHolder += $"\"{TextHolderNode.InnerText}\":{TextHolderNode.Attributes["href"].Value}";
+                                TextHolder += $"\"{TextHolderNode.InnerText}\":[{TextHolderNode.Attributes["href"].Value}] ";
                             }
                         }
                         break;
@@ -281,7 +283,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         HtmlNode SubElement = TextHolderNode.SelectSingleNode(".//a[@class='widget_userNameSmall']");
                         if (SubElement != null)
                         {
-                            TextHolder += $"🐰\"{SubElement.InnerText}\":{SubElement.Attributes["href"].Value}";
+                            TextHolder += $"🐰\"{SubElement.InnerText}\":[{SubElement.Attributes["href"].Value}] ";
                             break;
                         }
 
@@ -293,7 +295,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                             if (PicUrl.Contains("overlays/blocked.png")) // https://inkbunny.net/s/2163614
                             {
                                 PostURL = $"https://inkbunny.net{TextHolderNode.SelectSingleNode(".//a").Attributes["href"].Value}";
-                                TextHolder += $"🐰\"{PostURL}\":{PostURL}";
+                                TextHolder += $"🐰\"{PostURL}\":[{PostURL}] ";
                             }
                             else
                             {
@@ -302,7 +304,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                                 {
                                     PostURL = $"https://inkbunny.net{PostURL}";
                                 }
-                                TextHolder += $"🐰\"{SubElement.SelectSingleNode(".//img").Attributes["title"].Value}\":{PostURL}";
+                                TextHolder += $"🐰\"{SubElement.SelectSingleNode(".//img").Attributes["title"].Value}\":[{PostURL}] ";
                             }
                             break;
                         }
@@ -385,7 +387,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         {
                             aURL = aURL.Substring(10);
                         }
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} ";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}] ";
                         break;
                     }
 
@@ -451,14 +453,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "a":
                     {
                         string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} \n";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}]\n";
                         break;
                     }
 
                 case "img":
                     {
                         string aURL = TextHolderNode.Attributes["src"].Value;
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} \n";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}]\n";
                         break;
                     }
 
@@ -546,7 +548,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         private static string? ParseNode_Weasyl(HtmlNode TextHolderNode)
         {
-            string TextHolder = null;
+            string? TextHolder = null;
             switch (TextHolderNode.Name)
             {
                 case "#text":
@@ -565,7 +567,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     {
 
                         string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} ";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}] ";
                         break;
                     }
 
@@ -627,7 +629,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "a":
                     {
                         string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} ";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}] ";
                         break;
                     }
 
@@ -689,7 +691,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 case "a":
                     {
                         string aURL = WebUtility.UrlDecode(TextHolderNode.Attributes["href"].Value);
-                        TextHolder += $"\"{TextHolderNode.InnerText}\":{aURL} ";
+                        TextHolder += $"\"{TextHolderNode.InnerText}\":[{aURL}] ";
                         break;
                     }
 

@@ -302,24 +302,25 @@
 
                         <CheckBox x:Name="DownloadQueue_CheckBox" Grid.Row="0" Style="{DynamicResource CheckBoxStyle_Large}" Content="Download Queue" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Margin="8,0,0,0" IsChecked="True" ToolTip="Toggle downloading status."/>
 
-                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageUp" Width="24" Content="▲" ToolTip="Show previous page of Download Queue." HorizontalAlignment="Left"  Cursor="Hand" BorderThickness="1,0,1,0" Click="DownloadQueue_DownloadPageUp_Click" IsEnabled="False" />
+                        <Button x:Name="DownloadQueue_JobImport" Content="Job Import" BorderThickness="1,0,1,0" ToolTip="Import download job(s) from a text file.&#10;&#10;Tags should be on a single line, separated by spaces and ending with quotation marks for download folder.&#10;If you dont want a custom folder, leave quotation blank.&#10;Each line is treated as a separate job.&#10;&#10;tag1 tag2 -tag3 &quot;MyTagsDownload&quot; or &quot;&quot;" HorizontalAlignment="Right" Width="80" Height="32" Click="DownloadQueue_JobImport_Click" Margin="0,0,63,0" Cursor="Hand"/>
 
-                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageDown" Width="24" Content="▼" ToolTip="Show next page of Download Queue." HorizontalAlignment="Left" Cursor="Hand" BorderThickness="1,0,1,0" Margin="23,0,0,0" Click="DownloadQueue_DownloadPageDown_Click" IsEnabled="False" />
-
+                        <Button x:Name="DownloadQueue_CancelAPIDL" Content="Cancel" BorderThickness="1,0,1,0" ToolTip="Cancel grabbing further download links from e621 API." HorizontalAlignment="Right" Width="64" Height="32" IsEnabled="False" Click="DownloadQueue_CancelAPIDL_Click" Cursor="Hand"/>
+                        
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
-
-                        <Button x:Name="DownloadQueue_CancelAPIDL" Content="Cancel" BorderThickness="1,0,1,0" ToolTip="Cancel grabbing further download links from e621 API." HorizontalAlignment="Right" Margin="0,0,31,0" Width="64" Height="32" IsEnabled="False" Click="DownloadQueue_CancelAPIDL_Click"/>
-
-                        <Button x:Name="DownloadQueue_ReverseDownloadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
-
+                        
+                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageUp" Width="24" Content="▲" ToolTip="Show previous page of Download Queue." HorizontalAlignment="Left"  Cursor="Hand" BorderThickness="1,0,1,0" Click="DownloadQueue_DownloadPageUp_Click" IsEnabled="False" />
+                        
+                        <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageDown" Width="24" Content="▼" ToolTip="Show next page of Download Queue." HorizontalAlignment="Left" Cursor="Hand" BorderThickness="1,0,1,0" Margin="23,0,0,0" Click="DownloadQueue_DownloadPageDown_Click" IsEnabled="False" />
+                        
                         <TextBlock x:Name="DownloadQueue_StatusTextBlock" Text="API DL Status: Suspended." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="52,0,0,0"/>
-
+                        
                         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <customcontrols:Custom_TreeView Grid.Row="2" x:Name="DownloadQueue_TreeView" Padding="4,0,4,0" Margin="0" ContextMenuOpening="DownloadTreeViewContextMenu_Opening">
                             <customcontrols:Custom_TreeView.Resources>
                                 <ContextMenu x:Key="DownloadTreeViewContextMenu" IsTabStop="False" Opened="DownloadTreeViewContextMenu_Opened" Closed="DownloadTreeViewContextMenu_Closed">
                                     <MenuItem Header="Remove" Click="DownloadTreeViewContextMenu_Remove"/>
+                                    <MenuItem Header="Remove Page" Click="DownloadTreeViewContextMenu_RemovePage"/>
                                     <MenuItem Header="Remove All" Click="DownloadTreeViewContextMenu_RemoveAll"/>
                                 </ContextMenu>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource TreeViewItemStyle_DownloaderCustom}">
@@ -473,7 +474,7 @@
                             <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
 
-                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click"/>
+                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click" Cursor="Hand"/>
 
                         <Canvas x:Name="Upload_ProgressCanvas" HorizontalAlignment="Right" Margin="0,8,64,0">
                             <Canvas.RenderTransform>
@@ -775,7 +776,7 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand" ToolTip="Blacklist Tags you do not want to download.&#10;Blacklist applies to downloads from e621 via API (pool downloads ignore it)."/>
+                    <Button x:Name="SettingsButton_Blacklist" Content="Blacklist" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,112" Width="128" Height="32" Click="SettingsButton_Blacklist_Click" Cursor="Hand" ToolTip="Blacklist Tags you do not want to download.&#10;&#10;Blacklist applies to downloads from e621 via API (pool downloads ignore it)."/>
                     <Grid x:Name="Grid4Colours" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16" Width="256" Height="80">
                         <Grid.RowDefinitions>
                             <RowDefinition/>

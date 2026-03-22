@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -885,6 +886,76 @@ namespace e621_ReBot_v3
             }
         }
 
+        private async void DownloadQueue_JobImport_Click(object sender, RoutedEventArgs e)
+        {
+            DownloadQueue_JobImport.IsEnabled = false;
+
+            OpenFileDialog OpenFileDialogTemp = new OpenFileDialog
+            {
+                Filter = "Text files (*.txt)|*.txt",
+                Title = "Select the text file contaning the job.",
+                InitialDirectory = AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            if (OpenFileDialogTemp.ShowDialog() != true)
+            {
+                DownloadQueue_JobImport.IsEnabled = true;
+                return;
+            }
+
+
+            string filePath = OpenFileDialogTemp.FileName;
+            string fileContent = File.ReadAllText(filePath);
+
+            string[] lineHolder = fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            //verify file first
+            foreach (string line in lineHolder)
+            {
+                if (line.Contains('"'))
+                {
+                    int lastQuoteEnd = line.LastIndexOf('"');
+                    int lastQuoteStart = line.LastIndexOf('"', lastQuoteEnd - 1);
+                    if (lastQuoteStart == -1)
+                    {
+                        //error
+                        MessageBox.Show(this, "Job syntax for the selected file is not correct.\n\nFix quotation syntax.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                        DownloadQueue_JobImport.IsEnabled = true;
+                        return;
+                    }
+
+                    string[] tagHolder = line.Substring(0, lastQuoteStart).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (tagHolder.Length > 40)
+                    {
+                        //error
+                        MessageBox.Show(this, "You can only use up to 40 tags for a single search.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                        DownloadQueue_JobImport.IsEnabled = true;
+                        return;
+                    }
+                }
+                else
+                {
+                    //error
+                    MessageBox.Show(this, "Job syntax for the selected file is not correct.\n\nQuotation missing.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DownloadQueue_JobImport.IsEnabled = true;
+                    return;
+                }
+            }
+
+            //add jobs
+            foreach (string line in lineHolder)
+            {
+                int lastQuoteEnd = line.LastIndexOf('"');
+                int lastQuoteStart = line.LastIndexOf('"', lastQuoteEnd - 1);
+                string folderName = line.Substring(lastQuoteStart + 1, lastQuoteEnd - lastQuoteStart - 1);
+                string[] tagHolder = line.Substring(0, lastQuoteStart).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                string combinedTags = string.Join(' ', tagHolder);
+                await Module_DLe621.Grab_MediaWithTags(combinedTags, folderName);
+            }
+
+            DownloadQueue_JobImport.IsEnabled = true;
+        }
+
         private void DownloadQueue_CancelAPIDL_Click(object sender, RoutedEventArgs e)
         {
             Module_DLe621.CancellationPending = true;
@@ -934,6 +1005,18 @@ namespace e621_ReBot_v3
             lock (Module_Downloader._2Download_DownloadItems)
             {
                 Module_Downloader._2Download_DownloadItems.RemoveURL(DownloadTreeViewContextMenuHolderTarget);
+            }
+            Module_Downloader.UpdateDownloadTreeView();
+        }
+
+        private void DownloadTreeViewContextMenu_RemovePage(object sender, RoutedEventArgs e)
+        {
+            lock (Module_Downloader._2Download_DownloadItems)
+            {
+                foreach (TreeViewItem TreeViewItemTemp in DownloadQueue_TreeView.Items)
+                {
+                    Module_Downloader._2Download_DownloadItems.RemoveURL(TreeViewItemTemp.Header.ToString());
+                }
             }
             Module_Downloader.UpdateDownloadTreeView();
         }
