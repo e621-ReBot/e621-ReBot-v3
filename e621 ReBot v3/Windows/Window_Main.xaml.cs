@@ -936,7 +936,7 @@ namespace e621_ReBot_v3
                 else
                 {
                     //error
-                    MessageBox.Show(this, "Job syntax for the selected file is not correct.\n\nQuotation missing.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(this, "Job syntax for the selected file is not correct.\n\nQuotation is missing.\nA line should end with folder name (or blank) inside quotation.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
                     DownloadQueue_JobImport.IsEnabled = true;
                     return;
                 }
