@@ -1075,35 +1075,41 @@ namespace e621_ReBot_v3.Modules
 
             string GetFileNameOnly = Path.GetFileNameWithoutExtension(MediaFile_GetFileNameOnly(PicURL));
 
+            //Always make e621 folder
             string DownloadPath = Path.Combine(AppSettings.Download_FolderLocation, "e621");
+
+            string ArtistFolder = string.Empty;
+            //If user wants to save to folders by artists as well
+            if (AppSettings.Download_Save2ArtistsFolder)
+            {
+                ArtistFolder = CheckTags4Artist(DownloadItemRef.e6_Tags);
+            }
+
+            //If there is a custom folder inputed, that takes priority over pool folder
             if (!string.IsNullOrEmpty(DownloadItemRef.DL_Folder))
             {
                 DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.DL_Folder);
 
-                //If user wants to save to folders by artists as well
-                if (AppSettings.Download_Save2ArtistsFolder)
+                //If custom folder and artist are named the same, then skip creating artist folder as it's probably not wanted
+                if (!string.Equals(DownloadItemRef.DL_Folder, ArtistFolder))
                 {
-                    //And artist lists exists
-                    if (Window_Tagger.Artist_List != null)
-                    {
-                        HashSet<string> TagList = new HashSet<string>(DownloadItemRef.e6_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-                        //Search for artist tag
-                        string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
-
-                        //And add that artists as a folder
-                        if (AnyArtist != null)
-                        {
-                            //And remove characters that are not allowed
-                            string PurgeArtistName = string.Concat(AnyArtist.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
-                            DownloadPath = Path.Combine(DownloadPath, PurgeArtistName);
-                        }
-                    }
+                    //Add artist folder if needed
+                    DownloadPath = Path.Combine(DownloadPath, ArtistFolder);
                 }
             }
             else
             {
-                DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.e6_PoolName ?? string.Empty);
+                if (!string.IsNullOrEmpty(DownloadItemRef.e6_PoolName))
+                {
+                    DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.e6_PoolName);
+                }
+                else
+                {
+                    //Add artist folder if needed
+                    DownloadPath = Path.Combine(DownloadPath, ArtistFolder);
+                }
             }
+
             Directory.CreateDirectory(DownloadPath);
 
             switch (AppSettings.NamingPattern_e6)
@@ -1165,6 +1171,28 @@ namespace e621_ReBot_v3.Modules
             }).Task.Wait();
 
             return true;
+        }
+
+        private static string CheckTags4Artist(string e6Tags)
+        {
+            //If artist lists exists
+            if (Window_Tagger.Artist_List != null)
+            {
+                //Split the tag list
+                HashSet<string> TagList = new HashSet<string>(e6Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                //Search for artist tag
+                string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
+
+                //And add that artists as a folder
+                if (AnyArtist != null)
+                {
+                    //And remove characters that are not allowed
+                    string PurgeArtistName = string.Concat(AnyArtist.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+                    return PurgeArtistName;
+                }
+            }
+
+            return string.Empty;
         }
 
         private static bool DownloadFrom_URL(DownloadItem DownloadItemRef)
