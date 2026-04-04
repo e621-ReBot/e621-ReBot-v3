@@ -99,7 +99,7 @@ namespace CefSharp
                 //new Regex(@"^\w+://s.pximg.net/www/js/build/spa.\w+.js"),
                 new Regex(@"^\w+://www\.recaptcha\.net/recaptcha/enterprise/reload\?k="), //Pixiv
                 new Regex(@"^\w+://www\.hiccears\.com/(contents|file|p)"),
-                new Regex(@"^\w+://x\.com/i/api/graphql/.+/(UserTweets|UserMedia|TweetDetail)\?variables="),
+                new Regex(@"^\w+://x\.com/i/api/graphql/.+/(UserTweets|UserMedia|TweetDetail|Likes|Bookmarks)\?variables="),
                 new Regex(@"^\w+://api\.x\.com/graphql/.+/TweetResultByRestId\?variables="), //when not logged in
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies|portal|art)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view|artwork|browse)"),

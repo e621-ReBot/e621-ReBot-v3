@@ -1085,7 +1085,7 @@ namespace e621_ReBot_v3.Modules
                 ArtistFolder = CheckTags4Artist(DownloadItemRef.e6_Tags);
             }
 
-            //If there is a custom folder inputed, that takes priority over pool folder
+            //If there is a custom folder provided, that takes priority over pool folder
             if (!string.IsNullOrEmpty(DownloadItemRef.DL_Folder))
             {
                 DownloadPath = Path.Combine(DownloadPath, DownloadItemRef.DL_Folder);
