@@ -190,10 +190,19 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
-            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@class='gallery-section']//button[text()='Next']");
+            //modern
+            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='submission-list']//button[text()='Next']");
             if (HtmlNodeTemp != null)
             {
                 string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.ParentNode.Attributes["action"].Value}";
+                return NextPage;
+            }
+
+            //classic
+            HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='submission-list']//div[@class='fancy-pagination clearfloat']/a[@class='button-link right']");
+            if (HtmlNodeTemp != null)
+            {
+                string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.Attributes["href"].Value}";
                 return NextPage;
             }
 
