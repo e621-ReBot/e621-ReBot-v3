@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -399,10 +400,15 @@ namespace e621_ReBot_v3.Modules
             MultipartFormDataContent EncodedContent = new MultipartFormDataContent(MPF_Boundary);
             foreach (KeyValuePair<string, string> DataPair in SendDictionary)
             {
-                if (DataPair.Key.EndsWith("file]"))
+                if (DataPair.Key.Equals("upload[file]"))
                 {
                     if (bytes2Send == null) throw new ApplicationException("bytes2Send is null somehow!");
-                    EncodedContent.Add(new ByteArrayContent(bytes2Send), name: DataPair.Key, fileName: DataPair.Value);
+
+                    //EncodedContent.Add(new ByteArrayContent(bytes2Send), name: DataPair.Key, fileName: DataPair.Value); //Sends in one chunk
+
+                    ProgressStream ProgressStreamTemp = new ProgressStream(new MemoryStream(bytes2Send));
+                    ProgressStreamTemp.ProgressChanged += ProgressStreamTemp_ProgressChanged; //this is reading rather than sending, so kind of a fake progress. But it hangs at the end with real progress anyway.
+                    EncodedContent.Add(new StreamContent(ProgressStreamTemp), DataPair.Key, DataPair.Value);
                 }
                 else
                 {
@@ -415,21 +421,16 @@ namespace e621_ReBot_v3.Modules
             {
                 HttpRequestMessageTemp.Content = EncodedContent;
 
-                if (bytes2Send != null)
-                {
-                    Report_Status("Uploading Media...0%");
-                    e621_ProgressMessageHandler.HttpSendProgress += E621_ProgressMessageHandler_HttpSendProgress;
-                }
                 HttpResponseMessage HttpResponseMessageTemp = e621Upload_HttpClient.SendAsync(HttpRequestMessageTemp).GetAwaiter().GetResult();
                 e621StringResponse = HttpResponseMessageTemp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 e621HttpResponseMessage = HttpResponseMessageTemp;
             }
-            if (bytes2Send != null) e621_ProgressMessageHandler.HttpSendProgress -= E621_ProgressMessageHandler_HttpSendProgress;
+            Report_Status("Uploading Media...100%");
         }
 
-        private static void E621_ProgressMessageHandler_HttpSendProgress(object? sender, HttpProgressEventArgs e)
+        private static void ProgressStreamTemp_ProgressChanged(int percentage)
         {
-            Report_Status($"Uploading Media...{e.ProgressPercentage}%");
+            Report_Status($"Uploading Media...{percentage}%");
         }
 
         private static void SuccessfulUpload_DisplayUpdates(MediaItem MediaItemRef, string PostID, bool Save2DB = true)

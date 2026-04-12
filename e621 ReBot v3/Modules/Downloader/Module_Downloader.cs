@@ -85,19 +85,21 @@ namespace e621_ReBot_v3.Modules
                 Holder_FileClient.Add(FileClient);
             }
 
-            ErrorSkipList = new List<string>{
+            ErrorSkipList = new List<string>
+            {
                 "An existing connection was forcibly closed by the remote host.",
                 "An error occurred while sending the request.",
-                "A connection attempt failed because the connected party did not properly respond after a period of time,"};
+                "A connection attempt failed because the connected party did not properly respond after a period of time,"
+            };
 
             HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 CookieContainer = new CookieContainer()
             };
-            _GeneralClient = new HttpClient(HttpClientHandlerTemp);
-            _GeneralClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-            _GeneralClient.Timeout = TimeSpan.FromSeconds(5);
+            _DownloadClient = new HttpClient(HttpClientHandlerTemp);
+            _DownloadClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+            _DownloadClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
         internal static void Start()
@@ -322,7 +324,7 @@ namespace e621_ReBot_v3.Modules
         //    }
         //}
 
-        private static readonly HttpClient _GeneralClient;
+        private static readonly HttpClient _DownloadClient;
         internal static HttpClient _PixivClient;
         private static HttpClient _HicceArsClient;
 
@@ -365,7 +367,7 @@ namespace e621_ReBot_v3.Modules
                 if (_HicceArsClient == null) MakeHicceArsClient();
                 return _HicceArsClient;
             }
-            return _GeneralClient;
+            return _DownloadClient;
         }
 
         internal static async Task<byte[]> DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null, float PercentageMod = 1, float MultiProgressBase = 0)
@@ -504,51 +506,54 @@ namespace e621_ReBot_v3.Modules
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 TreeViewItem? TreeViewItemTemp;
-                if (_2Download_DownloadItems.Count > 0)
+                lock (_2Download_DownloadItems) //might be needed, very rarely gives error for Parameter 'Index out of range. (0)
                 {
-                    int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                    if (StartIndex > (_2Download_DownloadItems.Count - 1))
+                    if (_2Download_DownloadItems.Count > 0)
                     {
-                        DownloadTreeViewPage = (int)Math.Floor((_2Download_DownloadItems.Count - 1) / (float)DownloadNodeMax);
-                        StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                    }
-
-                    int NodesOnPage = Math.Min(DownloadNodeMax, _2Download_DownloadItems.Count - StartIndex);
-                    int TreeNodeCount = Window_Main._RefHolder.DownloadQueue_TreeView.Items.Count;
-                    if (TreeNodeCount != NodesOnPage)
-                    {
-                        for (int i = 0; i < Math.Abs(TreeNodeCount - NodesOnPage); i++)
+                        int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                        if (StartIndex > (_2Download_DownloadItems.Count - 1))
                         {
-                            if (TreeNodeCount < NodesOnPage)
+                            DownloadTreeViewPage = (int)Math.Floor((_2Download_DownloadItems.Count - 1) / (float)DownloadNodeMax);
+                            StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                        }
+
+                        int NodesOnPage = Math.Min(DownloadNodeMax, _2Download_DownloadItems.Count - StartIndex);
+                        int TreeNodeCount = Window_Main._RefHolder.DownloadQueue_TreeView.Items.Count;
+                        if (TreeNodeCount != NodesOnPage)
+                        {
+                            for (int i = 0; i < Math.Abs(TreeNodeCount - NodesOnPage); i++)
                             {
-                                Window_Main._RefHolder.DownloadQueue_TreeView.Items.Add(new TreeViewItem());
-                                //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
-                                //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
-                            }
-                            else
-                            {
-                                Window_Main._RefHolder.DownloadQueue_TreeView.Items.RemoveAt(0);
+                                if (TreeNodeCount < NodesOnPage)
+                                {
+                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Add(new TreeViewItem());
+                                    //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
+                                    //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
+                                }
+                                else
+                                {
+                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.RemoveAt(0);
+                                }
                             }
                         }
-                    }
 
-                    for (int i = 0; i < NodesOnPage; i++)
-                    {
-                        TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadQueue_TreeView.Items[i];
-                        TreeViewItemTemp.Header = _2Download_DownloadItems[i + StartIndex].Grab_MediaURL;
-                        TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
+                        for (int i = 0; i < NodesOnPage; i++)
+                        {
+                            TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadQueue_TreeView.Items[i];
+                            TreeViewItemTemp.Header = _2Download_DownloadItems[i + StartIndex].Grab_MediaURL;
+                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
+                        }
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = _2Download_DownloadItems.Count > (StartIndex + DownloadNodeMax);
                     }
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = _2Download_DownloadItems.Count > (StartIndex + DownloadNodeMax);
+                    else
+                    {
+                        DownloadTreeViewPage = 0;
+                        Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
+                    }
+                    Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({_2Download_DownloadItems.Count})";
                 }
-                else
-                {
-                    DownloadTreeViewPage = 0;
-                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
-                }
-                Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({_2Download_DownloadItems.Count})";
 
                 if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
                 {
@@ -1045,24 +1050,27 @@ namespace e621_ReBot_v3.Modules
             DownloadItem? DownloadItemTemp;
             while (DLThreadsWaiting > 0 && _2Download_DownloadItems.Count > 0)
             {
-                DownloadItemTemp = _2Download_DownloadItems[0];
-                bool DownloadStarted = false;
+                lock (_2Download_DownloadItems)
+                {
+                    DownloadItemTemp = _2Download_DownloadItems[0];
+                    bool DownloadStarted = false;
 
-                DLThreadsWaiting--;
-                if (DownloadItemTemp.Is_e6Download)
-                {
-                    DownloadStarted = DownloadFrom_e6URL(DownloadItemTemp);
-                }
-                else
-                {
-                    DownloadStarted = DownloadFrom_URL(DownloadItemTemp);
-                }
-
-                if (DownloadStarted)
-                {
-                    lock (_2Download_DownloadItems)
+                    DLThreadsWaiting--;
+                    if (DownloadItemTemp.Is_e6Download)
                     {
-                        _2Download_DownloadItems.RemoveAt(0);
+                        DownloadStarted = DownloadFrom_e6URL(DownloadItemTemp);
+                    }
+                    else
+                    {
+                        DownloadStarted = DownloadFrom_URL(DownloadItemTemp);
+                    }
+
+                    if (DownloadStarted)
+                    {
+                        lock (_2Download_DownloadItems)
+                        {
+                            _2Download_DownloadItems.RemoveAt(0);
+                        }
                     }
                 }
             }
