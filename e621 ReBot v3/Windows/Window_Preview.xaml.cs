@@ -196,7 +196,12 @@ namespace e621_ReBot_v3
             SetUPColour();
 
             Title = $"Preview ({MediaItemIndexHolder + 1}) - .{MediaItemHolder.Grid_MediaFormat}";
-            if (Window_Tagger._RefHolder != null) Window_Tagger._RefHolder.Close();
+
+            //If Tagger is open for this media, close it
+            if (Window_Tagger._RefHolder != null && Window_Tagger._RefHolder.Owner == this)
+            {
+                Window_Tagger._RefHolder.Close();
+            }
 
             PB_Upload.IsEnabled = true;
             panel_Search.IsEnabled = false;
@@ -471,7 +476,7 @@ namespace e621_ReBot_v3
 
             Title += " | Checking MD5...";
 
-            string MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}");
+            string? MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}");
 
             MediaItemHolderRef.Grid_MediaMD5Checked = true;
 
@@ -480,12 +485,20 @@ namespace e621_ReBot_v3
 
             if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
+            //Add better error handling maybe? 
+
             JObject MD5CheckJSON = JObject.Parse(MD5Check);
+
+            //Take post ID from e6
             MediaItemHolderRef.UP_UploadedID = (string)MD5CheckJSON["post"]["id"];
 
+            //Save e6 post ID to DB
             AppSettings.MediaRecord_Add(MediaItemHolderRef);
 
+            //Take rating from e6
             MediaItemHolderRef.UP_Rating = ((string)MD5CheckJSON["post"]["rating"]).ToUpper();
+
+            //Take tags from e6
             List<string> TagList = new List<string>();
             foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
             {
@@ -495,11 +508,18 @@ namespace e621_ReBot_v3
                 }
             }
             MediaItemHolderRef.UP_Tags = string.Join(' ', TagList);
+
+            //Check status on grid item if it's visible
             GridVE? GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolderRef);
             if (GridVETemp != null)
             {
                 GridVETemp.IsUploaded_SetText(MediaItemHolderRef.UP_UploadedID);
             }
+            // Don't need tags if already uploaded.
+            if (Window_Tagger._RefHolder != null && Window_Tagger._RefHolder.MediaItemHolder == MediaItemHolderRef) 
+            { 
+                Window_Tagger._RefHolder.Close();
+            } 
         }
 
         private void AutoTags()
@@ -680,8 +700,6 @@ namespace e621_ReBot_v3
 
         private void PB_Navigate_Click(object sender, RoutedEventArgs e)
         {
-            if (Window_Tagger._RefHolder != null) Window_Tagger._RefHolder.Close();
-
             int WantedChange = short.Parse(((Button)sender).Tag.ToString());
             int WouldBeNewIndex = Module_Grabber._Grabbed_MediaItems.FindIndex(MediaItemHolder) + WantedChange;
             if (WouldBeNewIndex == -1 || WouldBeNewIndex == Module_Grabber._Grabbed_MediaItems.Count) return;
