@@ -38,7 +38,8 @@ namespace e621_ReBot_v3.CustomControls
         {
             for (int i = 0; i < InnerList.Count; i++)
             {
-                if (ReferenceEquals((DownloadItem)InnerList[i], DownloadItemRef)) return i;
+                DownloadItem? DownloadItemTemp = (DownloadItem)InnerList[i];
+                if (ReferenceEquals(DownloadItemTemp, DownloadItemRef)) return i;
             }
             return -1;
         }
@@ -47,7 +48,8 @@ namespace e621_ReBot_v3.CustomControls
         {
             for (int i = 0; i < InnerList.Count; i++)
             {
-                if (((DownloadItem)InnerList[i]).Grab_MediaURL.Equals(URL2Find)) return i;
+                DownloadItem? DownloadItemTemp = (DownloadItem)InnerList[i];
+                if (string.Equals(DownloadItemTemp.Grab_MediaURL, URL2Find)) return i;
             }
             return -1;
         }

@@ -15,7 +15,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -50,6 +49,7 @@ namespace e621_ReBot_v3
             GBTB_Right.Visibility = Visibility.Hidden;
             GBD_Change.Opacity = 0;
             GBU_Change.Opacity = 0;
+            JobImport_TextBlock.Visibility = Visibility.Hidden;
             Upload_ProgressCanvas.Visibility = Visibility.Hidden;
             SettingsButton_DLGenders.Visibility = Visibility.Hidden;
             SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
@@ -706,22 +706,27 @@ namespace e621_ReBot_v3
             string? SpecialSaveFolder = Module_Downloader.SelectFolderPopup(string.Empty);
 
             IEnumerable<MediaItem> MediaItemList = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? Module_Grabber._Grabbed_MediaItems.Skip(Grid_ItemStartIndex).Take(Grid_ItemLimit) : Module_Grabber._Grabbed_MediaItems;
-            foreach (MediaItem? MediaItemTemp in MediaItemList)
-            {
-                if (MediaItemTemp.DL_Queued)
-                {
-                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
 
-                    Module_Downloader.AddDownloadItem2Queue(
-                        PageURL: MediaItemTemp.Grab_PageURL,
-                        MediaURL: MediaItemTemp.Grab_MediaURL,
-                        ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
-                        Artist: MediaItemTemp.Grab_Artist,
-                        Title: MediaItemTemp.Grab_Title,
-                        MediaFormat: MediaItemTemp.Grid_MediaFormat,
-                        MediaItemRef: MediaItemTemp,
-                        DL_Folder: SpecialSaveFolder); //Save to user specified folder
-                    DownloadAdditionCounter++;
+            lock (Module_Downloader._2Download_DownloadItems)
+            {
+                foreach (MediaItem? MediaItemTemp in MediaItemList)
+                {
+                    if (MediaItemTemp.DL_Queued)
+                    {
+                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
+
+                        Module_Downloader.AddDownloadItem2Queue(
+                            PageURL: MediaItemTemp.Grab_PageURL,
+                            MediaURL: MediaItemTemp.Grab_MediaURL,
+                            ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
+                            Artist: MediaItemTemp.Grab_Artist,
+                            Title: MediaItemTemp.Grab_Title,
+                            MediaFormat: MediaItemTemp.Grid_MediaFormat,
+                            MediaItemRef: MediaItemTemp,
+                            DL_Folder: SpecialSaveFolder, //Save to user specified folder
+                            LockDLList: false);
+                        DownloadAdditionCounter++;
+                    }
                 }
             }
 
@@ -877,7 +882,7 @@ namespace e621_ReBot_v3
             }
         }
 
-        internal List<DownloadVE> _DownloadVEList = new List<DownloadVE>();
+        internal readonly List<DownloadVE> _DownloadVEList = new List<DownloadVE>();
         private void Download_DownloadVEPanel_LayoutUpdated(object sender, EventArgs e)
         {
             for (int i = 0; i < Download_DownloadVEPanel.Children.Count; i++)
@@ -902,7 +907,6 @@ namespace e621_ReBot_v3
                 DownloadQueue_JobImport.IsEnabled = true;
                 return;
             }
-
 
             string filePath = OpenFileDialogTemp.FileName;
             string fileContent = File.ReadAllText(filePath);
@@ -942,16 +946,9 @@ namespace e621_ReBot_v3
                 }
             }
 
-            //add jobs
-            foreach (string line in lineHolder)
-            {
-                int lastQuoteEnd = line.LastIndexOf('"');
-                int lastQuoteStart = line.LastIndexOf('"', lastQuoteEnd - 1);
-                string folderName = line.Substring(lastQuoteStart + 1, lastQuoteEnd - lastQuoteStart - 1);
-                string[] tagHolder = line.Substring(0, lastQuoteStart).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                string combinedTags = string.Join(' ', tagHolder);
-                await Module_DLe621.Grab_MediaWithTags(combinedTags, folderName);
-            }
+            JobImport_TextBlock.Text = $"{Module_DownloadImport._2Do_SubTasks.Count} >";
+            JobImport_TextBlock.Visibility = Visibility.Visible;
+            Module_DownloadImport.Import_SubJobs(lineHolder);
 
             DownloadQueue_JobImport.IsEnabled = true;
         }

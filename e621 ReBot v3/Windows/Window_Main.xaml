@@ -302,18 +302,20 @@
 
                         <CheckBox x:Name="DownloadQueue_CheckBox" Grid.Row="0" Style="{DynamicResource CheckBoxStyle_Large}" Content="Download Queue" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Margin="8,0,0,0" IsChecked="True" ToolTip="Toggle downloading status."/>
 
+                        <TextBlock x:Name="JobImport_TextBlock" Text="1234 &gt;" ToolTip="Shows how many subtasks are left to be processed by Job Importer." HorizontalAlignment="Right" Margin="0,8,148,0" Foreground="{DynamicResource ThemeForeground}"/>
+
                         <Button x:Name="DownloadQueue_JobImport" Content="Job Import" BorderThickness="1,0,1,0" ToolTip="Import e621 download job(s) from a text file.&#10;&#10;Each line is treated as a separate job.&#10;Tags should be separated using spaces, ending with a folder name inside quotation marks.&#10;If you dont want a custom folder, leave the inside of quotation blank.&#10;&#10;Example: tag1 tag2 tag3 &quot;MyTagsDownload&quot; (or &quot;&quot;)" HorizontalAlignment="Right" Width="80" Height="32" Click="DownloadQueue_JobImport_Click" Margin="0,0,63,0" Cursor="Hand"/>
 
                         <Button x:Name="DownloadQueue_CancelAPIDL" Content="Cancel" BorderThickness="1,0,1,0" ToolTip="Cancel grabbing further download links from e621 API." HorizontalAlignment="Right" Width="64" Height="32" IsEnabled="False" Click="DownloadQueue_CancelAPIDL_Click" Cursor="Hand"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
-                        
+
                         <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageUp" Width="24" Content="▲" ToolTip="Show previous page of Download Queue." HorizontalAlignment="Left"  Cursor="Hand" BorderThickness="1,0,1,0" Click="DownloadQueue_DownloadPageUp_Click" IsEnabled="False" />
-                        
+
                         <Button Grid.Row="1" x:Name="DownloadQueue_DownloadPageDown" Width="24" Content="▼" ToolTip="Show next page of Download Queue." HorizontalAlignment="Left" Cursor="Hand" BorderThickness="1,0,1,0" Margin="23,0,0,0" Click="DownloadQueue_DownloadPageDown_Click" IsEnabled="False" />
-                        
+
                         <TextBlock x:Name="DownloadQueue_StatusTextBlock" Text="API DL Status: Suspended." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="52,0,0,0"/>
-                        
+
                         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <customcontrols:Custom_TreeView Grid.Row="2" x:Name="DownloadQueue_TreeView" Padding="4,0,4,0" Margin="0" ContextMenuOpening="DownloadTreeViewContextMenu_Opening">

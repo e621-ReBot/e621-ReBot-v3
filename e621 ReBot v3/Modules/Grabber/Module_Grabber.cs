@@ -144,12 +144,12 @@ namespace e621_ReBot_v3.Modules
             {
                 case "www.furaffinity.net":
                     {
-                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps") || URISplit[0].Equals("favorites"))
                         {
                             string NextPage = Module_FurAffinity.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
-                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you like to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                 {
                                     DoMultiPageGrab = true;
@@ -181,7 +181,7 @@ namespace e621_ReBot_v3.Modules
                             string NextPage = Module_Inkbunny.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
-                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you lik to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Would you like to grab all pages?\nBrowser interaction will be disabled during the process.", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                 {
                                     DoMultiPageGrab = true;
@@ -273,11 +273,12 @@ namespace e621_ReBot_v3.Modules
             Uri TempURI = new Uri(WebAddress);
             string[] URISplit = TempURI.LocalPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
+            Thread.Sleep(100); //Give page some time to load, seems like sometimes not fully loaded despite calling the event.
             switch (TempURI.Host)
             {
                 case "www.furaffinity.net":
                     {
-                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps"))
+                        if (URISplit[0].Equals("gallery") || URISplit[0].Equals("scraps") || URISplit[0].Equals("favorites"))
                         {
                             Module_FurAffinity.Queue_Prepare(WebAddress);
 

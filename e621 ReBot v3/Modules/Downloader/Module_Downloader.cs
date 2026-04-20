@@ -127,6 +127,28 @@ namespace e621_ReBot_v3.Modules
         internal static Dictionary<string, string> MediaBrowser_MediaCache = new Dictionary<string, string>();
         internal static DownloadItemList _2Download_DownloadItems = new DownloadItemList();
 
+        internal static void ModifyListCapacity()
+        {
+            lock (_2Download_DownloadItems)
+            {
+                int count = _2Download_DownloadItems.Count;
+                int capacity = _2Download_DownloadItems.Capacity;
+                int targetCapacity = capacity;
+
+                if (count > 1_000) targetCapacity = 5_000;
+                if (count > 5_000) targetCapacity = 10_000;
+                if (count > 10_000) targetCapacity = 50_000;
+                if (count > 50_000) targetCapacity = 100_000; //should no longer happen
+                if (count > 100_000) targetCapacity = 500_000; //should no longer happen
+                if (count > 500_000) targetCapacity = 1_000_000; //should no longer happen
+
+                if (targetCapacity > capacity)
+                {
+                    _2Download_DownloadItems.Capacity = targetCapacity;
+                }
+            }
+        }
+
         // - - - - - - - - - - - - - - - -
 
         internal static string MediaFile_GetFileNameOnly(string FullNamePath, string? MediaFormat = null)
@@ -503,13 +525,17 @@ namespace e621_ReBot_v3.Modules
         internal static int DownloadTreeViewPage = 0;
         internal static void UpdateDownloadTreeView()
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            //lock outside main thread since this is called from other threads
+            lock (_2Download_DownloadItems) //might be needed, very rarely gives error for Parameter 'Index out of range. (0)
             {
-                TreeViewItem? TreeViewItemTemp;
-                lock (_2Download_DownloadItems) //might be needed, very rarely gives error for Parameter 'Index out of range. (0)
+
+                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                 {
+                    TreeViewItem? TreeViewItemTemp;
+
                     if (_2Download_DownloadItems.Count > 0)
                     {
+
                         int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
                         if (StartIndex > (_2Download_DownloadItems.Count - 1))
                         {
@@ -525,7 +551,12 @@ namespace e621_ReBot_v3.Modules
                             {
                                 if (TreeNodeCount < NodesOnPage)
                                 {
-                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Add(new TreeViewItem());
+                                    TreeViewItemTemp = new TreeViewItem //fix the binding error spam
+                                    {
+                                        VerticalContentAlignment = VerticalAlignment.Stretch,
+                                        HorizontalContentAlignment = HorizontalAlignment.Stretch
+                                    };
+                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Add(TreeViewItemTemp);
                                     //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
                                     //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
                                 }
@@ -553,30 +584,30 @@ namespace e621_ReBot_v3.Modules
                         Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
                     }
                     Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({_2Download_DownloadItems.Count})";
-                }
 
-                if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
-                {
-                    TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
-                    if (TreeViewItemTemp.Parent != null)
+                    if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
                     {
-                        if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
+                        TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
+                        if (TreeViewItemTemp.Parent != null)
                         {
-                            TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
-                        }
+                            if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
+                            {
+                                TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
+                            }
 
-                        if (TreeViewItemTemp == null)
-                        {
-                            ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
-                        }
-                        else
-                        {
-                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
+                            if (TreeViewItemTemp == null)
+                            {
+                                ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
+                            }
+                            else
+                            {
+                                TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
+                            }
                         }
                     }
-                }
-                Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
-            });
+                    Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
+                });
+            }
         }
 
         internal static void Report_Info(string InfoMessage)
@@ -591,31 +622,28 @@ namespace e621_ReBot_v3.Modules
 
         internal static bool CheckDownloadQueue4Duplicate(string MediaURL, string? DLFolder = null)
         {
-            if (_2Download_DownloadItems.ContainsURL(MediaURL))
+            int GetIndex = _2Download_DownloadItems.FindIndex(MediaURL);
+            if (GetIndex == -1) return false;
+
+            //If Special Download Folder is provided, check if a download is already queued for the same folder
+            if (!string.IsNullOrEmpty(DLFolder))
             {
-                //If Special Download Folder is provided, check if a download is already queued for the same folder
-                if (!string.IsNullOrEmpty(DLFolder))
+                string? DownloadFolder = _2Download_DownloadItems[GetIndex].DL_Folder;
+
+                if (!string.IsNullOrEmpty(DownloadFolder))
                 {
-                    int GetIndex = _2Download_DownloadItems.FindIndex(MediaURL);
-                    string? DownloadFolder = _2Download_DownloadItems[GetIndex].DL_Folder;
-
-                    if (!string.IsNullOrEmpty(DownloadFolder))
-                    {
-                        return string.Equals(DLFolder, DownloadFolder);
-                    }
-
-                    //Return false folders are different (folder missing also means different folder)
-                    return false;
+                    return string.Equals(DLFolder, DownloadFolder);
                 }
 
-                //Return true as both queued and current url have no special folder so they are going to the same folder
-                return true;
+                //Return false folders are different (folder missing also means different folder)
+                return false;
             }
 
-            return false; //default
+            //Return true as both queued and current url have no special folder so they are going to the same folder
+            return true;
         }
 
-        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null, string? DL_Folder = null)
+        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null, string? DL_Folder = null, bool LockDLList = true)
         {
             DownloadItem DownloadItemTemp = new DownloadItem()
             {
@@ -633,7 +661,14 @@ namespace e621_ReBot_v3.Modules
                 MediaItemRef = MediaItemRef,
                 DL_Folder = DL_Folder ?? string.Empty
             };
-            lock (_2Download_DownloadItems)
+            if (LockDLList)
+            {
+                lock (_2Download_DownloadItems)
+                {
+                    _2Download_DownloadItems.Add(DownloadItemTemp);
+                }
+            }
+            else
             {
                 _2Download_DownloadItems.Add(DownloadItemTemp);
             }
@@ -1038,14 +1073,22 @@ namespace e621_ReBot_v3.Modules
         private static readonly BackgroundWorker Download_BGW = new BackgroundWorker();
         private static void DownloadTimer_Tick(object? sender, EventArgs e)
         {
-            if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true && _2Download_DownloadItems.Count > 0 && !Download_BGW.IsBusy)
+            if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true && !Download_BGW.IsBusy)
             {
-                Download_BGW.RunWorkerAsync();
+                if (_2Download_DownloadItems.Count > 0)
+                {
+                    Download_BGW.RunWorkerAsync();
+                }
+                else
+                {
+                    //Also start bgw for the import task if there are no other tasks
+                    if (Module_DownloadImport._2Do_SubTasks.Count > 0 && !Module_DownloadImport.SubJobRunning) Download_BGW.RunWorkerAsync();
+                }
             }
         }
 
         internal static ushort DLThreadsWaiting = 4;
-        private static void DownloadBGW_Start(object? sender, DoWorkEventArgs e)
+        private static async void DownloadBGW_Start(object? sender, DoWorkEventArgs e)
         {
             DownloadItem? DownloadItemTemp;
             while (DLThreadsWaiting > 0 && _2Download_DownloadItems.Count > 0)
@@ -1067,14 +1110,17 @@ namespace e621_ReBot_v3.Modules
 
                     if (DownloadStarted)
                     {
-                        lock (_2Download_DownloadItems)
-                        {
-                            _2Download_DownloadItems.RemoveAt(0);
-                        }
+                        _2Download_DownloadItems.RemoveAt(0);
                     }
                 }
             }
+
             UpdateDownloadTreeView();
+
+            if (_2Download_DownloadItems.Count == 0 && Module_DownloadImport._2Do_SubTasks.Count > 0 && !Module_DownloadImport.SubJobRunning)
+            {
+                await Module_DownloadImport.Run_SubJob();
+            }
         }
 
         private static bool DownloadFrom_e6URL(DownloadItem DownloadItemRef)

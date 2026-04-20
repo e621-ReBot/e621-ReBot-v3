@@ -48,7 +48,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocumentTemp.LoadHtml(HTMLSource);
 
             HtmlNodeCollection HtmlNodeCollectionTemp = HtmlDocumentTemp.DocumentNode.SelectNodes(".//section[contains(@id, 'gallery')]/figure");
-            if (HtmlNodeCollectionTemp.Count == 0)
+            if (HtmlNodeCollectionTemp == null || HtmlNodeCollectionTemp.Count == 0)
             {
                 Module_Grabber.Report_Info($"Skipped grabbing - No Media found [@{WebAddress}]");
                 return;
@@ -191,7 +191,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
             //modern
-            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='submission-list']//button[text()='Next']");
+            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='gallery-section']//button[text()='Next']");
             if (HtmlNodeTemp != null)
             {
                 string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.ParentNode.Attributes["action"].Value}";
@@ -199,7 +199,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
 
             //classic
-            HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='submission-list']//div[@class='fancy-pagination clearfloat']/a[@class='button-link right']");
+            HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@id]/parent::*/div[@class='fancy-pagination clearfloat']/a[@class='button-link right']");
             if (HtmlNodeTemp != null)
             {
                 string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.Attributes["href"].Value}";

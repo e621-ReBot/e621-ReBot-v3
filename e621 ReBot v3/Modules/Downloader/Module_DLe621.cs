@@ -88,22 +88,26 @@ namespace e621_ReBot_v3.Modules.Downloader
                             HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                             if (NodeSelector != null)
                             {
-                                foreach (HtmlNode Post in NodeSelector)
+                                lock (Module_Downloader._2Download_DownloadItems)
                                 {
-                                    if (!Post.Attributes["class"].Value.Contains("blacklisted"))
+                                    foreach (HtmlNode Post in NodeSelector)
                                     {
-                                        Post_MediaURL = Post.Attributes["data-file-url"].Value;
-                                        if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
+                                        if (!Post.Attributes["class"].Value.Contains("blacklisted"))
+                                        {
+                                            Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                            if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
-                                        Module_Downloader.AddDownloadItem2Queue(
-                                            PageURL: WebAddress,
-                                            MediaURL: Post_MediaURL,
-                                            ThumbnailURL: Post.Attributes["data-preview-url"].Value,
-                                            MediaFormat: Post.Attributes["data-file-ext"].Value,
-                                            e6PostID: Post.Attributes["data-id"].Value,
-                                            e6Tags: Post.Attributes["data-tags"].Value,
-                                            e6Download: true,
-                                            DL_Folder: SpecialSaveFolder);
+                                            Module_Downloader.AddDownloadItem2Queue(
+                                                PageURL: WebAddress,
+                                                MediaURL: Post_MediaURL,
+                                                ThumbnailURL: Post.Attributes["data-preview-url"].Value,
+                                                MediaFormat: Post.Attributes["data-file-ext"].Value,
+                                                e6PostID: Post.Attributes["data-id"].Value,
+                                                e6Tags: Post.Attributes["data-tags"].Value,
+                                                e6Download: true,
+                                                DL_Folder: SpecialSaveFolder,
+                                                LockDLList: false);
+                                        }
                                     }
                                 }
                             }
@@ -147,28 +151,33 @@ namespace e621_ReBot_v3.Modules.Downloader
                             PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
 
                             int PoolIndex = 0;
-                            foreach (HtmlNode Post in NodeSelector)
+
+                            lock (Module_Downloader._2Download_DownloadItems)
                             {
-                                if (Post.Attributes["data-flags"].Value.Equals("deleted")) continue;
+                                foreach (HtmlNode Post in NodeSelector)
+                                {
+                                    if (Post.Attributes["data-flags"].Value.Equals("deleted")) continue;
 
-                                Post_MediaURL = Post.Attributes["data-file-url"].Value;
-                                if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL, PoolName)) continue;
+                                    Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                    if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL, PoolName)) continue;
 
-                                Post_ID = Post.Attributes["data-id"].Value;
-                                string PoolPostIndex = CurrentPage > 1 ? PoolPages.IndexOf(Post_ID).ToString() : PoolIndex.ToString();
+                                    Post_ID = Post.Attributes["data-id"].Value;
+                                    string PoolPostIndex = CurrentPage > 1 ? PoolPages.IndexOf(Post_ID).ToString() : PoolIndex.ToString();
 
-                                Module_Downloader.AddDownloadItem2Queue(
-                                           PageURL: WebAddress,
-                                           MediaURL: Post_MediaURL,
-                                           ThumbnailURL: Post.Attributes["data-preview-url"].Value,
-                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
-                                           e6PostID: Post.Attributes["data-id"].Value,
-                                           e6PoolName: PoolName,
-                                           e6PoolPostIndex: PoolPostIndex,
-                                           e6Tags: Post.Attributes["data-tags"].Value,
-                                           e6Download: true);
+                                    Module_Downloader.AddDownloadItem2Queue(
+                                               PageURL: WebAddress,
+                                               MediaURL: Post_MediaURL,
+                                               ThumbnailURL: Post.Attributes["data-preview-url"].Value,
+                                               MediaFormat: Post.Attributes["data-file-ext"].Value,
+                                               e6PostID: Post.Attributes["data-id"].Value,
+                                               e6PoolName: PoolName,
+                                               e6PoolPostIndex: PoolPostIndex,
+                                               e6Tags: Post.Attributes["data-tags"].Value,
+                                               e6Download: true,
+                                               LockDLList: false);
 
-                                PoolIndex += 1;
+                                    PoolIndex += 1;
+                                }
                             }
                         }
                         break;
@@ -180,22 +189,27 @@ namespace e621_ReBot_v3.Modules.Downloader
                         if (NodeSelector != null)
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
-                            foreach (HtmlNode Post in NodeSelector)
-                            {
-                                if (!Post.Attributes["class"].Value.Contains("blacklisted"))
-                                {
-                                    Post_MediaURL = Post.Attributes["data-file-url"].Value;
-                                    if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
-                                    Module_Downloader.AddDownloadItem2Queue(
-                                          PageURL: WebAddress,
-                                          MediaURL: Post_MediaURL,
-                                          ThumbnailURL: Post.Attributes["data-preview-url"].Value,
-                                          MediaFormat: Post.Attributes["data-file-ext"].Value,
-                                          e6PostID: Post.Attributes["data-id"].Value,
-                                          e6Tags: Post.Attributes["data-tags"].Value,
-                                          e6Download: true,
-                                          DL_Folder: SpecialSaveFolder);
+                            lock (Module_Downloader._2Download_DownloadItems)
+                            {
+                                foreach (HtmlNode Post in NodeSelector)
+                                {
+                                    if (!Post.Attributes["class"].Value.Contains("blacklisted"))
+                                    {
+                                        Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                        if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
+
+                                        Module_Downloader.AddDownloadItem2Queue(
+                                              PageURL: WebAddress,
+                                              MediaURL: Post_MediaURL,
+                                              ThumbnailURL: Post.Attributes["data-preview-url"].Value,
+                                              MediaFormat: Post.Attributes["data-file-ext"].Value,
+                                              e6PostID: Post.Attributes["data-id"].Value,
+                                              e6Tags: Post.Attributes["data-tags"].Value,
+                                              e6Download: true,
+                                              DL_Folder: SpecialSaveFolder,
+                                              LockDLList: false);
+                                    }
                                 }
                             }
                         }
@@ -223,22 +237,26 @@ namespace e621_ReBot_v3.Modules.Downloader
                         HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
-                            foreach (HtmlNode Post in NodeSelector)
+                            lock (Module_Downloader._2Download_DownloadItems)
                             {
-                                if (!Post.Attributes["class"].Value.Contains("blacklisted"))
+                                foreach (HtmlNode Post in NodeSelector)
                                 {
-                                    Post_MediaURL = Post.Attributes["data-file-url"].Value;
-                                    if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
+                                    if (!Post.Attributes["class"].Value.Contains("blacklisted"))
+                                    {
+                                        Post_MediaURL = Post.Attributes["data-file-url"].Value;
+                                        if (Module_Downloader.CheckDownloadQueue4Duplicate(Post_MediaURL)) continue;
 
-                                    Module_Downloader.AddDownloadItem2Queue(
-                                       PageURL: WebAddress,
-                                       MediaURL: Post_MediaURL,
-                                       ThumbnailURL: Post.Attributes["data-preview-url"].Value,
-                                       MediaFormat: Post.Attributes["data-file-ext"].Value,
-                                       e6PostID: Post.Attributes["data-id"].Value,
-                                       e6Tags: Post.Attributes["data-tags"].Value,
-                                       e6Download: true,
-                                       DL_Folder: SpecialSaveFolder);
+                                        Module_Downloader.AddDownloadItem2Queue(
+                                           PageURL: WebAddress,
+                                           MediaURL: Post_MediaURL,
+                                           ThumbnailURL: Post.Attributes["data-preview-url"].Value,
+                                           MediaFormat: Post.Attributes["data-file-ext"].Value,
+                                           e6PostID: Post.Attributes["data-id"].Value,
+                                           e6Tags: Post.Attributes["data-tags"].Value,
+                                           e6Download: true,
+                                           DL_Folder: SpecialSaveFolder,
+                                           LockDLList: false);
+                                    }
                                 }
                             }
                         }
@@ -290,34 +308,44 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32)
+            {
+                Update_APIStatus("Suspended.", false);
+                return;
+            }
 
             JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
-            foreach (JToken cPost in JSON_Object.Children())
+
+            lock (Module_Downloader._2Download_DownloadItems)
             {
-                List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
-                if (!Blacklist_Check(TempTagList))
+                foreach (JToken cPost in JSON_Object.Children())
                 {
-                    string MediaURLTemp;
-                    string ThumbnailURLTemp;
-                    MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
-                    string PostID = (string)cPost["id"];
+                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
+                    if (!Blacklist_Check(TempTagList))
+                    {
+                        string MediaURLTemp;
+                        string ThumbnailURLTemp;
+                        MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
+                        string PostID = (string)cPost["id"];
 
-                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
+                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
-                    Module_Downloader.AddDownloadItem2Queue(
-                        PageURL: $"https://e621.net/posts/{PostID}",
-                        MediaURL: MediaURLTemp,
-                        ThumbnailURL: ThumbnailURLTemp,
-                        MediaFormat: (string)cPost["file"]["ext"],
-                        e6PostID: PostID,
-                        e6Tags: string.Join(' ', TempTagList),
-                        e6Download: true,
-                        DL_Folder: FolderName);
+                        Module_Downloader.AddDownloadItem2Queue(
+                            PageURL: $"https://e621.net/posts/{PostID}",
+                            MediaURL: MediaURLTemp,
+                            ThumbnailURL: ThumbnailURLTemp,
+                            MediaFormat: (string)cPost["file"]["ext"],
+                            e6PostID: PostID,
+                            e6Tags: string.Join(' ', TempTagList),
+                            e6Download: true,
+                            DL_Folder: FolderName,
+                            LockDLList: false);
+                    }
                 }
             }
             PageCounter += 1;
             Module_Downloader.UpdateDownloadTreeView();
+            Module_Downloader.ModifyListCapacity();
 
             if (CancellationPending)
             {
@@ -342,7 +370,11 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? JSON_PoolData = await RunTaskFirst;
-            if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32) return;
+            if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32)
+            {
+                Update_APIStatus("Suspended.", false);
+                return;
+            }
 
             JToken PoolJSON = JObject.Parse(JSON_PoolData);
             string PoolName = ((string)PoolJSON["name"]).Replace('_', ' ').Trim();
@@ -379,34 +411,39 @@ namespace e621_ReBot_v3.Modules.Downloader
             if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
             JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
-            foreach (JToken cPost in JSON_Object)
+            lock (Module_Downloader._2Download_DownloadItems)
             {
-                string MediaURLTemp;
-                string ThumbnailURLTemp;
-                MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
-
-                string PicName = MediaURLTemp.Substring(MediaURLTemp.LastIndexOf('/') + 1);
-                if (FoundComicPosts.Contains(PicName))
+                foreach (JToken cPost in JSON_Object)
                 {
-                    SkippedPostsCounter += 1;
-                    continue;
+                    string MediaURLTemp;
+                    string ThumbnailURLTemp;
+                    MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
+
+                    string PicName = MediaURLTemp.Substring(MediaURLTemp.LastIndexOf('/') + 1);
+                    if (FoundComicPosts.Contains(PicName))
+                    {
+                        SkippedPostsCounter += 1;
+                        continue;
+                    }
+
+                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
+
+                    string? PostID = (string?)cPost["id"];
+                    Module_Downloader.AddDownloadItem2Queue(
+                        PageURL: $"https://e621.net/posts/{PostID}",
+                        MediaURL: MediaURLTemp,
+                        ThumbnailURL: ThumbnailURLTemp,
+                        MediaFormat: (string)cPost["file"]["ext"],
+                        e6PostID: PostID,
+                        e6PoolName: PoolName,
+                        e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
+                        e6Tags: string.Join(' ', TempTagList),
+                        e6Download: true,
+                        LockDLList: false);
                 }
-
-                List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
-
-                string? PostID = (string?)cPost["id"];
-                Module_Downloader.AddDownloadItem2Queue(
-                    PageURL: $"https://e621.net/posts/{PostID}",
-                    MediaURL: MediaURLTemp,
-                    ThumbnailURL: ThumbnailURLTemp,
-                    MediaFormat: (string)cPost["file"]["ext"],
-                    e6PostID: PostID,
-                    e6PoolName: PoolName,
-                    e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
-                    e6Tags: string.Join(' ', TempTagList),
-                    e6Download: true);
             }
             Module_Downloader.UpdateDownloadTreeView();
+            Module_Downloader.ModifyListCapacity();
 
             if (CancellationPending)
             {

@@ -37,21 +37,25 @@ namespace e621_ReBot_v3.Modules.Downloader
                 string JSONSourceTest = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
                 JObject PixivJSON = JObject.Parse(JSONSourceTest);
 
-                foreach (JToken JTokenTemp in PixivJSON["body"].Children())
+                lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    MediaURL = (string)JTokenTemp["urls"]["original"];
+                    foreach (JToken JTokenTemp in PixivJSON["body"].Children())
+                    {
+                        MediaURL = (string)JTokenTemp["urls"]["original"];
 
-                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
+                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
-                    ThumbURL = ((string)JTokenTemp["urls"]["thumb_mini"]).Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
-                    Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
+                        ThumbURL = ((string)JTokenTemp["urls"]["thumb_mini"]).Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.;
+                        Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
-                    Module_Downloader.AddDownloadItem2Queue(
-                        PageURL: WebAddress,
-                        MediaURL: MediaURL,
-                        ThumbnailURL: ThumbURL,
-                        MediaFormat: Media_Format,
-                        Artist: ArtistName);
+                        Module_Downloader.AddDownloadItem2Queue(
+                            PageURL: WebAddress,
+                            MediaURL: MediaURL,
+                            ThumbnailURL: ThumbURL,
+                            MediaFormat: Media_Format,
+                            Artist: ArtistName,
+                            LockDLList: false);
+                    }
                 }
             }
         }

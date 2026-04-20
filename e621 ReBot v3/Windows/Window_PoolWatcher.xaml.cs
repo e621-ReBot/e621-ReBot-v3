@@ -180,28 +180,33 @@ namespace e621_ReBot_v3
                 if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
                 JToken PostData = JObject.Parse(e6JSONResult)["posts"];
-                foreach (JToken PostDataDetailed in PostData.Children())
+
+                lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    int Post_ID = (int)PostDataDetailed["id"];
-                    string Pool_Name = PoolPosts2Get[Post_ID].Name;
-                    Pool_Name = string.Join(null, Pool_Name.Split(Path.GetInvalidFileNameChars()));
+                    foreach (JToken PostDataDetailed in PostData.Children())
+                    {
+                        int Post_ID = (int)PostDataDetailed["id"];
+                        string Pool_Name = PoolPosts2Get[Post_ID].Name;
+                        Pool_Name = string.Join(null, Pool_Name.Split(Path.GetInvalidFileNameChars()));
 
-                    string MediaURLTemp;
-                    string ThumbnailURLTemp;
-                    Module_DLe621.MD5_2_URL(PostDataDetailed, out MediaURLTemp, out ThumbnailURLTemp);
+                        string MediaURLTemp;
+                        string ThumbnailURLTemp;
+                        Module_DLe621.MD5_2_URL(PostDataDetailed, out MediaURLTemp, out ThumbnailURLTemp);
 
-                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp, Pool_Name)) continue;
+                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp, Pool_Name)) continue;
 
-                    Module_Downloader.AddDownloadItem2Queue(
-                                          PageURL: $"https://e621.net/posts/{Post_ID}",
-                                          MediaURL: MediaURLTemp,
-                                          ThumbnailURL: ThumbnailURLTemp,
-                                          MediaFormat: (string)PostDataDetailed["file"]["ext"],
-                                          e6PostID: Post_ID.ToString(),
-                                          e6PoolName: Pool_Name,
-                                          e6PoolPostIndex: PoolPosts2Get[Post_ID].PostIDs.IndexOf(Post_ID).ToString(),
-                                          e6Download: true);
-                    ItemsAddedCount++;
+                        Module_Downloader.AddDownloadItem2Queue(
+                                              PageURL: $"https://e621.net/posts/{Post_ID}",
+                                              MediaURL: MediaURLTemp,
+                                              ThumbnailURL: ThumbnailURLTemp,
+                                              MediaFormat: (string)PostDataDetailed["file"]["ext"],
+                                              e6PostID: Post_ID.ToString(),
+                                              e6PoolName: Pool_Name,
+                                              e6PoolPostIndex: PoolPosts2Get[Post_ID].PostIDs.IndexOf(Post_ID).ToString(),
+                                              e6Download: true,
+                                              LockDLList: false);
+                        ItemsAddedCount++;
+                    }
                 }
             }
             if (ItemsAddedCount > 0)

@@ -97,43 +97,47 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 string ArtistName = PostNode.SelectSingleNode(".//div[@class='elephant elephant_555753']/div[@class='content' and not(@id)]//a[text()]").Attributes["href"].Value;
 
-                foreach (string MediaURL in MediaList)
+                lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
-
-                    Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
-
-                    switch (MediaURL.Substring(MediaURL.LastIndexOf('.')))
+                    foreach (string MediaURL in MediaList)
                     {
-                        case ".mp4":
-                        case ".swf":
-                            {
-                                ThumbURL = MediaURL.Substring(0, MediaURL.Length - 4) + ".jpg";
-                                ThumbURL = ThumbURL.Replace("files/full", "thumbnails/large");
-                                ThumbURL = CheckURLExists(ThumbURL) ? ThumbURL : "https://nl.ib.metapix.net/images80/overlays/video.png";
-                                break;
-                            }
+                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
 
-                        case ".gif":
-                            {
-                                ThumbURL = MediaURL.Replace("files/full", "files/screen");
-                                break;
-                            }
+                        Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
-                        default:
-                            {
-                                ThumbURL = MediaURL.Replace("files/full", "thumbnails/large");
-                                ThumbURL = ThumbURL.Substring(0, ThumbURL.Length - 4) + "_noncustom.jpg";
-                                break;
-                            }
+                        switch (MediaURL.Substring(MediaURL.LastIndexOf('.')))
+                        {
+                            case ".mp4":
+                            case ".swf":
+                                {
+                                    ThumbURL = MediaURL.Substring(0, MediaURL.Length - 4) + ".jpg";
+                                    ThumbURL = ThumbURL.Replace("files/full", "thumbnails/large");
+                                    ThumbURL = CheckURLExists(ThumbURL) ? ThumbURL : "https://nl.ib.metapix.net/images80/overlays/video.png";
+                                    break;
+                                }
+
+                            case ".gif":
+                                {
+                                    ThumbURL = MediaURL.Replace("files/full", "files/screen");
+                                    break;
+                                }
+
+                            default:
+                                {
+                                    ThumbURL = MediaURL.Replace("files/full", "thumbnails/large");
+                                    ThumbURL = ThumbURL.Substring(0, ThumbURL.Length - 4) + "_noncustom.jpg";
+                                    break;
+                                }
+                        }
+
+                        Module_Downloader.AddDownloadItem2Queue(
+                            PageURL: WebAddress,
+                            MediaURL: MediaURL,
+                            ThumbnailURL: ThumbURL,
+                            MediaFormat: Media_Format,
+                            Artist: ArtistName,
+                            LockDLList: false);
                     }
-
-                    Module_Downloader.AddDownloadItem2Queue(
-                        PageURL: WebAddress,
-                        MediaURL: MediaURL,
-                        ThumbnailURL: ThumbURL,
-                        MediaFormat: Media_Format,
-                        Artist: ArtistName);
                 }
             }
         }

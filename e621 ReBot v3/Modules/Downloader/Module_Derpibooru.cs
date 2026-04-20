@@ -47,23 +47,27 @@ namespace e621_ReBot_v3.Modules.Downloader
                 HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//main[@id]//div[@class='media-box']");
                 if (NodeSelector != null)
                 {
-                    foreach (HtmlNode Post in NodeSelector)
+                    lock (Module_Downloader._2Download_DownloadItems)
                     {
-                        JObject PostUris = JObject.Parse(HttpUtility.HtmlDecode(Post.SelectSingleNode(".//div[@data-uris]").Attributes["data-uris"].Value));
-                        MediaURL = (string)PostUris["full"];
+                        foreach (HtmlNode Post in NodeSelector)
+                        {
+                            JObject PostUris = JObject.Parse(HttpUtility.HtmlDecode(Post.SelectSingleNode(".//div[@data-uris]").Attributes["data-uris"].Value));
+                            MediaURL = (string)PostUris["full"];
 
-                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
+                            if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
 
-                        Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
-                        ThumbURL = (string)PostUris["thumb"];
+                            Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
+                            ThumbURL = (string)PostUris["thumb"];
 
-                        Module_Downloader.AddDownloadItem2Queue(
-                            PageURL: WebAddress,
-                            MediaURL: MediaURL,
-                            ThumbnailURL: ThumbURL,
-                            MediaFormat: Media_Format,
-                            Artist: string.Empty,
-                            DL_Folder: SpecialSaveFolder);
+                            Module_Downloader.AddDownloadItem2Queue(
+                                PageURL: WebAddress,
+                                MediaURL: MediaURL,
+                                ThumbnailURL: ThumbURL,
+                                MediaFormat: Media_Format,
+                                Artist: string.Empty,
+                                DL_Folder: SpecialSaveFolder,
+                                LockDLList: false);
+                        }
                     }
                 }
             }

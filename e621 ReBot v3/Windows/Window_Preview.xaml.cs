@@ -516,10 +516,10 @@ namespace e621_ReBot_v3
                 GridVETemp.IsUploaded_SetText(MediaItemHolderRef.UP_UploadedID);
             }
             // Don't need tags if already uploaded.
-            if (Window_Tagger._RefHolder != null && Window_Tagger._RefHolder.MediaItemHolder == MediaItemHolderRef) 
-            { 
+            if (Window_Tagger._RefHolder != null && Window_Tagger._RefHolder.MediaItemHolder == MediaItemHolderRef)
+            {
                 Window_Tagger._RefHolder.Close();
-            } 
+            }
         }
 
         private void AutoTags()
