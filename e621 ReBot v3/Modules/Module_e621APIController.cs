@@ -50,24 +50,25 @@ namespace e621_ReBot_v3.Modules
         internal static List<Task> BackgroundTasks = new List<Task>();
         private static void API_Timer_Tick(object? sender, EventArgs e)
         {
-            if (UserTasks.Any())
+            Task TaskTemp;
+            if (UserTasks.Count > 0)
             {
-                Task TaskTemp = UserTasks[0];
                 lock (UserTasks)
                 {
+                    TaskTemp = UserTasks[0];
                     UserTasks.RemoveAt(0);
                 }
-                TaskTemp.Start();
+                if (TaskTemp != null) TaskTemp.Start();
                 return;
             }
-            if (BackgroundTasks.Any())
+            if (BackgroundTasks.Count > 0)
             {
-                Task TaskTemp = BackgroundTasks[0];
                 lock (BackgroundTasks)
                 {
+                    TaskTemp = BackgroundTasks[0];
                     BackgroundTasks.RemoveAt(0);
                 }
-                TaskTemp.Start();
+                if (TaskTemp != null) TaskTemp.Start();
             }
         }
     }
