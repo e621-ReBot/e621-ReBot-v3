@@ -191,7 +191,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
             //modern
-            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='gallery-section']//button[text()='Next']");
+            HtmlNode HtmlNodeTemp = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//section[@class='gallery-section']//button[text()='Next']");
             if (HtmlNodeTemp != null)
             {
                 string NextPage = $"https://www.furaffinity.net{HtmlNodeTemp.ParentNode.Attributes["action"].Value}";
