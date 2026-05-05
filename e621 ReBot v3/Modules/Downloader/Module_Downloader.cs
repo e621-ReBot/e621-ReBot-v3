@@ -525,89 +525,88 @@ namespace e621_ReBot_v3.Modules
         internal static int DownloadTreeViewPage = 0;
         internal static void UpdateDownloadTreeView()
         {
-            //lock outside main thread since this is called from other threads
-            lock (_2Download_DownloadItems) //might be needed, very rarely gives error for Parameter 'Index out of range. (0)
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
+                TreeViewItem? TreeViewItemTemp;
 
-                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                int DownloadItemCount = _2Download_DownloadItems.Count;
+                if (DownloadItemCount > 0)
                 {
-                    TreeViewItem? TreeViewItemTemp;
-
-                    if (_2Download_DownloadItems.Count > 0)
+                    int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                    if (StartIndex > (DownloadItemCount - 1)) //-1 so that when collection is same count as page max count, it returns the correct page, as first page starts at item 0.
                     {
-
-                        int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                        if (StartIndex > (_2Download_DownloadItems.Count - 1))
-                        {
-                            DownloadTreeViewPage = (int)Math.Floor((_2Download_DownloadItems.Count - 1) / (float)DownloadNodeMax);
-                            StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                        }
-
-                        int NodesOnPage = Math.Min(DownloadNodeMax, _2Download_DownloadItems.Count - StartIndex);
-                        int TreeNodeCount = Window_Main._RefHolder.DownloadQueue_TreeView.Items.Count;
-                        if (TreeNodeCount != NodesOnPage)
-                        {
-                            for (int i = 0; i < Math.Abs(TreeNodeCount - NodesOnPage); i++)
-                            {
-                                if (TreeNodeCount < NodesOnPage)
-                                {
-                                    TreeViewItemTemp = new TreeViewItem //fix the binding error spam
-                                    {
-                                        VerticalContentAlignment = VerticalAlignment.Stretch,
-                                        HorizontalContentAlignment = HorizontalAlignment.Stretch
-                                    };
-                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Add(TreeViewItemTemp);
-                                    //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
-                                    //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
-                                }
-                                else
-                                {
-                                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.RemoveAt(0);
-                                }
-                            }
-                        }
-
-                        for (int i = 0; i < NodesOnPage; i++)
-                        {
-                            TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadQueue_TreeView.Items[i];
-                            TreeViewItemTemp.Header = _2Download_DownloadItems[i + StartIndex].Grab_MediaURL;
-                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
-                        }
-                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
-                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = _2Download_DownloadItems.Count > (StartIndex + DownloadNodeMax);
+                        //fix (soon to be) current page
+                        DownloadTreeViewPage = (int)Math.Floor((DownloadItemCount - 1) / (float)DownloadNodeMax);
+                        //also fix start index
+                        StartIndex = DownloadTreeViewPage * DownloadNodeMax;
                     }
-                    else
-                    {
-                        DownloadTreeViewPage = 0;
-                        Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
-                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
-                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
-                    }
-                    Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({_2Download_DownloadItems.Count})";
+                    int NodesOnPage = Math.Min(DownloadNodeMax, DownloadItemCount - StartIndex);
 
-                    if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
+                    //Don't need a reference, just data, so make a snapshot.
+                    List<DownloadItem> DownloadItemListSnapshot = _2Download_DownloadItems.GetRange(StartIndex, NodesOnPage);
+
+                    NodesOnPage = DownloadItemListSnapshot.Count; //redo, needed?
+
+                    ItemCollection TreeViewItemsTemp = Window_Main._RefHolder.DownloadQueue_TreeView.Items;
+                    //If there are more items on page than on TreeView, add them.
+                    while (TreeViewItemsTemp.Count < DownloadItemListSnapshot.Count)
                     {
-                        TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
-                        if (TreeViewItemTemp.Parent != null)
+                        TreeViewItemTemp = new TreeViewItem //Fix the binding error spam
                         {
-                            if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
-                            {
-                                TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
-                            }
+                            VerticalContentAlignment = VerticalAlignment.Stretch,
+                            HorizontalContentAlignment = HorizontalAlignment.Stretch
+                        };
+                        TreeViewItemsTemp.Add(TreeViewItemTemp);
+                        //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
+                        //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
+                    }
+                    //If there are less items on page than on TreeView, remove them.
+                    while (TreeViewItemsTemp.Count > DownloadItemListSnapshot.Count)
+                    {
+                        TreeViewItemsTemp.RemoveAt(TreeViewItemsTemp.Count - 1);
+                    }
 
-                            if (TreeViewItemTemp == null)
-                            {
-                                ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
-                            }
-                            else
-                            {
-                                TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
-                            }
+                    //Update data on TreeView items
+                    for (int i = 0; i < DownloadItemListSnapshot.Count; i++)
+                    {
+                        TreeViewItemTemp = (TreeViewItem)TreeViewItemsTemp[i];
+                        TreeViewItemTemp.Header = DownloadItemListSnapshot[i + StartIndex].Grab_MediaURL;
+                        TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
+                    }
+                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
+                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = DownloadItemCount > (StartIndex + DownloadNodeMax);
+                }
+                else
+                {
+                    DownloadTreeViewPage = 0;
+                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
+                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
+                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
+                }
+                Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({DownloadItemCount})";
+
+                if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
+                {
+                    TreeViewItem? TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
+                    if (TreeViewItemTemp.Parent != null)
+                    {
+                        if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
+                        {
+                            TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
+                        }
+
+                        if (TreeViewItemTemp == null)
+                        {
+                            ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
+                        }
+                        else
+                        {
+                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
                         }
                     }
-                    Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
-                });
-            }
+                }
+                Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
+            });
         }
 
         internal static void Report_Info(string InfoMessage)
