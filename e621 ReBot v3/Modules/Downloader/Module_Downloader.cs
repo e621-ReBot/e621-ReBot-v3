@@ -587,7 +587,7 @@ namespace e621_ReBot_v3.Modules
 
                 if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
                 {
-                    TreeViewItem? TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
+                    TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
                     if (TreeViewItemTemp.Parent != null)
                     {
                         if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
