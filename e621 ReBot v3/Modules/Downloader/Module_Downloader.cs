@@ -179,6 +179,12 @@ namespace e621_ReBot_v3.Modules
         {
             string NewFileName = FileName;
 
+            //Handle Bluesky blobs
+            if (NewFileName.Contains(".getBlob?"))
+            {
+                NewFileName = $"{NewFileName.Substring(NewFileName.IndexOf("&cid=") + 5)}.{DownloadItemRef.Grab_MediaFormat}";
+            }
+
             switch (AppSettings.NamingPattern_Web)
             {
                 case 0: //Original
@@ -194,14 +200,14 @@ namespace e621_ReBot_v3.Modules
                             break;
                         }
 
-                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{FileName}";
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{NewFileName}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
                         break;
                     }
 
                 case 2: //Artist_Title_Original
                     {
-                        List<string> TitleFilterList = new List<string> { "Created by", "Tweet by", "Plurk by" };
+                        HashSet<string> TitleFilterList = new HashSet<string> { "Created by", "Tweet by @", "Plurk by", "Post by @" };
                         string? TitleSubstring = DownloadItemRef.Grab_Title;
 
                         if (string.IsNullOrEmpty(TitleSubstring) || TitleFilterList.Any(TitleName => TitleSubstring.Contains(TitleName)))
@@ -210,7 +216,7 @@ namespace e621_ReBot_v3.Modules
                         }
 
                         TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
-                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{FileName}";
+                        NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{NewFileName}";
                         NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
                         break;
                     }
@@ -968,26 +974,24 @@ namespace e621_ReBot_v3.Modules
                     return;
                 }
 
-                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
-                if (ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
+                if (!CheckDownloadQueue4Duplicate(MediaURL))
                 {
-                    if (!CheckDownloadQueue4Duplicate(MediaURL))
+                    lock (_2Download_DownloadItems)
                     {
-                        lock (_2Download_DownloadItems)
-                        {
-                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                        }
+                        //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                        _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
                     }
-                    DLThreadsWaiting++;
-                    DownloadVETemp.DownloadFinish();
-                    DownloadVETemp._DownloadFinished = true;
-                    UpdateDownloadTreeView();
                 }
-                else
+                DLThreadsWaiting++;
+                DownloadVETemp.DownloadFinish();
+                DownloadVETemp._DownloadFinished = true;
+                UpdateDownloadTreeView();
+
+                //Just report other errors.
+                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
+                if (!ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
                 {
                     MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
-                    throw e.Error;
                 }
                 return;
             }

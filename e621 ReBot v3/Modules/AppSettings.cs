@@ -216,7 +216,7 @@ namespace e621_ReBot_v3
                                 foreach (JToken MediaItemTokenTemp in JTokenMedia.Children())
                                 {
                                     Module_Grabber._Grabbed_MediaItems.Add(MediaItemTokenTemp.ToObject<MediaItem>());
-                                    if (MediaItemTokenTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[Module_Grabber._Grabbed_MediaItems.Count - 1].Grid_ThumbnailFullInfo = true;
+                                    if (MediaItemTokenTemp["Grid_ThumbnailFullInfo"] == null) Module_Grabber._Grabbed_MediaItems[^1].Grid_ThumbnailFullInfo = true;
                                 }
                                 //Window_Main._RefHolder.Dispatcher.BeginInvoke(() => Window_Main._RefHolder.Grid_Populate(true));
                                 break;

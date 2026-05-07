@@ -214,6 +214,17 @@ namespace e621_ReBot_v3
             }
 
             string MediaURL = MediaItemHolder.Grab_MediaURL;
+
+
+            //Redirect Bluesky blobs to view
+            if (MediaURL.Contains(".getBlob?"))
+            {
+                string did = MediaURL.Substring(MediaURL.IndexOf(".getBlob?did=") + 13);
+                string cid = did.Split("&cid=").Last();
+                did = did.Split("&cid=").First();
+                MediaURL = $"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{cid}";
+            }
+
             string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaURL, MediaItemHolder.Grid_MediaFormat);
 
             //if (Form_Loader._FormReference.cTreeView_ConversionQueue.Nodes.ContainsKey(ImageURL))
@@ -350,18 +361,21 @@ namespace e621_ReBot_v3
                     {
                         if (MediaItemHolder.Grid_MediaMD5 == null) //Acts as first load
                         {
-                            MatchCollection ImageResolution = Preview_Regex().Matches(DocumentTitle);
+                            if (MediaItemHolder.Grid_MediaWidth == null)
+                            {
+                                MatchCollection ImageResolution = Preview_Regex().Matches(DocumentTitle);
 
-                            if (ImageResolution.Count == 0) return; //Protect against 404
+                                if (ImageResolution.Count == 0) return; //Protect against 404
 
-                            MediaItemHolder.Grid_MediaWidth = ushort.Parse(ImageResolution[0].Groups[1].Value);
-                            MediaItemHolder.Grid_MediaHeight = ushort.Parse(ImageResolution[0].Groups[2].Value);
+                                MediaItemHolder.Grid_MediaWidth = ushort.Parse(ImageResolution[0].Groups[1].Value);
+                                MediaItemHolder.Grid_MediaHeight = ushort.Parse(ImageResolution[0].Groups[2].Value);
+                            }
 
                             GetCachedMedia();
                             Module_Uploader.Media2BigCheck(MediaItemHolder);
                             AutoTags();
 
-                            //Reload thumb for Seasyl as it is using a PH thumb
+                            //Reload thumb for Weasyl as it is using a PH thumb
                             if (MediaItemHolder.Grab_PageURL.Contains("www.weasyl.com"))
                             {
                                 MediaItemHolder.Grid_Thumbnail = null; //set to null so it will be loaded in the following code automatically
@@ -438,7 +452,8 @@ namespace e621_ReBot_v3
         private void GetCachedMedia(string? FilePath = null)
         {
             string MediaName = FilePath ?? Module_Downloader.MediaFile_GetFileNameOnly(MediaItemHolder.Grab_MediaURL, MediaItemHolder.Grid_MediaFormat);
-            string? EitherFilePath = FilePath ?? Module_Downloader.MediaBrowser_MediaCache[MediaName];
+            Module_Downloader.MediaBrowser_MediaCache.TryGetValue(MediaName, out string? CachePath);
+            string? EitherFilePath = FilePath ?? CachePath;
 
             if (EitherFilePath != null)
             {

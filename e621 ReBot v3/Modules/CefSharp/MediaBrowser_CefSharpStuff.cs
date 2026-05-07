@@ -4,6 +4,7 @@ using e621_ReBot_v3.Modules;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace CefSharp
@@ -139,14 +140,18 @@ namespace CefSharp
             return false;
         }
 
+        private readonly HashSet<string> DiscardList = new HashSet<string>() { "bsky.app", ".getBlob?" };
         private Dictionary<ulong, MediaBrowser_ResponseFilter> responseDictionary = new Dictionary<ulong, MediaBrowser_ResponseFilter>();
         protected override void OnResourceLoadComplete(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response, UrlRequestStatus status, long receivedContentLength)
         {
             if (status == UrlRequestStatus.Success && responseDictionary.TryGetValue(request.Identifier, out MediaBrowser_ResponseFilter ResponseFilterHolder))
             {
+                //ignore Bluesky blobs
+                if (DiscardList.Any(discard => request.Url.Contains(discard))) return;
+
                 byte[] ByteData = ResponseFilterHolder.ByteData;
 
-                string FileExt = response.Headers["content-type"].ToString();
+                string FileExt = (string)response.Headers["content-type"];
                 if (FileExt == null) return;
 
                 switch (FileExt)

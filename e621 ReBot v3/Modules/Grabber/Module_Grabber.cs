@@ -40,6 +40,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@"^\w+://\w+\.\w+/@.+/(\d+/?|media)"), //mastodon, baraag, pawoo
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures/(user/.+|featured|popular|random|recent/)|user/.+/faves/pictures|users/FaveUsersRecentPictures)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)(.+)?"),
+                new Regex(@"^\w+://bsky\.app/profile/\w+\.(bsky\.social|com)(/post/\w+)?")
             };
 
             _GrabTimer.Tick += GrabTimer_Tick;
@@ -264,6 +265,12 @@ namespace e621_ReBot_v3.Modules
                         ThreadPool.QueueUserWorkItem(state => Module_Plurk.Queue_Prepare(WebAddress));
                         break;
                     }
+
+                case "bsky.app":
+                    {
+                        ThreadPool.QueueUserWorkItem(state => Module_Bluesky.Queue_Prepare(WebAddress));
+                        break;
+                    }
             }
         }
 
@@ -326,7 +333,7 @@ namespace e621_ReBot_v3.Modules
         internal readonly static ushort _GrabberMaxHandCount = 4;
         private static ushort GrabberActiveHandCount = 0;
         internal static DispatcherTimer _GrabTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        private static readonly HashSet<string> FastSites = new HashSet<string>() { "https://x.com/", "https://mastodon.social/", "https://baraag.net/", "https://pawoo.net/" };
+        private static readonly HashSet<string> FastSites = new HashSet<string>() { "https://x.com/", "https://mastodon.social/", "https://baraag.net/", "https://pawoo.net/", "https://bsky.app/" };
         private static void GrabTimer_Tick(object sender, EventArgs e)
         {
             _GrabTimer.Stop();
@@ -476,6 +483,12 @@ namespace e621_ReBot_v3.Modules
                 case "www.plurk.com":
                     {
                         await Module_Plurk.Grab(WebAddress, (string)NeededData);
+                        break;
+                    }
+
+                case "bsky.app":
+                    {
+                        await Module_Bluesky.Grab(WebAddress, (string)NeededData);
                         break;
                     }
             }

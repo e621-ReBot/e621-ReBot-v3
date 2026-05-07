@@ -12,7 +12,7 @@ namespace e621_ReBot_v3.Modules
         internal static CookieContainer? Cookies_Inkbunny;
         internal static CookieContainer? Cookies_Pixiv;
         internal static CookieContainer? Cookies_HicceArs;
-        internal static CookieContainer? Cookies_Twitter;
+        //internal static CookieContainer? Cookies_Twitter;
         internal static CookieContainer? Cookies_Newgrounds;
         internal static CookieContainer? Cookies_SoFurry;
         internal static CookieContainer? Cookies_Weasyl;

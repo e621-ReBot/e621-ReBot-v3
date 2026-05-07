@@ -161,6 +161,7 @@ namespace e621_ReBot_v3.Modules
             Module_Mastodons.MastodonsJSONHolder = null;
             Module_Itaku.ItakuSingleJSONHolder = null;
             Module_Itaku.ItakuMultiJSONHolder = null;
+            Module_Bluesky.BlueskyJSONHolder = null;
             InvokeOnUIThread(() =>
             {
                 _browserControl.Url_TextBox.Text = HttpUtility.UrlDecode(BrowserAddress);

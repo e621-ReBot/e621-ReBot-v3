@@ -108,6 +108,7 @@ namespace CefSharp
                 //new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures|user)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)"),
+                new Regex(@"^\w+://public\.api\.bsky\.app/xrpc/app\.bsky\.(unspecced\.getPostThreadV2|feed\.getAuthorFeed)"),
 
                 //- - - Download only
 
@@ -211,7 +212,7 @@ namespace CefSharp
                         break;
                     }
 
-                case string Twitter when Twitter.Contains("x.com"):
+                case string Twitter when Twitter.Contains("x.com/"):
                     {
                         if (response.MimeType.Equals("application/json"))
                         {
@@ -295,6 +296,19 @@ namespace CefSharp
                                     Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                                 });
                             });
+                        }
+                        break;
+                    }
+
+                case string Bluesky when Bluesky.Contains(".bsky.app"):
+                    {
+                        if (response.MimeType.Equals("application/json"))
+                        {
+                            string Data2String = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
+                            if (Data2String.Length > 64 && Module_Bluesky.VerifyJSONValid(Bluesky, Data2String))
+                            {
+                                Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                            }
                         }
                         break;
                     }

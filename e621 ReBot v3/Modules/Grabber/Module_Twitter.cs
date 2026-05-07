@@ -17,7 +17,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Twitter);
+            //Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Twitter);
             if (WebAddress.Contains("/status/"))
             {
                 Queue_Single(WebAddress);
@@ -59,7 +59,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             ushort SkipCounter = 0;
             Dictionary<string, string> Posts2Grab = new Dictionary<string, string>();
-            foreach (JToken JTokenTemp in TwitterJSONHolder.Children())
+            foreach (JToken JTokenTemp in TwitterJSONHolder)
             {
                 JToken ExtendedContainer = JTokenTemp["extended_entities"];
 
@@ -98,7 +98,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static async Task Grab(string WebAddress, string JSONSource)
         {
-            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Twitter) : JSONSource;
+            //JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Twitter) : JSONSource;
             if (string.IsNullOrEmpty(JSONSource))
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Twitter.Grab [@{WebAddress}]");
@@ -126,6 +126,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             string? Post_ThumbnailURL;
             List<MediaItem> MediaItemList = new List<MediaItem>();
             ushort SkipCounter = 0;
+
             foreach (JToken MediaNode in TweeterJSON["extended_entities"]["media"])
             {
                 if (MediaNode["video_info"] != null)
@@ -226,7 +227,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 //[@something]makes it go two levels deep.
                 TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddToModule')].moduleItems[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //media page
-                if (!TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //status page
+                if (TweetsContainer == null || !TweetsContainer.Any()) TweetsContainer = JObjectTemp.SelectTokens("$..data..instructions[?(@.type=='TimelineAddEntries')].entries[*]..tweet_results.result..legacy").Where(token => token["extended_entities"] != null); //status page
             }
             if (WebAddress.StartsWith("https://api.x.com/graphql/")) //not logged in
             {
@@ -234,38 +235,23 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
 
             // Exit if no valid tweets
-            if (!TweetsContainer.Any()) return false;
+            if (TweetsContainer == null || !TweetsContainer.Any()) return false;
 
-            //Hold onto JSON for later, combine with existing entries if any
-            JArray TweetHolder = new JArray(TweetsContainer);
-            bool SkipUnion = false;
             if (TwitterJSONHolder == null)
             {
-                TwitterJSONHolder = TweetHolder;
-                SkipUnion = true;
+                TwitterJSONHolder = new JArray(TweetsContainer);
+                return true;
             }
 
             lock (TwitterJSONHolder)
             {
-                if (!SkipUnion) TwitterJSONHolder.Merge(TweetHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
+                HashSet<string?> ExistingIDs = TwitterJSONHolder.Select(tweet => (string)tweet["id_str"]).ToHashSet();
 
-                //clear duplicates, happens rarely
-                if (TwitterJSONHolder.Count > 1)
+                foreach (JToken tweet in TweetsContainer)
                 {
-                    //Module_Twitter.TwitterJSONHolder.OrderBy(token => (uint)token["id_str"]);
-                    HashSet<string> TweetIDList = new HashSet<string>();
-                    for (int i = TwitterJSONHolder.Count - 1; i >= 0; i--)
-                    {
-                        string TweetID = (string)TwitterJSONHolder[i]["id_str"];
-                        if (TweetIDList.Contains(TweetID))
-                        {
-                            TwitterJSONHolder.RemoveAt(i);
-                        }
-                        else
-                        {
-                            TweetIDList.Add(TweetID);
-                        }
-                    }
+                    string TweetID = (string)tweet["id_str"];
+                    //Try to add to existing ids, if it fails it means it's duplicate
+                    if (ExistingIDs.Add(TweetID)) TwitterJSONHolder.Add(tweet);
                 }
             }
             return true;
