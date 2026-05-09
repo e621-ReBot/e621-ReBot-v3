@@ -129,22 +129,19 @@ namespace e621_ReBot_v3.Modules.Grabber
             int EpochTime = int.Parse(PostNode.SelectSingleNode(".//span[@class='popup_date']").Attributes["data-time"].Value);
             DateTime Post_DateTime = DateTimeOffset.FromUnixTimeSeconds(EpochTime).DateTime;
 
-            string Post_Title = PostNode.SelectSingleNode(".//div[@class='submission-title' or @class='classic-submission-title information']/h2").InnerText.Trim();
+            string Post_Title = PostNode.SelectSingleNode(".//div[@class='submission-title' or @class='classic-submission-title information']/h2").InnerText;
             Post_Title = WebUtility.HtmlDecode(Post_Title.Replace('[', '⟦').Replace(']', '⟧'));
 
-            string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-id-sub-container' or @class='classic-submission-title information']//a").InnerText.Trim());
+            string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-description-artist' or @class='classic-submission-title information']//span[@class='c-usernameBlockSimple__displayName']").InnerText);
 
-            //modern or classic
-            HtmlNode Post_TextNode = PostNode.SelectSingleNode(".//div[@class='submission-description' or @class='submission-description user-submitted-links'] | .//div[@id='page-submission']//table[@class='maintable']//table[@class='maintable']//td[@class='alt1' and @style]");
+            HtmlNode Post_TextNode = PostNode.SelectSingleNode(".//div[@class=@class='submission-description user-submitted-links' or 'submission-description'] | .//div[@class='classic-submission-title container']/ancestor::tbody[1]//td[@class='alt1' and @style]");
             string? Post_Text = Module_Html2Text.Html2Text_FurAffinity(Post_TextNode);
 
-            //modern or classic
-            HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a | .//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
+            HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@id='submission-options']/a[text()='Download'] | .//img[@id='submissionImg']/following-sibling::div[@class='alt1 actions aligncenter']//a[text()='Download']");
             string Post_MediaURL = $"https:{DownloadNode.Attributes["href"].Value}";
 
-            //modern or classic
-            HtmlNode MediaSizeNode = PostNode.SelectSingleNode(".//div[@id='submission_page']//section[@class='info text']/div[3]/span | .//div[@id='page-submission']//td[@class='alt1 stats-container']//b[text()='Resolution:']/following-sibling::text()"); //info text
-            string[] MediaSizes = MediaSizeNode.InnerText.Trim().Replace(" x ", "x").Split('x', StringSplitOptions.RemoveEmptyEntries);
+            HtmlNode MediaSizeNode = PostNode.SelectSingleNode(".//div[@class='submission-content-stats']//span[2]/span[4] | .//div[@id='page-submission']//td[@class='alt1 stats-container']//b[text()='Resolution:']/following-sibling::text()"); //info text
+            string[] MediaSizes = MediaSizeNode.InnerText.Trim().Split('x', StringSplitOptions.RemoveEmptyEntries);
 
             // - - - - - - - - - - - - - - - -
 

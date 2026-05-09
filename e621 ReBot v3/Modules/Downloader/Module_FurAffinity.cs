@@ -24,11 +24,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? Media_Format;
             if (WebAddress.Contains("/view/")) //single
             {
-                HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@class='download' or @class='download fullsize']/a");
-                if (DownloadNode == null) //classic theme selected
-                {
-                    DownloadNode = PostNode.SelectSingleNode(".//div[@id='page-submission']//div[@class='alt1 actions aligncenter']//a[text()='Download']");
-                }
+                HtmlNode DownloadNode = PostNode.SelectSingleNode(".//div[@id='submission-options']/a[text()='Download'] | .//img[@id='submissionImg']/following-sibling::div[@class='alt1 actions aligncenter']//a[text()='Download']");
                 MediaURL = $"https:{DownloadNode.Attributes["href"].Value}";
 
                 if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
@@ -36,7 +32,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
                 ThumbURL = $"https:{PostNode.SelectSingleNode(".//img[@id='submissionImg']").Attributes["data-preview-src"].Value.Replace("@600-", "@200-")}";
 
-                string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-id-sub-container' or @class='classic-submission-title information']//a").InnerText.Trim());
+                string ArtistName = WebUtility.HtmlDecode(PostNode.SelectSingleNode(".//div[@class='submission-description-artist' or @class='classic-submission-title information']//span[@class='c-usernameBlockSimple__displayName']").InnerText);
 
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: WebAddress,
