@@ -181,6 +181,7 @@ namespace e621_ReBot_v3
 
         internal MediaItem? MediaItemHolder;
         bool _isLoading = false;
+        private static readonly string BlueskyVideoScript = "<!doctype html><html><head><meta charset='utf-8'><script src='https://cdn.jsdelivr.net/npm/hls.js@latest'></script><style>html,body{{margin:0;height:100%;background:dimgray;overflow:hidden;}}video{{width:100vw;height:100vh;object-fit:contain;background:dimgray}}</style></head><body><video id='videoplayer' autoplay muted controls></video><script>const v=document.getElementById('videoplayer');const url='{0}';const h=new Hls();h.loadSource(url);h.attachMedia(v);</script></body></html>";
         internal async Task Nav2URL(MediaItem MediaItemRef)
         {
             if (MediaBrowser.IsBrowserInitialized && _isLoading) MediaBrowser.Stop(); //Error: "IBrowser instance is null" Null sometimes?
@@ -215,14 +216,24 @@ namespace e621_ReBot_v3
 
             string MediaURL = MediaItemHolder.Grab_MediaURL;
 
-
+            bool navBypass = false;
             //Redirect Bluesky blobs to view
             if (MediaURL.Contains(".getBlob?"))
             {
                 string did = MediaURL.Substring(MediaURL.IndexOf(".getBlob?did=") + 13);
                 string cid = did.Split("&cid=").Last();
                 did = did.Split("&cid=").First();
-                MediaURL = $"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{cid}";
+
+                if (MediaItemHolder.Grab_ThumbnailURL.Contains("video.bsky.app/watch"))
+                {
+                    MediaURL = $"https://video.bsky.app/watch/{did}/{cid}/playlist.m3u8";
+                    MediaBrowser.LoadHtml(string.Format(BlueskyVideoScript, MediaURL));
+                    navBypass = true;
+                }
+                else
+                {
+                    MediaURL = $"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{cid}";
+                }
             }
 
             string MediaName = Module_Downloader.MediaFile_GetFileNameOnly(MediaURL, MediaItemHolder.Grid_MediaFormat);
@@ -275,7 +286,15 @@ namespace e621_ReBot_v3
             //}
 
             PB_LoadAllMedia.IsEnabled = !(MediaItemIndexHolder == Module_Grabber._Grabbed_MediaItems.Count - 1);
-            MediaBrowser.LoadUrlAsync(MediaURL);
+            if (navBypass)
+            {
+                PalleteHolder_StackPanel.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                MediaBrowser.LoadUrlAsync(MediaURL);
+                PalleteHolder_StackPanel.Visibility = Visibility.Visible;
+            }
         }
 
         private string? DocumentTitle;
@@ -361,7 +380,7 @@ namespace e621_ReBot_v3
                     {
                         if (MediaItemHolder.Grid_MediaMD5 == null) //Acts as first load
                         {
-                            if (MediaItemHolder.Grid_MediaWidth == null)
+                            if (MediaItemHolder.Grid_MediaWidth == 0)
                             {
                                 MatchCollection ImageResolution = Preview_Regex().Matches(DocumentTitle);
 
@@ -422,13 +441,9 @@ namespace e621_ReBot_v3
             if (MediaItemHolder.UP_UploadedID != null)
             {
                 PB_Upload.IsEnabled = false;
-                panel_Search.IsEnabled = false;
                 AlreadyUploaded_Label.Text = $"#{MediaItemHolder.UP_UploadedID}";
             }
-            else
-            {
-                panel_Search.IsEnabled = Module_e621APIController.APIEnabled;
-            }
+            SimilarSearchEnableCheck();
             Tags_TextBlock.Text = MediaItemHolder.UP_Tags;
 
             if (LoadAllImagesMod)
@@ -905,6 +920,14 @@ namespace e621_ReBot_v3
             Window_MediaSelect.Show_SimilarSearch(SenderButton.PointToScreen(new Point(0, 0)), SenderButton.Content.ToString());
         }
 
+        private static readonly HashSet<string> AllowedCompareFormats = new HashSet<string>() { "jpg", "jpeg", "png", "webp", "gif" };
+        internal void SimilarSearchEnableCheck()
+        {
+            bool canSearch = MediaItemHolder != null && MediaItemHolder.UP_UploadedID == null && Module_e621APIController.APIEnabled;
+            if (!AllowedCompareFormats.Any(format => format.Equals(MediaItemHolder.Grid_MediaFormat))) canSearch = false;
+            panel_Search.IsEnabled = canSearch;
+        }
+
         private async void InferiorSub(string PostID)
         {
             Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json").GetAwaiter().GetResult());
@@ -1150,23 +1173,23 @@ namespace e621_ReBot_v3
             {
                 using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))
                 {
-                    foreach (ZipArchiveEntry entry in UgoiraZip.Entries)
+                    foreach (ZipArchiveEntry ZipArchiveEntryTemp in UgoiraZip.Entries)
                     {
-                        using (Stream entryStream = entry.Open())
+                        using (Stream ZipEntryStream = ZipArchiveEntryTemp.Open())
                         {
                             // Copy to MemoryStream to ensure seekable stream
-                            using (var ms = new MemoryStream())
+                            using (MemoryStream MemoryStreamTemp = new MemoryStream())
                             {
-                                entryStream.CopyTo(ms);
-                                ms.Position = 0;
+                                ZipEntryStream.CopyTo(MemoryStreamTemp);
+                                MemoryStreamTemp.Position = 0;
 
-                                BitmapDecoder decoder = BitmapDecoder.Create(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                                BitmapSource source = decoder.Frames[0];
+                                BitmapDecoder BitmapDecoderTemp = BitmapDecoder.Create(MemoryStreamTemp, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                                BitmapSource BitmapSourceTemp = BitmapDecoderTemp.Frames[0];
 
-                                WriteableBitmap wb = new WriteableBitmap(source);
-                                wb.Freeze();
+                                WriteableBitmap WriteableBitmapTemp = new WriteableBitmap(BitmapSourceTemp);
+                                WriteableBitmapTemp.Freeze();
 
-                                FrameFiles.Add(wb);
+                                FrameFiles.Add(WriteableBitmapTemp);
                             }
                         }
                     }

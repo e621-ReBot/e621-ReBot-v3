@@ -442,8 +442,12 @@ namespace e621_ReBot_v3.Modules
                 GridVE GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemRef);
                 if (GridVETemp == null)
                 {
-                    MediaItemRef.UP_Queued = false;
-                    Window_Main._RefHolder.UploadCounterChange(-1);
+                    //Don't decrease counter if it's already unchecked
+                    if (MediaItemRef.UP_Queued)
+                    {
+                        MediaItemRef.UP_Queued = false;
+                        Window_Main._RefHolder.UploadCounterChange(-1);
+                    }
                 }
                 else
                 {
@@ -810,6 +814,7 @@ namespace e621_ReBot_v3.Modules
             {
                 case HttpStatusCode.OK:
                     {
+                        //Replacements do not use flag credit.
                         //JObject Upload_ReponseData = JObject.Parse(e621StringResponse);
                         Module_Credit.Credit_UploadHourly--;
                         if (Module_Credit.UserLevel < 30)

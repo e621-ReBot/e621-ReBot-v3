@@ -126,7 +126,7 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?search[creator_id]={AppSettings.UserID}").GetAwaiter().GetResult());
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?limit=30&search[creator_id]={AppSettings.UserID}").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -159,7 +159,7 @@ namespace e621_ReBot_v3.Modules
             Timestamps_Flags.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?search[creator_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?limit=10&search[creator_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -169,7 +169,7 @@ namespace e621_ReBot_v3.Modules
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray FlagHistory = JArray.Parse(JSON_UserInfo);
-                for (int x = 0; x <= 10; x++)
+                for (int x = 0; x < 10; x++)
                 {
                     DateTime TempTime = ((DateTime)FlagHistory[x]["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)
@@ -191,7 +191,7 @@ namespace e621_ReBot_v3.Modules
             Timestamps_Notes.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?search[updater_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?limit=50&search[updater_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -201,7 +201,7 @@ namespace e621_ReBot_v3.Modules
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray NoteHistory = JArray.Parse(JSON_UserInfo);
-                for (int x = 0; x <= 50; x++)
+                for (int x = 0; x < 50; x++)
                 {
                     DateTime TempTime = ((DateTime)NoteHistory[x]["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)

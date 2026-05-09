@@ -1,15 +1,12 @@
-﻿using CefSharp.DevTools.Debugger;
-using e621_ReBot_v3.CustomControls;
+﻿using e621_ReBot_v3.CustomControls;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using static System.Net.WebRequestMethods;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
@@ -119,19 +116,19 @@ namespace e621_ReBot_v3.Modules.Grabber
             ushort SkipCounter = 0;
 
             //blob https://bsky.social/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}
-            string embedType = (string)BlueskyJSON["embed"]["$type"];
+            string embedType = BlueskyJSON.SelectToken("record.embed.media.$type")?.ToString() ?? BlueskyJSON.SelectToken("record.embed.$type")?.ToString();
             if (embedType.Contains("video"))
             {
                 //https://video.bsky.app/watch/{did}/{cid}/playlist.m3u8
                 //https://video.bsky.app/watch/{did}/{cid}/thumbnail.jpg
                 string did = (string)BlueskyJSON["author"]["did"];
-                string cid = (string)BlueskyJSON["record"]["embed"]["video"]["ref"]["$link"];
+                string cid = BlueskyJSON.SelectToken("record..video.ref.$link").ToString();
                 Post_MediaURL = $"https://bsky.social/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}";
 
                 if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    Post_ThumbnailURL = (string)BlueskyJSON["embed"]["thumbnail"];
-                    string VideoFormat = (string)BlueskyJSON["record"]["embed"]["video"]["mimeType"];
+                    Post_ThumbnailURL = BlueskyJSON.SelectToken("embed..thumbnail").ToString();
+                    string VideoFormat = BlueskyJSON.SelectToken("record..video.mimeType").ToString();
                     VideoFormat = VideoFormat.Substring(VideoFormat.IndexOf('/') + 1);
 
                     MediaItem MediaItemTemp = new MediaItem
@@ -144,9 +141,9 @@ namespace e621_ReBot_v3.Modules.Grabber
                         Grab_Title = $"Post by @{ArtistName}",
                         Grab_TextBody = Post_Text,
                         Grid_MediaFormat = VideoFormat,
-                        Grid_MediaWidth = (uint)BlueskyJSON["record"]["embed"]["aspectRatio"]["width"],
-                        Grid_MediaHeight = (uint)BlueskyJSON["record"]["embed"]["aspectRatio"]["height"],
-                        Grid_MediaByteLength = (uint)BlueskyJSON["record"]["embed"]["video"]["size"],
+                        Grid_MediaWidth = (uint)BlueskyJSON.SelectToken("record.embed..aspectRatio.width"),
+                        Grid_MediaHeight = (uint)BlueskyJSON.SelectToken("record.embed..aspectRatio.height"),
+                        Grid_MediaByteLength = (uint)BlueskyJSON.SelectToken("record..video.size"),
                         Grid_ThumbnailFullInfo = true,
                         UP_Tags = Post_DateTime.Year.ToString(),
                         UP_IsWhitelisted = true
@@ -229,14 +226,15 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             //Only check for entries that contain media
             IEnumerable<JToken>? PostsContainer = null;
-            if (WebAddress.StartsWith("https://public.api.bsky.app/xrpc/app.bsky."))
+            if (WebAddress.Contains("/xrpc/app.bsky."))
             {
                 PostsContainer = JObjectTemp.SelectTokens("$.feed[*].post").Where(token => AllowedTypes.Contains(token["record"]?["embed"]?["$type"]?.ToString() ?? string.Empty)); //multi posts page
                 if (PostsContainer == null || !PostsContainer.Any())
                 {
                     //single post page
                     JToken? FirstPost = JObjectTemp["thread"][0]["value"]["post"];
-                    PostsContainer = AllowedTypes.Contains(FirstPost?["record"]?["embed"]?["$type"]?.ToString() ?? string.Empty) ? new JToken[] { FirstPost } : null;
+                    string? EmbedType = FirstPost.SelectToken("record.embed.media.$type")?.ToString() ?? FirstPost.SelectToken("record.embed.$type")?.ToString();
+                    PostsContainer = AllowedTypes.Contains(EmbedType ?? string.Empty) ? new JToken[] { FirstPost } : null;
                 }
             }
 

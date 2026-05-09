@@ -418,12 +418,10 @@
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True" ToolTip="Toggle grabbing status."/>
-
-                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
-
-                        <Grid IsHitTestVisible="False">
-                            <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
+                        <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True" ToolTip="Toggle grabbing status." HorizontalAlignment="Left"/>
+                        
+                        <Grid IsHitTestVisible="False" Margin="128,0,0,0">
+                            <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" BorderThickness="1,0,0,0">
                                 <TextBlock x:Name="Grab_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                             </Border>
 
@@ -434,6 +432,8 @@
                                 <ProgressBar Width="6" Style="{StaticResource VerticalProgressBar}" Background="{x:Null}" BorderBrush="Black" Foreground="{DynamicResource ThemeFocus}" Value="25" Height="32" Orientation="Vertical" Margin="-1,0,0,0" Visibility="Hidden"/>
                             </StackPanel>
                         </Grid>
+
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <customcontrols:Custom_TreeView Grid.Row="1" x:Name="Grab_TreeView" Margin="1,0,1,1">
 
@@ -470,14 +470,12 @@
 
                         <Border Grid.Row="0" Grid.RowSpan="3" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged" ToolTip="Toggle uploading status."/>
+                        <CheckBox x:Name="Upload_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Uploader" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" Checked="Upload_CheckBox_CheckChanged" Unchecked="Upload_CheckBox_CheckChanged" ToolTip="Toggle uploading status." HorizontalAlignment="Left"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
-
-                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click" Cursor="Hand"/>
-
+                        
                         <Canvas x:Name="Upload_ProgressCanvas" HorizontalAlignment="Right" Margin="0,8,64,0">
                             <Canvas.RenderTransform>
                                 <RotateTransform x:Name="CanvasTransformUpload" CenterX="8" CenterY="8"/>
@@ -493,6 +491,10 @@
                             </Canvas.Triggers>
                             <Path Stroke="{DynamicResource ThemeFocus}" StrokeThickness="4" Data="M 0,8 A 8,8 0 1 0 8,0"/>
                         </Canvas>
+
+                        <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click" Cursor="Hand"/>
+                        
+                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1">
                             <TextBlock x:Name="Upload_WorkingOnTextBlock" Text="Working on: Nothing." Foreground="{DynamicResource ThemeForeground}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8,0,0,0"/>
@@ -524,8 +526,6 @@
                                 </Style>
                             </customcontrols:Custom_TreeView.ItemContainerStyle>
                         </customcontrols:Custom_TreeView>
-
-                        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
                     </Grid>
 
                     <Grid x:Name="Conversion_GridBox" Margin="8" Grid.Row="1">
@@ -536,7 +536,7 @@
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
 
-                        <CheckBox x:Name="Conversion_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Conversionist" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0"/>
+                        <CheckBox x:Name="Conversion_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Conversionist" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" HorizontalAlignment="Left"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
@@ -563,6 +563,7 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
+                        
                         <TextBlock x:Name="Retry_TextBlock" TextWrapping="Wrap" Grid.Row="0" Text="Retry Queue" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  VerticalAlignment="Center" Padding="4,0,0,0"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>

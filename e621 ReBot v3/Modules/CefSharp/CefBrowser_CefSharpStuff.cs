@@ -108,12 +108,12 @@ namespace CefSharp
                 //new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures|user)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)"),
-                new Regex(@"^\w+://public\.api\.bsky\.app/xrpc/app\.bsky\.(unspecced\.getPostThreadV2|feed\.getAuthorFeed)"),
+                new Regex(@"^\w+://([a-z0-9.-]+)?\.bsky\.(app|network)/xrpc/app\.bsky\.(unspecced\.getPostThreadV2|feed\.getAuthorFeed)"),
 
                 //- - - Download only
 
                 new Regex(@"^\w+://derpibooru\.org/(images|search\?|galleries/)"),
-                new Regex(@"^\w+://itaku.ee/api/(galleries/images|posts)/(\d+/$)?") //new Regex(@".+itaku.ee/images/\d+")
+                new Regex(@"^\w+://itaku\.ee/api/(galleries/images|posts)/(\d+/$)?") //new Regex(@".+itaku.ee/images/\d+")
             };
         }
 
@@ -300,7 +300,7 @@ namespace CefSharp
                         break;
                     }
 
-                case string Bluesky when Bluesky.Contains(".bsky.app"):
+                case string Bluesky when Bluesky.Contains("/xrpc/app.bsky."):
                     {
                         if (response.MimeType.Equals("application/json"))
                         {

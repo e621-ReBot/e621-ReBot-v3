@@ -53,6 +53,8 @@ namespace e621_ReBot_v3
             Upload_ProgressCanvas.Visibility = Visibility.Hidden;
             SettingsButton_DLGenders.Visibility = Visibility.Hidden;
             SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
+            SB_APIKey.IsEnabled = false;
+            Upload_CheckBox.IsEnabled = false;
 
             DateTime HolidaysStart = new DateTime(DateTime.UtcNow.Year, 12, 24);
             DateTime HolidaysEnd = HolidaysStart.AddDays(13);
@@ -98,8 +100,23 @@ namespace e621_ReBot_v3
             }
             else
             {
-                if (!string.IsNullOrEmpty(AppSettings.APIKey)) ThreadPool.QueueUserWorkItem(state => Module_Credit.Credit_CheckAll());
                 Module_Updater.PreUpdateCheck();
+                if (string.IsNullOrEmpty(AppSettings.APIKey))
+                {
+                    SB_APIKey.IsEnabled = true;
+                }
+                else
+                {
+                    SB_APIKey.Content = "Remove API key";
+                    ThreadPool.QueueUserWorkItem(state =>
+                    {
+                        Module_Credit.Credit_CheckAll();
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            Module_e621APIController.ToggleStatus();
+                        });
+                    });
+                }
             }
 
             ModuleEnabler();
@@ -117,11 +134,11 @@ namespace e621_ReBot_v3
 
         private void ModuleEnabler()
         {
+            Module_e621APIController.StartTheController();
             Module_Grabber.Start(); //Make it load on main thread, bug fix.
             Module_Downloader.Start(); //Make it load on main thread, bug fix.
-            if (AppSettings.APIKey != null)
+            if (!string.IsNullOrEmpty(AppSettings.APIKey))
             {
-                Module_e621APIController.ToggleStatus();
                 ThreadPool.QueueUserWorkItem(state => Window_PoolWatcher.PoolWatcher_Check4New());
             }
         }

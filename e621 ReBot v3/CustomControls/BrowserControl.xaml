@@ -103,9 +103,6 @@
             <Button x:Name="testbutton_Copy" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,60,0,0" Visibility="Hidden">
                 <Image Source="/Resources/MainWindow/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
             </Button>
-            <Button x:Name="testbutton_Copy1" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,30,0,0" Visibility="Hidden">
-                <Image Source="/Resources/MainWindow/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
-            </Button>
 
             <Button x:Name="testbutton_Copy2" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="96,0,0,0" Visibility="Hidden">
                 <Image Source="/Resources/MainWindow/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
@@ -117,6 +114,10 @@
 
             <Button x:Name="testbutton_Copy4" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="190,60,0,0" Visibility="Hidden">
                 <Image Source="/Resources/MainWindow/Ko-Fi ButtonSmall.png" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="BQB_Bluesky" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Tag="https://bsky.app/" ToolTip="Bluesky.app" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,30,0,0">
+                <Image IsHitTestVisible="False" Source="/Resources/Browser/BrowserIcon_Bluesky.png"/>
             </Button>
 
             <Button x:Name="BQB_SoFurry" Style="{StaticResource ButtonStyle_HexagonalButton}" Click="BQB_Button_Click" Tag="https://www.sofurry.com/" ToolTip="SoFurry.com" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="190,120,0,0">

@@ -10,7 +10,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<FileVersion>3.0.0.147</FileVersion>
+		<FileVersion>3.0.0.148</FileVersion>
 		<StartupObject>e621_ReBot_v3.App</StartupObject>
 		<IsPublishable>False</IsPublishable>
 		<RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>
@@ -57,7 +57,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\BrowserIcon_Bluesky.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Baraag.png" />
+	  <None Remove="Resources\Browser\BrowserIcon_Bluesky.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_Derpibooru.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_e621.png" />
 	  <None Remove="Resources\Browser\BrowserIcon_FurAffinity.png" />
@@ -121,6 +123,7 @@
 
 	<ItemGroup>
 	  <Resource Include="Resources\Browser\BrowserIcon_Baraag.png" />
+	  <Resource Include="Resources\Browser\BrowserIcon_Bluesky.png" />
 	  <Resource Include="Resources\Browser\BrowserIcon_Derpibooru.png" />
 	  <Resource Include="Resources\Browser\BrowserIcon_e621.png" />
 	  <Resource Include="Resources\Browser\BrowserIcon_FurAffinity.png" />

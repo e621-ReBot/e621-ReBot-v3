@@ -4,7 +4,6 @@ using e621_ReBot_v3.Modules;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 
 namespace CefSharp
@@ -96,9 +95,14 @@ namespace CefSharp
         protected override IResourceRequestHandler? GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
         {
             string RequestUrlCut = request.Url;
+
+            //ignore Bluesky
+            if (request.Url.Contains("bsky.app")) return null;
+
             if (RequestUrlCut.Contains('?')) RequestUrlCut = RequestUrlCut.Substring(0, request.Url.IndexOf('?'));
             switch (RequestUrlCut)
             {
+                //Don't do anything with videos
                 case string VideoFormat1 when VideoFormat1.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase):
                 case string VideoFormat2 when VideoFormat2.EndsWith(".swf", StringComparison.OrdinalIgnoreCase):
                     {
@@ -106,12 +110,14 @@ namespace CefSharp
                     }
                 default:
                     {
+                        //Also don't do anything if it's already cached
                         if (Module_Downloader.MediaBrowser_MediaCache.ContainsKey(Module_Downloader.MediaFile_GetFileNameOnly(request.Url)))
                         {
                             return null;
                         }
                         else
                         {
+                            //Cache images
                             return new MediaBrowser_ResourceRequestHandler();
                         }
                     }
@@ -140,15 +146,11 @@ namespace CefSharp
             return false;
         }
 
-        private readonly HashSet<string> DiscardList = new HashSet<string>() { "bsky.app", ".getBlob?" };
         private Dictionary<ulong, MediaBrowser_ResponseFilter> responseDictionary = new Dictionary<ulong, MediaBrowser_ResponseFilter>();
         protected override void OnResourceLoadComplete(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response, UrlRequestStatus status, long receivedContentLength)
         {
             if (status == UrlRequestStatus.Success && responseDictionary.TryGetValue(request.Identifier, out MediaBrowser_ResponseFilter ResponseFilterHolder))
             {
-                //ignore Bluesky blobs
-                if (DiscardList.Any(discard => request.Url.Contains(discard))) return;
-
                 byte[] ByteData = ResponseFilterHolder.ByteData;
 
                 string FileExt = (string)response.Headers["content-type"];
@@ -164,7 +166,7 @@ namespace CefSharp
                         {
                             Window_Preview._RefHolder.MediaItemHolder.Grid_MediaByteLength = (uint?)ByteData.Length;
                             string FileName = Module_Downloader.MediaFile_GetFileNameOnly(request.Url);
-                            if (FileName.EndsWith(".", StringComparison.Ordinal)) FileName += FileExt;
+                            if (FileName.EndsWith('.')) FileName += FileExt;
 
                             if (!Module_Downloader.MediaBrowser_MediaCache.ContainsKey(FileName))
                             {
@@ -237,16 +239,15 @@ namespace CefSharp
             return FilterStatus.Done;
         }
 
-        public void Dispose()
-        {
-            //    MemoryStreamHolder.Dispose();
-            //    MemoryStreamHolder = null;
-        }
-
         public void DisposeIt()
         {
-            MemoryStreamHolder.Dispose();
+            MemoryStreamHolder?.Dispose();
             MemoryStreamHolder = null;
+        }
+
+        public void Dispose()
+        {
+
         }
 
         public byte[] ByteData

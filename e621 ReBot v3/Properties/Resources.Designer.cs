@@ -103,16 +103,6 @@ namespace e621_ReBot_v3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] BrowserIcon_Derpibooru1 {
-            get {
-                object obj = ResourceManager.GetObject("BrowserIcon_Derpibooru1", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] BrowserIcon_e621 {
             get {
                 object obj = ResourceManager.GetObject("BrowserIcon_e621", resourceCulture);
@@ -291,7 +281,7 @@ namespace e621_ReBot_v3.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 0eff0rt✄0eff0rt_(artist)✄1delkon✄1delkon_(artist)✄1ksrw✄1ksrw_(artist)✄1oi✄1oi_(artist)✄2001maxx✄2001maxx_(artist)✄2dredders✄2dredders_(artist)✄2dreddersart✄2dreddersart_(artist)✄2gecs✄2gecs_(artist)✄2gecsart✄2gecsart_(artist)✄2vv7✄2vv7_(artist)✄33xtc✄33xtc_(artist)✄413k✄413k_(artist)✄413k_zzzz✄413k_zzzz_(artist)✄4dbadbooks✄4dbadbooks_(artist)✄57tears✄57tears_(artist)✄69beas✄69beas_(artist)✄7mii✄7mii_(artist)✄abananaman✄abananaman_(artist)✄abnuny✄abnuny_(artist)✄abobarseem✄abobarseem_(artist)✄abyssalwolfy✄a [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to 0eff0rt✄0eff0rt_(artist)✄1delkon✄1delkon_(artist)✄1ksrw✄1ksrw_(artist)✄1oi✄1oi_(artist)✄2001maxx✄2001maxx_(artist)✄2dredders✄2dredders_(artist)✄2dreddersart✄2dreddersart_(artist)✄2gecs✄2gecs_(artist)✄2gecsart✄2gecsart_(artist)✄2vv7✄2vv7_(artist)✄33xtc✄33xtc_(artist)✄413k✄413k_(artist)✄413k_zzzz✄413k_zzzz_(artist)✄4dbadbooks✄4dbadbooks_(artist)✄57tears✄57tears_(artist)✄69beas✄69beas_(artist)✄7mii✄7mii_(artist)✄a_deer✄a_deer_(artist)✄abananaman✄abananaman_(artist)✄abnuny✄abnuny_(artist)✄abobarseem✄abobarseem_ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DNPs {
             get {
