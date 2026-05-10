@@ -47,7 +47,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
 
-            HtmlNodeCollection HtmlNodeCollectionTemp = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id=('yw0' or 'yw1')]//a[@class='sfArtworkSmallInner']");
+            HtmlNodeCollection HtmlNodeCollectionTemp = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@id='yw0' or @id='yw1']//a[@class='sfArtworkSmallInner']");
             if (HtmlNodeCollectionTemp.Count == 0)
             {
                 Module_Grabber.Report_Info($"Skipped grabbing - No Media found [@{WebAddress}]");

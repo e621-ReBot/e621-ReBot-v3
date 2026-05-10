@@ -292,7 +292,7 @@ namespace e621_ReBot_v3.Modules
                             string NextPage = Module_FurAffinity.MultiPageCheck();
                             if (!string.IsNullOrEmpty(NextPage))
                             {
-                                Thread.Sleep(RandomDelay.Next(100, 500));
+                                Thread.Sleep(RandomDelay.Next(200, 500));
                                 Module_CefSharp.LoadURL(NextPage);
                                 return;
                             }

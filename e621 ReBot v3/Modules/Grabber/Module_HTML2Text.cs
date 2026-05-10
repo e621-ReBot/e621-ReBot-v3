@@ -81,7 +81,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 case "hr":
                     {
-                        TextHolder += "\n--------------------------------\n";
+                        TextHolder += "\n────────────────────────────────\n";
                         break;
                     }
 
@@ -126,6 +126,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                             case "bbcode_quote":
                                 {
                                     TextHolder += $"[quote]{(TextHolderNode.ChildNodes.Count > 1 ? Html2Text_FurAffinity(TextHolderNode) : ParseNode_FurAffinity(TextHolderNode.FirstChild))} [/quote]";
+                                    break;
+                                }
+
+                            case "bbcode bbcode_hr":
+                                {
+                                    TextHolder += "\n────────────────────────────────\n";
                                     break;
                                 }
 
