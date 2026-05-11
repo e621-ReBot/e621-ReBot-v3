@@ -40,7 +40,7 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@"^\w+://\w+\.\w+/@.+/(\d+/?|media)"), //mastodon, baraag, pawoo
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures/(user/.+|featured|popular|random|recent/)|user/.+/faves/pictures|users/FaveUsersRecentPictures)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)(.+)?"),
-                new Regex(@"^\w+://bsky\.app/profile/\w+\.(bsky\.social|com)(/post/\w+)?")
+                new Regex(@"^\w+://bsky\.app/profile/(did:plc:\w+|[\w.-]+)(/post/\w+)?")
             };
 
             _GrabTimer.Tick += GrabTimer_Tick;

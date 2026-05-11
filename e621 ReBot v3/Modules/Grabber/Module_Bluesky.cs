@@ -43,7 +43,16 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 //Isn't guaranteed to be first token, have to search for it.
                 string PostID = Bluesky_Regex().Match(WebAddress).Value;
-                Window_Main._RefHolder.Dispatcher.Invoke(() => { Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress, BlueskyJSONHolder.First(token => ((string)token["uri"]).Contains($".post/{PostID}")).ToString(), true); });
+                //needed token might not be first
+                JToken PostJToken = BlueskyJSONHolder.FirstOrDefault(token => ((string)token["uri"]).Contains($".post/{PostID}"));
+
+                if (PostJToken == null)
+                {
+                    Module_Grabber.Report_Info($"Skipped grabbing - Post was not found inside the Bluesky JSON [@{WebAddress}]");
+                    return;
+                }
+
+                Window_Main._RefHolder.Dispatcher.Invoke(() => { Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress, PostJToken.ToString(), true); });
             }
         }
 
