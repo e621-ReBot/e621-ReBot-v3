@@ -54,7 +54,7 @@ namespace e621_ReBot_v3
             }
         }
 
-        [GeneratedRegex(@".+e621.net/pools/\d+/?")]
+        [GeneratedRegex(@".+e621.net/pools/(\d+)/?")]
         private static partial Regex PoolWatcherRegex();
         internal static readonly Regex _PoolWatcherEnabler = PoolWatcherRegex();
         internal static void PoolWatcherEnabler(string WebAddress)
@@ -64,8 +64,8 @@ namespace e621_ReBot_v3
                 Match MatchTemp = _PoolWatcherEnabler.Match(WebAddress);
                 if (MatchTemp.Success)
                 {
-                    string PoolID = WebAddress.Substring(WebAddress.LastIndexOf('/') + 1);
-                    PoolItem? PoolItemTemp = AppSettings.PoolWatcher.Where(PoolItem => PoolItem.ID == int.Parse(PoolID)).SingleOrDefault();
+                    string PoolID = MatchTemp.Groups[1].Value;
+                    PoolItem? PoolItemTemp = AppSettings.PoolWatcher.SingleOrDefault(PoolItem => PoolItem.ID == int.Parse(PoolID));
                     if (PoolItemTemp == null)
                     {
                         BrowserControl._RefHolder.BB_PoolWatcher.Content = "Watch";
