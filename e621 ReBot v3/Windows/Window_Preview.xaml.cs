@@ -868,7 +868,8 @@ namespace e621_ReBot_v3
                Artist: MediaItemHolder.Grab_Artist,
                Title: MediaItemHolder.Grab_Title,
                MediaFormat: MediaItemHolder.Grid_MediaFormat,
-               MediaItemRef: MediaItemHolder);
+               MediaItemRef: MediaItemHolder,
+               DL_Size: MediaItemHolder.Grid_MediaByteLength);
             Module_Downloader.UpdateDownloadTreeView();
         }
 

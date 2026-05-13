@@ -29,12 +29,16 @@ namespace e621_ReBot_v3.Modules.Downloader
                 JObject PostUris = JObject.Parse(HttpUtility.HtmlDecode(HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//main[@id='content']//div[@class='image-show-container']").Attributes["data-uris"].Value));
                 ThumbURL = (string?)PostUris["thumb"];
 
+                uint FileSize = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//main[@id='content']//div[@class='image-show-container']/div[@data-image-size]").GetAttributeValue("data-image-size", 0u);
+
                 Module_Downloader.AddDownloadItem2Queue(
                     PageURL: WebAddress,
                     MediaURL: MediaURL,
                     ThumbnailURL: ThumbURL,
                     MediaFormat: Media_Format,
-                    Artist: string.Empty);
+                    Artist: string.Empty,
+                    DL_Folder: SpecialSaveFolder,
+                    DL_Size: FileSize);
             }
             else //multi images, galleries
             {

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -310,6 +311,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? e6JSONResult = await RunTaskFirst;
             if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32)
             {
+                Module_Downloader.Report_Info("Posts API response error.");
                 Update_APIStatus("Suspended.", false);
                 return;
             }
@@ -326,9 +328,11 @@ namespace e621_ReBot_v3.Modules.Downloader
                         string MediaURLTemp;
                         string ThumbnailURLTemp;
                         MD5_2_URL(cPost, out MediaURLTemp, out ThumbnailURLTemp);
-                        string PostID = (string)cPost["id"];
 
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
+
+                        string PostID = (string)cPost["id"];
+                        uint? FileSize = (uint?)cPost["file"]["size"];
 
                         Module_Downloader.AddDownloadItem2Queue(
                             PageURL: $"https://e621.net/posts/{PostID}",
@@ -339,6 +343,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             e6Tags: string.Join(' ', TempTagList),
                             e6Download: true,
                             DL_Folder: FolderName,
+                            DL_Size: FileSize,
                             LockDLList: false);
                     }
                 }
@@ -372,6 +377,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? JSON_PoolData = await RunTaskFirst;
             if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32)
             {
+                Module_Downloader.Report_Info("Pools API response error.");
                 Update_APIStatus("Suspended.", false);
                 return;
             }
@@ -408,7 +414,11 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32)
+            {
+                Module_Downloader.Report_Info("Pool Posts API response error.");
+                goto ExitFromStuff;
+            }
 
             JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
             lock (Module_Downloader._2Download_DownloadItems)
@@ -426,9 +436,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                         continue;
                     }
 
-                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
+                    if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
+                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
                     string? PostID = (string?)cPost["id"];
+                    uint? FileSize = (uint?)cPost["file"]["size"];
+
                     Module_Downloader.AddDownloadItem2Queue(
                         PageURL: $"https://e621.net/posts/{PostID}",
                         MediaURL: MediaURLTemp,
@@ -439,9 +452,11 @@ namespace e621_ReBot_v3.Modules.Downloader
                         e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
                         e6Tags: string.Join(' ', TempTagList),
                         e6Download: true,
+                        DL_Size: FileSize,
                         LockDLList: false);
                 }
             }
+            PageCounter++;
             Module_Downloader.UpdateDownloadTreeView();
             Module_Downloader.ModifyListCapacity();
 

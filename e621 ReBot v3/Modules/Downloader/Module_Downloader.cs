@@ -648,7 +648,7 @@ namespace e621_ReBot_v3.Modules
             return true;
         }
 
-        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null, string? DL_Folder = null, bool LockDLList = true)
+        internal static void AddDownloadItem2Queue(string PageURL, string MediaURL, string? ThumbnailURL = null, string? Artist = null, string? Title = null, string? MediaFormat = null, string? e6PostID = null, string? e6PoolName = null, string? e6PoolPostIndex = null, string? e6Tags = null, bool e6Download = false, MediaItem? MediaItemRef = null, string? DL_Folder = null, uint? DL_Size = null, bool LockDLList = true)
         {
             DownloadItem DownloadItemTemp = new DownloadItem()
             {
@@ -664,7 +664,8 @@ namespace e621_ReBot_v3.Modules
                 e6_Tags = e6Tags,
                 Is_e6Download = e6Download,
                 MediaItemRef = MediaItemRef,
-                DL_Folder = DL_Folder ?? string.Empty
+                DL_Folder = DL_Folder ?? string.Empty,
+                DL_Size = DL_Size
             };
             if (LockDLList)
             {
@@ -1198,10 +1199,18 @@ namespace e621_ReBot_v3.Modules
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
+            bool ShouldDownloadFile = true;
             if (File.Exists(FilePath))
             {
-                DLThreadsWaiting++;
-                return true; // Don't need duplicates
+                if (DownloadItemRef.DL_Size != null && DownloadItemRef.DL_Size > 0)
+                {
+                    long FileSize = new FileInfo(FilePath).Length;
+                    if (FileSize >= DownloadItemRef.DL_Size)
+                    {
+                        DLThreadsWaiting++;
+                        return true; // Don't need duplicates or inferiors (assume larger filesize = better)
+                    }
+                }
             }
 
             DownloadVE? DownloadVETemp = FindDownloadVE();
@@ -1333,12 +1342,8 @@ namespace e621_ReBot_v3.Modules
                         string ImageRename = MediaFile_RenameFileName(GetFileNameOnly, DownloadItemRef);
 
                         string FilePath = Path.Combine(FolderPath, ImageRename);
-                        if (File.Exists(FilePath) || (MediaBrowser_MediaCache.Keys.Contains(GetFileNameOnly) && ReSaveMedia(DownloadItemRef)))
+                        if (File.Exists(FilePath) || (MediaBrowser_MediaCache.ContainsKey(GetFileNameOnly) && ReSaveMedia(DownloadItemRef)))
                         {
-                            //Form_Loader._FormReference.BeginInvoke(new Action(() =>
-                            //{
-                            //    AddPic2FLP((string)DataRowRef["Grab_ThumbnailURL"], FilePath);
-                            //}));
                             DLThreadsWaiting++;
                             return true;
                         }

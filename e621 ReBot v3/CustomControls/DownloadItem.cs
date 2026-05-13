@@ -19,9 +19,12 @@
         internal string? e6_Tags;
         internal bool Is_e6Download = false;
 
-        // = = = Grid stiff
+        // = = = Grid stuff
 
         internal MediaItem? MediaItemRef;
+
+        // = = = Download stuff
         internal string? DL_Folder;
+        internal uint? DL_Size;
     }
 }

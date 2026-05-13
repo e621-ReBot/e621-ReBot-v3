@@ -741,6 +741,7 @@ namespace e621_ReBot_v3
                             MediaFormat: MediaItemTemp.Grid_MediaFormat,
                             MediaItemRef: MediaItemTemp,
                             DL_Folder: SpecialSaveFolder, //Save to user specified folder
+                            DL_Size: MediaItemTemp.Grid_MediaByteLength,
                             LockDLList: false);
                         DownloadAdditionCounter++;
                     }

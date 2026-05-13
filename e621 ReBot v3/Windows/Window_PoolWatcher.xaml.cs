@@ -195,6 +195,8 @@ namespace e621_ReBot_v3
 
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp, Pool_Name)) continue;
 
+                        uint FileSize = (uint)PostDataDetailed["file"]["size"];
+
                         Module_Downloader.AddDownloadItem2Queue(
                                               PageURL: $"https://e621.net/posts/{Post_ID}",
                                               MediaURL: MediaURLTemp,
@@ -204,6 +206,7 @@ namespace e621_ReBot_v3
                                               e6PoolName: Pool_Name,
                                               e6PoolPostIndex: PoolPosts2Get[Post_ID].PostIDs.IndexOf(Post_ID).ToString(),
                                               e6Download: true,
+                                              DL_Size: FileSize,
                                               LockDLList: false);
                         ItemsAddedCount++;
                     }
