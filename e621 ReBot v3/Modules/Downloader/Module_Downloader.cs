@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1002,7 +1003,14 @@ namespace e621_ReBot_v3.Modules
             FileInfo FileInfoTemp = new FileInfo(TempFilePath);
             if (FileInfoTemp.Exists)
             {
-                FileInfoTemp.MoveTo(Path.ChangeExtension(TempFilePath, null)); //Change back to normal name
+                //Double check if such file exists and try to replace it
+                string NewNamePath = TempFilePath.Substring(0, TempFilePath.LastIndexOf('.'));
+                if (File.Exists(NewNamePath)) File.Delete(NewNamePath);
+
+                //Rename the the download to proper name
+                if (!File.Exists(NewNamePath)) FileInfoTemp.MoveTo(NewNamePath); //Change back to normal name
+
+                //Save tags if needed
                 if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
                 {
                     File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
