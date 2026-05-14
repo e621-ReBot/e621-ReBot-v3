@@ -265,13 +265,9 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
         }
 
-        private static List<string> CreateTagList(JToken PostTags, string RatingTag)
+        private static HashSet<string> CreateTagList(string PostTags, string RatingTag)
         {
-            List<string> TempList = new List<string>();
-            foreach (JProperty TagCategory in PostTags.Children())
-            {
-                TempList.AddRange(TagCategory.First.ToObject<string[]>());
-            }
+            HashSet<string> TempList = PostTags.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
             TempList.Add("rating:" + RatingTag);
             return TempList;
         }
@@ -296,7 +292,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.DownloadQueue_CancelAPIDL.IsEnabled = true; });
 
-            string PostRequestString = $"https://e621.net/posts.json?limit=320&tags={TagQuery}";
+            string PostRequestString = $"https://e621.net/posts.json?limit=320&tags={TagQuery}&v2=true&mode=thumbnails";
             int PageCounter = 1;
 
         GrabAnotherAPIPage:
@@ -315,13 +311,13 @@ namespace e621_ReBot_v3.Modules.Downloader
                 return;
             }
 
-            JToken? JSON_Object = JObject.Parse(e6JSONResult)["posts"];
+            JArray Posts_Array = JArray.Parse(e6JSONResult);
 
             lock (Module_Downloader._2Download_DownloadItems)
             {
-                foreach (JToken cPost in JSON_Object.Children())
+                foreach (JToken cPost in Posts_Array)
                 {
-                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
+                    HashSet<string> TempTagList = CreateTagList((string)cPost["tags"], (string)cPost["rating"]);
                     if (!Blacklist_Check(TempTagList))
                     {
                         string MediaURLTemp;
@@ -331,18 +327,17 @@ namespace e621_ReBot_v3.Modules.Downloader
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
                         string PostID = (string)cPost["id"];
-                        uint? FileSize = (uint?)cPost["file"]["size"];
 
                         Module_Downloader.AddDownloadItem2Queue(
                             PageURL: $"https://e621.net/posts/{PostID}",
                             MediaURL: MediaURLTemp,
                             ThumbnailURL: ThumbnailURLTemp,
-                            MediaFormat: (string)cPost["file"]["ext"],
+                            MediaFormat: (string)cPost["file_ext"],
                             e6PostID: PostID,
                             e6Tags: string.Join(' ', TempTagList),
                             e6Download: true,
                             DL_Folder: FolderName,
-                            DL_Size: FileSize,
+                            DL_Size: (uint)cPost["size"],
                             LockDLList: false);
                     }
                 }
@@ -357,7 +352,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 Update_APIStatus("Suspended.", false);
                 return;
             }
-            if (JSON_Object.Children().Count() == 320)
+            if (Posts_Array.Children().Count() == 320)
             {
                 goto GrabAnotherAPIPage;
             }
@@ -400,7 +395,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             List<string> PoolPages = PoolJSON["post_ids"].Values<string>().ToList();
             int SkippedPostsCounter = 0;
-            string PoolRequestString = $"https://e621.net/posts.json?limit=320&tags=pool:{PoolID}";
+            string PoolRequestString = $"https://e621.net/posts.json?limit=320&tags=pool:{PoolID}&v2=true&mode=thumbnails";
             int PageCounter = 1;
 
         GrabAnotherAPIPage:
@@ -419,10 +414,10 @@ namespace e621_ReBot_v3.Modules.Downloader
                 goto ExitFromStuff;
             }
 
-            JToken JSON_Object = JObject.Parse(e6JSONResult)["posts"];
+            JArray Posts_Array = JArray.Parse(e6JSONResult);
             lock (Module_Downloader._2Download_DownloadItems)
             {
-                foreach (JToken cPost in JSON_Object)
+                foreach (JToken cPost in Posts_Array)
                 {
                     string MediaURLTemp;
                     string ThumbnailURLTemp;
@@ -437,21 +432,20 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                     if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp)) continue;
 
-                    List<string> TempTagList = CreateTagList(cPost["tags"], (string)cPost["rating"]);
+                    HashSet<string> TempTagList = CreateTagList((string)cPost["tags"], (string)cPost["rating"]);
                     string? PostID = (string?)cPost["id"];
-                    uint? FileSize = (uint?)cPost["file"]["size"];
 
                     Module_Downloader.AddDownloadItem2Queue(
                         PageURL: $"https://e621.net/posts/{PostID}",
                         MediaURL: MediaURLTemp,
                         ThumbnailURL: ThumbnailURLTemp,
-                        MediaFormat: (string)cPost["file"]["ext"],
+                        MediaFormat: (string)cPost["file_ext"],
                         e6PostID: PostID,
                         e6PoolName: PoolName,
                         e6PoolPostIndex: PoolPages.IndexOf(PostID).ToString(),
                         e6Tags: string.Join(' ', TempTagList),
                         e6Download: true,
-                        DL_Size: FileSize,
+                        DL_Size: (uint)cPost["size"],
                         LockDLList: false);
                 }
             }
@@ -464,7 +458,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 CancellationPending = false;
                 goto ExitFromStuff;
             }
-            if (JSON_Object.Children().Count() == 320)
+            if (Posts_Array.Children().Count() == 320)
             {
                 goto GrabAnotherAPIPage;
             }
@@ -477,7 +471,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             Update_APIStatus("Suspended.", false);
         }
 
-        private static bool Blacklist_Check(List<string> PostTags)
+        private static bool Blacklist_Check(HashSet<string> PostTags)
         {
             if (AppSettings.Blacklist.Any())
             {
@@ -485,8 +479,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 {
                     if (BlacklistLine.Contains('-'))
                     {
-                        List<string> BlacklistLineList = new List<string>();
-                        BlacklistLineList.AddRange(BlacklistLine.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                        HashSet<string> BlacklistLineList = BlacklistLine.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
                         int HitCounter = 0;
                         foreach (string BlacklistTag in BlacklistLineList)
                         {

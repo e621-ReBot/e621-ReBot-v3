@@ -506,37 +506,37 @@ namespace e621_ReBot_v3
 
             Title += " | Checking MD5...";
 
-            string? MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}");
+            string? MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}&v2=true&mode=thumbnails");
+
+            if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
             MediaItemHolderRef.Grid_MediaMD5Checked = true;
 
-            //When navigating away, don't cut the title
-            if (MediaItemHolderRef == MediaItemHolder) Title = Title.Substring(0, Title.Length - 18); //"MediaBrowser.Title".Length
-
-            if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
+            if (MD5Check.Contains("not found")) return; //there is no match so end early
 
             //Add better error handling maybe? 
 
             JObject MD5CheckJSON = JObject.Parse(MD5Check);
 
             //Take post ID from e6
-            MediaItemHolderRef.UP_UploadedID = (string)MD5CheckJSON["post"]["id"];
+            MediaItemHolderRef.UP_UploadedID = (string)MD5CheckJSON["id"];
 
             //Save e6 post ID to DB
             AppSettings.MediaRecord_Add(MediaItemHolderRef);
 
             //Take rating from e6
-            MediaItemHolderRef.UP_Rating = ((string)MD5CheckJSON["post"]["rating"]).ToUpper();
+            MediaItemHolderRef.UP_Rating = ((string)MD5CheckJSON["rating"]).ToUpper();
 
             //Take tags from e6
-            List<string> TagList = new List<string>();
-            foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
-            {
-                foreach (JToken cTag in pTag.First)
-                {
-                    TagList.Add((string)cTag);
-                }
-            }
+            //List<string> TagList = new List<string>();
+            //foreach (JProperty pTag in MD5CheckJSON["post"]["tags"].Children())
+            //{
+            //    foreach (JToken cTag in pTag.First)
+            //    {
+            //        TagList.Add((string)cTag);
+            //    }
+            //}
+            HashSet<string> TagList = ((string)MD5CheckJSON["tags"]).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
             MediaItemHolderRef.UP_Tags = string.Join(' ', TagList);
 
             //Check status on grid item if it's visible

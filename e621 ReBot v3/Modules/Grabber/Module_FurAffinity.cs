@@ -112,7 +112,13 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body");
+            HtmlNode? PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body");
+
+            if (PostNode == null) //body sometimes missing, not sure why
+            {
+                Module_Grabber.Report_Info($"Grabbing skipped - body not found in HTML document [@{WebAddress}]");
+                return;
+            }
 
             HtmlNode LoginTest = PostNode.SelectSingleNode(".//div[@id='standardpage']/section[@class='aligncenter notice-message']");
             if (LoginTest != null)

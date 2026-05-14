@@ -102,7 +102,7 @@ namespace e621_ReBot_v3.Modules
 
                 AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}").GetAwaiter().GetResult());
+                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}&v2=true&mode=thumbnails").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -111,8 +111,8 @@ namespace e621_ReBot_v3.Modules
                 JSON_UserInfo = await RunTaskFirst;
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
-                JObject PostHistory = JObject.Parse(JSON_UserInfo);
-                foreach (JObject UploadedPost in PostHistory["posts"])
+                JArray PostHistory = JArray.Parse(JSON_UserInfo);
+                foreach (JObject UploadedPost in PostHistory)
                 {
                     DateTime TempTime = ((DateTime)UploadedPost["created_at"]).ToUniversalTime().AddHours(1);
                     if (DateTime.UtcNow > TempTime)

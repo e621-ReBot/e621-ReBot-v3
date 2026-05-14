@@ -171,7 +171,7 @@ namespace e621_ReBot_v3
             for (int i = 0; i < Math.Ceiling(PoolPosts2Get.Keys.Count / (double)PageSize); i++)
             {
                 string ListSlice = string.Join(',', PoolPosts2Get.Keys.ToList().Skip(i * PageSize).Take(PageSize));
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{ListSlice}").GetAwaiter().GetResult());
+                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{ListSlice}&v2=true&mode=thumbnails").GetAwaiter().GetResult());
                 lock (Module_e621APIController.BackgroundTasks)
                 {
                     Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
@@ -179,11 +179,11 @@ namespace e621_ReBot_v3
                 string e6JSONResult = await RunTaskFirst;
                 if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
-                JToken PostData = JObject.Parse(e6JSONResult)["posts"];
+                JArray Posts_Array = JArray.Parse(e6JSONResult);
 
                 lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    foreach (JToken PostDataDetailed in PostData.Children())
+                    foreach (JToken PostDataDetailed in Posts_Array)
                     {
                         int Post_ID = (int)PostDataDetailed["id"];
                         string Pool_Name = PoolPosts2Get[Post_ID].Name;
@@ -195,18 +195,16 @@ namespace e621_ReBot_v3
 
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURLTemp, Pool_Name)) continue;
 
-                        uint FileSize = (uint)PostDataDetailed["file"]["size"];
-
                         Module_Downloader.AddDownloadItem2Queue(
                                               PageURL: $"https://e621.net/posts/{Post_ID}",
                                               MediaURL: MediaURLTemp,
                                               ThumbnailURL: ThumbnailURLTemp,
-                                              MediaFormat: (string)PostDataDetailed["file"]["ext"],
+                                              MediaFormat: (string)PostDataDetailed["file_ext"],
                                               e6PostID: Post_ID.ToString(),
                                               e6PoolName: Pool_Name,
                                               e6PoolPostIndex: PoolPosts2Get[Post_ID].PostIDs.IndexOf(Post_ID).ToString(),
                                               e6Download: true,
-                                              DL_Size: FileSize,
+                                              DL_Size: (uint)PostDataDetailed["size"],
                                               LockDLList: false);
                         ItemsAddedCount++;
                     }

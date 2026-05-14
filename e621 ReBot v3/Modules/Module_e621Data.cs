@@ -29,7 +29,7 @@ namespace e621_ReBot_v3.Modules
                 {
                     using (HttpResponseMessage HttpResponseMessageTemp = await e621_HttpClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead))
                     {
-                        if (HttpResponseMessageTemp.IsSuccessStatusCode)
+                        if (Address.Contains("?md5=") || HttpResponseMessageTemp.IsSuccessStatusCode)
                         {
                             return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
                         }

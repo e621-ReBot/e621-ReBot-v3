@@ -332,8 +332,8 @@ namespace e621_ReBot_v3
 
             _RefHolder.SearchStatus.Text = "Getting image data...";
 
-            string? JSON_SimilarData = await Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{string.Join(',', ResultList)}");
-            if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
+            string? JSON_SimilarData = await Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{string.Join(',', ResultList)}&v2=true&mode=thumbnails");
+            if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 32)
             {
                 if (JSON_SimilarData.StartsWith('ⓔ'))
                 {
@@ -343,13 +343,13 @@ namespace e621_ReBot_v3
                 }
                 ;
 
-                JToken e6SimilarData = JObject.Parse(JSON_SimilarData)["posts"];
+                JArray e6SimilarData = JArray.Parse(JSON_SimilarData);
                 foreach (JObject e6Post in e6SimilarData.Children())
                 {
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                     {
                         PostID = (string)e6Post["id"],
-                        Tag = string.Join(' ', e6Post.SelectTokens("$.tags.*[*]")),
+                        Tag = string.Join(' ', (string)e6Post["tags"]),
                         Cursor = Cursors.No
                     };
                     MediaSelectItemTemp.cIsUploaded_TextBlock.FontSize = 14;
@@ -359,8 +359,8 @@ namespace e621_ReBot_v3
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Margin = new Thickness(4, 4, 0, 0);
                     MediaSelectItemTemp.ChangeRating(((string)e6Post["rating"]).ToUpper());
                     string PostID = $"#{(string)e6Post["id"]}";
-                    string MediaSizeFormat = $"{(ushort)e6Post["file"]["width"]} x {(ushort)e6Post["file"]["height"]} .{(string)e6Post["file"]["ext"]}";
-                    string ByteSize = $"{(uint)((uint)e6Post["file"]["size"] / 1024f)} kB";
+                    string MediaSizeFormat = $"{(ushort)e6Post["width"]} x {(ushort)e6Post["height"]} .{(string)e6Post["file_ext"]}";
+                    string ByteSize = $"{(uint)((uint)e6Post["size"] / 1024f)} kB";
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Text = $"{PostID} - {MediaSizeFormat}\n{ByteSize}";
 
                     string ThumbLink = ResultList[MediaSelectItemTemp.PostID];
@@ -383,7 +383,7 @@ namespace e621_ReBot_v3
             _RefHolder.SearchStatus.Text = "Getting image data...";
             //no md5 or extension without auth
             string? JSON_SimilarData = await Module_e621Data.DataDownload($"https://e621.net/iqdb_queries.json?url={Window_Preview._RefHolder.MediaItemHolder.Grab_MediaURL}", true);
-            if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 24)
+            if (!string.IsNullOrEmpty(JSON_SimilarData) && JSON_SimilarData.Length > 32)
             {
                 if (JSON_SimilarData.StartsWith('ⓔ'))
                 {
@@ -394,7 +394,7 @@ namespace e621_ReBot_v3
                 ;
 
                 JArray e6SimilarData = JArray.Parse(JSON_SimilarData);
-                foreach (JObject e6Post in e6SimilarData.Children())
+                foreach (JObject e6Post in e6SimilarData)
                 {
                     JToken PostHolder = e6Post["post"]["posts"];
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
