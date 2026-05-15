@@ -274,8 +274,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         internal static void MD5_2_URL(JToken cPost, out string MediaURL, out string ThumbnailURL)
         {
-            string MD5 = (string)cPost["file"]["md5"];
-            MediaURL = $"https://static1.e621.net/data/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.{(string)cPost["file"]["ext"]}";
+            string MD5 = (string)cPost["md5"];
+            MediaURL = $"https://static1.e621.net/data/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.{(string)cPost["file_ext"]}";
             ThumbnailURL = $"https://static1.e621.net/data/preview/{MD5.Substring(0, 2)}/{MD5.Substring(2, 2)}/{MD5}.jpg";
         }
 
