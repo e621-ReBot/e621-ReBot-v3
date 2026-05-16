@@ -125,6 +125,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             ushort SkipCounter = 0;
 
             //blob https://bsky.social/xrpc/com.atproto.sync.getBlob?did={did}&cid={cid}
+            //Select media.type first, then embed.type if media.type doesn't exist
             string embedType = BlueskyJSON.SelectToken("record.embed.media.$type")?.ToString() ?? BlueskyJSON.SelectToken("record.embed.$type")?.ToString();
             if (embedType.Contains("video"))
             {
@@ -163,7 +164,8 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else //image(s)
             {
-                foreach (JToken MediaNode in BlueskyJSON["record"]["embed"]["images"])
+                //sometimes it's record.embed.images, other times it's record.embed.media.images
+                foreach (JToken MediaNode in BlueskyJSON.SelectToken("record.embed..images"))
                 {
                     //https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{cid}
                     //https://cdn.bsky.app/img/feed_thumbnail/plain/{did}/{cid}
