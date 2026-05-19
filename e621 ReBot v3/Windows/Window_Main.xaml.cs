@@ -379,6 +379,7 @@ namespace e621_ReBot_v3
             int Items2Show = Math.Min(Module_Grabber._Grabbed_MediaItems.Count - Grid_ItemStartIndex, Grid_ItemLimit);
             if (Items2Show == 0 || Module_Grabber._Grabbed_MediaItems.Count == 0)
             {
+                Grid_GridVEPanel.Children.Clear();
                 Grid_Paginator();
                 return;
             }
