@@ -958,23 +958,6 @@ namespace e621_ReBot_v3.Modules
 
             if (e.Error != null)
             {
-                if (AppSettings.Download_IgnoreErrors)
-                {
-                    if (!CheckDownloadQueue4Duplicate(MediaURL))
-                    {
-                        lock (_2Download_DownloadItems)
-                        {
-                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                        }
-                    }
-                    DLThreadsWaiting++;
-                    DownloadVETemp.DownloadFinish();
-                    DownloadVETemp._DownloadFinished = true;
-                    UpdateDownloadTreeView();
-                    return;
-                }
-
                 if (!CheckDownloadQueue4Duplicate(MediaURL))
                 {
                     lock (_2Download_DownloadItems)
@@ -988,10 +971,23 @@ namespace e621_ReBot_v3.Modules
                 DownloadVETemp._DownloadFinished = true;
                 UpdateDownloadTreeView();
 
+                if (AppSettings.Download_IgnoreErrors) return;
+
                 //Just report other errors.
                 string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
                 if (!ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
                 {
+                    if (ErrorMsg.Contains("There is not enough space on the disk."))
+                    {
+                        if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true)
+                        {
+                            //Also stop downloads when disk is full
+                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                            //Show error just the first time
+                            MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        return;
+                    }
                     MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 return;
