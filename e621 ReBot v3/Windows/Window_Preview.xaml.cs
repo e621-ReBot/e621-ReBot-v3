@@ -504,6 +504,7 @@ namespace e621_ReBot_v3
             if (MediaItemHolderRef.Grid_MediaMD5 == null) return;
             MediaItemHolderRef.Preview_DontDelay = true;
 
+            string TitleContent = Title;
             Title += " | Checking MD5...";
 
             string? MD5Check = await Module_e621Data.DataDownload($"https://e621.net/posts.json?md5={MediaItemHolderRef.Grid_MediaMD5}&v2=true&mode=thumbnails");
@@ -511,6 +512,9 @@ namespace e621_ReBot_v3
             if (string.IsNullOrEmpty(MD5Check) || MD5Check.StartsWith('ⓔ') || MD5Check.Length < 32) return;
 
             MediaItemHolderRef.Grid_MediaMD5Checked = true;
+
+            //When navigating away, don't alter the title
+            if (MediaItemHolderRef == MediaItemHolder) Title = TitleContent;
 
             if (MD5Check.Contains("not found")) return; //there is no match so end early
 
