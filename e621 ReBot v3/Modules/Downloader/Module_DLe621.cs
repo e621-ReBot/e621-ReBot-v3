@@ -304,11 +304,27 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32)
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ'))
             {
-                Module_Downloader.Report_Info("Posts API response error.");
+                Module_Downloader.Report_Info($"Posts API response error for query: {{{TagQuery}}}");
                 Update_APIStatus("Suspended.", false);
                 return;
+            }
+            else
+            {
+                if (e6JSONResult.Equals("[]")) //blank response, no posts for query
+                {
+                    Module_Downloader.Report_Info($"No results for query: {{{TagQuery}}}");
+                    Update_APIStatus("Suspended.", false);
+                    return;
+                }
+
+                if (e6JSONResult.Length < 32)
+                {
+                    Module_Downloader.Report_Info($"Posts API unexpected response error for query: {{{TagQuery}}}");
+                    Update_APIStatus("Suspended.", false);
+                    return;
+                }
             }
 
             JArray Posts_Array = JArray.Parse(e6JSONResult);
@@ -371,7 +387,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? JSON_PoolData = await RunTaskFirst;
             if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32)
             {
-                Module_Downloader.Report_Info("Pools API response error.");
+                Module_Downloader.Report_Info($"Pools API response error for pool#{PoolID}");
                 Update_APIStatus("Suspended.", false);
                 return;
             }
@@ -408,10 +424,27 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             string? e6JSONResult = await RunTaskFirst;
-            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32)
+            if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ'))
             {
-                Module_Downloader.Report_Info("Pool Posts API response error.");
+                Module_Downloader.Report_Info($"Pool Posts API response error for tags=pool:{PoolID}");
+                Update_APIStatus("Suspended.", false);
                 goto ExitFromStuff;
+            }
+            else
+            {
+                if (e6JSONResult.Equals("[]")) //blank response, no posts for query
+                {
+                    Module_Downloader.Report_Info($"No results for tags=pool:{PoolID}");
+                    Update_APIStatus("Suspended.", false);
+                    goto ExitFromStuff;
+                }
+
+                if (e6JSONResult.Length < 32)
+                {
+                    Module_Downloader.Report_Info($"Posts API unexpected response error for tags=pool:{PoolID}");
+                    Update_APIStatus("Suspended.", false);
+                    goto ExitFromStuff;
+                }
             }
 
             JArray Posts_Array = JArray.Parse(e6JSONResult);

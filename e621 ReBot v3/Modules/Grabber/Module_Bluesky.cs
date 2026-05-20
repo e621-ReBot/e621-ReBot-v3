@@ -183,6 +183,9 @@ namespace e621_ReBot_v3.Modules.Grabber
                     string ImageFormat = (string)MediaNode["image"]["mimeType"];
                     ImageFormat = ImageFormat.Substring(ImageFormat.IndexOf('/') + 1);
 
+                    var test0 = (uint)MediaNode["aspectRatio"]["width"];
+                    var test1 = (uint)MediaNode["image"]["size"];
+
                     MediaItem MediaItemTemp = new MediaItem
                     {
                         Grab_PageURL = Post_URL,

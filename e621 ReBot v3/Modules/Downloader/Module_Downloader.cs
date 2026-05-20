@@ -876,7 +876,7 @@ namespace e621_ReBot_v3.Modules
             if (DownloadVETemp._DownloadItemRef == null) return; //file download finished before thumb?
             if (e.Error != null)
             {
-                Report_Info($"Thumb DL Error @{DownloadVETemp._DownloadItemRef.Grab_ThumbnailURL}, Msg:{e.Error.Message}");
+                Report_Info($"Thumb DL Error @{DownloadVETemp._DownloadItemRef.Grab_ThumbnailURL}, Msg: {e.Error.Message}");
                 return;
             }
             if (e.Result == null) return; // same?
