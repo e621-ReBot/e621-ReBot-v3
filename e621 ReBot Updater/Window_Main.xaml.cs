@@ -92,11 +92,9 @@ namespace e621_ReBot_Updater
                         }
                     }
 
-                    string[] CVSHolder = CurrentVersionString.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                    string[] LVSHolder = LatestVersionString.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                    int CurrVerNum = (int)(int.Parse(CVSHolder[1]) * Math.Pow(10, 6) + int.Parse(CVSHolder[2]) * Math.Pow(10, 3) + int.Parse(CVSHolder[3]));
-                    int UpdateVerNum = (int)(int.Parse(LVSHolder[1]) * Math.Pow(10, 6) + int.Parse(LVSHolder[2]) * Math.Pow(10, 3) + int.Parse(LVSHolder[3]));
-                    if (UpdateVerNum > CurrVerNum)
+                    Version AppCurrentVersion = new Version(CurrentVersionString);
+                    Version AppUpdateVersion = new Version(LatestVersionString);
+                    if (AppUpdateVersion > AppCurrentVersion)
                     {
                         Dispatcher.BeginInvoke(() =>
                         {
@@ -112,11 +110,14 @@ namespace e621_ReBot_Updater
                         {
                             ExtractCounter++;
                             Updating_TextBlock.Dispatcher.BeginInvoke(() => Updating_TextBlock.Text = $"Extracting: #{ExtractCounter} of {ZippedFileList.Count}");
-                            if (ZipEntry.FullName.EndsWith("/"))
+
+                            if (string.IsNullOrEmpty(ZipEntry.Name)) //folder
                             {
+                                //delete old folders if they exist (previous version of browser)
+                                if (Directory.Exists(ZipEntry.FullName)) Directory.Delete(ZipEntry.FullName, true);
                                 Directory.CreateDirectory(ZipEntry.FullName);
                             }
-                            else
+                            else //file
                             {
                                 ZipEntry.ExtractToFile(Path.Combine("./", ZipEntry.FullName), true);
                             }

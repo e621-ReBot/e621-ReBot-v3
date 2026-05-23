@@ -1,10 +1,10 @@
 ﻿using e621_ReBot_v3.Modules;
-using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -56,100 +56,84 @@ namespace e621_ReBot_v3
             }
         }
 
-        [GeneratedRegex(@"(?:.+/v)(\d\.\d+\.\d+\.\d+)")]
+        [GeneratedRegex(@"\d+\.(\d+)\.(\d+)\.(\d+)")]
         private static partial Regex VersionRegex();
-        private static CookieContainer CookieContainerGitHub = new CookieContainer();
         internal static async void Check4Update()
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Visible;
             });
-            Thread.Sleep(1000);
+            Thread.Sleep(1000); //To show update text
 
-            string UpdateSource = "https://github.com/e621-ReBot/e621-ReBot-v3/releases";
-            string? HTMLSource = await Module_Grabber.GetPageSource(UpdateSource, CookieContainerGitHub);
-            if (string.IsNullOrEmpty(HTMLSource))
-            {
-                GitHubError();
-                return;
-            }
-            Thread.Sleep(1000);
+            JObject? GithubJSON;
 
-            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(HTMLSource);
-            HtmlNode ReleaseNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='Box-footer']//include-fragment"); //SelectSingleNode(".//turbo-frame[@id='repo-content-turbo-frame']//div[@data-pjax]/section");
-            if (ReleaseNode != null)
+            using HttpClient GithubClient = new HttpClient();
             {
-                string ReleaseTag = ReleaseNode.Attributes["src"].Value;//.Replace("https://github.com/e621-ReBot/e621-ReBot-v3/releases/expanded_assets/v", null);
-                Match MatchResult = VersionRegex().Match(ReleaseTag);
-                if (MatchResult.Success)
+                GithubClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
+                string JSONResponse = await GithubClient.GetStringAsync("https://api.github.com/repos/e621-ReBot/e621-ReBot-v3/releases/latest");
+
+                if (string.IsNullOrEmpty(JSONResponse))
                 {
-                    ReleaseTag = MatchResult.Groups[1].Value;
-                    string[] CVSHolder = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                    string[] LVSHolder = ReleaseTag.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                    int CurrVerNum = (int)(int.Parse(CVSHolder[1]) * Math.Pow(10, 6) + int.Parse(CVSHolder[2]) * Math.Pow(10, 3) + int.Parse(CVSHolder[3]));
-                    int UpdateVerNum = (int)(int.Parse(LVSHolder[1]) * Math.Pow(10, 6) + int.Parse(LVSHolder[2]) * Math.Pow(10, 3) + int.Parse(LVSHolder[3]));
-                    if (UpdateVerNum > CurrVerNum)
-                    {
-                        DownloadUpdate(ReleaseNode.Attributes["src"].Value);
-                    }
-                    else
-                    {
-                        UpdateNotNeeded();
-                    }
-                    AppSettings.Update_LastCheck = DateTime.UtcNow;
+                    GitHubError();
                     return;
                 }
+
+                GithubJSON = JObject.Parse(JSONResponse);
+            }
+
+            Match MatchResult = VersionRegex().Match((string)GithubJSON["name"]);
+            if (MatchResult.Success)
+            {
+                Version AppCurrentVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+                Version AppUpdateVersion = new Version($"{MatchResult.Groups[1].Value}.{MatchResult.Groups[2].Value}.{MatchResult.Groups[3].Value}");
+                if (AppUpdateVersion > AppCurrentVersion)
+                {
+                    string? FileURL = GithubJSON.SelectToken("assets[0].browser_download_url")?.Value<string>();
+                    DownloadUpdate(FileURL);
+                }
+                else
+                {
+                    UpdateNotNeeded();
+                }
+                AppSettings.Update_LastCheck = DateTime.UtcNow;
+                return;
             }
             UpdateError();
         }
 
-        private static async void DownloadUpdate(string AssetsURL)
+        private static async void DownloadUpdate(string ZipURL)
         {
-            string? HTMLSource = await Module_Grabber.GetPageSource(AssetsURL, CookieContainerGitHub);
-            if (string.IsNullOrEmpty(HTMLSource))
+            if (string.IsNullOrEmpty(ZipURL))
             {
-                GitHubError();
+                UpdateError();
                 return;
             }
 
-            HtmlDocument HtmlDocumentTemp = new HtmlDocument();
-            HtmlDocumentTemp.LoadHtml(HTMLSource);
-
-            HtmlNode UpdateZipFile = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//ul[@data-view-component]//li//a");
-            if (UpdateZipFile != null)
+            byte[] UpdateBytes = await Module_Downloader.DownloadFileBytes(ZipURL, ActionType.Update);
+            Directory.CreateDirectory("ReBotUpdate").Attributes = FileAttributes.Hidden;
+            using (MemoryStream bytes2Stream = new MemoryStream(UpdateBytes))
             {
-                if (UpdateZipFile.SelectSingleNode("./span").InnerText.Trim().StartsWith("e621.ReBot-v3"))
+                using (FileStream FileStreamTemp = new FileStream($"ReBotUpdate\\ReBotUpdate.zip", FileMode.Create))
                 {
-                    byte[] UpdateBytes = Module_Downloader.DownloadFileBytes($"https://github.com/{UpdateZipFile.Attributes["href"].Value}", ActionType.Update).GetAwaiter().GetResult();
-                    Directory.CreateDirectory("ReBotUpdate").Attributes = FileAttributes.Hidden;
-                    using (MemoryStream bytes2Stream = new MemoryStream(UpdateBytes))
-                    {
-                        using (FileStream FileStreamTemp = new FileStream($"ReBotUpdate\\ReBotUpdate.zip", FileMode.Create))
-                        {
-                            bytes2Stream.WriteTo(FileStreamTemp);
-                        }
-                    }
-
-                    DeleteErrorLog();
-
-                    //AppSettings.Update_LastCheck = DateTime.UtcNow;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                    {
-                        MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Update is downloaded and ready, do you want to update now?", "e621 ReBot v3", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-                        if (MessageBoxResultTemp == MessageBoxResult.Yes)
-                        {
-                            Window_Main._RefHolder.Close();
-                            Process.Start("e621 ReBot Updater.exe");
-                        }
-                        Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Hidden;
-                        Window_Main._RefHolder.ReBot_Menu_ListBox.Visibility = Visibility.Visible;
-                    });
+                    bytes2Stream.WriteTo(FileStreamTemp);
                 }
-                return;
             }
-            UpdateError();
+
+            DeleteErrorLog();
+
+            //AppSettings.Update_LastCheck = DateTime.UtcNow;
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Update is downloaded and ready, do you want to update now?", "e621 ReBot v3", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                if (MessageBoxResultTemp == MessageBoxResult.Yes)
+                {
+                    Window_Main._RefHolder.Close();
+                    Process.Start("e621 ReBot Updater.exe");
+                }
+                Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Hidden;
+                Window_Main._RefHolder.ReBot_Menu_ListBox.Visibility = Visibility.Visible;
+            });
         }
 
         private static void GitHubError()

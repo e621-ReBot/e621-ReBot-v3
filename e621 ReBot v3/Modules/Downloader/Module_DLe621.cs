@@ -314,7 +314,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             {
                 if (e6JSONResult.Equals("[]")) //blank response, no posts for query
                 {
-                    Module_Downloader.Report_Info($"No results for query: {{{TagQuery}}}");
+                    if (PageCounter == 1) Module_Downloader.Report_Info($"No results for query: {{{TagQuery}}}");
                     Update_APIStatus("Suspended.", false);
                     return;
                 }

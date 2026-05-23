@@ -5,7 +5,7 @@ using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Grabber;
 using HtmlAgilityPack;
 using System;
-using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Web;
 using System.Windows;
@@ -17,15 +17,20 @@ namespace e621_ReBot_v3.Modules
         internal static ChromiumWebBrowser? CefSharpBrowser;
 
         private static readonly BrowserControl _browserControl = BrowserControl._RefHolder;
-
         internal static void InitializeBrowser()
         {
+            string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+            string CefPath = Path.Combine(BasePath, "CefSharp Browser");
             CefSettings CefSharp_Settings = new CefSettings
             {
-                CachePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\CefSharp Cache",
+                ResourcesDirPath = CefPath,
+                BrowserSubprocessPath = Path.Combine(CefPath, "CefSharp.BrowserSubprocess.exe"),
+                LocalesDirPath = Path.Combine(CefPath, "locales"),
+                CachePath = Path.Combine(BasePath, "CefSharp Cache"),
                 PersistSessionCookies = true,
-                BackgroundColor = (uint)ColorTranslator.ToWin32(Color.DimGray),
-                LogSeverity = LogSeverity.Disable
+                BackgroundColor = Cef.ColorSetARGB(255, 105, 105, 105), //(uint)ColorTranslator.ToWin32(Color.DimGray),
+                LogSeverity = LogSeverity.Disable,
+                //LogFile = Path.Combine(BasePath, "CefSharp.log")
             };
             CefSharpSettings.ShutdownOnExit = true;
 
