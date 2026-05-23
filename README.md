@@ -26,11 +26,11 @@ Features:
 ## Requirements:
 - Windows, resolution 1366 x 768 (+)
 - .Net 8 (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- C++ 2019 (https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+- C++ 2022 (https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
 
 ---
 ## How to install:
-- Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.63
+- Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.162-full
 - Extract archive, run the ReBot.exe
 - For manual updates, just overwrite older files
 
