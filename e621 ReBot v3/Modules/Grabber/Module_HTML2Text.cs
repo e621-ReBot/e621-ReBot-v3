@@ -146,7 +146,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 case "code":
                 case "h2": //https://www.furaffinity.net/view/39735601/
-                case "sub": // https://www.furaffinity.net/view/36370763/
+                case "h5": //https://www.furaffinity.net/view/65153628/
+                case "sub": //https://www.furaffinity.net/view/36370763/
                     {
                         TextHolder += Html2Text_FurAffinity(TextHolderNode);
                         break;
