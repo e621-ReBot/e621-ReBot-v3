@@ -538,20 +538,25 @@ namespace e621_ReBot_v3.Modules
                 int DownloadItemCount = _2Download_DownloadItems.Count;
                 if (DownloadItemCount > 0)
                 {
-                    int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                    if (StartIndex > (DownloadItemCount - 1)) //-1 so that when collection is same count as page max count, it returns the correct page, as first page starts at item 0.
-                    {
-                        //fix (soon to be) current page
-                        DownloadTreeViewPage = (int)Math.Floor((DownloadItemCount - 1) / (float)DownloadNodeMax);
-                        //also fix start index
-                        StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                    }
-                    int NodesOnPage = Math.Min(DownloadNodeMax, DownloadItemCount - StartIndex);
-
                     //Don't need a reference, just data, so make a snapshot.
-                    List<DownloadItem> DownloadItemListSnapshot = _2Download_DownloadItems.GetRange(StartIndex, NodesOnPage);
+                    List<DownloadItem> DownloadItemListSnapshot;
 
-                    NodesOnPage = DownloadItemListSnapshot.Count; //redo, needed?
+                    int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                    lock (_2Download_DownloadItems)
+                    {
+                        DownloadItemCount = _2Download_DownloadItems.Count;
+                        if (StartIndex > (_2Download_DownloadItems.Count - 1)) //-1 so that when collection is same count as page max count, it returns the correct page, as first page starts at item 0.
+                        {
+                            //fix (soon to be) current page
+                            DownloadTreeViewPage = (int)Math.Floor((DownloadItemCount - 1) / (float)DownloadNodeMax);
+                            //also fix start index
+                            StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                        }
+                        int NodesOnPage = Math.Min(DownloadNodeMax, DownloadItemCount - StartIndex);
+
+                        //Don't need a reference, just data, so make a snapshot.
+                        DownloadItemListSnapshot = _2Download_DownloadItems.GetRange(StartIndex, NodesOnPage);
+                    }
 
                     ItemCollection TreeViewItemsTemp = Window_Main._RefHolder.DownloadQueue_TreeView.Items;
                     //If there are more items on page than on TreeView, add them.

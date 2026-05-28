@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,6 +22,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace e621_ReBot_v3
 {
@@ -151,8 +153,22 @@ namespace e621_ReBot_v3
                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "I found an error log! You should report it to my maker. Do you want me to copy it to your clipboard?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                 {
-                    Clipboard.SetText(File.ReadAllText("ReBotErrorLog.txt"));
-                    DeleteLogAfterCopy = true;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        try
+                        {
+                            Clipboard.SetText(File.ReadAllText("ReBotErrorLog.txt"));
+                            DeleteLogAfterCopy = true;
+                            return;
+                        }
+                        catch (COMException)
+                        {
+                            //This is gonna freeze UI
+                            Thread.Sleep(1000);
+                        }
+                    }
+
+                    MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                 }
             }
         }
