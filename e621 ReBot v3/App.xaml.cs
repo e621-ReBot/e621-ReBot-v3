@@ -75,7 +75,7 @@ namespace e621_ReBot_v3
             string? Notice4Readers = null;
             if (Message.Contains("Could not load file or assembly 'CefSharp"))
             {
-                Notice4Readers = "This error is likely due to not having the needed version of browser, rather than it missing.\n Suggestion: Download the latest full package from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.162-full then update that.";
+                Notice4Readers = "This error is likely due to not having the needed version of browser, rather than it missing.\n Suggestion: Download the latest full package from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.166-full then update that.";
             }
 
             File.WriteAllText("ReBotErrorLog.txt", $"{Notice4Readers}\n\n{Header}\n{Message}\n{InnerException}\n{Source}\n{Target}\n\n{StackTrace}");
