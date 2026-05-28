@@ -143,8 +143,11 @@ namespace e621_ReBot_v3
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            SuggestionPopup.PoolMode = false;
-            SuggestionPopup.RemoveTextBoxTarget(Tags_TextBox);
+            if (SuggestionPopup != null)
+            {
+                SuggestionPopup.PoolMode = false;
+                SuggestionPopup.RemoveTextBoxTarget(Tags_TextBox);
+            }
             _RefHolder = null;
             Owner.Activate();
         }

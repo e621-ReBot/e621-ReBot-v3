@@ -23,8 +23,8 @@ namespace e621_ReBot_v3.Modules
             string CefPath = Path.Combine(BasePath, "CefSharp Browser");
             CefSettings CefSharp_Settings = new CefSettings
             {
-                ResourcesDirPath = CefPath,
-                BrowserSubprocessPath = Path.Combine(CefPath, "CefSharp.BrowserSubprocess.exe"),
+                //ResourcesDirPath = CefPath,
+                //BrowserSubprocessPath = Path.Combine(CefPath, "CefSharp.BrowserSubprocess.exe"), //just causes issue during debugging, got to delete folders and fix the .deps every time
                 LocalesDirPath = Path.Combine(CefPath, "locales"),
                 CachePath = Path.Combine(BasePath, "CefSharp Cache"),
                 PersistSessionCookies = true,

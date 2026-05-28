@@ -92,6 +92,8 @@
         <ContextMenu IsTabStop="False">
             <MenuItem Header="Copy Source URL" Click="MenuItem_Click_Source"/>
             <MenuItem Header="Copy Media URL" Click="MenuItem_Click_Media"/>
+            <MenuItem Name="AddSources"  Header="Add additional sources" Click="MenuItem_Click_AddSources"/>
+            <MenuItem Name="OverrideByteUpload" Header="Upload bytes" Click="MenuItem_Click_OverrideByteUpload" ToolTip="Will upload media bytes instead of providing a link to source."/>
             <Separator/>
             <MenuItem Name="MoveUp" Header="Decrease Media's Index" Click="MenuItem_Click_Move" Tag="-1"/>
             <MenuItem Name="MoveDown" Header="Increase Media's Index" Click="MenuItem_Click_Move" Tag="1"/>

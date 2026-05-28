@@ -476,6 +476,13 @@ namespace e621_ReBot_v3.Modules
                     if (!Upload_Sources.Contains(InferiorSource)) Upload_Sources += $"%0A{InferiorSource}";
                 }
             }
+            if (!string.IsNullOrEmpty(MediaItemRef.UP_AdditionalSources))
+            {
+                foreach (string AdditionalSource in MediaItemRef.UP_AdditionalSources.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (!Upload_Sources.Contains(AdditionalSource)) Upload_Sources += $"%0A{AdditionalSource}";
+                }
+            }
 
             string? Upload_Description = MediaItemRef.Grab_TextBody == null ? $"[code]{MediaItemRef.Grab_Title}[/code]" : $"[section,expanded={MediaItemRef.Grab_Title}]\n{MediaItemRef.Grab_TextBody}\n[/section]";
             string Upload_DescriptionNoExtras = Upload_Description;
@@ -533,6 +540,9 @@ namespace e621_ReBot_v3.Modules
             Report_Status("Uploading...");
 
             byte[]? bytes2Send = null;
+
+            isByteUpload = isByteUpload || MediaItemRef.UP_OverrideByteUpload;
+
             if (isByteUpload)
             {
                 string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);

@@ -295,10 +295,16 @@ namespace e621_ReBot_v3.CustomControls
         // - - - - - - - - - - - - - - - -
 
         private int MediaItemIndex = 0;
+        private static readonly SolidColorBrush SolidColorBrushHolder = new SolidColorBrush(Colors.DarkGreen);
         private void GridVE_UserControl_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             MediaItemIndex = Module_Grabber._Grabbed_MediaItems.FindIndex(_MediaItemRef);
             if (MediaItemIndex == -1) return;
+
+            AddSources.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
+
+            if (_MediaItemRef.UP_OverrideByteUpload) OverrideByteUpload.Background = SolidColorBrushHolder;
+            OverrideByteUpload.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
 
             MoveUp.IsEnabled = MediaItemIndex > 0;
             MoveDown.IsEnabled = MediaItemIndex < Module_Grabber._Grabbed_MediaItems.Count - 1;
@@ -326,6 +332,20 @@ namespace e621_ReBot_v3.CustomControls
         private void MenuItem_Click_Media(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(_MediaItemRef.Grab_MediaURL);
+        }
+
+        private void MenuItem_Click_AddSources(object sender, RoutedEventArgs e)
+        {
+            string InputedText = Custom_InputBox.ShowInputBox(Window_Main._RefHolder, "Add Sources", "Aditional Sources should be separated by whitespace", ((MenuItem)sender).PointToScreen(new Point(0, 0)), _MediaItemRef.UP_AdditionalSources);
+            if (InputedText.Equals("☠")) return;
+
+            _MediaItemRef.UP_AdditionalSources = InputedText.Trim();
+        }
+
+        private void MenuItem_Click_OverrideByteUpload(object sender, RoutedEventArgs e)
+        {
+            //Rarely used, so not necesarry to make it a toggle.
+            _MediaItemRef.UP_OverrideByteUpload = true;
         }
 
         private void MenuItem_Click_Move(object sender, RoutedEventArgs e)
@@ -393,6 +413,7 @@ namespace e621_ReBot_v3.CustomControls
             ((Storyboard)FindResource("ScaleOut")).Begin(this);
             GettingDestroyed = true;
         }
+
 
     }
 }

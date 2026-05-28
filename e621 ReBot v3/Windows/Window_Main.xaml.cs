@@ -22,7 +22,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace e621_ReBot_v3
 {
