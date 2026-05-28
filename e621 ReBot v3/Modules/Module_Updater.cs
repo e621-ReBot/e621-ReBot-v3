@@ -86,7 +86,7 @@ namespace e621_ReBot_v3
             if (MatchResult.Success)
             {
                 Version AppCurrentVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-                Version AppUpdateVersion = new Version($"{MatchResult.Groups[1].Value}.{MatchResult.Groups[2].Value}.{MatchResult.Groups[3].Value}");
+                Version AppUpdateVersion = new Version(MatchResult.Captures[0].Value);
                 if (AppUpdateVersion > AppCurrentVersion)
                 {
                     string? FileURL = GithubJSON.SelectToken("assets[0].browser_download_url")?.Value<string>();
@@ -128,8 +128,15 @@ namespace e621_ReBot_v3
                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Update is downloaded and ready, do you want to update now?", "e621 ReBot v3", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                 if (MessageBoxResultTemp == MessageBoxResult.Yes)
                 {
-                    Window_Main._RefHolder.Close();
-                    Process.Start("e621 ReBot Updater.exe");
+                    if (File.Exists("e621 ReBot Updater.exe"))
+                    {
+                        Window_Main._RefHolder.Close();
+                        Process.Start("e621 ReBot Updater.exe");
+                    }
+                    else
+                    {
+                        MessageBox.Show(Window_Main._RefHolder, "Updater.exe not found.", "e621 ReBot v3", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                    }
                 }
                 Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Hidden;
                 Window_Main._RefHolder.ReBot_Menu_ListBox.Visibility = Visibility.Visible;
