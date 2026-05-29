@@ -94,13 +94,12 @@
             <MenuItem Header="Copy Media URL" Click="MenuItem_Click_Media"/>
             <MenuItem Name="AddSources"  Header="Add additional sources" Click="MenuItem_Click_AddSources"/>
             <MenuItem Name="OverrideByteUpload" Header="Upload bytes" Click="MenuItem_Click_OverrideByteUpload" ToolTip="Will upload media bytes instead of providing a link to source."/>
+            <MenuItem Name="RemoveRecord" Header="Remove Media Record" Click="MenuItem_Click_RemoveMediaRecord"/>
             <Separator/>
             <MenuItem Name="MoveUp" Header="Decrease Media's Index" Click="MenuItem_Click_Move" Tag="-1"/>
             <MenuItem Name="MoveDown" Header="Increase Media's Index" Click="MenuItem_Click_Move" Tag="1"/>
             <Separator/>
             <MenuItem Name="IgnoreMedia" Header="Ignore Media" Click="MenuItem_Click_IgnoreMedia" ToolTip="Ignore this media in future grabs."/>
-            <Separator/>
-            <MenuItem Name="RemoveRecord" Header="Remove Media Record" Click="MenuItem_Click_RemoveMediaRecord"/>
             <Separator/>
             <MenuItem Header="Remove Media" Click="MenuItem_Click_RemoveMedia"/>
         </ContextMenu>

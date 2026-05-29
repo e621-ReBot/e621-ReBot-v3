@@ -301,10 +301,10 @@ namespace e621_ReBot_v3.CustomControls
             MediaItemIndex = Module_Grabber._Grabbed_MediaItems.FindIndex(_MediaItemRef);
             if (MediaItemIndex == -1) return;
 
-            AddSources.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
+            AddSources.IsEnabled = string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
 
             if (_MediaItemRef.UP_OverrideByteUpload) OverrideByteUpload.Background = SolidColorBrushHolder;
-            OverrideByteUpload.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
+            OverrideByteUpload.IsEnabled = string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
 
             MoveUp.IsEnabled = MediaItemIndex > 0;
             MoveDown.IsEnabled = MediaItemIndex < Module_Grabber._Grabbed_MediaItems.Count - 1;
