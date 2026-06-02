@@ -531,96 +531,100 @@ namespace e621_ReBot_v3.Modules
         internal static int DownloadTreeViewPage = 0;
         internal static void UpdateDownloadTreeView()
         {
-            int DownloadItemCount = _2Download_DownloadItems.Count;
-
-            //Don't need a reference, just data, so make a snapshot.
-            List<DownloadItem> DownloadItemListSnapshot = new List<DownloadItem>();
-
-            int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-            if (DownloadItemCount > 0)
+            //Push it to another thread
+            Task.Run(() =>
             {
-                lock (_2Download_DownloadItems)
-                {
-                    DownloadItemCount = _2Download_DownloadItems.Count;
-                    if (StartIndex > (DownloadItemCount - 1)) //-1 so that when collection is same count as page max count, it returns the correct page, as first page starts at item 0.
-                    {
-                        //fix (soon to be) current page
-                        DownloadTreeViewPage = (int)Math.Floor((DownloadItemCount - 1) / (float)DownloadNodeMax);
-                        //also fix start index
-                        StartIndex = DownloadTreeViewPage * DownloadNodeMax;
-                    }
-                    int NodesOnPage = Math.Min(DownloadNodeMax, DownloadItemCount - StartIndex);
+                int DownloadItemCount = _2Download_DownloadItems.Count;
 
-                    //Don't need a reference, just data, so make a snapshot.
-                    DownloadItemListSnapshot = _2Download_DownloadItems.GetRange(StartIndex, NodesOnPage);
-                }
-            }
+                //Don't need a reference, just data, so make a snapshot.
+                List<DownloadItem> DownloadItemListSnapshot = new List<DownloadItem>();
 
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-            {
-                TreeViewItem? TreeViewItemTemp;
-
+                int StartIndex = DownloadTreeViewPage * DownloadNodeMax;
                 if (DownloadItemCount > 0)
                 {
-                    ItemCollection TreeViewItemsTemp = Window_Main._RefHolder.DownloadQueue_TreeView.Items;
-                    //If there are more items on page than on TreeView, add them.
-                    while (TreeViewItemsTemp.Count < DownloadItemListSnapshot.Count)
+                    lock (_2Download_DownloadItems)
                     {
-                        TreeViewItemTemp = new TreeViewItem //Fix the binding error spam
+                        DownloadItemCount = _2Download_DownloadItems.Count;
+                        if (StartIndex > (DownloadItemCount - 1)) //-1 so that when collection is same count as page max count, it returns the correct page, as first page starts at item 0.
                         {
-                            VerticalContentAlignment = VerticalAlignment.Stretch,
-                            HorizontalContentAlignment = HorizontalAlignment.Stretch
-                        };
-                        TreeViewItemsTemp.Add(TreeViewItemTemp);
-                        //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
-                        //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
-                    }
-                    //If there are less items on page than on TreeView, remove them.
-                    while (TreeViewItemsTemp.Count > DownloadItemListSnapshot.Count)
-                    {
-                        TreeViewItemsTemp.RemoveAt(TreeViewItemsTemp.Count - 1);
-                    }
+                            //fix (soon to be) current page
+                            DownloadTreeViewPage = (int)Math.Floor((DownloadItemCount - 1) / (float)DownloadNodeMax);
+                            //also fix start index
+                            StartIndex = DownloadTreeViewPage * DownloadNodeMax;
+                        }
+                        int NodesOnPage = Math.Min(DownloadNodeMax, DownloadItemCount - StartIndex);
 
-                    //Update data on TreeView items
-                    for (int i = 0; i < DownloadItemListSnapshot.Count; i++)
-                    {
-                        TreeViewItemTemp = (TreeViewItem)TreeViewItemsTemp[i];
-                        TreeViewItemTemp.Header = DownloadItemListSnapshot[i + StartIndex].Grab_MediaURL;
-                        TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
+                        //Don't need a reference, just data, so make a snapshot.
+                        DownloadItemListSnapshot = _2Download_DownloadItems.GetRange(StartIndex, NodesOnPage);
                     }
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = DownloadItemCount > (StartIndex + DownloadNodeMax);
                 }
-                else
+
+                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                 {
-                    DownloadTreeViewPage = 0;
-                    Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
-                    Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
-                }
-                Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({DownloadItemCount})";
+                    TreeViewItem? TreeViewItemTemp;
 
-                if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
-                {
-                    TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
-                    if (TreeViewItemTemp.Parent != null)
+                    if (DownloadItemCount > 0)
                     {
-                        if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
+                        ItemCollection TreeViewItemsTemp = Window_Main._RefHolder.DownloadQueue_TreeView.Items;
+                        //If there are more items on page than on TreeView, add them.
+                        while (TreeViewItemsTemp.Count < DownloadItemListSnapshot.Count)
                         {
-                            TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
+                            TreeViewItemTemp = new TreeViewItem //Fix the binding error spam
+                            {
+                                VerticalContentAlignment = VerticalAlignment.Stretch,
+                                HorizontalContentAlignment = HorizontalAlignment.Stretch
+                            };
+                            TreeViewItemsTemp.Add(TreeViewItemTemp);
+                            //TreeViewItemTemp.ContextMenu.Opened += ContextMenu_Opened;
+                            //TreeViewItemTemp.ContextMenu.Closed += ContextMenu_Closed;
+                        }
+                        //If there are less items on page than on TreeView, remove them.
+                        while (TreeViewItemsTemp.Count > DownloadItemListSnapshot.Count)
+                        {
+                            TreeViewItemsTemp.RemoveAt(TreeViewItemsTemp.Count - 1);
                         }
 
-                        if (TreeViewItemTemp == null)
+                        //Update data on TreeView items
+                        for (int i = 0; i < DownloadItemListSnapshot.Count; i++)
                         {
-                            ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
+                            TreeViewItemTemp = (TreeViewItem)TreeViewItemsTemp[i];
+                            TreeViewItemTemp.Header = DownloadItemListSnapshot[i + StartIndex].Grab_MediaURL;
+                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeForeground");
                         }
-                        else
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = DownloadTreeViewPage != 0;
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = DownloadItemCount > (StartIndex + DownloadNodeMax);
+                    }
+                    else
+                    {
+                        DownloadTreeViewPage = 0;
+                        Window_Main._RefHolder.DownloadQueue_TreeView.Items.Clear();
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageUp.IsEnabled = false;
+                        Window_Main._RefHolder.DownloadQueue_DownloadPageDown.IsEnabled = false;
+                    }
+                    Window_Main._RefHolder.DownloadQueue_CheckBox.Content = $"Download Queue ({DownloadItemCount})";
+
+                    if (Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget != null)
+                    {
+                        TreeViewItemTemp = (TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget;
+                        if (TreeViewItemTemp.Parent != null)
                         {
-                            TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
+                            if (!TreeViewItemTemp.Header.ToString().Equals(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget))
+                            {
+                                TreeViewItemTemp = Window_Main._RefHolder.DownloadQueue_TreeView.FindTreeViewItemByHeader(Window_Main._RefHolder.DownloadTreeViewContextMenuHolderTarget);
+                            }
+
+                            if (TreeViewItemTemp == null)
+                            {
+                                ((TreeViewItem)Window_Main._RefHolder.DownloadTreeViewContextMenuHolder.PlacementTarget).ContextMenu.IsOpen = false;
+                            }
+                            else
+                            {
+                                TreeViewItemTemp.Foreground = (SolidColorBrush)Application.Current.FindResource("ThemeFocus");
+                            }
                         }
                     }
-                }
-                Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
+                    Window_Main._RefHolder.Download_SessionDownloadsTextBlock.Text = $"Media Downloaded: {SessionDownloads}";
+                });
             });
         }
 
