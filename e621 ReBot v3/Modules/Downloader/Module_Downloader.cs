@@ -928,7 +928,7 @@ namespace e621_ReBot_v3.Modules
 
         private static uint SessionDownloads = 0;
         private static readonly List<string> ErrorSkipList;
-        private static void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
+        private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
             string MediaURL = DownloadVETemp._DownloadItemRef.Grab_MediaURL;
@@ -1011,12 +1011,30 @@ namespace e621_ReBot_v3.Modules
             FileInfo FileInfoTemp = new FileInfo(TempFilePath);
             if (FileInfoTemp.Exists)
             {
-                //Double check if such file exists and try to replace it
-                string NewNamePath = TempFilePath.Substring(0, TempFilePath.LastIndexOf('.'));
-                if (File.Exists(NewNamePath)) File.Delete(NewNamePath);
+                //try for 5 seconds
+                for (int i = 0; i <= 10; i++)
+                {
+                    try
+                    {
+                        //Double check if such file exists and try to replace it
+                        string NewNamePath = TempFilePath.Substring(0, TempFilePath.LastIndexOf('.'));
+                        if (File.Exists(NewNamePath)) File.Delete(NewNamePath);
 
-                //Rename the the download to proper name
-                if (!File.Exists(NewNamePath)) FileInfoTemp.MoveTo(NewNamePath); //Change back to normal name
+                        //Rename the the download to proper name
+                        if (!File.Exists(NewNamePath)) FileInfoTemp.MoveTo(NewNamePath); //Change back to normal name
+
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        if (i == 10)
+                        {
+                            Report_Info($"{FileInfoTemp.Name} was locked and could not be renamed.");
+                        }
+
+                        await Task.Delay(500);
+                    }
+                }
 
                 //Save tags if needed
                 if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
