@@ -274,6 +274,7 @@ namespace e621_ReBot_v3.Modules
             List<string> PoolList = new List<string>();
             if (PoolStream != null)
             {
+                PoolStream.Position = 0;
                 Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Pools..."; });
 
                 using (GZipStream TagsZip = new GZipStream(PoolStream, CompressionMode.Decompress))
@@ -283,7 +284,6 @@ namespace e621_ReBot_v3.Modules
                         CSVParser.HasFieldsEnclosedInQuotes = true;
                         CSVParser.SetDelimiters(",");
                         CSVParser.ReadLine(); //skip header
-
                         while (!CSVParser.EndOfData)
                         {
                             //id, name, created_at, updated_at, creator_id, description, is_active, post_ids
