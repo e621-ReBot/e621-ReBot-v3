@@ -39,6 +39,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Grabber._GrabQueue_URLs)
                 {
                     Module_Grabber._GrabQueue_URLs.Add(WebAddress);
@@ -75,6 +76,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 else
                 {
+                    //lock should already be in background thread as the task is done in background
                     lock (Module_Grabber._GrabQueue_URLs)
                     {
                         Module_Grabber._GrabQueue_URLs.Add(URL2Post);
@@ -197,6 +199,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             if (MediaItemList.Count == 0)
             {
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Grabber._GrabQueue_WorkingOn)
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
@@ -205,6 +208,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 return;
             }
 
+            //lock should already be in background thread as the task is done in background
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemList.Count == 1 ? MediaItemList.First() : MediaItemList;

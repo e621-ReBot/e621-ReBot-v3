@@ -85,13 +85,6 @@ namespace e621_ReBot_v3.Modules
                 Holder_FileClient.Add(FileClient);
             }
 
-            ErrorSkipList = new List<string>
-            {
-                "An existing connection was forcibly closed by the remote host.",
-                "An error occurred while sending the request.",
-                "A connection attempt failed because the connected party did not properly respond after a period of time,"
-            };
-
             HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -682,6 +675,7 @@ namespace e621_ReBot_v3.Modules
             };
             if (LockDLList)
             {
+                //lock should already be in background thread as the tasks that call this are done in background
                 lock (_2Download_DownloadItems)
                 {
                     _2Download_DownloadItems.Add(DownloadItemTemp);
@@ -927,7 +921,12 @@ namespace e621_ReBot_v3.Modules
         }
 
         private static uint SessionDownloads = 0;
-        private static readonly List<string> ErrorSkipList;
+        private static readonly HashSet<string> ErrorSkipList = new HashSet<string>
+            {
+                "An existing connection was forcibly closed by the remote host.",
+                "An error occurred while sending the request.",
+                "A connection attempt failed because the connected party did not properly respond after a period of time,"
+            };
         private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
@@ -939,11 +938,14 @@ namespace e621_ReBot_v3.Modules
                 {
                     if (!CheckDownloadQueue4Duplicate(MediaURL))
                     {
-                        lock (_2Download_DownloadItems)
+                        await Task.Run(() =>
                         {
-                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                        }
+                            lock (_2Download_DownloadItems)
+                            {
+                                //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                                _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
+                            }
+                        });
                     }
                     DLThreadsWaiting++;
                     DownloadVETemp.DownloadFinish();
@@ -957,10 +959,13 @@ namespace e621_ReBot_v3.Modules
 
                 if (!CheckDownloadQueue4Duplicate(MediaURL))
                 {
-                    lock (_2Download_DownloadItems)
+                    await Task.Run(() =>
                     {
-                        _2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                    }
+                        lock (_2Download_DownloadItems)
+                        {
+                            _2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                        }
+                    });
                 }
                 DLThreadsWaiting++;
                 DownloadVETemp.DownloadFinish();
@@ -973,11 +978,14 @@ namespace e621_ReBot_v3.Modules
             {
                 if (!CheckDownloadQueue4Duplicate(MediaURL))
                 {
-                    lock (_2Download_DownloadItems)
+                    await Task.Run(() =>
                     {
-                        //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                        _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                    }
+                        lock (_2Download_DownloadItems)
+                        {
+                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
+                        }
+                    });
                 }
                 DLThreadsWaiting++;
                 DownloadVETemp.DownloadFinish();
@@ -1131,6 +1139,7 @@ namespace e621_ReBot_v3.Modules
             DownloadItem? DownloadItemTemp;
             while (DLThreadsWaiting > 0 && _2Download_DownloadItems.Count > 0)
             {
+                //lock should already be in background thread as the task is done in background worker
                 lock (_2Download_DownloadItems)
                 {
                     DownloadItemTemp = _2Download_DownloadItems[0];

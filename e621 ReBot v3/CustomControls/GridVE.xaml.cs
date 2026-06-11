@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -89,14 +90,18 @@ namespace e621_ReBot_v3.CustomControls
             cThumbnail_Image.Source = _MediaItemRef.Grid_Thumbnail;
         }
 
-        private void RemoveControl(object sender, EventArgs e)
+        private async void RemoveControl(object sender, EventArgs e)
         {
             Window_Main._RefHolder.DownloadCounterChange(_MediaItemRef.DL_Queued ? -1 : 0);
             Window_Main._RefHolder.UploadCounterChange(_MediaItemRef.UP_Queued ? -1 : 0);
-            lock (Module_Grabber._Grabbed_MediaItems)
+
+            await Task.Run(() =>
             {
-                Module_Grabber._Grabbed_MediaItems.Remove(_MediaItemRef);
-            }
+                lock (Module_Grabber._Grabbed_MediaItems)
+                {
+                    Module_Grabber._Grabbed_MediaItems.Remove(_MediaItemRef);
+                }
+            });
             Window_Main._RefHolder.Grid_GridVEPanel.Children.Remove(this);
 
             bool NoAnimationPopulation = false;
@@ -348,15 +353,20 @@ namespace e621_ReBot_v3.CustomControls
             _MediaItemRef.UP_OverrideByteUpload = true;
         }
 
-        private void MenuItem_Click_Move(object sender, RoutedEventArgs e)
+        private async void MenuItem_Click_Move(object sender, RoutedEventArgs e)
         {
             int RequestedindexChange = int.Parse(((MenuItem)sender).Tag.ToString());
-            lock (Module_Grabber._Grabbed_MediaItems)
+
+            await Task.Run(() =>
             {
-                MediaItem MediaItemTemp = Module_Grabber._Grabbed_MediaItems[MediaItemIndex];
-                Module_Grabber._Grabbed_MediaItems.RemoveAt(MediaItemIndex);
-                Module_Grabber._Grabbed_MediaItems.Insert(MediaItemIndex + RequestedindexChange, MediaItemTemp);
-            }
+                lock (Module_Grabber._Grabbed_MediaItems)
+                {
+                    MediaItem MediaItemTemp = Module_Grabber._Grabbed_MediaItems[MediaItemIndex];
+                    Module_Grabber._Grabbed_MediaItems.RemoveAt(MediaItemIndex);
+                    Module_Grabber._Grabbed_MediaItems.Insert(MediaItemIndex + RequestedindexChange, MediaItemTemp);
+                }
+            });
+
             if (Window_Main._RefHolder._SelectedGridVE != null) Window_Main._RefHolder._SelectedGridVE.ToggleSelection();
             Window_Main._RefHolder.Grid_LastIndexCheck = -1;
             Window_Main._RefHolder.Grid_Populate(true);

@@ -39,6 +39,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Grabber._GrabQueue_URLs)
                 {
                     Module_Grabber._GrabQueue_URLs.Add(WebAddress);
@@ -72,6 +73,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 else
                 {
+                    //lock should already be in background thread as the task is done in background
                     lock (Module_Grabber._GrabQueue_URLs)
                     {
                         Module_Grabber._GrabQueue_URLs.Add(URL2Post);
@@ -140,6 +142,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
             {
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Grabber._GrabQueue_WorkingOn)
                 {
                     Module_Grabber._GrabQueue_WorkingOn.Remove(Post_URL);
@@ -169,6 +172,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 MediaItemTemp.Grid_Thumbnail = HentaiFoundryThumbDefault;
             }
 
+            //lock should already be in background thread as the task is done in background
             lock (Module_Grabber._GrabQueue_WorkingOn)
             {
                 Module_Grabber._GrabQueue_WorkingOn[Post_URL] = MediaItemTemp;

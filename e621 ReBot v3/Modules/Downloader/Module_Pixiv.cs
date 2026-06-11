@@ -37,6 +37,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 string JSONSourceTest = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
                 JObject PixivJSON = JObject.Parse(JSONSourceTest);
 
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Downloader._2Download_DownloadItems)
                 {
                     foreach (JToken JTokenTemp in PixivJSON["body"].Children())

@@ -54,7 +54,7 @@ namespace e621_ReBot_v3.Modules
             {
                 try
                 {
-                    HttpWebRequest DBExportDownloader = (HttpWebRequest)WebRequest.Create(string.Format(Address, DateTimeTempUTC.Year, DateTimeTempUTC.ToString("MM"), DateTimeTempUTC.ToString("dd")));
+                    HttpWebRequest DBExportDownloader = (HttpWebRequest)WebRequest.Create(Address);
                     DBExportDownloader.Timeout = 5000;
                     using (HttpWebResponse DownloaderReponse = (HttpWebResponse)DBExportDownloader.GetResponse())
                     {
@@ -91,153 +91,248 @@ namespace e621_ReBot_v3.Modules
         internal static void DLSuggestions()
         {
             ushort SuccessCount = 0;
-            MemoryStream? DownloadedStream = DownloadDBExport("https://e621.net/db_export/tags-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
-            if (DownloadedStream != null)
+
+            MemoryStream? AliasStream = DownloadDBExport("https://static1.e621.net/data/db_export/tag_aliases.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            //Process Aliases for later use
+            Dictionary<string, List<string>> aliases = new Dictionary<string, List<string>>();
+            if (AliasStream != null)
             {
-                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Tags..."; });
-
-                List<string> TagList = new List<string>();
-                List<string> ArtistList = new List<string>();
-                DownloadedStream.Position = 0;
-                using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
+                AliasStream.Position = 0;
+                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Aliases..."; });
+                using (GZipStream TagsZip = new GZipStream(AliasStream, CompressionMode.Decompress))
                 {
-                    using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
+                    using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
                     {
-                        StreamReaderTemp.ReadLine();
-                        string ReadCSV = StreamReaderTemp.ReadToEnd();
-                        using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(ReadCSV)))
+                        CSVParser.HasFieldsEnclosedInQuotes = true;
+                        CSVParser.SetDelimiters(",");
+                        CSVParser.ReadLine(); //skip header
+                        while (!CSVParser.EndOfData)
                         {
-                            CSVParser.HasFieldsEnclosedInQuotes = true;
-                            CSVParser.SetDelimiters(",");
+                            //id, antecedent_name, consequent_name, created_at, status
+                            string[] CSVFields = CSVParser.ReadFields();
+                            string old_name = CSVFields[1];
+                            string new_name = CSVFields[2];
 
-                            List<Tuple<int, string>> TagListTemp = new List<Tuple<int, string>>();
-                            while (!CSVParser.EndOfData)
+                            if (!aliases.TryGetValue(new_name, out List<string>? list))
                             {
-                                string[] CSVFields = CSVParser.ReadFields();
-                                if (!CSVFields[3].Equals("0")) //post_count
-                                {
-                                    TagListTemp.Add(new Tuple<int, string>(int.Parse(CSVFields[3]), CSVFields[1]));
-                                }
-                                if (CSVFields[2].Equals("1")) //category
-                                {
-                                    ArtistList.Add(CSVFields[1]);
-                                }
+                                list = new List<string>();
+                                aliases[new_name] = list;
                             }
-                            TagListTemp.Sort((x, y) => y.Item1.CompareTo(x.Item1));
-                            //x and y are tuples from list, not items inside a single tuple
-                            //Item1 and Item2 are items of single tuple
-                            TagList = TagListTemp.Select(x => x.Item2).ToList(); //select Item2 - that is string
-                            TagListTemp.Clear();
+                            list.Add(old_name);
                         }
                     }
-                    DownloadedStream.Dispose();
                 }
-                TagList = TagList.Distinct().ToList();
+                AliasStream.Dispose();
+            }
 
-                DownloadedStream = DownloadDBExport("https://e621.net/db_export/tag_aliases-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
-                if (DownloadedStream != null)
+            MemoryStream? ImplicationStream = DownloadDBExport("https://static1.e621.net/data/db_export/tag_implications.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            //Process Implications for later use
+            Dictionary<string, List<string>> implications = new Dictionary<string, List<string>>();
+            if (ImplicationStream != null)
+            {
+                ImplicationStream.Position = 0;
+                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Implications..."; });
+                using (GZipStream TagsZip = new GZipStream(ImplicationStream, CompressionMode.Decompress))
                 {
-                    Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Aliases..."; });
-
-                    Dictionary<string, List<string>> TagAliases = new Dictionary<string, List<string>>();
-                    DownloadedStream.Position = 0;
-                    using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
+                    using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
                     {
-                        using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
+                        CSVParser.HasFieldsEnclosedInQuotes = true;
+                        CSVParser.SetDelimiters(",");
+                        CSVParser.ReadLine(); //skip header
+                        while (!CSVParser.EndOfData)
                         {
-                            StreamReaderTemp.ReadLine();
-                            string ReadCSV = StreamReaderTemp.ReadToEnd();
-                            using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(ReadCSV)))
+                            //id, antecedent_name, consequent_name, created_at, status
+                            string[] CSVFields = CSVParser.ReadFields();
+                            string base_Tag = CSVFields[1];
+                            string implicated_tag = CSVFields[2];
+                            string status = CSVFields[4];
+
+                            if (status.Equals("active"))
                             {
-                                CSVParser.HasFieldsEnclosedInQuotes = true;
-                                CSVParser.SetDelimiters(",");
-
-                                while (!CSVParser.EndOfData)
+                                if (!implications.TryGetValue(implicated_tag, out List<string>? implicationstemp))
                                 {
-                                    string[] CSVFields = CSVParser.ReadFields();
-                                    if (CSVFields[4].Equals("active"))
-                                    {
-                                        if (TagAliases.ContainsKey(CSVFields[2]))
-                                        {
-                                            TagAliases[CSVFields[2]].Add(CSVFields[1]);
-                                        }
-                                        else
-                                        {
-                                            TagAliases.Add(CSVFields[2], new List<string> { CSVFields[1] });
-                                        }
+                                    implicationstemp = new List<string>();
+                                    implications[implicated_tag] = implicationstemp;
+                                }
+                                implicationstemp.Add(base_Tag);
+                            }
+                        }
+                    }
+                }
+                ImplicationStream.Dispose();
+            }
 
-                                        if (ArtistList.Contains(CSVFields[2]))
+            MemoryStream? TagStream = DownloadDBExport("https://static1.e621.net/data/db_export/tags.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            //Do tags and artists and DNPs
+            List<string> TagList = new List<string>();
+            Dictionary<string, List<string>> TagAliases = new Dictionary<string, List<string>>();
+            HashSet<string> ArtistList = new HashSet<string>();
+            HashSet<string> DNPList = new HashSet<string>();
+            if (TagStream != null)
+            {
+                TagStream.Position = 0;
+                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Tags..."; });
+                using (GZipStream TagsZip = new GZipStream(TagStream, CompressionMode.Decompress))
+                {
+                    using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
+                    {
+                        CSVParser.HasFieldsEnclosedInQuotes = true;
+                        CSVParser.SetDelimiters(",");
+                        CSVParser.ReadLine(); //skip header
+
+                        Dictionary<string, int> TagListTemp = new Dictionary<string, int>();
+                        string[] DNPStrings = new string[] { "avoid_posting", "conditional_dnp" };
+                        while (!CSVParser.EndOfData)
+                        {
+                            //id, name, category, post_count
+                            string[] CSVFields = CSVParser.ReadFields();
+                            string name = CSVFields[1];
+                            string category = CSVFields[2];
+                            int postCount = int.Parse(CSVFields[3]);
+
+                            if (postCount > 0)
+                            {
+                                TagListTemp.Add(name, postCount);
+
+                                //Also note down it's alias
+                                if (aliases.TryGetValue(name, out List<string>? aliasList))
+                                {
+                                    TagAliases[name] = aliasList;
+                                }
+                            }
+
+                            if (category.Equals("1")) //Also add to separate artist list
+                            {
+                                if (DNPStrings.Any(str => name.Equals(str)))
+                                {
+                                    DNPList.Add(name);
+                                    if (aliases.TryGetValue(name, out List<string>? dnp_aliasList1))
+                                    {
+                                        DNPList.UnionWith(dnp_aliasList1);
+                                    }
+
+                                    if (implications.TryGetValue(name, out List<string>? implicationList))
+                                    {
+                                        DNPList.UnionWith(implicationList);
+                                        foreach (string impliedTag in implicationList)
                                         {
-                                            ArtistList.Add(CSVFields[1]); //Also add aliases to Artist list
+                                            if (aliases.TryGetValue(impliedTag, out List<string>? dnp_aliasList2))
+                                            {
+                                                DNPList.UnionWith(dnp_aliasList2);
+                                            }
                                         }
                                     }
                                 }
+
+                                ArtistList.Add(name);
+                                //Also note down it's alias
+                                if (aliases.TryGetValue(name, out List<string>? aliasList))
+                                {
+                                    ArtistList.UnionWith(aliasList);
+                                }
+
+                                ////There are some implications as well
+                                //if (implications.TryGetValue(name, out List<string>? ImplicationList))
+                                //{
+                                //    ArtistList.UnionWith(ImplicationList);
+                                //}
                             }
                         }
+                        TagList = TagListTemp.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
                     }
-                    DownloadedStream.Dispose();
-
-                    if (TagAliases != null)
-                    {
-                        StringBuilder StringBuilderTemp = new StringBuilder();
-                        foreach (string StringTemp in TagList)
-                        {
-                            StringBuilderTemp.Append(StringTemp);
-                            if (TagAliases.ContainsKey(StringTemp))
-                            {
-                                StringBuilderTemp.Append("," + string.Join(",", TagAliases[StringTemp]));
-                            }
-                            StringBuilderTemp.Append("✄");
-                        }
-                        File.WriteAllText("tags.txt", StringBuilderTemp.ToString());
-                    }
-                    else
-                    {
-                        File.WriteAllText("tags.txt", string.Join("✄", TagList));
-                    }
-
-                    if (ArtistList.Count > 0)
-                    {
-                        ArtistList.Sort();
-                        File.WriteAllText("artists.txt", string.Join("✄", ArtistList));
-                    }
+                    TagStream.Dispose();
                 }
                 SuccessCount++;
             }
 
-            DownloadedStream = DownloadDBExport("https://e621.net/db_export/pools-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
-            if (DownloadedStream != null)
+            //Do Genders
+            HashSet<string> GendersList = new HashSet<string>() { "ambiguous_gender", "male", "female", "intersex" };
+            Queue<string> queue = new Queue<string>(GendersList);
+            while (queue.Count > 0)
+            {
+                string current = queue.Dequeue();
+
+                if (aliases.TryGetValue(current, out var aliasList))
+                {
+                    foreach (var next in aliasList)
+                    {
+                        if (GendersList.Add(next)) queue.Enqueue(next);
+                    }
+                }
+
+                if (implications.TryGetValue(current, out var implList))
+                {
+                    foreach (var next in implList)
+                    {
+                        if (GendersList.Add(next)) queue.Enqueue(next);
+                    }
+                }
+            }
+
+            MemoryStream? PoolStream = DownloadDBExport("https://static1.e621.net/data/db_export/pools.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            //Do Pools
+            List<string> PoolList = new List<string>();
+            if (PoolStream != null)
             {
                 Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Pools..."; });
 
-                List<string> PoolList = new List<string>();
-                DownloadedStream.Position = 0;
-                using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
+                using (GZipStream TagsZip = new GZipStream(PoolStream, CompressionMode.Decompress))
                 {
-                    using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
+                    using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
                     {
-                        StreamReaderTemp.ReadLine();
-                        string ReadCSV = StreamReaderTemp.ReadToEnd();
-                        using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(ReadCSV)))
-                        {
-                            CSVParser.HasFieldsEnclosedInQuotes = true;
-                            CSVParser.SetDelimiters(",");
+                        CSVParser.HasFieldsEnclosedInQuotes = true;
+                        CSVParser.SetDelimiters(",");
+                        CSVParser.ReadLine(); //skip header
 
-                            string[] CSVFields;
-                            while (!CSVParser.EndOfData)
-                            {
-                                CSVFields = CSVParser.ReadFields();
-                                PoolList.Add($"{CSVFields[0]},{CSVFields[1]}");
-                            }
+                        while (!CSVParser.EndOfData)
+                        {
+                            //id, name, created_at, updated_at, creator_id, description, is_active, post_ids
+                            string[] CSVFields = CSVParser.ReadFields();
+                            string pool_id = CSVFields[0];
+                            string pool_name = CSVFields[1];
+                            PoolList.Add($"{pool_id},{pool_name}");
                         }
                     }
                 }
-                DownloadedStream.Dispose();
+                PoolStream.Dispose();
 
                 PoolList = PoolList.Distinct().ToList();
                 PoolList.Reverse();
-                File.WriteAllText("pools.txt", string.Join("✄", PoolList));
                 SuccessCount++;
+            }
+
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Writting Files..."; });
+            if (TagList.Count > 0)
+            {
+                StringBuilder StringBuilderTemp = new StringBuilder();
+                foreach (string tag in TagList)
+                {
+                    StringBuilderTemp.Append(tag);
+
+                    if (TagAliases.TryGetValue(tag, out List<string>? aliasesList))
+                    {
+                        StringBuilderTemp.Append(',');
+                        StringBuilderTemp.Append(string.Join(',', aliasesList));
+                    }
+                    StringBuilderTemp.Append('✄');
+                }
+                File.WriteAllText("tags.txt", StringBuilderTemp.ToString());
+            }
+            if (ArtistList.Count > 0)
+            {
+                File.WriteAllText("artists.txt", string.Join('✄', ArtistList.OrderBy(x => x)));
+            }
+            if (GendersList.Count > 0)
+            {
+                File.WriteAllText("genders.txt", string.Join("✄", GendersList.OrderBy(x => x)));
+            }
+            if (DNPList.Count > 0)
+            {
+                File.WriteAllText("DNPs.txt", string.Join("✄", DNPList.OrderBy(x => x)));
+            }
+            if (PoolList.Count > 0)
+            {
+                File.WriteAllText("pools.txt", string.Join('✄', PoolList));
             }
 
             if (SuccessCount == 2)
@@ -250,158 +345,6 @@ namespace e621_ReBot_v3.Modules
                     MessageBox.Show(Window_Main._RefHolder, "Downloaded all Tags and Pools for tag suggestions in addition to Artists for DNPs check.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
                     GC.WaitForPendingFinalizers();
                     GC.Collect();
-                });
-            }
-        }
-
-        internal static void DLGenders()
-        {
-            MemoryStream? DownloadedStream = DownloadDBExport("https://e621.net/db_export/tag_aliases-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLGenders);
-            if (DownloadedStream != null)
-            {
-                Window_Main._RefHolder.SettingsButton_DLGenders.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLGenders.Content = "Processing Genders..."; });
-
-                string? ReadCSVAliases = null;
-                DownloadedStream.Position = 0;
-                using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
-                {
-                    using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
-                    {
-                        StreamReaderTemp.ReadLine();
-                        ReadCSVAliases = StreamReaderTemp.ReadToEnd();
-                    }
-                }
-                DownloadedStream.Dispose();
-
-                string? ReadCSVImplications = null;
-                DownloadedStream = DownloadDBExport("https://e621.net/db_export/tag_implications-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLGenders);
-                if (DownloadedStream != null)
-                {
-                    Window_Main._RefHolder.SettingsButton_DLGenders.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLGenders.Content = "Processing Implications..."; });
-
-                    DownloadedStream.Position = 0;
-                    using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
-                    {
-                        using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
-                        {
-                            StreamReaderTemp.ReadLine();
-                            ReadCSVImplications = StreamReaderTemp.ReadToEnd();
-                        }
-                    }
-                    DownloadedStream.Dispose();
-                }
-
-                List<string> GendersList = new List<string>() { "ambiguous_gender", "male", "female", "intersex" };
-                for (int repeat = 0; repeat < 4; repeat++)
-                {
-                    foreach (string StringTemp in new string[] { ReadCSVAliases, ReadCSVImplications })
-                    {
-                        using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(StringTemp)))
-                        {
-                            CSVParser.HasFieldsEnclosedInQuotes = true;
-                            CSVParser.SetDelimiters(",");
-                            while (!CSVParser.EndOfData)
-                            {
-                                string[] CSVFields = CSVParser.ReadFields();
-                                if (GendersList.Contains(CSVFields[2]) && CSVFields[4].Equals("active"))
-                                {
-                                    GendersList.Add(CSVFields[1]);
-                                }
-                            }
-                        }
-                    }
-                    GendersList = GendersList.Distinct().ToList();
-                }
-                GendersList.Sort();
-                File.WriteAllText("genders.txt", string.Join("✄", GendersList));
-
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
-                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                {
-                    Window_Main._RefHolder.SettingsButton_DLGenders.Content = "DL Genders";
-                    Window_Main._RefHolder.SettingsButton_DLGenders.IsEnabled = true;
-                    MessageBox.Show(Window_Main._RefHolder, "Downloaded all Genders.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
-                });
-            }
-        }
-
-        internal static void DLDNPs()
-        {
-            MemoryStream? DownloadedStream = DownloadDBExport("https://e621.net/db_export/tag_implications-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLDNPs);
-            if (DownloadedStream != null)
-            {
-                Window_Main._RefHolder.SettingsButton_DLDNPs.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLDNPs.Content = "Processing DNPs..."; });
-
-                List<string> DNPList = new List<string>();
-                string[] DNPStrings = new string[] { "avoid_posting", "conditional_dnp" };
-
-                DownloadedStream.Position = 0;
-                using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
-                {
-                    using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
-                    {
-                        StreamReaderTemp.ReadLine();
-                        string ReadCSVImplications = StreamReaderTemp.ReadToEnd();
-                        using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(ReadCSVImplications)))
-                        {
-                            CSVParser.HasFieldsEnclosedInQuotes = true;
-                            CSVParser.SetDelimiters(",");
-                            while (!CSVParser.EndOfData)
-                            {
-                                string[] CSVFields = CSVParser.ReadFields();
-                                if (DNPStrings.Any(str => CSVFields[2].Equals(str)) && CSVFields[4].Equals("active"))
-                                {
-                                    DNPList.Add(CSVFields[1]);
-                                }
-                            }
-                        }
-                    }
-                }
-                DownloadedStream.Dispose();
-
-                DownloadedStream = DownloadDBExport("https://e621.net/db_export/tag_aliases-{0}-{1}-{2}.csv.gz", Window_Main._RefHolder.SettingsButton_DLDNPs);
-                if (DownloadedStream != null)
-                {
-                    Window_Main._RefHolder.SettingsButton_DLDNPs.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLDNPs.Content = "Processing Aliases..."; });
-
-                    DownloadedStream.Position = 0;
-                    using (GZipStream TagsZip = new GZipStream(DownloadedStream, CompressionMode.Decompress))
-                    {
-                        using (StreamReader StreamReaderTemp = new StreamReader(TagsZip))
-                        {
-                            StreamReaderTemp.ReadLine();
-                            string ReadCSVAliases = StreamReaderTemp.ReadToEnd();
-                            using (TextFieldParser CSVParser = new TextFieldParser(new StringReader(ReadCSVAliases)))
-                            {
-                                CSVParser.HasFieldsEnclosedInQuotes = true;
-                                CSVParser.SetDelimiters(",");
-                                while (!CSVParser.EndOfData)
-                                {
-                                    string[] CSVFields = CSVParser.ReadFields();
-                                    if (DNPList.Contains(CSVFields[2]) && CSVFields[4].Equals("active"))
-                                    {
-                                        DNPList.Add(CSVFields[1]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    DownloadedStream.Dispose();
-                }
-                DNPList = DNPList.Distinct().ToList();
-                DNPList.Sort();
-                File.WriteAllText("DNPs.txt", string.Join("✄", DNPList));
-
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
-                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                {
-                    Window_Main._RefHolder.SettingsButton_DLDNPs.Content = "DL DNPs";
-                    Window_Main._RefHolder.SettingsButton_DLDNPs.IsEnabled = true;
-                    MessageBox.Show(Window_Main._RefHolder, "Downloaded all DNPs.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
                 });
             }
         }

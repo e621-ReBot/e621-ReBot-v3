@@ -181,6 +181,7 @@ namespace e621_ReBot_v3
 
                 JArray Posts_Array = JArray.Parse(e6JSONResult);
 
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Downloader._2Download_DownloadItems)
                 {
                     foreach (JToken PostDataDetailed in Posts_Array)

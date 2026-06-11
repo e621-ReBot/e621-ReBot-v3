@@ -820,10 +820,6 @@
                     </Grid>
 
                     <Button x:Name="SettingsButton_DLSuggestions" Content="DL Suggestions" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,288,16" Click="SettingsButton_DLSuggestions_Click" ToolTip="DL data from e621 for autocomplete suggestions."/>
-
-                    <Button x:Name="SettingsButton_DLGenders" Content="DL Genders" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,432,16" Click="SettingsButton_DLGenders_Click" ToolTip="DL all Genders (data) from e621 (used for autocomplete suggestions and gender missing warning)."/>
-
-                    <Button x:Name="SettingsButton_DLDNPs" Content="DL DNPs" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Height="32" Cursor="Hand" Margin="0,0,576,16" Click="SettingsButton_DLDNPs_Click" ToolTip="DL all DNPs (data) from e621 (used for DNP upload warning)."/>
                 </Grid>
             </TabItem>
 

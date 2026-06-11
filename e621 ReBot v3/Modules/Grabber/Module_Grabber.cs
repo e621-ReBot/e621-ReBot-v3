@@ -399,6 +399,8 @@ namespace e621_ReBot_v3.Modules
         private static async void Grab_2Media(string WebAddress, object? NeededData)
         {
             GrabberActiveHandCount++;
+
+            //lock should already be in background thread as the task is done in background
             lock (_GrabQueue_WorkingOn)
             {
                 _GrabQueue_WorkingOn.Add(WebAddress, null);
@@ -493,6 +495,7 @@ namespace e621_ReBot_v3.Modules
                     }
             }
 
+            //lock should already be in background thread as the task is done in background
             lock (_GrabQueue_URLs)
             {
                 _GrabQueue_URLs.Remove(WebAddress);
@@ -650,6 +653,7 @@ namespace e621_ReBot_v3.Modules
             GrabberActiveHandCount--;
             Report_Status();
 
+            //lock should already be in background thread as the task is done in background
             lock (_GrabQueue_WorkingOn)
             {
                 while (_GrabQueue_WorkingOn.Count > 0)

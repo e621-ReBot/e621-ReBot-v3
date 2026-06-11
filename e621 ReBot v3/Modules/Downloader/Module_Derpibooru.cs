@@ -51,6 +51,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 HtmlNodeCollection NodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//main[@id]//div[@class='media-box']");
                 if (NodeSelector != null)
                 {
+                    //lock should already be in background thread as the task is done in background
                     lock (Module_Downloader._2Download_DownloadItems)
                     {
                         foreach (HtmlNode Post in NodeSelector)

@@ -88,6 +88,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                             HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                             if (NodeSelector != null)
                             {
+                                //lock should already be in background thread as the task is done in background
                                 lock (Module_Downloader._2Download_DownloadItems)
                                 {
                                     foreach (HtmlNode Post in NodeSelector)
@@ -152,6 +153,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                             int PoolIndex = 0;
 
+                            //lock should already be in background thread as the task is done in background
                             lock (Module_Downloader._2Download_DownloadItems)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -190,6 +192,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         {
                             SpecialSaveFolder = Module_Downloader.SelectFolderPopup(SpecialSaveFolder);
 
+                            //lock should already be in background thread as the task is done in background
                             lock (Module_Downloader._2Download_DownloadItems)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -237,6 +240,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                         HtmlNodeCollection NodeSelector = PageNode.SelectNodes(".//div[@id='posts']/section[@class='posts-container']/article");
                         if (NodeSelector != null)
                         {
+                            //lock should already be in background thread as the task is done in background
                             lock (Module_Downloader._2Download_DownloadItems)
                             {
                                 foreach (HtmlNode Post in NodeSelector)
@@ -329,6 +333,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             JArray Posts_Array = JArray.Parse(e6JSONResult);
 
+            //lock should already be in background thread as the task is done in background
             lock (Module_Downloader._2Download_DownloadItems)
             {
                 foreach (JToken cPost in Posts_Array)
@@ -448,6 +453,8 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             JArray Posts_Array = JArray.Parse(e6JSONResult);
+
+            //lock should already be in background thread as the task is done in background
             lock (Module_Downloader._2Download_DownloadItems)
             {
                 foreach (JToken cPost in Posts_Array)

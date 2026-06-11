@@ -97,6 +97,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 string ArtistName = PostNode.SelectSingleNode(".//div[@class='elephant elephant_555753']/div[@class='content' and not(@id)]//a[text()]").Attributes["href"].Value;
 
+                //lock should already be in background thread as the task is done in background
                 lock (Module_Downloader._2Download_DownloadItems)
                 {
                     foreach (string MediaURL in MediaList)

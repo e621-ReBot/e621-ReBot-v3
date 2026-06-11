@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -52,8 +53,6 @@ namespace e621_ReBot_v3
             GBU_Change.Opacity = 0;
             JobImport_TextBlock.Visibility = Visibility.Hidden;
             Upload_ProgressCanvas.Visibility = Visibility.Hidden;
-            SettingsButton_DLGenders.Visibility = Visibility.Hidden;
-            SettingsButton_DLDNPs.Visibility = Visibility.Hidden;
             SB_APIKey.IsEnabled = false;
             Upload_CheckBox.IsEnabled = false;
 
@@ -530,39 +529,45 @@ namespace e621_ReBot_v3
             Grid_Populate(true);
         }
 
-        private void GB_Clear_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private async void GB_Clear_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             bool ClearAll = true;
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                lock (Module_Grabber._Grabbed_MediaItems)
+                await Task.Run(() =>
                 {
-                    for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
+                    lock (Module_Grabber._Grabbed_MediaItems)
                     {
-                        MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                        DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
-                        if (MediaItemTemp.UP_UploadedID != null)
+                        for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
                         {
-                            Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
+                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
+                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
+                            if (MediaItemTemp.UP_UploadedID != null)
+                            {
+                                Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
+                            }
                         }
                     }
-                }
+                });
                 ClearAll = false;
             }
 
             if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
-                lock (Module_Grabber._Grabbed_MediaItems)
+                await Task.Run(() =>
                 {
-                    for (int i = Grid_ItemStartIndex + Grid_GridVEPanel.Children.Count - 1; i >= Grid_ItemStartIndex; i--)
+                    lock (Module_Grabber._Grabbed_MediaItems)
                     {
-                        MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                        DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
-                        UploadCounter += MediaItemTemp.UP_Queued ? -1 : 0;
-                        Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
+                        for (int i = Grid_ItemStartIndex + Grid_GridVEPanel.Children.Count - 1; i >= Grid_ItemStartIndex; i--)
+                        {
+                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
+                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
+                            UploadCounter += MediaItemTemp.UP_Queued ? -1 : 0;
+                            Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
+                        }
                     }
-                }
+                });
                 ClearAll = false;
             }
 
@@ -579,10 +584,14 @@ namespace e621_ReBot_v3
                     if (MessageBoxResultTemp != MessageBoxResult.Yes) return;
                 }
 
-                lock (Module_Grabber._Grabbed_MediaItems)
+                await Task.Run(() =>
                 {
-                    Module_Grabber._Grabbed_MediaItems.Clear();
-                }
+                    lock (Module_Grabber._Grabbed_MediaItems)
+                    {
+                        Module_Grabber._Grabbed_MediaItems.Clear();
+                    }
+                });
+
                 Grid_GridVEPanel.Children.Clear();
                 Grid_ItemStartIndex = 0;
                 UploadCounter = 0;
@@ -732,7 +741,7 @@ namespace e621_ReBot_v3
             GBD_Download.IsEnabled = DownloadCounter > 0;
         }
 
-        private void GBD_Download_Click(object sender, RoutedEventArgs e)
+        private async void GBD_Download_Click(object sender, RoutedEventArgs e)
         {
             int DownloadAdditionCounter = 0;
 
@@ -740,29 +749,33 @@ namespace e621_ReBot_v3
 
             IEnumerable<MediaItem> MediaItemList = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? Module_Grabber._Grabbed_MediaItems.Skip(Grid_ItemStartIndex).Take(Grid_ItemLimit) : Module_Grabber._Grabbed_MediaItems;
 
-            lock (Module_Downloader._2Download_DownloadItems)
+            //lock should already be in background thread as the task is done in background
+            await Task.Run(() =>
             {
-                foreach (MediaItem? MediaItemTemp in MediaItemList)
+                lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    if (MediaItemTemp.DL_Queued)
+                    foreach (MediaItem? MediaItemTemp in MediaItemList)
                     {
-                        if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
+                        if (MediaItemTemp.DL_Queued)
+                        {
+                            if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaItemTemp.Grab_MediaURL)) continue;
 
-                        Module_Downloader.AddDownloadItem2Queue(
-                            PageURL: MediaItemTemp.Grab_PageURL,
-                            MediaURL: MediaItemTemp.Grab_MediaURL,
-                            ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
-                            Artist: MediaItemTemp.Grab_Artist,
-                            Title: MediaItemTemp.Grab_Title,
-                            MediaFormat: MediaItemTemp.Grid_MediaFormat,
-                            MediaItemRef: MediaItemTemp,
-                            DL_Folder: SpecialSaveFolder, //Save to user specified folder
-                            DL_Size: MediaItemTemp.Grid_MediaByteLength,
-                            LockDLList: false);
-                        DownloadAdditionCounter++;
+                            Module_Downloader.AddDownloadItem2Queue(
+                                PageURL: MediaItemTemp.Grab_PageURL,
+                                MediaURL: MediaItemTemp.Grab_MediaURL,
+                                ThumbnailURL: MediaItemTemp.Grab_ThumbnailURL,
+                                Artist: MediaItemTemp.Grab_Artist,
+                                Title: MediaItemTemp.Grab_Title,
+                                MediaFormat: MediaItemTemp.Grid_MediaFormat,
+                                MediaItemRef: MediaItemTemp,
+                                DL_Folder: SpecialSaveFolder, //Save to user specified folder
+                                DL_Size: MediaItemTemp.Grid_MediaByteLength,
+                                LockDLList: false);
+                            DownloadAdditionCounter++;
+                        }
                     }
                 }
-            }
+            });
 
             Module_Downloader.UpdateDownloadTreeView();
             GBD_Change.Text = $"+{DownloadAdditionCounter}";
@@ -1031,33 +1044,43 @@ namespace e621_ReBot_v3
             Module_Downloader.UpdateDownloadTreeView();
         }
 
-        private void DownloadTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
+        private async void DownloadTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
         {
-            lock (Module_Downloader._2Download_DownloadItems)
+            await Task.Run(() =>
             {
-                Module_Downloader._2Download_DownloadItems.RemoveURL(DownloadTreeViewContextMenuHolderTarget);
-            }
-            Module_Downloader.UpdateDownloadTreeView();
-        }
-
-        private void DownloadTreeViewContextMenu_RemovePage(object sender, RoutedEventArgs e)
-        {
-            lock (Module_Downloader._2Download_DownloadItems)
-            {
-                foreach (TreeViewItem TreeViewItemTemp in DownloadQueue_TreeView.Items)
+                lock (Module_Downloader._2Download_DownloadItems)
                 {
-                    Module_Downloader._2Download_DownloadItems.RemoveURL(TreeViewItemTemp.Header.ToString());
+                    Module_Downloader._2Download_DownloadItems.RemoveURL(DownloadTreeViewContextMenuHolderTarget);
                 }
-            }
+            });
             Module_Downloader.UpdateDownloadTreeView();
         }
 
-        private void DownloadTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
+        private async void DownloadTreeViewContextMenu_RemovePage(object sender, RoutedEventArgs e)
         {
-            lock (Module_Downloader._2Download_DownloadItems)
+            List<string> WebAdresses = DownloadQueue_TreeView.Items.Cast<TreeViewItem>().Select(item => item.Header.ToString()).ToList();
+            await Task.Run(() =>
             {
-                Module_Downloader._2Download_DownloadItems.Clear();
-            }
+                lock (Module_Downloader._2Download_DownloadItems)
+                {
+                    foreach (string WebAddress in WebAdresses)
+                    {
+                        Module_Downloader._2Download_DownloadItems.RemoveURL(WebAddress);
+                    }
+                }
+            });
+            Module_Downloader.UpdateDownloadTreeView();
+        }
+
+        private async void DownloadTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
+        {
+            await Task.Run(() =>
+            {
+                lock (Module_Downloader._2Download_DownloadItems)
+                {
+                    Module_Downloader._2Download_DownloadItems.Clear();
+                }
+            });
             Module_Downloader.UpdateDownloadTreeView();
         }
 
@@ -1167,7 +1190,7 @@ namespace e621_ReBot_v3
             }
         }
 
-        private void GrabTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
+        private async void GrabTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
         {
             MenuItem MenuItemClicked = (MenuItem)sender;
             ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
@@ -1178,21 +1201,27 @@ namespace e621_ReBot_v3
             {
                 if (TreeViewItemTarget.Items.Count == 0)
                 {
-                    lock (Module_Grabber._GrabQueue_URLs)
+                    await Task.Run(() =>
                     {
-                        Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
-                    }
+                        lock (Module_Grabber._GrabQueue_URLs)
+                        {
+                            Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
+                        }
+                    });
                 }
                 else
                 {
-                    lock (Module_Grabber._GrabQueue_URLs)
+                    List<string> WebAdresses = TreeViewItemTarget.Items.Cast<TreeViewItem>().Select(item => Encoding.UTF8.GetString(Convert.FromHexString(item.Name.Substring(1)))).ToList();
+                    await Task.Run(() =>
                     {
-                        foreach (TreeViewItem TreeViewItemTemp in TreeViewItemTarget.Items)
+                        lock (Module_Grabber._GrabQueue_URLs)
                         {
-                            WebAddress = Encoding.UTF8.GetString(Convert.FromHexString(TreeViewItemTemp.Name.Substring(1)));
-                            Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
+                            foreach (string WebAddress in WebAdresses)
+                            {
+                                Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
+                            }
                         }
-                    }
+                    });
                 }
                 Grab_TreeView.Items.Remove(TreeViewItemTarget);
             }
@@ -1208,19 +1237,26 @@ namespace e621_ReBot_v3
                     TreeViewItemParent.Items.Remove(TreeViewItemTarget);
                     TreeViewItemParent.ToolTip = $"Pages left to grab: {TreeViewItemParent.Items.Count}";
                 }
-                lock (Module_Grabber._GrabQueue_URLs)
+
+                Task.Run(() =>
                 {
-                    Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
-                }
+                    lock (Module_Grabber._GrabQueue_URLs)
+                    {
+                        Module_Grabber._GrabQueue_URLs.Remove(WebAddress);
+                    }
+                });
             }
         }
 
         private void GrabTreeViewContextMenu_RemoveAll(object sender, RoutedEventArgs e)
         {
-            lock (Module_Grabber._GrabQueue_URLs)
+            Task.Run(() =>
             {
-                Module_Grabber._GrabQueue_URLs.Clear();
-            }
+                lock (Module_Grabber._GrabQueue_URLs)
+                {
+                    Module_Grabber._GrabQueue_URLs.Clear();
+                }
+            });
             Grab_TreeView.Items.Clear();
         }
 
@@ -1507,18 +1543,6 @@ namespace e621_ReBot_v3
         {
             SettingsButton_DLSuggestions.IsEnabled = false;
             ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLSuggestions());
-        }
-
-        private void SettingsButton_DLGenders_Click(object sender, RoutedEventArgs e)
-        {
-            SettingsButton_DLGenders.IsEnabled = false;
-            ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLGenders());
-        }
-
-        private void SettingsButton_DLDNPs_Click(object sender, RoutedEventArgs e)
-        {
-            SettingsButton_DLDNPs.IsEnabled = false;
-            ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLDNPs());
         }
 
         #endregion
