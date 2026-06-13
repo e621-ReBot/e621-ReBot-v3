@@ -119,7 +119,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 //FFMpeg.StartInfo.RedirectStandardError = true;
 
                 //FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
-                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -framerate {avgFPS} -i \"{FullFolderPath}\\{UgoiraFileName}%d.{ImageExtension}\" -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+                FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -framerate {avgFPS} -i \"{TempFolderName}\\{UgoiraFileName}%d.{ImageExtension}\" -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
 
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
@@ -429,8 +429,9 @@ namespace e621_ReBot_v3.Modules.Converter
         internal static async Task DownloadQueue_Ugoira2WebM(DownloadVE DownloadVERef)
         {
             //Get FileName
-            string UgoiraFileName = Path.GetFileNameWithoutExtension(DownloadVERef._DownloadItemRef.Grab_MediaURL);
-            UgoiraFileName = UgoiraFileName.TrimEnd('0'); ; //turn "ugoira0" into "ugoira"
+            string UgoiraFileName = DownloadVERef._DownloadItemRef.Grab_MediaURL;
+            string ImageFormat = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('.') + 1);
+            UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName).TrimEnd('0'); //turn "ugoira0" into "ugoira"
 
             //Get Artist for folder name
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
@@ -468,6 +469,7 @@ namespace e621_ReBot_v3.Modules.Converter
             //check for 0 error here?
 
             //Convert to Webm
+            UgoiraFileName = $"{UgoiraFileName}.{ImageFormat}";
             FFMpeg4Ugoira2WebM(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, DownloadVERef.ConversionProgress);
 
             //Delete temp work folder

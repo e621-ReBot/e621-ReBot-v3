@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using CefSharp;
+using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 
@@ -13,6 +14,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         internal static async void GrabMediaLinks(string WebAddress)
         {
             Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Pixiv);
+            Module_CefSharp.BrowserHTMLSource = Module_CefSharp.CefSharpBrowser.GetSourceAsync().GetAwaiter().GetResult(); //this is clicked after some delay, so should be fine now since some elements are sometimes missing otherwise
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
@@ -30,7 +32,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             string? Media_Format;
             if (WebAddress.Contains("/artworks/")) //single
             {
-                string ArtistName = PostNode.SelectSingleNode(".//aside/section/h2//a[@class]").InnerText; ;
+                string ArtistName = PostNode.SelectSingleNode(".//aside/section/h2//a[@class]").InnerText;
 
                 string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
 

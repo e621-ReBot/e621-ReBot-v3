@@ -1,4 +1,5 @@
-﻿using e621_ReBot_v3.CustomControls;
+﻿using CefSharp;
+using e621_ReBot_v3.CustomControls;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,6 +20,7 @@ namespace e621_ReBot_v3.Modules.Grabber
         internal static void Queue_Prepare(string WebAddress)
         {
             Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Pixiv);
+            Module_CefSharp.BrowserHTMLSource = Module_CefSharp.CefSharpBrowser.GetSourceAsync().GetAwaiter().GetResult(); //this is clicked after some delay, so should be fine now since some elements are sometimes missing otherwise
             if (WebAddress.StartsWith("https://www.pixiv.net/en/users/"))
             {
                 MessageBoxResult MessageBoxResultTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => { return MessageBox.Show(Window_Main._RefHolder, "Do you want to go grab all works?\nIf you chose not to, only the visible ones on this page will be grabbed.", "Grab", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes); });

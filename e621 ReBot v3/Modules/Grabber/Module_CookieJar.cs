@@ -75,16 +75,19 @@ namespace e621_ReBot_v3.Modules
 
         internal static bool PixivCookieCheck()
         {
-            if (Cookies_Pixiv == null || Cookies_Pixiv.Count == 0) //Also try and get them
+            if (Module_CefSharp.CefSharpBrowser != null && Module_CefSharp.CefSharpBrowser.IsInitialized)
             {
-                GetCookies("https://www.pixiv.net", ref Cookies_Pixiv);
-            }
-            if (Cookies_Pixiv.Count == 0) //There are still no cookies
-            {
-                return false;
+                if (Cookies_Pixiv == null || Cookies_Pixiv.Count == 0) //Also try and get them
+                {
+                    GetCookies("https://www.pixiv.net", ref Cookies_Pixiv);
+                }
+                if (Cookies_Pixiv.Count > 0)
+                {
+                    return true;
+                }
             }
 
-            return true;
+            return false;
         }
     }
 }

@@ -1157,7 +1157,17 @@ namespace e621_ReBot_v3.Modules
 
                     if (DownloadStarted)
                     {
+                        //Maybe shouldn't remove before it's finished downloading, can make duplicates if added while downloading
                         _2Download_DownloadItems.RemoveAt(0);
+                    }
+                    else
+                    {
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() => 
+                        { 
+                            //Should throw messagebox for user?
+                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false; 
+                        });   
+                        return;
                     }
                 }
             }
@@ -1331,6 +1341,13 @@ namespace e621_ReBot_v3.Modules
             {
                 case string UgoiraTest when UgoiraTest.Contains("ugoira"):
                     {
+                        if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
+                        {
+                            Report_Info($"Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.");
+                            DLThreadsWaiting++;
+                            return false;
+                        }
+
                         string WebMName = $"{GetFileNameOnly.Substring(0, GetFileNameOnly.IndexOf("_ugoira0"))}_ugoira.webm";
                         string ImageRename = MediaFile_RenameFileName(WebMName, DownloadItemRef);
 
