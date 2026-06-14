@@ -250,6 +250,12 @@ namespace e621_ReBot_v3
                         case "Download_FolderLocation":
                             {
                                 Download_FolderLocation = (string)LoadSettingsJObject["Download_FolderLocation"];
+
+                                //check if the drive exists
+                                if (!Directory.Exists(Path.GetPathRoot(Download_FolderLocation)))
+                                {
+                                    Download_FolderLocation = $"{AppDomain.CurrentDomain.BaseDirectory}Downloads\\";
+                                }
                                 Window_Main._RefHolder.Download_DownloadFolderLocation.ToolTip = $"Current path: {Download_FolderLocation}";
                                 break;
                             }
