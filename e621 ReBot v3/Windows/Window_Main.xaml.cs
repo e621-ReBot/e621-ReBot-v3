@@ -108,7 +108,7 @@ namespace e621_ReBot_v3
                 else
                 {
                     SB_APIKey.Content = "Remove API key";
-                    ThreadPool.QueueUserWorkItem(state =>
+                    Task.Run(() =>
                     {
                         Module_Credit.Credit_CheckAll();
                         Dispatcher.BeginInvoke(() =>
@@ -139,7 +139,7 @@ namespace e621_ReBot_v3
             Module_Downloader.Start(); //Make it load on main thread, bug fix.
             if (!string.IsNullOrEmpty(AppSettings.APIKey))
             {
-                ThreadPool.QueueUserWorkItem(state => Window_PoolWatcher.PoolWatcher_Check4New());
+                Task.Run(() => Window_PoolWatcher.PoolWatcher_Check4New());
             }
         }
 
@@ -859,7 +859,11 @@ namespace e621_ReBot_v3
         private void Download_DownloadFolder_Click(object sender, RoutedEventArgs e)
         {
             Directory.CreateDirectory(AppSettings.Download_FolderLocation);
-            Process.Start("explorer.exe", AppSettings.Download_FolderLocation);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppSettings.Download_FolderLocation,
+                UseShellExecute = true
+            });
         }
 
         private void RadionButton_DLTX_Click(object sender, RoutedEventArgs e)
@@ -1542,7 +1546,7 @@ namespace e621_ReBot_v3
         private void SettingsButton_DLSuggestions_Click(object sender, RoutedEventArgs e)
         {
             SettingsButton_DLSuggestions.IsEnabled = false;
-            ThreadPool.QueueUserWorkItem(state => Module_e621Data.DLSuggestions());
+            Task.Run(() => Module_e621Data.DLSuggestions());
         }
 
         #endregion

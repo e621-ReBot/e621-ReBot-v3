@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -160,22 +161,22 @@ namespace e621_ReBot_v3.CustomControls
             Module_Grabber.Grab_1Link(BB_Grab.Tag.ToString());
         }
 
-        private void BB_Download_Click(object sender, RoutedEventArgs e)
+        private async void BB_Download_Click(object sender, RoutedEventArgs e)
         {
             BB_Download.Visibility = Visibility.Collapsed;
             //Worker_Sound();
             string TagPass = BB_Download.Tag.ToString();
-            ThreadPool.QueueUserWorkItem(state => Module_Downloader.Grab_DownloadMedia(TagPass));
+            Task.Run(() => Module_Downloader.Grab_DownloadMedia(TagPass));
             //Module_Downloader.UpdateTreeViewNodes();
             //Module_Downloader.timer_Download.Start();
         }
 
-        private void BB_PoolWatcher_Click(object sender, RoutedEventArgs e)
+        private async void BB_PoolWatcher_Click(object sender, RoutedEventArgs e)
         {
             BB_PoolWatcher.Visibility = Visibility.Collapsed;
             if (BB_PoolWatcher.Tag == null)
             {
-                ThreadPool.QueueUserWorkItem(state => Window_PoolWatcher.PoolWatcher_AddPool2Watch());
+                Task.Run(() => Window_PoolWatcher.PoolWatcher_AddPool2Watch());
                 Window_Main._RefHolder.Download_PoolWatcher.IsEnabled = true;
             }
             else

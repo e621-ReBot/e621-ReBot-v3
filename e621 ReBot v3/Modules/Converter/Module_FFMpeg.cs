@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace e621_ReBot_v3.Modules.Converter
 {
@@ -257,7 +258,8 @@ namespace e621_ReBot_v3.Modules.Converter
             return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
         }
 
-        private static async Task<int> DownloadUgoira(string PageURL, string MediaURL, string TempFolderPath, ActionType ActionTypEnum, ProgressBar ProgressBarRef = null)
+        private static readonly Random RngDelay = new Random();
+        private static async Task<int> DownloadUgoira(string PageURL, string MediaURL, string TempFolderPath, ActionType ActionTypEnum, ProgressBar? ProgressBarRef = null)
         {
             string JSONResponse = await UgoiraJSONResponse(PageURL);
             JToken UgoiraJObject = JObject.Parse(JSONResponse)["body"];
@@ -291,7 +293,7 @@ namespace e621_ReBot_v3.Modules.Converter
                     UgoiraConcat.AppendLine($"duration {FrameDelay / 1000d}");
                     TotalUgoiraLength += FrameDelay;
 
-                    await Task.Delay(500);
+                    await Task.Delay(RngDelay.Next(100, 250)); //Will lower delay be fine?
                 }
             }
             else
@@ -319,6 +321,11 @@ namespace e621_ReBot_v3.Modules.Converter
                 }
             }
 
+            ProgressBarRef.Dispatcher.BeginInvoke(() => { 
+                ProgressBarRef.Value = 100;
+                ProgressBarRef.Foreground = Module_Downloader.CompletedWorkBrush;
+            });
+            
             File.WriteAllText(Path.Combine(TempFolderPath, "input.txt"), UgoiraConcat.ToString());
 
             return TotalUgoiraLength;
@@ -470,6 +477,8 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Convert to Webm
             UgoiraFileName = $"{UgoiraFileName}.{ImageFormat}";
+
+            DownloadVERef.ConversionProgressHolder.Dispatcher.BeginInvoke(() => { DownloadVERef.ConversionProgressHolder.Visibility = Visibility.Visible; });
             FFMpeg4Ugoira2WebM(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, DownloadVERef.ConversionProgress);
 
             //Delete temp work folder
@@ -532,9 +541,9 @@ namespace e621_ReBot_v3.Modules.Converter
             Module_Downloader.SaveFileBytes(TempBytes, VideoFileName, FolderPath);
 
             //Convert to Webm
+            DownloadVERef.ConversionProgressHolder.Dispatcher.BeginInvoke(() => { DownloadVERef.ConversionProgressHolder.Visibility = Visibility.Visible; });
             string OriginalVideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
             FFMpeg4Video(ActionType.Download, TempFolderName, VideoFileName, OriginalVideoFormat, FolderPath, DownloadVERef.ConversionProgress);
-
 
             //Delete temp work folder
             Directory.Delete(TempFolderName, true);
@@ -559,6 +568,8 @@ namespace e621_ReBot_v3.Modules.Converter
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
+                //DownloadVERef.ConversionProgressHolder.Visibility = Visibility.Hidden;
+                DownloadVERef.ConversionProgress.Foreground = Module_Downloader.CompletedWorkBrush;
                 DownloadVERef.FolderIcon.Tag = FullFilePath;
                 DownloadVERef._DownloadFinished = true;
                 Module_Downloader._DownloadVEFinisherTimer.Stop();

@@ -63,7 +63,7 @@ namespace e621_ReBot_v3.Modules
                     {
                         if (DoMultiPageGrab)
                         {
-                            ThreadPool.QueueUserWorkItem(state => Grab_MultiPageTask(MatchTemp.Value));
+                            Task.Run(() => Grab_MultiPageTask(MatchTemp.Value));
                         }
                         else
                         {
@@ -171,7 +171,7 @@ namespace e621_ReBot_v3.Modules
                                 }
                             }
                         }
-                        ThreadPool.QueueUserWorkItem(state => Module_FurAffinity.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_FurAffinity.Queue_Prepare(WebAddress));
                         break;
                     }
 
@@ -195,80 +195,80 @@ namespace e621_ReBot_v3.Modules
                                 }
                             }
                         }
-                        ThreadPool.QueueUserWorkItem(state => Module_Inkbunny.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Inkbunny.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.pixiv.net":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Pixiv.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Pixiv.Queue_Prepare(WebAddress));
                         break;
 
                     }
 
                 case "www.hiccears.com":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_HicceArs.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_HicceArs.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "x.com": //was twitter.com before
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Twitter.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Twitter.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Newgrounds.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Newgrounds.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case string SoFurry when SoFurry.Contains(".sofurry.com"):
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_SoFurry.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_SoFurry.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.weasyl.com":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Weasyl.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Weasyl.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "mastodon.social":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Mastodon));
+                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Mastodon));
                         break;
                     }
 
                 case "baraag.net":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Baraag));
+                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Baraag));
                         break;
                     }
 
                 case "pawoo.net":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Pawoo));
+                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Pawoo));
                         break;
                     }
 
                 case "www.hentai-foundry.com":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_HentaiFoundry.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_HentaiFoundry.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "www.plurk.com":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Plurk.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Plurk.Queue_Prepare(WebAddress));
                         break;
                     }
 
                 case "bsky.app":
                     {
-                        ThreadPool.QueueUserWorkItem(state => Module_Bluesky.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Bluesky.Queue_Prepare(WebAddress));
                         break;
                     }
             }
@@ -367,7 +367,7 @@ namespace e621_ReBot_v3.Modules
                 }
 
                 object? NeededData = TreeViewItemSender.Tag;
-                ThreadPool.QueueUserWorkItem(state => Grab_2Media(WebAddress, NeededData));
+                Task.Run(() => Grab_2Media(WebAddress, NeededData));
 
                 // - - - - - - - - - - - - - - - -
 

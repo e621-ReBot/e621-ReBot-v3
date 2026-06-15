@@ -1109,7 +1109,7 @@ namespace e621_ReBot_v3.Modules
             _UploadDisableTimer.Stop();
             if (_UploadDisableTimer.Tag != null) //Total
             {
-                ThreadPool.QueueUserWorkItem(state => Module_Credit.Credit_CheckAll());
+                Task.Run(() => Module_Credit.Credit_CheckAll());
             }
             else //Hourly
             {

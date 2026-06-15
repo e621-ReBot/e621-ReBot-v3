@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -102,7 +103,7 @@ namespace e621_ReBot_v3
             {
                 if (!string.IsNullOrEmpty(AppSettings.APIKey))
                 {
-                    ThreadPool.QueueUserWorkItem(state =>
+                    Task.Run(() =>
                     {
                         Module_Credit.Credit_CheckAll();
                         Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.Credit_StackPanel.Visibility = Visibility.Visible; });

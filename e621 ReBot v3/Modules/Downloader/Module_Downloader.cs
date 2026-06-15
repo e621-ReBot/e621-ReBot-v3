@@ -927,6 +927,8 @@ namespace e621_ReBot_v3.Modules
                 "An error occurred while sending the request.",
                 "A connection attempt failed because the connected party did not properly respond after a period of time,"
             };
+
+        internal static readonly SolidColorBrush CompletedWorkBrush = new SolidColorBrush(Colors.LimeGreen);
         private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
@@ -1053,6 +1055,7 @@ namespace e621_ReBot_v3.Modules
 
             SessionDownloads++;
 
+            DownloadVETemp.DownloadProgress.Foreground = CompletedWorkBrush;
             DownloadVETemp._DownloadFinished = true;
             _DownloadVEFinisherTimer.Stop();
             _DownloadVEFinisherTimer.Start();
@@ -1391,7 +1394,7 @@ namespace e621_ReBot_v3.Modules
                                     }
                                 }
                             }
-                            ThreadPool.QueueUserWorkItem(state => Module_FFMpeg.DownloadQueue_Ugoira2WebM(DownloadVETemp));
+                            Task.Run(() => Module_FFMpeg.DownloadQueue_Ugoira2WebM(DownloadVETemp));
                         }).Task.Wait();
 
                         break;
@@ -1460,7 +1463,7 @@ namespace e621_ReBot_v3.Modules
                                         }
                                         else
                                         {
-                                            ThreadPool.QueueUserWorkItem(state => Module_FFMpeg.DownloadQueue_Video2WebM(DownloadVETemp));
+                                            Task.Run(() => Module_FFMpeg.DownloadQueue_Video2WebM(DownloadVETemp));
                                         }
                                         break;
                                     }

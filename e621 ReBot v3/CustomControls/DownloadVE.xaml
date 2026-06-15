@@ -13,9 +13,13 @@
 
         <Image x:Name="FolderIcon" VerticalAlignment="Center" HorizontalAlignment="Center" Width="40" Height="32" Source="/Resources/FolderIcon.png" Cursor="Hand" Stretch="UniformToFill" Visibility="Hidden"/>
 
-        <ProgressBar x:Name="DownloadProgress" Width="2" HorizontalAlignment="Left" Background="Black" BorderBrush="RoyalBlue" Foreground="Orange" Orientation="Vertical" BorderThickness="0" IsHitTestVisible="False" Margin="1,0,0,0"/>
-        <ProgressBar x:Name="ConversionProgress" Width="2" HorizontalAlignment="Right" Background="Black" BorderBrush="RoyalBlue" Foreground="DarkOrchid" Orientation="Vertical" BorderThickness="0" IsHitTestVisible="False" Margin="0,0,1,0"/>
+        <Border HorizontalAlignment="Left" BorderBrush="Black" BorderThickness="0,0,1,0"> 
+            <ProgressBar x:Name="DownloadProgress" Width="2" HorizontalAlignment="Left" Background="Black" BorderBrush="RoyalBlue" Foreground="Orange" Orientation="Vertical" IsHitTestVisible="False" Margin="1,0,0,0" BorderThickness="0"/>
+        </Border>
+        <Border Name="ConversionProgressHolder" HorizontalAlignment="Right" BorderBrush="Black" BorderThickness="1,0,0,0" Visibility="Hidden">
+            <ProgressBar x:Name="ConversionProgress" Width="2" HorizontalAlignment="Right" Background="Black" BorderBrush="RoyalBlue" Foreground="DarkOrchid" Orientation="Vertical" IsHitTestVisible="False" Margin="0,0,1,0" BorderThickness="0"/>
+        </Border>
 
-        <Border x:Name="BorderHighlight" BorderBrush="RoyalBlue" BorderThickness="1"/>
+        <Border x:Name="BorderHighlight" BorderThickness="1" BorderBrush="RoyalBlue"/>
     </Grid>
 </UserControl>

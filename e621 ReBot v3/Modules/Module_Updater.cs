@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -48,7 +49,7 @@ namespace e621_ReBot_v3
         {
             if (DateTime.UtcNow > AppSettings.Update_LastCheck.AddDays(AppSettings.Update_Interval))
             {
-                ThreadPool.QueueUserWorkItem(state => Check4Update());
+                Task.Run(() => Check4Update());
             }
             else
             {
