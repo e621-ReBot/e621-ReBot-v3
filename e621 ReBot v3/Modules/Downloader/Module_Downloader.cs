@@ -1346,7 +1346,8 @@ namespace e621_ReBot_v3.Modules
                     {
                         if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
                         {
-                            Report_Info($"Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.");
+                            //Report_Info($"Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.");
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Main._RefHolder, "Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.", "e621 ReBot - Download", MessageBoxButton.OK, MessageBoxImage.Warning); });
                             DLThreadsWaiting++;
                             return false;
                         }

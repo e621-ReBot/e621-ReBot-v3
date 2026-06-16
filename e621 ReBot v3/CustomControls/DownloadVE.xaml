@@ -13,7 +13,7 @@
 
         <Image x:Name="FolderIcon" VerticalAlignment="Center" HorizontalAlignment="Center" Width="40" Height="32" Source="/Resources/FolderIcon.png" Cursor="Hand" Stretch="UniformToFill" Visibility="Hidden"/>
 
-        <Border HorizontalAlignment="Left" BorderBrush="Black" BorderThickness="0,0,1,0"> 
+        <Border Name="DownloadProgressHolder" HorizontalAlignment="Left" BorderBrush="Black" BorderThickness="0,0,1,0" Visibility="Hidden"> 
             <ProgressBar x:Name="DownloadProgress" Width="2" HorizontalAlignment="Left" Background="Black" BorderBrush="RoyalBlue" Foreground="Orange" Orientation="Vertical" IsHitTestVisible="False" Margin="1,0,0,0" BorderThickness="0"/>
         </Border>
         <Border Name="ConversionProgressHolder" HorizontalAlignment="Right" BorderBrush="Black" BorderThickness="1,0,0,0" Visibility="Hidden">

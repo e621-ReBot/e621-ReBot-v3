@@ -166,7 +166,7 @@ namespace e621_ReBot_v3
                         }
                     }
 
-                    MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                    MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                 }
             }
         }
@@ -555,11 +555,12 @@ namespace e621_ReBot_v3
 
             if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
+                int GridItemCount = Grid_GridVEPanel.Children.Count;
                 await Task.Run(() =>
                 {
                     lock (Module_Grabber._Grabbed_MediaItems)
                     {
-                        for (int i = Grid_ItemStartIndex + Grid_GridVEPanel.Children.Count - 1; i >= Grid_ItemStartIndex; i--)
+                        for (int i = Grid_ItemStartIndex + GridItemCount - 1; i >= Grid_ItemStartIndex; i--)
                         {
                             MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
                             DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;

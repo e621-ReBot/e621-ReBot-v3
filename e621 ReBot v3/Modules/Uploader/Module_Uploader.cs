@@ -498,7 +498,8 @@ namespace e621_ReBot_v3.Modules
                         if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
                         {
                             FailedUploadTask = true;
-                            Report_Error($"Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.", "e621 ReBot - Upload");
+                            //Report_Error($"Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.", "e621 ReBot - Upload");
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Main._RefHolder, "Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.", "e621 ReBot - Upload", MessageBoxButton.OK, MessageBoxImage.Warning); });
                             return;
                         }
 
@@ -720,7 +721,8 @@ namespace e621_ReBot_v3.Modules
                         if (!Module_CookieJar.PixivCookieCheck()) //no cookies, but they will be needed later, so warn the user right away
                         {
                             FailedUploadTask = true;
-                            Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior");
+                            //Report_Error($"Pixiv cookies not found, you will need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior");
+                            Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Main._RefHolder, "Pixiv cookies not found, you need to initialize browser or log in into Pixiv first.", "e621 ReBot - Replace Inferior", MessageBoxButton.OK, MessageBoxImage.Warning); });
                             return;
                         }
                         isByteUpload = true;

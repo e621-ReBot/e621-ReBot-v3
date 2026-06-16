@@ -45,6 +45,7 @@ namespace e621_ReBot_v3.CustomControls
             cThumbnail_Image.Source = LoadingImage;
             _DownloadFinished = false;
             _AlreadyCopied = false;
+            DownloadProgressHolder.Visibility = Visibility.Visible;
         }
 
         private static readonly SolidColorBrush DownloadBrush = new SolidColorBrush(Colors.Orange);
@@ -55,8 +56,10 @@ namespace e621_ReBot_v3.CustomControls
             _AlreadyCopied = true;
             DownloadProgress.Value = 0;
             DownloadProgress.Foreground = DownloadBrush;
+            DownloadProgressHolder.Visibility = Visibility.Hidden;
             ConversionProgress.Value = 0;
             ConversionProgress.Foreground = ConversionBrush;
+            ConversionProgressHolder.Visibility = Visibility.Hidden;
             cThumbnail_Image.Source = null;
             _DownloadItemRef = null;
             ThumbClient?.CancelAsync();

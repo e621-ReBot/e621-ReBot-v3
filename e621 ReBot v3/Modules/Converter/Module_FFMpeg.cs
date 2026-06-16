@@ -120,6 +120,34 @@ namespace e621_ReBot_v3.Modules.Converter
                 //FFMpeg.StartInfo.RedirectStandardError = true;
 
                 //FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{TempFolderName}\\input.txt\" -vsync vfr -c:v libvpx-vp9 -pix_fmt yuv420p -lossless 1 -row-mt 1 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
+
+                if (ImageExtension.Equals("gif"))
+                {
+                    //static gifs and webm conversion just doesn't want to work properly
+                    string[] gifList = Directory.GetFiles(TempFolderName, "*.gif").OrderBy(f => f).ToArray();
+
+                    ProcessStartInfo ProcessStartInfoTemp = new ProcessStartInfo
+                    {
+                        FileName = "ffmpeg",
+                        //Arguments = $"-hide_banner -loglevel error -nostats -y -i \"{gifImage}\" \"{output}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+
+                    };
+                    foreach (string gifImage in gifList)
+                    {
+                        string output = Path.ChangeExtension(gifImage, "png");
+
+                        ProcessStartInfoTemp.Arguments = $"-hide_banner -loglevel error -nostats -y -i \"{gifImage}\" \"{output}\"";
+                        using Process ProcessTemp = Process.Start(ProcessStartInfoTemp);
+                        {
+                            ProcessTemp.WaitForExit();
+                        }
+                    }
+
+                    ImageExtension = "png";
+                }
+
                 FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -framerate {avgFPS} -i \"{TempFolderName}\\{UgoiraFileName}%d.{ImageExtension}\" -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an \"{FullFolderPath}\\{UgoiraFileName}.webm\"";
 
                 FFMpeg.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
@@ -133,17 +161,19 @@ namespace e621_ReBot_v3.Modules.Converter
                             //or
                             //frame=1234
                             TimeSpan CurrentTime = TimeSpan.Parse(ReadLine.Substring("out_time=".Length));
+
+                            double ProgressPercentage = CurrentTime.TotalMilliseconds / UgoiraDuration;
                             switch (ActionTypeEnum)
                             {
                                 case ActionType.Upload:
                                     {
-                                        Module_Uploader.Report_Status($"Converting Ugoira to WebM...{(CurrentTime.TotalMilliseconds / UgoiraDuration):P0}");
+                                        Module_Uploader.Report_Status($"Converting Ugoira to WebM...{ProgressPercentage:P0}");
                                         break;
                                     }
 
                                 case ActionType.Download:
                                     {
-                                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(CurrentTime.TotalMilliseconds / UgoiraDuration * 100d); });
+                                        ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ProgressPercentage * 100); });
                                         break;
                                     }
 
@@ -321,11 +351,12 @@ namespace e621_ReBot_v3.Modules.Converter
                 }
             }
 
-            ProgressBarRef.Dispatcher.BeginInvoke(() => { 
+            ProgressBarRef.Dispatcher.BeginInvoke(() =>
+            {
                 ProgressBarRef.Value = 100;
                 ProgressBarRef.Foreground = Module_Downloader.CompletedWorkBrush;
             });
-            
+
             File.WriteAllText(Path.Combine(TempFolderPath, "input.txt"), UgoiraConcat.ToString());
 
             return TotalUgoiraLength;
@@ -343,7 +374,17 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Make temp work folder for Ugoira job
             string TempFolderName = Path.Combine("FFMpegTemp", "Upload");
-            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            if (Directory.Exists(TempFolderName))
+            {
+                try
+                {
+                    Directory.Delete(TempFolderName, true);
+                }
+                catch (Exception)
+                {
+                    Module_Uploader.Report_Info($"Was unable to delete {TempFolderName}.");
+                }
+            }
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             //Download the images, either originals or samples from zip
@@ -367,7 +408,14 @@ namespace e621_ReBot_v3.Modules.Converter
             }
 
             //Delete temp work folder
-            Directory.Delete(TempFolderName, true);
+            try
+            {
+                Directory.Delete(TempFolderName, true);
+            }
+            catch (Exception)
+            {
+                Module_Uploader.Report_Info($"Was unable to delete {TempFolderName}.");
+            }
         }
 
         internal static void UploadQueue_Ugoira2WebM(out byte[] bytes2Send, out string FileName, string UgoiraFileName)
@@ -386,7 +434,14 @@ namespace e621_ReBot_v3.Modules.Converter
             bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
 
             //Delete temp work folder
-            Directory.Delete(TempFolderName, true);
+            try
+            {
+                Directory.Delete(TempFolderName, true);
+            }
+            catch (Exception)
+            {
+                Module_Uploader.Report_Info($"Was unable to delete {TempFolderName}.");
+            }
         }
 
         internal static void UploadQueue_Videos2WebM(out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
@@ -398,7 +453,17 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Make temp work folder for job
             string TempFolderName = Path.Combine("FFMpegTemp", "Upload");
-            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            if (Directory.Exists(TempFolderName))
+            {
+                try
+                {
+                    Directory.Delete(TempFolderName, true);
+                }
+                catch (Exception)
+                {
+                    Module_Uploader.Report_Info($"Was unable to delete {TempFolderName}.");
+                }
+            }
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             //Download the video
@@ -428,7 +493,14 @@ namespace e621_ReBot_v3.Modules.Converter
             bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
 
             //Delete temp work folder
-            Directory.Delete(TempFolderName, true);
+            try
+            {
+                Directory.Delete(TempFolderName, true);
+            }
+            catch (Exception)
+            {
+                Module_Uploader.Report_Info($"Was unable to delete {TempFolderName}.");
+            }
         }
 
         // - - - - - - - - - - - - - - - -
@@ -467,7 +539,17 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Make temp work folder for Ugoira job
             string TempFolderName = Path.Combine("FFMpegTemp", UgoiraFileName);
-            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            if (Directory.Exists(TempFolderName))
+            {
+                try
+                {
+                    Directory.Delete(TempFolderName, true);
+                }
+                catch (Exception)
+                {
+                    Module_Downloader.Report_Info($"Was unable to delete {TempFolderName}.");
+                }
+            }
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             //Download the images, either originals or samples from zip
@@ -482,7 +564,14 @@ namespace e621_ReBot_v3.Modules.Converter
             FFMpeg4Ugoira2WebM(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, DownloadVERef.ConversionProgress);
 
             //Delete temp work folder
-            Directory.Delete(TempFolderName, true);
+            try
+            {
+                Directory.Delete(TempFolderName, true);
+            }
+            catch (Exception)
+            {
+                Module_Downloader.Report_Info($"Was unable to delete {TempFolderName}.");
+            }
 
             //Report task finish
             Module_Converter.Report_Info($"Converted Ugoira from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
@@ -533,7 +622,17 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Make temp work folder for job
             string TempFolderName = Path.Combine("FFMpegTemp", VideoFileName);
-            if (Directory.Exists(TempFolderName)) Directory.Delete(TempFolderName, true);
+            if (Directory.Exists(TempFolderName))
+            {
+                try
+                {
+                    Directory.Delete(TempFolderName, true);
+                }
+                catch (Exception)
+                {
+                    Module_Downloader.Report_Info($"Was unable to delete {TempFolderName}.");
+                }
+            }
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             //Download the video
@@ -546,7 +645,14 @@ namespace e621_ReBot_v3.Modules.Converter
             FFMpeg4Video(ActionType.Download, TempFolderName, VideoFileName, OriginalVideoFormat, FolderPath, DownloadVERef.ConversionProgress);
 
             //Delete temp work folder
-            Directory.Delete(TempFolderName, true);
+            try
+            {
+                Directory.Delete(TempFolderName, true);
+            }
+            catch (Exception)
+            {
+                Module_Downloader.Report_Info($"Was unable to delete {TempFolderName}.");
+            }
 
             //Report task finish
             Module_Converter.Report_Info($"Converted Video from: {DownloadVERef._DownloadItemRef.Grab_MediaURL} to WebM");
