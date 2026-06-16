@@ -555,11 +555,11 @@ namespace e621_ReBot_v3
 
             if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
-                int GridItemCount = Grid_GridVEPanel.Children.Count;
                 await Task.Run(() =>
                 {
                     lock (Module_Grabber._Grabbed_MediaItems)
                     {
+                        int GridItemCount = Grid_GridVEPanel.Dispatcher.Invoke(() => { return Grid_GridVEPanel.Children.Count; });
                         for (int i = Grid_ItemStartIndex + GridItemCount - 1; i >= Grid_ItemStartIndex; i--)
                         {
                             MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];

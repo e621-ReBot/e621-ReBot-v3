@@ -468,6 +468,8 @@ namespace e621_ReBot_v3.Modules
         {
             if (!Module_e621APIController.APIEnabled) return;
 
+            Report_Status("Preparing upload...");
+
             string Upload_Sources = MediaItemRef.Grab_PageURL;
             if (MediaItemRef.UP_Inferior_Sources != null)
             {
@@ -538,8 +540,6 @@ namespace e621_ReBot_v3.Modules
                     }
             }
 
-            Report_Status("Uploading...");
-
             byte[]? bytes2Send = null;
 
             isByteUpload = isByteUpload || MediaItemRef.UP_OverrideByteUpload;
@@ -554,9 +554,11 @@ namespace e621_ReBot_v3.Modules
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
 
-                            int TwentyMiB = 20 * 1024 * 1024;
+                            int TwentyMiB = 20971520; //20 * 1024 * 1024;
                             if (bytes2Send.Length > TwentyMiB)
                             {
+                                Report_Status($"Ugoira APNG is too big to upload. Converting to WebM instead.");
+                                Thread.Sleep(1000); //Delay so that message can be read
                                 Module_FFMpeg.UploadQueue_Ugoira2WebM(out bytes2Send, out FileName, FileName);
                                 Upload_Description += "\nConverted from Ugoira using FFmpeg: -framerate {avgFPS} -i {input} -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an";
                                 break;
@@ -639,6 +641,8 @@ namespace e621_ReBot_v3.Modules
             POST_Dictionary.Add("login", AppSettings.UserName);
             POST_Dictionary.Add("api_key", Module_Cryptor.Decrypt(AppSettings.APIKey));
 
+            Report_Status("Uploading...");
+
             HttpResponseMessage? e621HttpResponseMessage;
             string? e621StringResponse = string.Empty;
             E621UploadRequest("https://e621.net/uploads.json", "POST", POST_Dictionary, out e621HttpResponseMessage, out e621StringResponse, in bytes2Send);
@@ -711,6 +715,8 @@ namespace e621_ReBot_v3.Modules
         {
             if (!Module_e621APIController.APIEnabled) return;
 
+            Report_Status("Preparing upload...");
+
             Dictionary<string, string> POST_Dictionary = new Dictionary<string, string>();
             bool isByteUpload = false;
 
@@ -752,6 +758,9 @@ namespace e621_ReBot_v3.Modules
             Report_Status("Flagging for replacement...");
 
             byte[]? bytes2Send = null;
+
+            isByteUpload = isByteUpload || MediaItemRef.UP_OverrideByteUpload;
+
             if (isByteUpload)
             {
                 string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
@@ -762,9 +771,11 @@ namespace e621_ReBot_v3.Modules
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
 
-                            int TwentyMiB = 20 * 1024 * 1024;
+                            int TwentyMiB = 20971520; //20 * 1024 * 1024;
                             if (bytes2Send.Length > TwentyMiB)
                             {
+                                Report_Status($"Ugoira APNG is too big to upload. Converting to WebM instead.");
+                                Thread.Sleep(1000); //Delay so that message can be read
                                 Module_FFMpeg.UploadQueue_Ugoira2WebM(out bytes2Send, out FileName, FileName);
                             }
                             break;

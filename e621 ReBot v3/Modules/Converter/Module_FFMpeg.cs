@@ -41,6 +41,38 @@ namespace e621_ReBot_v3.Modules.Converter
                 FFMpeg.StartInfo.RedirectStandardOutput = true;
                 //FFMpeg.StartInfo.RedirectStandardError = true;
 
+                string ImageExtension = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('.') + 1);
+                if (ImageExtension.Equals("gif"))
+                {
+                    //static gifs and apng conversion just doesn't want to work properly
+                    string[] gifList = Directory.GetFiles(TempFolderName, "*.gif").OrderBy(f => f).ToArray();
+
+                    ProcessStartInfo ProcessStartInfoTemp = new ProcessStartInfo
+                    {
+                        FileName = "ffmpeg",
+                        //Arguments = $"-hide_banner -loglevel error -nostats -y -i \"{gifImage}\" \"{output}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+
+                    };
+                    foreach (string gifImage in gifList)
+                    {
+                        string output = Path.ChangeExtension(gifImage, ".png");
+
+                        ProcessStartInfoTemp.Arguments = $"-hide_banner -loglevel error -nostats -y -i \"{gifImage}\" \"{output}\"";
+                        using Process ProcessTemp = Process.Start(ProcessStartInfoTemp);
+                        {
+                            ProcessTemp.WaitForExit();
+                        }
+                    }
+
+                    //Edit the input file to new .png images
+                    string[] inputLines = File.ReadAllLines(inputTXTFile).Select(l => l.Replace(".gif", ".png")).ToArray();
+                    File.WriteAllLines(inputTXTFile, inputLines);
+
+                    UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
+                }
+
                 // APNGs have bigger file size but are the only ones that are fully compatible with iOS.
                 FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{inputTXTFile}\" -vsync vfr -c:v apng -pred mixed -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";
 
@@ -72,6 +104,7 @@ namespace e621_ReBot_v3.Modules.Converter
             UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
             int UgoiraDuration = 0;
             int avgFPS = 15;
+
             string inputTXTFile = Path.Combine(TempFolderName, "input.txt");
             if (File.Exists(inputTXTFile))
             {
@@ -136,7 +169,7 @@ namespace e621_ReBot_v3.Modules.Converter
                     };
                     foreach (string gifImage in gifList)
                     {
-                        string output = Path.ChangeExtension(gifImage, "png");
+                        string output = Path.ChangeExtension(gifImage, ".png");
 
                         ProcessStartInfoTemp.Arguments = $"-hide_banner -loglevel error -nostats -y -i \"{gifImage}\" \"{output}\"";
                         using Process ProcessTemp = Process.Start(ProcessStartInfoTemp);
@@ -351,11 +384,14 @@ namespace e621_ReBot_v3.Modules.Converter
                 }
             }
 
-            ProgressBarRef.Dispatcher.BeginInvoke(() =>
+            if (ProgressBarRef != null)
             {
-                ProgressBarRef.Value = 100;
-                ProgressBarRef.Foreground = Module_Downloader.CompletedWorkBrush;
-            });
+                ProgressBarRef.Dispatcher.BeginInvoke(() =>
+                {
+                    ProgressBarRef.Value = 100;
+                    ProgressBarRef.Foreground = Module_Downloader.CompletedWorkBrush;
+                });
+            }
 
             File.WriteAllText(Path.Combine(TempFolderPath, "input.txt"), UgoiraConcat.ToString());
 
@@ -367,8 +403,9 @@ namespace e621_ReBot_v3.Modules.Converter
         internal static void UploadQueue_Ugoira2APNG(string Grab_URL, out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
         {
             //Get FileName
-            string UgoiraFileName = Path.GetFileNameWithoutExtension(ExtraSourceURL);
-            UgoiraFileName = UgoiraFileName.TrimEnd('0'); ; //turn "ugoira0" into "ugoira"
+            string UgoiraFileName = ExtraSourceURL;
+            string ImageFormat = UgoiraFileName.Substring(UgoiraFileName.LastIndexOf('.') + 1);
+            UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName).TrimEnd('0'); //turn "ugoira0" into "ugoira"
 
             //check if file exists as download before doing separate dl and conversion?
 
@@ -391,21 +428,25 @@ namespace e621_ReBot_v3.Modules.Converter
             int UgoiraDuration = DownloadUgoira(Grab_URL, ExtraSourceURL, TempFolderName, ActionType.Upload).GetAwaiter().GetResult();
 
             //Convert to APNG
+            string TempUgoiraFileName = $"{UgoiraFileName}.{ImageFormat}"; //Need the format
             Module_Uploader.Report_Status("Converting Ugoira to APNG...");
-            FFMpeg4Ugoira2APNG(TempFolderName, TempFolderName, UgoiraFileName, UgoiraDuration);
+            FFMpeg4Ugoira2APNG(TempFolderName, TempFolderName, TempUgoiraFileName, UgoiraDuration);
             Module_Uploader.Report_Status("Converting Ugoira to APNG...100%");
             Window_Main._RefHolder.UploadQueueProcess = null;
 
             //Read bytes for upload
-            FileName = $"{UgoiraFileName}.apng";
-            bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, FileName));
+            TempUgoiraFileName = Path.ChangeExtension(UgoiraFileName, ".apng");
+            bytes2Send = File.ReadAllBytes(Path.Combine(TempFolderName, TempUgoiraFileName));
 
             //Since this is used only for upload don't delete the folder if it exceedes the file size but fallback to WebM conversion instead.
-            int TwentyMiB = 20 * 1024 * 1024;
+            int TwentyMiB = 20971520; //20 * 1024 * 1024
             if (bytes2Send.Length > TwentyMiB)
             {
+                FileName = $"{UgoiraFileName}.{ImageFormat}"; //useless, but needed to pass the out requirement
                 return;
             }
+
+            FileName = TempUgoiraFileName;
 
             //Delete temp work folder
             try
@@ -558,8 +599,7 @@ namespace e621_ReBot_v3.Modules.Converter
             //check for 0 error here?
 
             //Convert to Webm
-            UgoiraFileName = $"{UgoiraFileName}.{ImageFormat}";
-
+            UgoiraFileName = $"{UgoiraFileName}.{ImageFormat}"; //Need the format
             DownloadVERef.ConversionProgressHolder.Dispatcher.BeginInvoke(() => { DownloadVERef.ConversionProgressHolder.Visibility = Visibility.Visible; });
             FFMpeg4Ugoira2WebM(ActionType.Download, TempFolderName, FolderPath, UgoiraFileName, DownloadVERef.ConversionProgress);
 
