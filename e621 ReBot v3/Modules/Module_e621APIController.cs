@@ -41,7 +41,7 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        private static readonly DispatcherTimer? API_Timer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(3) };
+        private static readonly DispatcherTimer? API_Timer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(1) };
         internal static readonly Queue<Func<Task>> UserTasks = new Queue<Func<Task>>();
         internal static readonly Queue<Func<Task>> BackgroundTasks = new Queue<Func<Task>>();
         private static async void API_Timer_Tick(object? sender, EventArgs e)
