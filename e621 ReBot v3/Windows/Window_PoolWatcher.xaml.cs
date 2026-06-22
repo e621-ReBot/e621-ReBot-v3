@@ -121,13 +121,7 @@ namespace e621_ReBot_v3
                 for (int i = 0; i < Math.Ceiling(AppSettings.PoolWatcher.Count / (double)PageSize); i++)
                 {
                     string ListSlice = string.Join(',', AppSettings.PoolWatcher.Select(PoolItem => PoolItem.ID).Skip(i * PageSize).Take(PageSize));
-                    Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools.json?search[id]={ListSlice}").GetAwaiter().GetResult());
-                    lock (Module_e621APIController.BackgroundTasks)
-                    {
-                        Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                    }
-                    string e6JSONResult = await RunTaskFirst;
-
+                    string e6JSONResult = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/pools.json?search[id]={ListSlice}"));
                     if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
                     JArray? PoolArray = JArray.Parse(e6JSONResult);
@@ -167,16 +161,12 @@ namespace e621_ReBot_v3
         private static async void GetNewMedia(Dictionary<int, PoolItem> PoolPosts2Get)
         {
             int ItemsAddedCount = 0;
-            int PageSize = 75; //new API limit
+            int PageSize = 320; //new API limit
             for (int i = 0; i < Math.Ceiling(PoolPosts2Get.Keys.Count / (double)PageSize); i++)
             {
                 string ListSlice = string.Join(',', PoolPosts2Get.Keys.ToList().Skip(i * PageSize).Take(PageSize));
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?tags=id:{ListSlice}&v2=true&mode=thumbnails").GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-                string e6JSONResult = await RunTaskFirst;
+
+                string e6JSONResult = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=320&tags=id:{ListSlice}&v2=true&mode=thumbnails"));
                 if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ') || e6JSONResult.Length < 32) return;
 
                 JArray Posts_Array = JArray.Parse(e6JSONResult);

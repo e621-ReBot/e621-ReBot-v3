@@ -892,13 +892,7 @@ namespace e621_ReBot_v3.Modules
 
             Report_Status("Getting Notes data...");
 
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={MediaItemRef.UP_Inferior_ID}").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
-
-            string? JSON_NoteData = await RunTaskFirst;
+            string? JSON_NoteData = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={MediaItemRef.UP_Inferior_ID}"));
             if (string.IsNullOrEmpty(JSON_NoteData) || JSON_NoteData.StartsWith('ⓔ') || JSON_NoteData.Length < 32) return;
 
             JArray NoteList = JArray.Parse(JSON_NoteData);

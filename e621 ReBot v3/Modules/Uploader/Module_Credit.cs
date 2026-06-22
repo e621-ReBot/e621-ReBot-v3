@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Media3D;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -81,16 +83,11 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckUpload()
         {
+            Debug.WriteLine("Credit_CheckUpload");
             Timestamps_Upload.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/users/{AppSettings.UserID}.json", true).GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-
-                string? JSON_UserInfo = await RunTaskFirst;
+                string? JSON_UserInfo = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/users/{AppSettings.UserID}.json", true));
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JObject UserJObject = JObject.Parse(JSON_UserInfo);
@@ -102,13 +99,7 @@ namespace e621_ReBot_v3.Modules
 
                 AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}&v2=true&mode=thumbnails").GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-
-                JSON_UserInfo = await RunTaskFirst;
+                JSON_UserInfo = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/posts.json?limit=30&tags=user:!{AppSettings.UserID}&v2=true&mode=thumbnails"));
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray PostHistory = JArray.Parse(JSON_UserInfo);
@@ -126,13 +117,7 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
 
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?limit=30&search[creator_id]={AppSettings.UserID}").GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-
-                JSON_UserInfo = await RunTaskFirst;
+                JSON_UserInfo = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/post_replacements.json?limit=30&search[creator_id]={AppSettings.UserID}"));
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray PostHistoryArray = JArray.Parse(JSON_UserInfo);
@@ -156,16 +141,11 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckFlags()
         {
+            Debug.WriteLine("Credit_CheckFlags");
             Timestamps_Flags.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?limit=10&search[creator_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-
-                string? JSON_UserInfo = await RunTaskFirst;
+                string? JSON_UserInfo = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/post_flags.json?limit=10&search[creator_id]={AppSettings.UserID}", true));
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray FlagHistory = JArray.Parse(JSON_UserInfo);
@@ -188,16 +168,11 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckNotes()
         {
+            Debug.WriteLine("Credit_CheckNotes");
             Timestamps_Notes.Clear();
             if (UserLevel < 30)
             {
-                Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?limit=50&search[updater_id]={AppSettings.UserID}", true).GetAwaiter().GetResult());
-                lock (Module_e621APIController.BackgroundTasks)
-                {
-                    Module_e621APIController.BackgroundTasks.Add(RunTaskFirst);
-                }
-
-                string? JSON_UserInfo = await RunTaskFirst;
+                string? JSON_UserInfo = await Module_e621APIController.EnqueueBackgroundWork(() => Module_e621Data.DataDownload($"https://e621.net/note_versions.json?limit=50&search[updater_id]={AppSettings.UserID}", true));
                 if (string.IsNullOrEmpty(JSON_UserInfo) || JSON_UserInfo.StartsWith('ⓔ') || JSON_UserInfo.Length < 32) return;
 
                 JArray NoteHistory = JArray.Parse(JSON_UserInfo);

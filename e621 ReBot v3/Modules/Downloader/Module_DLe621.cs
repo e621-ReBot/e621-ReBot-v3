@@ -301,13 +301,8 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         GrabAnotherAPIPage:
             Update_APIStatus($"Working on Tags - Page {PageCounter}", true);
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PostRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
 
-            string? e6JSONResult = await RunTaskFirst;
+            string? e6JSONResult = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"{PostRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}"));
             if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ'))
             {
                 Module_Downloader.Report_Info($"Posts API response error for query: {{{TagQuery}}}");
@@ -383,13 +378,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
         internal async static Task Grab_Pool(string PoolID)
         {
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
-
-            string? JSON_PoolData = await RunTaskFirst;
+            string? JSON_PoolData = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/pools/{PoolID}.json"));
             if (string.IsNullOrEmpty(JSON_PoolData) || JSON_PoolData.StartsWith('ⓔ') || JSON_PoolData.Length < 32)
             {
                 Module_Downloader.Report_Info($"Pools API response error for pool#{PoolID}");
@@ -422,13 +411,7 @@ namespace e621_ReBot_v3.Modules.Downloader
         GrabAnotherAPIPage:
             Update_APIStatus($"Working on Pool#{PoolID} - Page {PageCounter}", true);
 
-            RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"{PoolRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
-
-            string? e6JSONResult = await RunTaskFirst;
+            string? e6JSONResult = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"{PoolRequestString}{(PageCounter > 1 ? $"&page={PageCounter}" : null)}"));
             if (string.IsNullOrEmpty(e6JSONResult) || e6JSONResult.StartsWith('ⓔ'))
             {
                 Module_Downloader.Report_Info($"Pool Posts API response error for tags=pool:{PoolID}");

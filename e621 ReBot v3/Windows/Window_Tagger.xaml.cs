@@ -264,6 +264,23 @@ namespace e621_ReBot_v3
             Close();
         }
 
+        internal static bool DNPCheck(MediaItem MediaItemRef)
+        {
+            HashSet<string> TagList = new HashSet<string>(MediaItemRef.UP_Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+            string? DNPArtist = TagList.FirstOrDefault(tag => DNP_List.Contains(tag));
+            if (!string.IsNullOrEmpty(DNPArtist))
+            {
+                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+
+                if (MessageBoxResultTemp != MessageBoxResult.Yes)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private void Tags_TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)

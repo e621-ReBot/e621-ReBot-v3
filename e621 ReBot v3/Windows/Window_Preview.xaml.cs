@@ -935,13 +935,7 @@ namespace e621_ReBot_v3
 
         private async void InferiorSub(string PostID)
         {
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
-
-            string? PostTest = await RunTaskFirst;
+            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json"));
             if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16 || PostTest.StartsWith('ⓔ'))
             {
                 MessageBox.Show(this, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -992,13 +986,7 @@ namespace e621_ReBot_v3
 
         internal static async void SuperiorSub(string PostID, MediaItem MediaItemRef)
         {
-            Task<string?> RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json").GetAwaiter().GetResult());
-            lock (Module_e621APIController.UserTasks)
-            {
-                Module_e621APIController.UserTasks.Add(RunTaskFirst);
-            }
-
-            string? PostTest = await RunTaskFirst;
+            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json"));
             if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16)
             {
                 MessageBox.Show(_RefHolder, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -1067,13 +1055,8 @@ namespace e621_ReBot_v3
             if ((bool)PostData["has_notes"])
             {
                 // when they fix api this should no longer take 2 requests to get notes
-                RunTaskFirst = new Task<string?>(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={PostID}", true).GetAwaiter().GetResult());
-                lock (Module_e621APIController.UserTasks)
-                {
-                    Module_e621APIController.UserTasks.Insert(0, RunTaskFirst);
-                }
-
-                PostTest = await RunTaskFirst;
+                //should I bump it to top of list?
+                PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/notes.json?search[post_id]={PostID}", true));
                 if (!string.IsNullOrEmpty(PostTest) && !PostTest.StartsWith('ⓔ') && !PostTest.StartsWith('{'))
                 {
                     MediaItemRef.UP_Inferior_HasNotes = true;

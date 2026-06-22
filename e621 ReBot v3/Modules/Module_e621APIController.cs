@@ -41,31 +41,85 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        private static readonly DispatcherTimer? API_Timer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(1) };
-        internal static List<Task> UserTasks = new List<Task>();
-        internal static List<Task> BackgroundTasks = new List<Task>();
-        private static void API_Timer_Tick(object? sender, EventArgs e)
+        private static readonly DispatcherTimer? API_Timer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(3) };
+        internal static readonly Queue<Func<Task>> UserTasks = new Queue<Func<Task>>();
+        internal static readonly Queue<Func<Task>> BackgroundTasks = new Queue<Func<Task>>();
+        private static async void API_Timer_Tick(object? sender, EventArgs e)
         {
+            //Timer is on main thread, is it an issue?
             Task TaskTemp;
+            Func<Task> Task2Run;
             if (UserTasks.Count > 0)
             {
                 lock (UserTasks)
                 {
-                    TaskTemp = UserTasks[0];
-                    UserTasks.RemoveAt(0);
+                    Task2Run = UserTasks.Dequeue();
                 }
-                if (TaskTemp != null) TaskTemp.Start();
-                return;
+                if (Task2Run != null)
+                {
+                    await Task2Run();
+                    return;
+                }
             }
             if (BackgroundTasks.Count > 0)
             {
                 lock (BackgroundTasks)
                 {
-                    TaskTemp = BackgroundTasks[0];
-                    BackgroundTasks.RemoveAt(0);
+                    Task2Run = BackgroundTasks.Dequeue();
                 }
-                if (TaskTemp != null) TaskTemp.Start();
+                if (Task2Run != null)
+                {
+                    await Task2Run();
+                } 
             }
+        }
+
+        internal static Task<T> EnqueuePriorityWork<T>(Func<Task<T>> work)
+        {
+            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+            Func<Task> wrapper = async () =>
+            {
+                try
+                {
+                    T result = await work();
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            };
+
+            lock (UserTasks)
+            {
+                UserTasks.Enqueue(wrapper);
+            }
+
+            return tcs.Task;
+        }
+
+        internal static Task<T> EnqueueBackgroundWork<T>(Func<Task<T>> work)
+        {
+            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+            Func<Task> wrapper = async () =>
+            {
+                try
+                {
+                    T result = await work();
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            };
+
+            lock (BackgroundTasks)
+            {
+                BackgroundTasks.Enqueue(wrapper);
+            }
+
+            return tcs.Task;
         }
     }
 }
