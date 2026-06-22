@@ -270,7 +270,7 @@ namespace e621_ReBot_v3
             string? DNPArtist = TagList.FirstOrDefault(tag => DNP_List.Contains(tag));
             if (!string.IsNullOrEmpty(DNPArtist))
             {
-                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Preview._RefHolder, $"Artist: {DNPArtist} is on DNP list, are you sure you want to proceed?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
 
                 if (MessageBoxResultTemp != MessageBoxResult.Yes)
                 {

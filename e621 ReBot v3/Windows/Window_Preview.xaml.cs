@@ -935,7 +935,7 @@ namespace e621_ReBot_v3
 
         private async void InferiorSub(string PostID)
         {
-            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json"));
+            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json?v2=true&mode=thumbnails"));
             if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16 || PostTest.StartsWith('ⓔ'))
             {
                 MessageBox.Show(this, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -951,23 +951,12 @@ namespace e621_ReBot_v3
             MediaItemHolder.UP_Rating = ((string)PostData["rating"]).ToUpper();
             MediaItemHolder.UP_UploadedID = PostID;
 
-            List<string> SortTags = new List<string>();
-            foreach (JProperty pTag in PostData["tags"].Children())
-            {
-                foreach (JToken cTag in pTag.First)
-                {
-                    SortTags.Add((string)cTag);
-                }
-            }
-            SortTags.Sort();
-            if (PostData["pools"].Children().Any())
-            {
-                foreach (JToken pPool in PostData["pools"].Children())
-                {
-                    SortTags.Add($"pool:{(string)pPool}");
-                }
-            }
-            MediaItemHolder.UP_Tags = string.Join(' ', SortTags);
+            //Tags
+            HashSet<string> TagList = ((string)PostData["tags"]).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+            //Pools
+            TagList.UnionWith(((string)PostData["pools"]).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet());
+
+            MediaItemHolder.UP_Tags = string.Join(' ', TagList);
             Tags_TextBlock.Text = MediaItemHolder.UP_Tags;
 
             GridVE GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemHolder);
@@ -1066,6 +1055,12 @@ namespace e621_ReBot_v3
             }
             MediaItemRef.UP_Tags = MediaItemRef.UP_Tags.Replace("better_version_at_source", null);
             _RefHolder.Tags_TextBlock.Text = MediaItemRef.UP_Tags;
+
+            //Check for DNPs
+            if (!Window_Tagger.DNPCheck(MediaItemRef)) //returns true to continue
+            {
+                return; //Add further stuff to show and prevent DNPs? As it will not show a warning by clicking upload in grid.
+            }
 
             GridVE GridVETemp = Module_Grabber.IsVisibleInGrid(MediaItemRef);
             if (GridVETemp != null)
