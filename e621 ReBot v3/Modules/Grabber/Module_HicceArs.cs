@@ -189,7 +189,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                 foreach (HtmlNode ThumbNode in ThumbNodes)
                 {
                     MediaCounter++;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                    {
+                        if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
+                    });
                     Post_MediaURL = $"https://www.hiccears.com{ThumbNode.Attributes["href"].Value.Replace("/preview", "/download")}";
                     Post_ThumbnailURL = $"https://www.hiccears.com{ThumbNode.SelectSingleNode(".//img").Attributes["src"].Value}";
 

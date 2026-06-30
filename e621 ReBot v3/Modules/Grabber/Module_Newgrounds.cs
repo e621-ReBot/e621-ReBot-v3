@@ -155,7 +155,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                 foreach (HtmlNode ImageNode in ImageNodes)
                 {
                     MediaCounter++;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                    {
+                        if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
+                    });
                     if (ImageNodes.Count == 1 || MediaCounter == 1)
                     {
                         Post_MediaURL = ImageNode.Attributes["src"].Value;

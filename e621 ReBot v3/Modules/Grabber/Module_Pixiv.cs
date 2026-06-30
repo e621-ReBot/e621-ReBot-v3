@@ -271,7 +271,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                 for (int p = 0; p <= PicCount - 1; p++)
                 {
                     MediaCounter++;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                    {
+                        if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
+                    });
                     Post_MediaURL = (string)JSONPages["body"][p]["urls"]["original"];
 
                     if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))

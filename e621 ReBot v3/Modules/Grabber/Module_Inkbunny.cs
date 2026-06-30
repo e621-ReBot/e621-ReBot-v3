@@ -195,7 +195,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                 foreach (HtmlNode ImageNode in ParentNode.SelectNodes(".//img"))
                 {
                     MediaCounter++;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => ProgressBarTemp.Value = MediaCounter);
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                    {
+                        if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
+                    });
                     Post_MediaURL = ImageNode.Attributes["src"].Value;
 
                     if (Post_MediaURL.Contains("overlays/writing")) //don't need writing thumb
