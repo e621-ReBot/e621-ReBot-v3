@@ -391,36 +391,59 @@ namespace e621_ReBot_v3.Modules
             return _DownloadClient;
         }
 
-        internal static async Task<byte[]> DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null, float PercentageMod = 1, float MultiProgressBase = 0)
+        internal static async Task<byte[]?> DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null, float PercentageMod = 1, float MultiProgressBase = 0)
         {
-            HttpClient ClientSelector = SelectClient(DownloadURL);
-
-            HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.GetAsync(DownloadURL, HttpCompletionOption.ResponseHeadersRead);
-            HttpResponseMessageTemp.EnsureSuccessStatusCode();
-
-            long? BytesInTotal = HttpResponseMessageTemp.Content.Headers.ContentLength;
-            //New version of using, lasts until async ends or end of scope
-            await using Stream DownloadStream = await HttpResponseMessageTemp.Content.ReadAsStreamAsync();
-            await using MemoryStream DownloadedBytes = new MemoryStream();
-
-            byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
-            int BytesRead = 0;
-            int BytesReadSoFar = 0;
-
-            while ((BytesRead = await DownloadStream.ReadAsync(DownloadBuffer, 0, DownloadBuffer.Length)) > 0)
+            try
             {
-                DownloadedBytes.Write(DownloadBuffer, 0, BytesRead);
-                BytesReadSoFar += BytesRead;
+                HttpClient ClientSelector = SelectClient(DownloadURL);
+                HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.GetAsync(DownloadURL, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessageTemp.EnsureSuccessStatusCode();
 
-                if (BytesInTotal.HasValue)
+                long? BytesInTotal = HttpResponseMessageTemp.Content.Headers.ContentLength;
+                //New version of using, lasts until async ends or end of scope
+                await using Stream DownloadStream = await HttpResponseMessageTemp.Content.ReadAsStreamAsync();
+                await using MemoryStream DownloadedBytes = new MemoryStream();
+
+                byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
+                int BytesRead = 0;
+                int BytesReadSoFar = 0;
+
+                while ((BytesRead = await DownloadStream.ReadAsync(DownloadBuffer, 0, DownloadBuffer.Length)) > 0)
                 {
-                    float percentage = (float)BytesReadSoFar / BytesInTotal.Value;
-                    if (PercentageMod < 1) percentage *= PercentageMod;
-                    percentage += MultiProgressBase;
-                    ReportProgress(percentage, ActionTypeEnum, ProgressBarRef);
+                    DownloadedBytes.Write(DownloadBuffer, 0, BytesRead);
+                    BytesReadSoFar += BytesRead;
+
+                    if (BytesInTotal.HasValue)
+                    {
+                        float percentage = (float)BytesReadSoFar / BytesInTotal.Value;
+                        if (PercentageMod < 1) percentage *= PercentageMod;
+                        percentage += MultiProgressBase;
+                        ReportProgress(percentage, ActionTypeEnum, ProgressBarRef);
+                    }
                 }
+                return DownloadedBytes.ToArray();
             }
-            return DownloadedBytes.ToArray();
+            catch (HttpRequestException ex)
+            {
+                // DNS lookup failed
+                // Connection refused
+                // SSL/TLS failure
+                // No internet connection
+                // Connection reset
+                Report_Info(ex.Message);
+            }
+            catch (TaskCanceledException ex)
+            {
+                // Usually a timeout.
+                Report_Info(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Other
+                Report_Info(ex.Message);
+            }
+
+            return null;
         }
 
         private static void ReportProgress(float ProgressPercentage, ActionType ActionTypeEnum, ProgressBar ProgressBarRef)
@@ -920,7 +943,7 @@ namespace e621_ReBot_v3.Modules
             ((DownloadVE)e.UserState).DownloadProgress.Value = e.ProgressPercentage;
         }
 
-        private static uint SessionDownloads = 0;
+        internal static uint SessionDownloads = 0;
         private static readonly HashSet<string> ErrorSkipList = new HashSet<string>
             {
                 "An existing connection was forcibly closed by the remote host.",
@@ -929,6 +952,7 @@ namespace e621_ReBot_v3.Modules
             };
 
         internal static readonly SolidColorBrush CompletedWorkBrush = new SolidColorBrush(Colors.LimeGreen);
+        internal static readonly SolidColorBrush FailedWorkBrush = new SolidColorBrush(Colors.Maroon);
         private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;

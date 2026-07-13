@@ -111,7 +111,21 @@ namespace e621_ReBot_v3
                 return;
             }
 
-            byte[] UpdateBytes = await Module_Downloader.DownloadFileBytes(ZipURL, ActionType.Update);
+            ushort RetryCount = 0;
+            byte[]? UpdateBytes = Array.Empty<byte>();
+            while (RetryCount < 3)
+            {
+                RetryCount++;
+                UpdateBytes = await Module_Downloader.DownloadFileBytes(ZipURL, ActionType.Update);
+                if (UpdateBytes != null && UpdateBytes.Length > 0) break;
+                await Task.Delay(500);
+            }
+            if (UpdateBytes == null || UpdateBytes.Length == 0)
+            {
+                UpdateError();
+                return;
+            }
+
             Directory.CreateDirectory("ReBotUpdate").Attributes = FileAttributes.Hidden;
             using (MemoryStream bytes2Stream = new MemoryStream(UpdateBytes))
             {

@@ -546,13 +546,19 @@ namespace e621_ReBot_v3.Modules
 
             if (isByteUpload)
             {
-                string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
+                string? FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
                 string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
                 switch (MediaItemRef.Grid_MediaFormat)
                 {
                     case "ugoira":
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
+                            if (bytes2Send == null)
+                            {
+                                Report_Error($"There was an error with getting Ugoira for upload.", "e621 ReBot - Upload");
+                                FailedUploadTask = true;
+                                return;
+                            }
 
                             int TwentyMiB = 20971520; //20 * 1024 * 1024;
                             if (bytes2Send.Length > TwentyMiB)
@@ -580,6 +586,12 @@ namespace e621_ReBot_v3.Modules
 
                             //Download if no local copy exists
                             Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
+                            if (bytes2Send == null)
+                            {
+                                Report_Error("0 bytes error @Upload Video", "e621 ReBot - Upload");
+                                FailedUploadTask = true;
+                                return;
+                            }
                             break;
                         }
 
@@ -602,7 +614,19 @@ namespace e621_ReBot_v3.Modules
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
+                            ushort RetryCount = 0;
+                            while (RetryCount < 3)
+                            {
+                                RetryCount++;
+                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
+                                if (bytes2Send != null && bytes2Send.Length > 0) break;
+                                Thread.Sleep(500);
+                            }
+                            if (bytes2Send == null || bytes2Send.Length == 0)
+                            {
+                                FailedUploadTask = true;
+                                return;
+                            }
                             break;
                         }
                 }
@@ -763,13 +787,19 @@ namespace e621_ReBot_v3.Modules
 
             if (isByteUpload)
             {
-                string FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
+                string? FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.Grab_MediaURL);
                 string ExtraSourceURL = MediaItemRef.Grab_MediaURL;
                 switch (MediaItemRef.Grid_MediaFormat)
                 {
                     case "ugoira":
                         {
                             Module_FFMpeg.UploadQueue_Ugoira2APNG(MediaItemRef.Grab_PageURL, out bytes2Send, out FileName, in ExtraSourceURL);
+                            if (bytes2Send == null)
+                            {
+                                Report_Error($"There was an error with getting Ugoira for upload.", "e621 ReBot - Replace Inferior");
+                                FailedUploadTask = true;
+                                return;
+                            }
 
                             int TwentyMiB = 20971520; //20 * 1024 * 1024;
                             if (bytes2Send.Length > TwentyMiB)
@@ -794,6 +824,12 @@ namespace e621_ReBot_v3.Modules
 
                             //Download if no local copy exists
                             Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
+                            if (bytes2Send == null)
+                            {
+                                Report_Error("0 bytes error @Upload Video", "e621 ReBot - Replace Inferior");
+                                FailedUploadTask = true;
+                                return;
+                            }
                             break;
                         }
 
@@ -816,7 +852,19 @@ namespace e621_ReBot_v3.Modules
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
+                            ushort RetryCount = 0;
+                            while (RetryCount < 3)
+                            {
+                                RetryCount++;
+                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
+                                if (bytes2Send != null && bytes2Send.Length > 0) break;
+                                Thread.Sleep(500);
+                            }
+                            if (bytes2Send == null || bytes2Send.Length == 0)
+                            {
+                                FailedUploadTask = true;
+                                return;
+                            }
                             break;
                         }
                 }

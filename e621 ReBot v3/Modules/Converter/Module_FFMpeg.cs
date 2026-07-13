@@ -1,4 +1,5 @@
-﻿using e621_ReBot_v3.CustomControls;
+﻿using CefSharp.DevTools.Network;
+using e621_ReBot_v3.CustomControls;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -346,8 +347,21 @@ namespace e621_ReBot_v3.Modules.Converter
                     string NewURL = $"{URLBase}{x}{MediaExtension}";
                     string FileName = Path.GetFileName(NewURL);
 
-                    //download each file
-                    byte[] TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef, MultiDLFactor, MultiProgressBase);
+                    //Download each file
+                    ushort RetryCount = 0;
+                    byte[]? TempBytes = Array.Empty<byte>();
+                    while (RetryCount < 3)
+                    {
+                        RetryCount++;
+                        TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef, MultiDLFactor, MultiProgressBase);
+                        if (TempBytes != null && TempBytes.Length > 0) break;
+                        await Task.Delay(500);
+                    }
+                    if (TempBytes == null || TempBytes.Length == 0)
+                    {
+                        return 0;
+                    }
+
                     Module_Downloader.SaveFileBytes(TempBytes, FileName, TempFolderPath);
                     MultiProgressBase += MultiDLFactor;
 
@@ -366,9 +380,22 @@ namespace e621_ReBot_v3.Modules.Converter
                     string NewURL = (string)UgoiraJObject["originalSrc"];
                     string FileName = Path.GetFileName(NewURL);
 
-                    //download zip
-                    byte[] TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef);
-                    //extract zip
+                    //Download zip
+                    ushort RetryCount = 0;
+                    byte[]? TempBytes = Array.Empty<byte>();
+                    while (RetryCount < 3)
+                    {
+                        RetryCount++;
+                        TempBytes = await Module_Downloader.DownloadFileBytes(NewURL, ActionTypEnum, ProgressBarRef);
+                        if (TempBytes != null && TempBytes.Length > 0) break;
+                        await Task.Delay(500);
+                    }
+                    if (TempBytes == null || TempBytes.Length == 0)
+                    {
+                        return 0;
+                    }
+
+                    //Extract zip
                     Module_Downloader.SaveFileBytes(TempBytes, FileName, TempFolderPath);
 
                     foreach (JToken UgoiraFrame in UgoiraJObject["frames"])
@@ -380,7 +407,8 @@ namespace e621_ReBot_v3.Modules.Converter
                 }
                 else
                 {
-                    throw new Exception($"HTTP error {HttpResponseMessageTemp.StatusCode}");
+                    //throw new Exception($"TempBytes == null #2");
+                    return 0;
                 }
             }
 
@@ -400,7 +428,7 @@ namespace e621_ReBot_v3.Modules.Converter
 
         // - - - - - - - - - - - - - - - -
 
-        internal static void UploadQueue_Ugoira2APNG(string Grab_URL, out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
+        internal static void UploadQueue_Ugoira2APNG(string Grab_URL, out byte[]? bytes2Send, out string? FileName, in string ExtraSourceURL)
         {
             //Get FileName
             string UgoiraFileName = ExtraSourceURL;
@@ -426,6 +454,11 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Download the images, either originals or samples from zip
             int UgoiraDuration = DownloadUgoira(Grab_URL, ExtraSourceURL, TempFolderName, ActionType.Upload).GetAwaiter().GetResult();
+            if (UgoiraDuration == 0) //Some error
+            {
+                bytes2Send = null;
+                FileName = null;
+            }
 
             //Convert to APNG
             string TempUgoiraFileName = $"{UgoiraFileName}.{ImageFormat}"; //Need the format
@@ -485,7 +518,7 @@ namespace e621_ReBot_v3.Modules.Converter
             }
         }
 
-        internal static void UploadQueue_Videos2WebM(out byte[] bytes2Send, out string FileName, in string ExtraSourceURL)
+        internal static void UploadQueue_Videos2WebM(out byte[]? bytes2Send, out string? FileName, in string ExtraSourceURL)
         {
             //Get FileName
             string VideoFileName = Path.GetFileName(ExtraSourceURL);
@@ -509,18 +542,21 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Download the video
             ushort RetryCount = 0;
-            byte[] TempBytes = Array.Empty<byte>();
+            byte[]? TempBytes = Array.Empty<byte>();
             while (RetryCount < 3)
             {
                 RetryCount++;
                 TempBytes = Module_Downloader.DownloadFileBytes(ExtraSourceURL, ActionType.Upload).GetAwaiter().GetResult();
-                if (TempBytes.Length > 0) break;
+                if (TempBytes != null && TempBytes.Length > 0) break;
                 Thread.Sleep(500);
             }
-            if (TempBytes.Length == 0)
+            if (TempBytes == null || TempBytes.Length == 0)
             {
-                throw new Exception("0 bytes error @Upload Video");
+                bytes2Send = null;
+                FileName = null;
+                return;
             }
+
             Module_Downloader.SaveFileBytes(TempBytes, $"{VideoFileName}.{VideoFormat}", TempFolderName);
 
             //Convert to Webm
@@ -595,6 +631,12 @@ namespace e621_ReBot_v3.Modules.Converter
 
             //Download the images, either originals or samples from zip
             int UgoiraDuration = await DownloadUgoira(DownloadVERef._DownloadItemRef.Grab_PageURL, DownloadVERef._DownloadItemRef.Grab_MediaURL, TempFolderName, ActionType.Download, DownloadVERef.DownloadProgress);
+            if (UgoiraDuration == 0)
+            {
+                Module_Downloader.Report_Info($"There was an error trying to download Ugoira {TempFolderName}.");
+                DownloadQueue_DownloadFailed(DownloadVERef);
+                return;
+            }
 
             //check for 0 error here?
 
@@ -627,6 +669,7 @@ namespace e621_ReBot_v3.Modules.Converter
                 DownloadVERef._DownloadItemRef.MediaItemRef.UP_Tags += $"{(UgoiraDuration < 30000 ? " short_playtime" : " long_playtime")} animated";
                 DownloadVERef._DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
             }
+            Module_Downloader.SessionDownloads++;
             DownloadQueue_ConvertFinished(DownloadVERef, FullFilePath);
         }
 
@@ -676,7 +719,22 @@ namespace e621_ReBot_v3.Modules.Converter
             Directory.CreateDirectory(TempFolderName).Attributes = FileAttributes.Hidden;
 
             //Download the video
-            byte[] TempBytes = await Module_Downloader.DownloadFileBytes(DownloadVERef._DownloadItemRef.Grab_MediaURL, ActionType.Download, DownloadVERef.DownloadProgress);
+            ushort RetryCount = 0;
+            byte[]? TempBytes = Array.Empty<byte>();
+            while (RetryCount < 3)
+            {
+                RetryCount++;
+                TempBytes = await Module_Downloader.DownloadFileBytes(DownloadVERef._DownloadItemRef.Grab_MediaURL, ActionType.Download, DownloadVERef.DownloadProgress);
+                if (TempBytes != null && TempBytes.Length > 0) break;
+                await Task.Delay(500);
+            }
+            if (TempBytes == null || TempBytes.Length == 0)
+            {
+                Module_Downloader.Report_Info($"There was an error trying to download Video {TempFolderName}.");
+                DownloadQueue_DownloadFailed(DownloadVERef);
+                return;
+            }
+
             Module_Downloader.SaveFileBytes(TempBytes, VideoFileName, FolderPath);
 
             //Convert to Webm
@@ -707,6 +765,7 @@ namespace e621_ReBot_v3.Modules.Converter
             {
                 DownloadVERef._DownloadItemRef.MediaItemRef.DL_FilePath = FullFilePath;
             }
+            Module_Downloader.SessionDownloads++;
             DownloadQueue_ConvertFinished(DownloadVERef, FullFilePath);
         }
 
@@ -740,6 +799,23 @@ namespace e621_ReBot_v3.Modules.Converter
             //e6_DownloadItemRef.Dispose();
             //((BackgroundWorker)sender).Dispose();
             //Module_Downloader.timer_Download.Start();
+        }
+
+        private static void DownloadQueue_DownloadFailed(DownloadVE DownloadVERef)
+        {
+            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            {
+                DownloadVERef.DownloadProgress.Foreground = Module_Downloader.FailedWorkBrush;
+                DownloadVERef.ConversionProgress.Value = 100; //Could be less.
+                DownloadVERef.FolderIcon.Tag = null;
+                DownloadVERef._DownloadFinished = true;
+                Module_Downloader._DownloadVEFinisherTimer.Stop();
+                Module_Downloader._DownloadVEFinisherTimer.Start();
+            });
+            lock (Module_Downloader._2Download_DownloadItems)
+            {
+                Module_Downloader._2Download_DownloadItems.Add(DownloadVERef._DownloadItemRef);
+            }
         }
 
         // - - - - - - - - - - - - - - - -
