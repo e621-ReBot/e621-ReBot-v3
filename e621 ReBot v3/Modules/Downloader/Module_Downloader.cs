@@ -2,6 +2,7 @@
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
+using e621_ReBot_v3.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +13,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
@@ -1189,11 +1189,11 @@ namespace e621_ReBot_v3.Modules
                     }
                     else
                     {
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() => 
-                        { 
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                        {
                             //Should throw messagebox for user?
-                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false; 
-                        });   
+                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                        });
                         return;
                     }
                 }
@@ -1319,26 +1319,59 @@ namespace e621_ReBot_v3.Modules
             return true;
         }
 
+        private static string StoredArtistName;
+        private static readonly HashSet<string> ArtistClear = new HashSet<string>() { "conditional_dnp", "third-party_edit", "sound_warning", "avoid_posting", "epilepsy_warning", "jumpscare_warning", "motion_sickness_warning", "eyestrain_warning", "headphone_warning" };
         private static string CheckTags4Artist(string e6Tags)
         {
             //If artist lists exists
-            if (Window_Tagger.Artist_List != null)
-            {
-                //Split the tag list
-                HashSet<string> TagList = new HashSet<string>(e6Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-                //Search for artist tag
-                string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
+            if (Window_Tagger.Artist_List == null) return string.Empty;
 
-                //And add that artists as a folder
-                if (AnyArtist != null)
+            //Split the tag list
+            HashSet<string> TagList = new HashSet<string>(e6Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+
+            //Remove non-artist tags that are categorized as artists
+            TagList.ExceptWith(ArtistClear);
+
+            //Search for artist tag
+            //string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
+            List<string> AllArtists = TagList.Where(tag => Window_Tagger.Artist_List.Contains(tag)).ToList();
+            if (AllArtists.Count == 0) return string.Empty;
+
+            if (AllArtists.Count > 1)
+            {
+                //Last selected name should be used first
+                if (AllArtists.Contains(StoredArtistName))
                 {
-                    //And remove characters that are not allowed
-                    string PurgeArtistName = string.Concat(AnyArtist.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
-                    return PurgeArtistName;
+                    return StoredArtistName;
+                }
+                else
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Window_SelectArtist ArtistWindow = new Window_SelectArtist(AllArtists)
+                        {
+                            Owner = Application.Current.MainWindow
+                        };
+
+                        //Show the window so user can select an artist
+                        ArtistWindow.ShowDialog();
+                        //StoredArtistName = null; maybe want to keep it?
+
+                        //Selected one should be then used over others
+                        if (ArtistWindow.SelectedArtist != null)
+                        {
+                            AllArtists.Clear();
+                            AllArtists.Add(ArtistWindow.SelectedArtist);
+                            StoredArtistName = ArtistWindow.SelectedArtist;
+                        }
+                    });
                 }
             }
 
-            return string.Empty;
+            //And add that artists as a folder
+            //And remove characters that are not allowed
+            string PurgeArtistName = string.Concat(AllArtists[0].Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            return PurgeArtistName;
         }
 
         private static bool DownloadFrom_URL(DownloadItem DownloadItemRef)

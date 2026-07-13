@@ -3,7 +3,6 @@ using e621_ReBot_v3.Modules;
 using System;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;

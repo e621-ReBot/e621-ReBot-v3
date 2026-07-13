@@ -70,7 +70,7 @@ namespace e621_ReBot_v3.Modules
                 if (Task2Run != null)
                 {
                     await Task2Run();
-                } 
+                }
             }
         }
 

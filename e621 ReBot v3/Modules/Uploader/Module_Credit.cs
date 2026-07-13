@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Media3D;
 
 namespace e621_ReBot_v3.Modules
 {

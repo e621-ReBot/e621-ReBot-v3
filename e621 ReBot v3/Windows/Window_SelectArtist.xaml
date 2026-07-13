@@ -1,0 +1,26 @@
+﻿<Window x:Class="e621_ReBot_v3.Windows.Window_SelectArtist"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:e621_ReBot_v3.Windows"
+        mc:Ignorable="d"
+        Title="Select Artist" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <StackPanel Margin="15">
+
+        <TextBlock Text="Multiple artists were found. Select one:" Margin="0,0,0,8"/>
+
+        <ItemsControl x:Name="ArtistItems">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <RadioButton GroupName="Artists" Checked="Artist_Checked">
+                        <TextBlock Text="{Binding}"/>
+                    </RadioButton>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left"/>
+
+    </StackPanel>
+</Window>
