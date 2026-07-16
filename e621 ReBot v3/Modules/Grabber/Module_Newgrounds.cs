@@ -202,7 +202,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                             //}
                         }
                     }
-                    Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                    await Task.Delay(Module_Grabber.PauseBetweenImages);
                 }
                 Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
             }

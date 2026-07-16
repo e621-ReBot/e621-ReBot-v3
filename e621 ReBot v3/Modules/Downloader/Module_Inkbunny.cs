@@ -91,7 +91,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                         MediaList.Add(PicURL);
 
-                        Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                        await Task.Delay(Module_Grabber.PauseBetweenImages);
                     }
                 }
 

@@ -285,7 +285,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                     string Post_ThumbnailURL = ((string)JSONPages["body"][p]["urls"]["thumb_mini"]).Replace("/128x128/", "/360x360_70/"); // /250x250_80_a2/ is cut off, that's not good.
                     MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text, (uint)JSONPages["body"][p]["width"], (uint)JSONPages["body"][p]["height"]));
-                    Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                    await Task.Delay(Module_Grabber.PauseBetweenImages);
                 }
                 Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
             }

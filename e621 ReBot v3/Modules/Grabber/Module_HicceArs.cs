@@ -203,7 +203,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     }
 
                     MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
-                    Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                    await Task.Delay(Module_Grabber.PauseBetweenImages);
                 }
                 Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
             }

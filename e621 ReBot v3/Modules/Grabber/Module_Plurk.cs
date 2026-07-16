@@ -221,7 +221,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     UP_IsWhitelisted = true
                 };
                 MediaItemList.Add(MediaItemTemp);
-                Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                await Task.Delay(Module_Grabber.PauseBetweenImages);
             }
 
             // - - - - - - - - - - - - - - - -

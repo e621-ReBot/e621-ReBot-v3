@@ -160,7 +160,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 Module_Uploader.Media2BigCheck(MediaItemTemp);
                 MediaItemList.Add(MediaItemTemp);
-                Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                await Task.Delay(Module_Grabber.PauseBetweenImages);
             }
 
             // - - - - - - - - - - - - - - - -

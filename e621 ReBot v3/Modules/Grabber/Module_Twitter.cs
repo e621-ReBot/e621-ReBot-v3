@@ -46,7 +46,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                 }
                 //Isn't guaranteed to be first token, have to search for it.
                 string TweetID = Twitter_Regex().Match(WebAddress).Value;
-                Window_Main._RefHolder.Dispatcher.Invoke(() => { Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress, TwitterJSONHolder.SelectToken($"$.[?(@.id_str == '{TweetID}')]").ToString(), true); });
+                JToken TweetJSON = TwitterJSONHolder.SelectToken($"$.[?(@.id_str == '{TweetID}')]");
+                if (TweetJSON == null)
+                {
+                    Module_Grabber.Report_Info($"Skipped grabbing - No Media found [@{WebAddress}]");
+                    return;
+                }
+
+                Window_Main._RefHolder.Dispatcher.Invoke(() => { Module_Grabber.TreeView_GetParentItem(WebAddress, WebAddress, TweetJSON.ToString(), true); });
             }
         }
 
@@ -109,7 +116,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             JObject TweeterJSON = JObject.Parse(JSONSource);
 
-            if (!TweeterJSON["extended_entities"]["media"].Any())
+            JArray MediaHolder = (JArray)TweeterJSON?["extended_entities"]?["media"];
+            if (MediaHolder == null || MediaHolder.Count == 0)
             {
                 Module_Grabber.Report_Info($"Skipped grabbing - No Media found [@{WebAddress}]");
                 return;
@@ -129,7 +137,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             List<MediaItem> MediaItemList = new List<MediaItem>();
             ushort SkipCounter = 0;
 
-            foreach (JToken MediaNode in TweeterJSON["extended_entities"]["media"])
+            foreach (JToken MediaNode in MediaHolder)
             {
                 if (MediaNode["video_info"] != null)
                 {
@@ -192,7 +200,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                 };
                 Module_Uploader.Media2BigCheck(MediaItemTemp);
                 MediaItemList.Add(MediaItemTemp);
-                Thread.Sleep(Module_Grabber.PauseBetweenImages);
+                await Task.Delay(Module_Grabber.PauseBetweenImages);
             }
 
             // - - - - - - - - - - - - - - - -
