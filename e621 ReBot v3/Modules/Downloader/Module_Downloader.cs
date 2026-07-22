@@ -1328,7 +1328,7 @@ namespace e621_ReBot_v3.Modules
             return true;
         }
 
-        private static string StoredArtistName;
+        private static readonly HashSet<string> StoredArtistNames = new HashSet<string>();
         private static readonly HashSet<string> ArtistClear = new HashSet<string>() { "conditional_dnp", "third-party_edit", "sound_warning", "avoid_posting", "epilepsy_warning", "jumpscare_warning", "motion_sickness_warning", "eyestrain_warning", "headphone_warning" };
         private static async Task<string> CheckTags4Artist(string e6Tags)
         {
@@ -1343,21 +1343,23 @@ namespace e621_ReBot_v3.Modules
 
             //Search for artist tag
             //string? AnyArtist = TagList.FirstOrDefault(tag => Window_Tagger.Artist_List.Contains(tag));
-            List<string> AllArtists = TagList.Where(tag => Window_Tagger.Artist_List.Contains(tag)).ToList();
+            List<string> AllArtists = TagList.Intersect(Window_Tagger.Artist_List).ToList();
             if (AllArtists.Count == 0) return string.Empty;
 
             if (AllArtists.Count > 1)
             {
-                //Last selected name should be used first
-                if (AllArtists.Contains(StoredArtistName))
+                List<string> MatchingArtists = AllArtists.Intersect(StoredArtistNames).ToList();
+                if (MatchingArtists.Count == 1)
                 {
-                    return StoredArtistName;
+                    return MatchingArtists[0];
                 }
                 else
                 {
+                    List<string> WhichList = MatchingArtists.Count == 0 ? AllArtists : MatchingArtists;
+
                     await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                     {
-                        Window_SelectArtist ArtistWindow = new Window_SelectArtist(AllArtists)
+                        Window_SelectArtist ArtistWindow = new Window_SelectArtist(WhichList)
                         {
                             Owner = Application.Current.MainWindow
                         };
@@ -1371,7 +1373,7 @@ namespace e621_ReBot_v3.Modules
                         {
                             AllArtists.Clear();
                             AllArtists.Add(ArtistWindow.SelectedArtist);
-                            StoredArtistName = ArtistWindow.SelectedArtist;
+                            StoredArtistNames.Add(ArtistWindow.SelectedArtist);
                         }
                     });
                 }
