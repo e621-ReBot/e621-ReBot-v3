@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -148,8 +149,9 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 PoolPages = JObject.Parse(JSON_PoolData)["post_ids"].Values<string>().ToList();
                             }
 
+                            char[] invalidChars = Path.GetInvalidFileNameChars();
                             string PoolName = PageNode.SelectSingleNode(".//div[@id='a-show']//a").InnerText;
-                            PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
+                            PoolName = string.Concat(PoolName.Where(c => !invalidChars.Contains(c)));
 
                             int PoolIndex = 0;
 
@@ -387,8 +389,11 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
 
             JToken PoolJSON = JObject.Parse(JSON_PoolData);
+
+            //Get Artist for folder name
+            char[] invalidChars = Path.GetInvalidFileNameChars();
             string PoolName = ((string)PoolJSON["name"]).Replace('_', ' ').Trim();
-            PoolName = string.Join(null, PoolName.Split(Path.GetInvalidFileNameChars()));
+            PoolName = string.Concat(PoolName.Where(c => !invalidChars.Contains(c)));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, @"e621\", PoolName);
 
             List<string> FoundComicPosts = new List<string>();

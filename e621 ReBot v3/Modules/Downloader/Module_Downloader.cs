@@ -194,7 +194,9 @@ namespace e621_ReBot_v3.Modules
                         }
 
                         NewFileName = $"{DownloadItemRef.Grab_Artist}_{NewFileName}";
-                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
+
+                        char[] invalidChars = Path.GetInvalidFileNameChars();
+                        NewFileName = string.Concat(NewFileName.Where(c => !invalidChars.Contains(c)));
                         break;
                     }
 
@@ -210,7 +212,9 @@ namespace e621_ReBot_v3.Modules
 
                         TitleSubstring = TitleSubstring.Substring(0, TitleSubstring.IndexOf(" ⮘ by ")).Substring(2);
                         NewFileName = $"{DownloadItemRef.Grab_Artist}_{TitleSubstring}_{NewFileName}";
-                        NewFileName = string.Join(null, NewFileName.Split(Path.GetInvalidFileNameChars()));
+
+                        char[] invalidChars = Path.GetInvalidFileNameChars();
+                        NewFileName = string.Concat(NewFileName.Where(c => !invalidChars.Contains(c)));
                         break;
                     }
             }
@@ -224,8 +228,10 @@ namespace e621_ReBot_v3.Modules
             string HostString = DomainURL.Host.Remove(DomainURL.Host.LastIndexOf('.')).Replace("www.", null);
             HostString = $"{new CultureInfo("en-US", false).TextInfo.ToTitleCase(HostString)}\\";
 
+            //Get Artist for folder name
+            char[] invalidChars = Path.GetInvalidFileNameChars();
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !invalidChars.Contains(c)));
             string FolderPath = Path.Combine(AppSettings.Download_FolderLocation, HostString, PurgeArtistName);
             Directory.CreateDirectory(FolderPath);
 
@@ -837,8 +843,10 @@ namespace e621_ReBot_v3.Modules
             }
             else
             {
-                InputedText = string.Join(null, InputedText.Split(Path.GetInvalidFileNameChars()));
+                //Get Artist for folder name
+                char[] invalidChars = Path.GetInvalidFileNameChars();
                 InputedText = InputedText.Trim();
+                InputedText = string.Concat(InputedText.Where(c => !invalidChars.Contains(c)));
             }
             return InputedText;
         }
@@ -1381,15 +1389,17 @@ namespace e621_ReBot_v3.Modules
 
             //And add that artists as a folder
             //And remove characters that are not allowed
-            string PurgeArtistName = string.Concat(AllArtists[0].Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            char[] invalidChars = Path.GetInvalidFileNameChars();
+            string PurgeArtistName = string.Concat(AllArtists[0].Where(c => !invalidChars.Contains(c)));
             return PurgeArtistName;
         }
 
         private static async Task<bool> DownloadFrom_URL(DownloadItem DownloadItemRef)
         {
             //Get Artist for folder name
+            char[] invalidChars = Path.GetInvalidFileNameChars();
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !invalidChars.Contains(c)));
 
             //Get Host for folder name
             Uri DomainURL = new Uri(DownloadItemRef.Grab_PageURL);

@@ -177,7 +177,9 @@ namespace e621_ReBot_v3
                     {
                         int Post_ID = (int)PostDataDetailed["id"];
                         string Pool_Name = PoolPosts2Get[Post_ID].Name;
-                        Pool_Name = string.Join(null, Pool_Name.Split(Path.GetInvalidFileNameChars()));
+
+                        char[] invalidChars = Path.GetInvalidFileNameChars();
+                        Pool_Name = string.Concat(Pool_Name.Where(c => !invalidChars.Contains(c)));
 
                         string MediaURLTemp;
                         string ThumbnailURLTemp;

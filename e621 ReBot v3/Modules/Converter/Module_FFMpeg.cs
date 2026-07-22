@@ -588,8 +588,9 @@ namespace e621_ReBot_v3.Modules.Converter
             UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName).TrimEnd('0'); //turn "ugoira0" into "ugoira"
 
             //Get Artist for folder name
+            char[] invalidChars = Path.GetInvalidFileNameChars();
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !invalidChars.Contains(c)));
 
             //Get Host for folder name
             string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
@@ -678,8 +679,9 @@ namespace e621_ReBot_v3.Modules.Converter
             string VideoFormat = DownloadVERef._DownloadItemRef.Grab_MediaFormat;
 
             //Get Artist for folder name
+            char[] invalidChars = Path.GetInvalidFileNameChars();
             string PurgeArtistName = DownloadVERef._DownloadItemRef.Grab_Artist.Replace('/', '-');
-            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            PurgeArtistName = string.Concat(PurgeArtistName.Where(c => !invalidChars.Contains(c)));
 
             //Get Host for folder name
             string HostString = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new Uri(DownloadVERef._DownloadItemRef.Grab_PageURL).Host.Split('.')[1]);
