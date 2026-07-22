@@ -1176,32 +1176,35 @@ namespace e621_ReBot_v3.Modules
                 lock (_2Download_DownloadItems)
                 {
                     DownloadItemTemp = _2Download_DownloadItems[0];
-                    bool DownloadStarted = false;
+                }
 
-                    DLThreadsWaiting--;
-                    if (DownloadItemTemp.Is_e6Download)
-                    {
-                        DownloadStarted = DownloadFrom_e6URL(DownloadItemTemp);
-                    }
-                    else
-                    {
-                        DownloadStarted = DownloadFrom_URL(DownloadItemTemp);
-                    }
+                DLThreadsWaiting--;
+                bool DownloadStarted = false;
+                if (DownloadItemTemp.Is_e6Download)
+                {
+                    DownloadStarted = DownloadFrom_e6URL(DownloadItemTemp).Result; //the await flags IsBusy as FALSE
+                }
+                else
+                {
+                    DownloadStarted = DownloadFrom_URL(DownloadItemTemp).Result; //the await flags IsBusy as FALSE
+                }
 
-                    if (DownloadStarted)
+                if (DownloadStarted)
+                {
+                    //Maybe shouldn't remove before it's finished downloading, can make duplicates if added while downloading
+                    lock (_2Download_DownloadItems)
                     {
-                        //Maybe shouldn't remove before it's finished downloading, can make duplicates if added while downloading
                         _2Download_DownloadItems.RemoveAt(0);
                     }
-                    else
+                }
+                else
+                {
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
                     {
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                        {
-                            //Should throw messagebox for user?
-                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
-                        });
-                        return;
-                    }
+                        //Should throw messagebox for user?
+                        Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                    });
+                    return;
                 }
             }
 
@@ -1213,7 +1216,7 @@ namespace e621_ReBot_v3.Modules
             }
         }
 
-        private static bool DownloadFrom_e6URL(DownloadItem DownloadItemRef)
+        private static async Task<bool> DownloadFrom_e6URL(DownloadItem DownloadItemRef)
         {
             string PicURL = DownloadItemRef.Grab_MediaURL;
 
@@ -1226,7 +1229,7 @@ namespace e621_ReBot_v3.Modules
             //If user wants to save to folders by artists as well
             if (AppSettings.Download_Save2ArtistsFolder)
             {
-                ArtistFolder = CheckTags4Artist(DownloadItemRef.e6_Tags);
+                ArtistFolder = await CheckTags4Artist(DownloadItemRef.e6_Tags);
             }
 
             //If there is a custom folder provided, that takes priority over pool folder
@@ -1306,7 +1309,7 @@ namespace e621_ReBot_v3.Modules
                 return false;
             }
 
-            Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+            await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
             {
                 DownloadVETemp._DownloadItemRef = DownloadItemRef;
                 DownloadVETemp.FolderIcon.Tag = FilePath;
@@ -1320,14 +1323,14 @@ namespace e621_ReBot_v3.Modules
                     Download_StartDLClient(DownloadVETemp, "Thumb");
                 }
                 Download_StartDLClient(DownloadVETemp, "File");
-            }).Task.Wait();
+            });
 
             return true;
         }
 
         private static string StoredArtistName;
         private static readonly HashSet<string> ArtistClear = new HashSet<string>() { "conditional_dnp", "third-party_edit", "sound_warning", "avoid_posting", "epilepsy_warning", "jumpscare_warning", "motion_sickness_warning", "eyestrain_warning", "headphone_warning" };
-        private static string CheckTags4Artist(string e6Tags)
+        private static async Task<string> CheckTags4Artist(string e6Tags)
         {
             //If artist lists exists
             if (Window_Tagger.Artist_List == null) return string.Empty;
@@ -1352,7 +1355,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                     {
                         Window_SelectArtist ArtistWindow = new Window_SelectArtist(AllArtists)
                         {
@@ -1380,7 +1383,7 @@ namespace e621_ReBot_v3.Modules
             return PurgeArtistName;
         }
 
-        private static bool DownloadFrom_URL(DownloadItem DownloadItemRef)
+        private static async Task<bool> DownloadFrom_URL(DownloadItem DownloadItemRef)
         {
             //Get Artist for folder name
             string PurgeArtistName = DownloadItemRef.Grab_Artist.Replace('/', '-');
@@ -1433,7 +1436,7 @@ namespace e621_ReBot_v3.Modules
                             return false;
                         }
 
-                        Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+                        await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                         {
                             DownloadVETemp._DownloadItemRef = DownloadItemRef;
                             DownloadVETemp.FolderIcon.Tag = FilePath;
@@ -1459,7 +1462,7 @@ namespace e621_ReBot_v3.Modules
                                 }
                             }
                             Task.Run(() => Module_FFMpeg.DownloadQueue_Ugoira2WebM(DownloadVETemp));
-                        }).Task.Wait();
+                        });
 
                         break;
                     }
