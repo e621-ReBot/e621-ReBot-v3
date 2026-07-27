@@ -253,7 +253,7 @@ namespace e621_ReBot_v3.Modules
                             break;
                         }
 
-                    case string Step3 when Step3.Equals($"https://e621.net/users/{AppSettings.UserID}/api_key"):
+                    case string Step3 when Step3.Equals($"https://e621.net/api_keys"):
                         {
                             Module_Tutorial.Step_3(true);
                             break;
@@ -272,8 +272,8 @@ namespace e621_ReBot_v3.Modules
                                 HtmlDocument HtmlDocumentTemp = new HtmlDocument();
                                 HtmlDocumentTemp.LoadHtml(BrowserHTMLSource);
 
-                                string UserNameString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-name']").Attributes["content"].Value;
-                                string UserIDString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-id']").Attributes["content"].Value;
+                                string UserNameString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body[@data-user-name]").Attributes["data-user-name"].Value;
+                                string UserIDString = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body[@data-user-id]").Attributes["data-user-id"].Value;
 
                                 if (string.IsNullOrEmpty(AppSettings.UserName))
                                 {
@@ -286,7 +286,7 @@ namespace e621_ReBot_v3.Modules
                                     MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "A different username has been detected, you might have logged in into a different account or changed your username.\n\nWould you like to go and regenerate your API key?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                                     if (MessageBoxResultTemp == MessageBoxResult.Yes)
                                     {
-                                        LoadURL($"https://e621.net/users/{UserIDString}/api_key");
+                                        LoadURL($"https://e621.net/api_keys");
                                         return;
                                     }
                                 }
@@ -297,7 +297,7 @@ namespace e621_ReBot_v3.Modules
                                 break;
                             }
 
-                        case string Step3 when Step3.Equals($"https://e621.net/users/{AppSettings.UserID}/api_key"):
+                        case string Step3 when Step3.Equals($"https://e621.net/api_keys"):
                             {
                                 Module_Tutorial.Step_3(false);
 

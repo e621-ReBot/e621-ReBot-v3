@@ -32,11 +32,11 @@ namespace e621_ReBot_v3.Modules
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
 
-            string MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-name']").Attributes["content"].Value;
+            string MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body[@data-user-name]").Attributes["data-user-name"].Value;
             AppSettings.UserName = MetaDataNode;
-            MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//head/meta[@name='current-user-id']").Attributes["content"].Value;
+            MetaDataNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//body[@data-user-id]").Attributes["data-user-id"].Value;
             AppSettings.UserID = MetaDataNode;
-            Module_CefSharp.LoadURL($"https://e621.net/users/{MetaDataNode}/api_key");
+            Module_CefSharp.LoadURL($"https://e621.net/api_keys");
         }
 
         internal static void Step_3(bool isTutorial = false)
@@ -50,7 +50,7 @@ namespace e621_ReBot_v3.Modules
             MessageBox.Show(Window_Main._RefHolder, "You can change or remove your API key at any time in the settings.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
             AppSettings.FirstRun = false;
             AppSettings.SaveSettings();
-            MessageBox.Show(Window_Main._RefHolder, "You can now go visit your favorite artists' galeries and grab your favorite media (downloading from e621.net is also supported).\nList of supported sites will be shown under this message box.\n\nWhen there, buttons will appear in the upper right corner, you just need to decide if you wish to download media straight away or grab it for later use. Grabbed media will be stored in Grid tab.\n\nRead button tooltips for further explanations on how things work.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Window_Main._RefHolder, "You can now go visit your favorite artists' galeries and grab your favorite media (downloading from e621.net is also supported).\nList of supported sites will be shown under this message box.\n\nWhen browsing a supported site, buttons will appear in the upper right corner. You just need to decide if you wish to download media straight away or grab it for later use.\nGrabbed media will be stored in the Grid tab.\n\nRead button tooltips for further explanations on how things work.", "e621 ReBot Tutorial", MessageBoxButton.OK, MessageBoxImage.Information);
             BrowserControl._RefHolder.BrowserQuickButtons.IsEnabled = true;
             MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Do you want me to check if there are any updates for my programming, like right now?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
             if (MessageBoxResultTemp == MessageBoxResult.Yes)
