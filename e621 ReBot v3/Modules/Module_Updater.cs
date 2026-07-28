@@ -59,30 +59,55 @@ namespace e621_ReBot_v3
 
         [GeneratedRegex(@"\d+\.(\d+)\.(\d+)\.(\d+)")]
         private static partial Regex VersionRegex();
-        internal static async void Check4Update()
+        internal static async Task Check4Update()
         {
             Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
             {
                 Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Visible;
             });
-            Thread.Sleep(1000); //To show update text
+            await Task.Delay(1000); //To show update text
 
             JObject? GithubJSON;
 
             using HttpClient GithubClient = new HttpClient();
             {
                 GithubClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                string JSONResponse = await GithubClient.GetStringAsync("https://api.github.com/repos/e621-ReBot/e621-ReBot-v3/releases/latest");
-
-                if (string.IsNullOrEmpty(JSONResponse))
+                try
                 {
+                    string JSONResponse = await GithubClient.GetStringAsync("https://api.github.com/repos/e621-ReBot/e621-ReBot-v3/releases/latest");
+
+                    if (string.IsNullOrEmpty(JSONResponse))
+                    {
+                        GitHubError();
+                        return;
+                    }
+
+                    GithubJSON = JObject.Parse(JSONResponse);
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Network error, 404, 500, etc.
+                    //Console.WriteLine(ex.Message);
                     GitHubError();
                     return;
                 }
-
-                GithubJSON = JObject.Parse(JSONResponse);
+                catch (TaskCanceledException ex)
+                {
+                    // Timeout
+                    //Console.WriteLine("Request timed out.");
+                    GitHubError();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    // Unexpected error
+                    //Console.WriteLine(ex);
+                    GitHubError();
+                    return;
+                }
             }
 
+            if (GithubJSON == null) return;
             Match MatchResult = VersionRegex().Match((string)GithubJSON["name"]);
             if (MatchResult.Success)
             {

@@ -233,6 +233,7 @@ namespace e621_ReBot_v3.CustomControls
                 foreach (string PoolData in ListOfPools)
                 {
                     string[] DataSplitter = PoolData.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    if (DataSplitter.Length != 2) continue; //An issue here maybe?
                     PoolCollection.Add(new KeyValuePair<string, string>(DataSplitter[0], DataSplitter[1]));
                 }
             }

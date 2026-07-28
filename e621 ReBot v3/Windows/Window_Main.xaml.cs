@@ -91,10 +91,11 @@ namespace e621_ReBot_v3
         }
 
         //Like Shown
-        private void Window_ContentRendered(object sender, EventArgs e)
+        private async void Window_ContentRendered(object sender, EventArgs e)
         {
             if (AppSettings.FirstRun)
             {
+                await Module_Updater.Check4Update();
                 ReBot_Menu_ListBox.Visibility = Visibility.Visible;
                 Module_Tutorial.Step_0();
             }
