@@ -1,7 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace e621_ReBot_v3.Modules.Downloader

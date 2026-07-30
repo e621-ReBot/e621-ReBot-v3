@@ -94,7 +94,7 @@ namespace e621_ReBot_v3.Modules
 
                 CanReplace = (bool)UserJObject["replacements_beta"];
 
-                Credit_UploadTotal = (ushort)UserJObject["upload_limit"];
+                Credit_UploadTotal = (ushort)UserJObject["upload_slots"];
 
                 AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 
