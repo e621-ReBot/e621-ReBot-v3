@@ -115,7 +115,11 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            DateTime Post_DateTime = DateTime.ParseExact((string)BlueskyJSON["record"]["createdAt"], "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            DateTime Post_DateTime;
+            if (!DateTime.TryParseExact((string)BlueskyJSON["record"]["createdAt"],"MM/dd/yyyy HH:mm:ss",CultureInfo.InvariantCulture,DateTimeStyles.None, out Post_DateTime))
+            {
+                Post_DateTime = DateTime.Parse((string)BlueskyJSON["record"]["createdAt"], CultureInfo.InvariantCulture); //Sometimes, formats are different
+            }
 
             string ArtistName = (string)BlueskyJSON["author"]["handle"];
 
@@ -153,13 +157,20 @@ namespace e621_ReBot_v3.Modules.Grabber
                         Grab_Title = $"Post by @{ArtistName}",
                         Grab_TextBody = Post_Text,
                         Grid_MediaFormat = VideoFormat,
-                        Grid_MediaWidth = (uint)BlueskyJSON.SelectToken("record.embed..aspectRatio.width"),
-                        Grid_MediaHeight = (uint)BlueskyJSON.SelectToken("record.embed..aspectRatio.height"),
                         Grid_MediaByteLength = (uint)BlueskyJSON.SelectToken("record..video.size"),
                         Grid_ThumbnailFullInfo = true,
                         UP_Tags = Post_DateTime.Year.ToString(),
                         UP_IsWhitelisted = true
                     };
+                    // Video info can be missing sometimes
+                    JToken VideoInfo = BlueskyJSON.SelectToken("record.embed..aspectRatio");
+                    if (VideoInfo != null)
+                    {
+                        MediaItemTemp.Grid_MediaWidth = (uint)VideoInfo["width"];
+                        MediaItemTemp.Grid_MediaHeight = (uint)VideoInfo["height"];
+                        MediaItemTemp.Grid_ThumbnailFullInfo = true;
+                    }
+
                     Module_Uploader.Media2BigCheck(MediaItemTemp);
                     MediaItemList.Add(MediaItemTemp);
                 }
@@ -185,9 +196,6 @@ namespace e621_ReBot_v3.Modules.Grabber
                     string ImageFormat = (string)MediaNode["image"]["mimeType"];
                     ImageFormat = ImageFormat.Substring(ImageFormat.IndexOf('/') + 1);
 
-                    var test0 = (uint)MediaNode["aspectRatio"]["width"];
-                    var test1 = (uint)MediaNode["image"]["size"];
-
                     MediaItem MediaItemTemp = new MediaItem
                     {
                         Grab_PageURL = Post_URL,
@@ -198,13 +206,19 @@ namespace e621_ReBot_v3.Modules.Grabber
                         Grab_Title = $"Post by @{ArtistName}",
                         Grab_TextBody = Post_Text,
                         Grid_MediaFormat = ImageFormat,
-                        Grid_MediaWidth = (uint)MediaNode["aspectRatio"]["width"],
-                        Grid_MediaHeight = (uint)MediaNode["aspectRatio"]["height"],
                         Grid_MediaByteLength = (uint)MediaNode["image"]["size"],
-                        Grid_ThumbnailFullInfo = true,
                         UP_Tags = Post_DateTime.Year.ToString(),
                         UP_IsWhitelisted = true //is giving errors so turn it into byte upload
                     };
+                    // Image info can be missing sometimes
+                    JToken ImageInfo = MediaNode["aspectRatio"];
+                    if (ImageInfo != null)
+                    {
+                        MediaItemTemp.Grid_MediaWidth = (uint)ImageInfo["width"];
+                        MediaItemTemp.Grid_MediaHeight = (uint)ImageInfo["height"];
+                        MediaItemTemp.Grid_ThumbnailFullInfo = true;
+                    }
+
                     Module_Uploader.Media2BigCheck(MediaItemTemp);
                     MediaItemList.Add(MediaItemTemp);
                     //Thread.Sleep(Module_Grabber.PauseBetweenImages); //Not doing any requests
