@@ -220,6 +220,7 @@ namespace CefSharp
                             if (Data2String.Length > 64 && Module_Twitter.VerifyJSONValid(Twitter, Data2String))
                             {
                                 Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                                Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
                             }
                         }
                         break;
@@ -273,6 +274,7 @@ namespace CefSharp
                                         if (!SkipUnion) Module_Mastodons.MastodonsJSONHolder.Merge(MastodonHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
                                     }
                                     Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                                    Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
                                 }
                             }
                         }
@@ -308,6 +310,7 @@ namespace CefSharp
                             if (Data2String.Length > 64 && Module_Bluesky.VerifyJSONValid(Bluesky, Data2String))
                             {
                                 Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                                Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
                             }
                         }
                         break;

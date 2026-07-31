@@ -24,6 +24,7 @@ namespace e621_ReBot_v3.Modules
     {
         internal static readonly ushort PauseBetweenImages = 50;
         internal static readonly List<Regex> _GrabEnabler;
+        internal static readonly List<Regex> _ScrollEnabler;
 
         static Module_Grabber()
         {
@@ -41,6 +42,12 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures/(user/.+|featured|popular|random|recent/)|user/.+/faves/pictures|users/FaveUsersRecentPictures)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)(.+)?"),
                 new Regex(@"^\w+://bsky\.app/profile/(did:plc:\w+|[\w.-]+)(/post/\w+)?")
+            };
+            _ScrollEnabler = new List<Regex>
+            {
+                new Regex(@"^\w+://x\.com/.+/(media|likes|bookmarks)"),
+                new Regex(@"^\w+://\w+\.\w+/@.+/media"), //mastodon, baraag, pawoo
+                new Regex(@"^\w+://bsky\.app/profile/(did:plc:\w+|[\w.-]+)/?$")
             };
 
             _GrabTimer.Tick += GrabTimer_Tick;
@@ -71,6 +78,19 @@ namespace e621_ReBot_v3.Modules
                             BrowserControl._RefHolder.BB_Grab.Visibility = Visibility.Visible;
                         }
                     });
+                    return;
+                }
+            }
+        }
+
+        internal static void ScrollEnabler(string WebAddress)
+        {
+            foreach (Regex URLTest in _ScrollEnabler)
+            {
+                Match MatchTemp = URLTest.Match(WebAddress);
+                if (MatchTemp.Success)
+                {
+                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { BrowserControl._RefHolder.BB_Scroll.Visibility = Visibility.Visible; });
                     return;
                 }
             }

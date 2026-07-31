@@ -174,6 +174,7 @@ namespace e621_ReBot_v3.Modules
                 _browserControl.BB_GrabAll.Visibility = Visibility.Collapsed;
                 _browserControl.BB_Download.Visibility = Visibility.Collapsed;
                 _browserControl.BB_PoolWatcher.Visibility = Visibility.Collapsed;
+                _browserControl.BB_Scroll.Visibility = Visibility.Collapsed;
                 _browserControl.BrowserQuickButtons.IsEnabled = false;
             });
         }

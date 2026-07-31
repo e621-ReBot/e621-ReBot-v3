@@ -3,6 +3,7 @@ using e621_ReBot_v3.Modules;
 using System;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,11 +24,12 @@ namespace e621_ReBot_v3.CustomControls
             BrowserControls_Panel.Visibility = Visibility.Hidden;
             BrowserQuickButtons.IsEnabled = false;
 
+            BB_DevTools.Visibility = Visibility.Collapsed;
             BB_Grab.Visibility = Visibility.Collapsed;
             BB_GrabAll.Visibility = Visibility.Collapsed;
             BB_Download.Visibility = Visibility.Collapsed;
             BB_PoolWatcher.Visibility = Visibility.Collapsed;
-            BB_DevTools.Visibility = Visibility.Hidden;
+            BB_Scroll.Visibility = Visibility.Collapsed;
         }
 
         internal void InitilizeBrowser()
@@ -193,6 +195,69 @@ namespace e621_ReBot_v3.CustomControls
         private void BB_DevTools_Click(object sender, RoutedEventArgs e)
         {
             Module_CefSharp.CefSharpBrowser.ShowDevTools();
+        }
+
+        private bool scrollStoppedByUser;
+        private CancellationTokenSource? scrollCTS;
+        private async void BB_Scroll_Click(object sender, RoutedEventArgs e)
+        {
+            // Stop
+            if (scrollCTS != null)
+            {
+                scrollStoppedByUser = true;
+
+                scrollCTS.Cancel();
+                scrollCTS.Dispose();
+                scrollCTS = null;
+
+                BB_Scroll.Content = "Scroll";
+                return;
+            }
+
+            // Start
+            scrollCTS = new CancellationTokenSource();
+            BB_Scroll.Content = "Stop";
+            scrollStoppedByUser = false;
+
+            try
+            {
+                await ScrollToBottomAsync(scrollCTS.Token);
+
+                if (!scrollStoppedByUser) MessageBox.Show("Scrolling has reached the bottom of the page.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                // stopped by user
+            }
+            finally
+            {
+                scrollCTS?.Dispose();
+                scrollCTS = null;
+
+                BB_Scroll.Content = "Scroll";
+            }
+        }
+
+        private readonly Random scrollDelay = new();
+        private async Task ScrollToBottomAsync(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Module_CefSharp.CefSharpBrowser.EvaluateScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+
+                JavascriptResponse result = await Module_CefSharp.CefSharpBrowser.EvaluateScriptAsync(@"
+                new Promise(resolve => {
+                    const observer = new MutationObserver(() => { observer.disconnect(); resolve(true);});
+
+                    observer.observe(document.body, {childList: true, subtree: true});
+
+                    setTimeout(() => { observer.disconnect(); resolve(false);}, 5000);
+                });");
+
+                if (!result.Success || !Convert.ToBoolean(result.Result)) break;
+
+                await Task.Delay(scrollDelay.Next(1000, 2000), token);
+            }
         }
     }
 }

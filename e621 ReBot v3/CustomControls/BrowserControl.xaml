@@ -13,51 +13,75 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel x:Name="BrowserControls_Panel" Height="26" VerticalAlignment="Center" LastChildFill="False" HorizontalAlignment="Left" Margin="1,0,0,0" >
+        <Grid x:Name="BrowserControls_Panel" Height="26" VerticalAlignment="Top" Margin="8,0,0,0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="512"/>
+                <ColumnDefinition Width="Auto" MinWidth="256"/>
+            </Grid.ColumnDefinitions>
 
-            <Button x:Name="BB_Bookmarks" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="8,0,0,0" ToolTip="Bookmarks" Click="BB_Bookmarks_Click" PreviewMouseLeftButtonDown="BB_Bookmarks_PreviewMouseLeftButtonDown">
-                <TextBlock Text="🔖" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Margin="0,-2,0,0"/>
-            </Button>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <Button x:Name="BB_Back" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Back" Click="BB_Back_Click">
-                <TextBlock Text="◁" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
-            </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
 
-            <Button x:Name="BB_Reload" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Reload" Click="BB_Reload_Click">
-                <TextBlock Text="⟳" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Margin="0,-4,0,0"/>
-            </Button>
+                    <Button x:Name="BB_Bookmarks" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" ToolTip="Bookmarks" Click="BB_Bookmarks_Click" PreviewMouseLeftButtonDown="BB_Bookmarks_PreviewMouseLeftButtonDown">
+                        <TextBlock Text="🔖" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Margin="0,-2,0,0"/>
+                    </Button>
 
-            <Button x:Name="BB_Forward" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Forward"  Click="BB_Forward_Click" >
-                <TextBlock Text="▷" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
-            </Button>
+                    <Button x:Name="BB_Back" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Back" Click="BB_Back_Click">
+                        <TextBlock Text="◁" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
+                    </Button>
 
-            <Button x:Name="BB_Home" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" ToolTip="Quick buttons" Click="BB_Home_Click">
-                <TextBlock Text="⎔" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Margin="0,-2,0,0"/>
-            </Button>
+                    <Button x:Name="BB_Reload" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Reload" Click="BB_Reload_Click">
+                        <TextBlock Text="⟳" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Margin="0,-4,0,0"/>
+                    </Button>
 
-            <Border Width="1" Height="24" Margin="8,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left"/>
+                    <Button x:Name="BB_Forward" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" IsEnabled="False" ToolTip="Forward"  Click="BB_Forward_Click" >
+                        <TextBlock Text="▷" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Margin="0,-2,0,0"/>
+                    </Button>
 
-            <TextBox x:Name="Url_TextBox" Height="24" Width="720" Margin="8,0,0,0" Text="about:blank"  Background="#FFF0F0F0" BorderBrush="Black" VerticalAlignment="Center" HorizontalAlignment="Left" TextAlignment="Left" VerticalContentAlignment="Center" AllowDrop="False" SelectionOpacity="0.5"  IsTabStop="False" KeyDown="Url_TextBox_KeyDown" GotKeyboardFocus="Url_TextBox_GotKeyboardFocus"/>
+                    <Button x:Name="BB_Home" Style="{StaticResource ButtonStyle_BrowserControl}" Margin="1,0,0,0" ToolTip="Quick buttons" Click="BB_Home_Click">
+                        <TextBlock Text="⎔" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Margin="0,-2,0,0"/>
+                    </Button>
 
-            <Button x:Name="BB_Navigate" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Navigate" Margin="1,0,0,0" Click="BB_Navigate_Click"/>
+                    <Border Width="1" Height="24" Margin="8,0,0,0" BorderBrush="Black" BorderThickness="1,0,0,0" HorizontalAlignment="Left"/>
+                
+                </StackPanel>
 
-            <Border Width="1" Height="24" Margin="8,0,0,0" BorderBrush="Black" BorderThickness="0,0,1,0" HorizontalAlignment="Left"/>
+                <TextBox x:Name="Url_TextBox" Height="24" Margin="8,0,0,0" Text="about:blank" Background="#FFF0F0F0" BorderBrush="Black" VerticalAlignment="Center" TextAlignment="Left" VerticalContentAlignment="Center" AllowDrop="False" SelectionOpacity="0.5"  IsTabStop="False" KeyDown="Url_TextBox_KeyDown" GotKeyboardFocus="Url_TextBox_GotKeyboardFocus" Grid.Column="1" HorizontalContentAlignment="Stretch"/>
 
-        </DockPanel>
+                <StackPanel Orientation="Horizontal" Grid.Column="2">
+                    
+                    <Button x:Name="BB_Navigate" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Navigate" Margin="1,0,0,0" Click="BB_Navigate_Click"/>
 
-        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,0,0">
+                    <Border Width="1" Height="24" Margin="8,0,8,0" BorderBrush="Black" BorderThickness="0,0,1,0" HorizontalAlignment="Left"/>
+                
+                </StackPanel>
 
-            <Button x:Name="BB_DevTools" Style="{StaticResource ButtonStyle_BrowserControl}" Background="{DynamicResource ThemeFocus}" Width="64" Content="DevTools" Margin="0,0,1,0" Click="BB_DevTools_Click"/>
+           </Grid>
 
-            <Button x:Name="BB_PoolWatcher" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Watch" Margin="0,0,1,0" Click="BB_PoolWatcher_Click"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,0,0" Grid.Column="1">
 
-            <Button x:Name="BB_Download" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Download" Margin="0,0,1,0" Click="BB_Download_Click"/>
+                <Button x:Name="BB_DevTools" Style="{StaticResource ButtonStyle_BrowserControl}" Background="{DynamicResource ThemeFocus}" Width="64" Content="DevTools" Margin="0,0,1,0" Click="BB_DevTools_Click"/>
 
-            <Button x:Name="BB_GrabAll" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab All" Margin="0,0,1,0"/>
+                <Button x:Name="BB_PoolWatcher" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Watch" Margin="0,0,1,0" Click="BB_PoolWatcher_Click"/>
 
-            <Button x:Name="BB_Grab" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab" Margin="0,0,1,0" Click="BB_Grab_Click"/>
+                <Button x:Name="BB_Download" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Download" Margin="0,0,1,0" Click="BB_Download_Click"/>
 
-        </WrapPanel>
+                <Button x:Name="BB_GrabAll" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab All" Margin="0,0,1,0"/>
+
+                <Button x:Name="BB_Grab" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Grab" Margin="0,0,1,0" Click="BB_Grab_Click"/>
+
+                <Button x:Name="BB_Scroll" Style="{StaticResource ButtonStyle_BrowserControl}" Width="64" Content="Scroll" Margin="0,0,1,0" ToolTip="Scroll to bottom of the page, continiuously." Click="BB_Scroll_Click"/>
+
+            </StackPanel>
+        </Grid>
+
+
 
         <Border x:Name="BrowserBorder" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="0,1,0,0" Panel.ZIndex="42" Grid.Row="1" VerticalAlignment="Top" Focusable="True">
             <ProgressBar x:Name="PageProgressBar" Height="2" Maximum="1" Foreground="{DynamicResource ThemeFocus}" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" IsHitTestVisible="False" IsTabStop="False" Panel.ZIndex="69"/>
