@@ -45,6 +45,8 @@ namespace e621_ReBot_v3
         internal static ushort NamingPattern_e6 = 0;
         internal static ushort NamingPattern_Web = 0;
         internal static bool Download_IgnoreErrors = false;
+        internal static bool Download_SkipSameFileNames = false;
+        internal static bool Download_CreateBlankFiles = false;
         // - - - - - - - - - - - - - - - -
         internal static bool Converter_DontConvertVideos = true;
         // - - - - - - - - - - - - - - - -
@@ -82,6 +84,8 @@ namespace e621_ReBot_v3
                 { "Download_ThreadsCount", Download_ThreadsCount },
                 { "Download_SaveTags", Download_SaveTags },
                 { "Download_Save2ArtistsFolder", Download_Save2ArtistsFolder },
+                { "Download_SkipSameFileNames", Download_Save2ArtistsFolder },
+                { "Download_CreateBlankFiles", Download_Save2ArtistsFolder },
                 { "NamingPattern_e6", NamingPattern_e6 },
                 { "NamingPattern_Web", NamingPattern_Web },
                 { "Download_IgnoreErrors", Download_IgnoreErrors },
@@ -282,6 +286,16 @@ namespace e621_ReBot_v3
                                 Download_Save2ArtistsFolder = (bool)LoadSettingsJObject["Download_Save2ArtistsFolder"];
                                 break;
                             }
+                        case "Download_SkipSameFileNames":
+                            {
+                                Download_SkipSameFileNames = (bool)LoadSettingsJObject["Download_SkipSameFileNames"];
+                                break;
+                            }
+                        case "Download_CreateBlankFiles":
+                            {
+                                Download_CreateBlankFiles = (bool)LoadSettingsJObject["Download_CreateBlankFiles"];
+                                break;
+                            }
                         case "NamingPattern_e6":
                             {
                                 NamingPattern_e6 = (ushort)LoadSettingsJObject["NamingPattern_e6"];
@@ -404,6 +418,8 @@ namespace e621_ReBot_v3
 
             Window_Main._RefHolder.SettingsCheckBox_DownloadSaveTags.IsChecked = Download_SaveTags;
             Window_Main._RefHolder.SettingsCheckBox_DownloadSave2ArtistsFolder.IsChecked = Download_Save2ArtistsFolder;
+            Window_Main._RefHolder.SettingsCheckBox_DownloadSkipSameFileNames.IsChecked = Download_SkipSameFileNames;
+            Window_Main._RefHolder.SettingsCheckBox_DownloadCreateBlankFiles.IsChecked = Download_CreateBlankFiles;
 
             // - - - Jobs
 

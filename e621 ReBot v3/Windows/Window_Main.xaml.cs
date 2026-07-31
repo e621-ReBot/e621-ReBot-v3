@@ -1,4 +1,5 @@
 ﻿using CefSharp;
+using CefSharp.DevTools.CacheStorage;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Converter;
@@ -142,6 +143,7 @@ namespace e621_ReBot_v3
             {
                 Task.Run(() => Window_PoolWatcher.PoolWatcher_Check4New());
             }
+            if (AppSettings.Download_SkipSameFileNames) SkipSameFilesWork(true);
         }
 
         private bool DeleteLogAfterCopy = false;
@@ -1467,6 +1469,30 @@ namespace e621_ReBot_v3
         private void SettingsCheckBox_DownloadSave2ArtistsFolder_Click(object sender, RoutedEventArgs e)
         {
             AppSettings.Download_Save2ArtistsFolder = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        private void SettingsCheckBox_DownloadSkipSameFileNames_Click(object sender, RoutedEventArgs e)
+        {
+            SkipSameFilesWork(((CheckBox)sender).IsChecked ?? false);
+        }
+
+        private void SkipSameFilesWork(bool statepass)
+        {
+            AppSettings.Download_Save2ArtistsFolder = statepass;
+            SettingsCheckBox_DownloadCreateBlankFiles.IsEnabled = statepass;
+            if (statepass)
+            {
+                Module_Downloader.SkipFileNamesList = new HashSet<string>(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+            }
+            else
+            {
+                SettingsCheckBox_DownloadCreateBlankFiles.IsChecked = false;
+            }
+        }
+
+        private void SettingsCheckBox_DownloadCreateBlankFiles_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.Download_CreateBlankFiles = ((CheckBox)sender).IsChecked ?? false;
         }
 
         // - - -

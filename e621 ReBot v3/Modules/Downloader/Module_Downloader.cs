@@ -1089,6 +1089,19 @@ namespace e621_ReBot_v3.Modules
                 {
                     File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
                 }
+
+                if (AppSettings.Download_SkipSameFileNames)
+                {
+                    SkipFileNamesList.Add(Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
+                    if (AppSettings.Download_CreateBlankFiles)
+                    {
+                        string BlankFileName = Path.Combine(FileInfoTemp.DirectoryName, Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
+                        using (File.Create($"{BlankFileName}.blank"))
+                        { 
+                            //nothing, just blank file
+                        }
+                    }
+                }
             }
 
             SessionDownloads++;
@@ -1174,6 +1187,7 @@ namespace e621_ReBot_v3.Modules
             }
         }
 
+        internal static HashSet<string> SkipFileNamesList;
         internal static ushort DLThreadsWaiting = 4;
         private static async void DownloadBGW_Start(object? sender, DoWorkEventArgs e)
         {
@@ -1296,7 +1310,6 @@ namespace e621_ReBot_v3.Modules
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
-            bool ShouldDownloadFile = true;
             if (File.Exists(FilePath))
             {
                 if (DownloadItemRef.DL_Size != null && DownloadItemRef.DL_Size > 0)
@@ -1307,6 +1320,14 @@ namespace e621_ReBot_v3.Modules
                         DLThreadsWaiting++;
                         return true; // Don't need duplicates or inferiors (assume larger filesize = better)
                     }
+                }
+            }
+            else
+            {
+                if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(GetFileNameOnly)))
+                {
+                        DLThreadsWaiting++;
+                        return true;
                 }
             }
 
@@ -1440,6 +1461,14 @@ namespace e621_ReBot_v3.Modules
                             DLThreadsWaiting++;
                             return true;
                         }
+                        else
+                        {
+                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
+                            {
+                                DLThreadsWaiting++;
+                                return true;
+                            }
+                        }
 
                         DownloadVE? DownloadVETemp = FindDownloadVE();
                         if (DownloadVETemp == null) //Not found somehow
@@ -1488,6 +1517,14 @@ namespace e621_ReBot_v3.Modules
                         {
                             DLThreadsWaiting++;
                             return true;
+                        }
+                        else
+                        {
+                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
+                            {
+                                DLThreadsWaiting++;
+                                return true;
+                            }
                         }
 
                         DownloadVE? DownloadVETemp = FindDownloadVE();

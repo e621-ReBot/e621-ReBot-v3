@@ -744,10 +744,11 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Grid x:Name="Grid4GridTab" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,198">
+                    <Grid x:Name="Grid4GridSettings" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,242">
                         <Border BorderBrush="Black" BorderThickness="1">
                             <StackPanel Margin="8">
-                                <TextBlock Text="Grid Tab" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
+                                <TextBlock Text="Grid Settings
+                                           " Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
                                 <CheckBox x:Name="SettingsCheckBox_GridSaveSession" Style="{DynamicResource CheckBoxStyle_Large}" Content="Save Grid session" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="True" ToolTip="Save Grid session so you can continue next time you start the app." Margin="0,0,0,4" Click="SettingsCheckBox_GridSaveSession_Click"/>
 
                                 <CheckBox x:Name="SettingsCheckBox_GridAltClear_DoubleClick" Style="{DynamicResource CheckBoxStyle_Large}" Content="Clear Alt Mode: Double Click" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Clearing all media from the grid will require a Double-Click." Margin="0,0,0,4" Click="SettingsCheckBox_GridAltClear_DoubleClick_Click"/>
@@ -756,14 +757,18 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-                    <Grid x:Name="Grid4DownloadTab" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,112">
+                    <Grid x:Name="Grid4DownloadSettings" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="256" Margin="16,0,0,112">
                         <Border BorderBrush="Black" BorderThickness="1">
                             <StackPanel Margin="8">
-                                <TextBlock Text="Download Tab" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
+                                <TextBlock Text="Download Settings" Foreground="{DynamicResource ThemeForeground}" TextDecorations="Underline" Margin="-4,-8,0,4"/>
 
-                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Save media tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media's tags to text file when downloading from e621."  Margin="0,0,0,4" Click="SettingsCheckBox_DownloadSaveTags_Click"/>
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSaveTags" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Save media tags to file" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media's tags to text file when downloading from e621." Margin="0,0,0,4" Click="SettingsCheckBox_DownloadSaveTags_Click"/>
 
-                                <CheckBox x:Name="SettingsCheckBox_DownloadSave2ArtistsFolder" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Download to Artists' folder" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media to a separate folders by artist when bulk downloading from e621." Click="SettingsCheckBox_DownloadSave2ArtistsFolder_Click"/>
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSave2ArtistsFolder" Style="{DynamicResource CheckBoxStyle_Large}" Content="e621: Download to Artists' folder" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Save media to a separate folders by artist when bulk downloading from e621." Margin="0,0,0,4" Click="SettingsCheckBox_DownloadSave2ArtistsFolder_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_DownloadSkipSameFileNames" Style="{DynamicResource CheckBoxStyle_Large}" Content="Skip same file names" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Skip downloading same files names (ignoring extension) regadless of where they are." Margin="0,0,0,4" Click="SettingsCheckBox_DownloadSkipSameFileNames_Click"/>
+
+                                <CheckBox x:Name="SettingsCheckBox_DownloadCreateBlankFiles" Style="{DynamicResource CheckBoxStyle_Large}" Content="Create blank files" Foreground="{DynamicResource ThemeForeground}" IsTabStop="False" ClickMode="Press" Padding="4,0,0,0" IsChecked="False" ToolTip="Create blank files so it can be used in tandem with above." Margin="0,0,0,0" Click="SettingsCheckBox_DownloadCreateBlankFiles_Click" IsEnabled="False"/>
                             </StackPanel>
                         </Border>
                     </Grid>
