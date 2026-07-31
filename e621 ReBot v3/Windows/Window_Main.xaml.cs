@@ -143,7 +143,7 @@ namespace e621_ReBot_v3
             {
                 Task.Run(() => Window_PoolWatcher.PoolWatcher_Check4New());
             }
-            if (AppSettings.Download_SkipSameFileNames) SkipSameFilesWork(true);
+            if (AppSettings.Download_SkipSameFileNames) SkipSameFilesWork(true, true);
         }
 
         private bool DeleteLogAfterCopy = false;
@@ -1476,13 +1476,29 @@ namespace e621_ReBot_v3
             SkipSameFilesWork(((CheckBox)sender).IsChecked ?? false);
         }
 
-        private void SkipSameFilesWork(bool statepass)
+        private async void SkipSameFilesWork(bool statepass, bool skipmsgbox = false)
         {
             AppSettings.Download_Save2ArtistsFolder = statepass;
             SettingsCheckBox_DownloadCreateBlankFiles.IsEnabled = statepass;
             if (statepass)
             {
-                Module_Downloader.SkipFileNamesList = new HashSet<string>(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+
+                if (!skipmsgbox) MessageBox.Show("Scanning the disk for files may take a while if there are lots of them.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                string CheckBoxText = (string)SettingsCheckBox_DownloadSkipSameFileNames.Content;
+                SettingsCheckBox_DownloadSkipSameFileNames.Content = "Scanning...";
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        Module_Downloader.SkipFileNamesList = new HashSet<string>(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception
+                    }
+                });
+                SettingsCheckBox_DownloadSkipSameFileNames.Content = CheckBoxText;
+                if (!skipmsgbox) MessageBox.Show("File scan done!", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
