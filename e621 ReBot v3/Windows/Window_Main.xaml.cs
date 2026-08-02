@@ -1486,6 +1486,8 @@ namespace e621_ReBot_v3
                 if (!skipmsgbox) MessageBox.Show("Scanning the disk for files may take a while if there are lots of them.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
                 string CheckBoxText = (string)SettingsCheckBox_DownloadSkipSameFileNames.Content;
                 SettingsCheckBox_DownloadSkipSameFileNames.Content = "Scanning...";
+                bool CurrentDownloadStatus = DownloadQueue_CheckBox.IsChecked ?? false;
+                DownloadQueue_CheckBox.IsChecked = false;
                 await Task.Run(() =>
                 {
                     try
@@ -1498,6 +1500,7 @@ namespace e621_ReBot_v3
                     }
                 });
                 SettingsCheckBox_DownloadSkipSameFileNames.Content = CheckBoxText;
+                DownloadQueue_CheckBox.IsChecked = CurrentDownloadStatus;
                 if (!skipmsgbox) MessageBox.Show("File scan done!", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else

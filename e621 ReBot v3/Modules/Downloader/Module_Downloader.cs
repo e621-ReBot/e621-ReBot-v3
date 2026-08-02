@@ -1324,7 +1324,7 @@ namespace e621_ReBot_v3.Modules
             }
             else
             {
-                if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(GetFileNameOnly)))
+                if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList != null && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(GetFileNameOnly)))
                 {
                         DLThreadsWaiting++;
                         return true;
@@ -1463,7 +1463,7 @@ namespace e621_ReBot_v3.Modules
                         }
                         else
                         {
-                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
+                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList != null && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
                             {
                                 DLThreadsWaiting++;
                                 return true;
@@ -1520,7 +1520,7 @@ namespace e621_ReBot_v3.Modules
                         }
                         else
                         {
-                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
+                            if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList != null && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(ImageRename)))
                             {
                                 DLThreadsWaiting++;
                                 return true;
