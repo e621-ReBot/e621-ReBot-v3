@@ -1092,12 +1092,13 @@ namespace e621_ReBot_v3.Modules
 
                 if (AppSettings.Download_SkipSameFileNames)
                 {
+                    if (SkipFileNamesList == null) SkipFileNamesList = new HashSet<string>();
                     SkipFileNamesList.Add(Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
                     if (AppSettings.Download_CreateBlankFiles)
                     {
                         string BlankFileName = Path.Combine(FileInfoTemp.DirectoryName, Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
                         using (File.Create($"{BlankFileName}.blank"))
-                        { 
+                        {
                             //nothing, just blank file
                         }
                     }
@@ -1326,8 +1327,8 @@ namespace e621_ReBot_v3.Modules
             {
                 if (AppSettings.Download_SkipSameFileNames && SkipFileNamesList != null && SkipFileNamesList.Contains(Path.GetFileNameWithoutExtension(GetFileNameOnly)))
                 {
-                        DLThreadsWaiting++;
-                        return true;
+                    DLThreadsWaiting++;
+                    return true;
                 }
             }
 

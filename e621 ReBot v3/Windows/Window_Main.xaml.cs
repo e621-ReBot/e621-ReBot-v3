@@ -1473,7 +1473,11 @@ namespace e621_ReBot_v3
 
         private void SettingsCheckBox_DownloadSkipSameFileNames_Click(object sender, RoutedEventArgs e)
         {
-            SkipSameFilesWork(((CheckBox)sender).IsChecked ?? false);
+            bool NewState = ((CheckBox)sender).IsChecked ?? false;
+
+            if (NewState && ((string)SettingsCheckBox_DownloadSkipSameFileNames.Content).Contains("Scanning")) return;
+
+            SkipSameFilesWork(NewState);
         }
 
         private async void SkipSameFilesWork(bool statepass, bool skipmsgbox = false)
@@ -1492,7 +1496,14 @@ namespace e621_ReBot_v3
                 {
                     try
                     {
-                        Module_Downloader.SkipFileNamesList = new HashSet<string>(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+                        if (Module_Downloader.SkipFileNamesList == null)
+                        {
+                            Module_Downloader.SkipFileNamesList = new HashSet<string>(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+                        }
+                        else
+                        {
+                            Module_Downloader.SkipFileNamesList.UnionWith(Directory.EnumerateFiles(AppSettings.Download_FolderLocation, "*", SearchOption.AllDirectories).Select(file => Path.GetFileNameWithoutExtension(file)));
+                        }
                     }
                     catch (Exception ex)
                     {
