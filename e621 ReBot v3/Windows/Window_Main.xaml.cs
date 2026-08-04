@@ -1482,7 +1482,7 @@ namespace e621_ReBot_v3
 
         private async void SkipSameFilesWork(bool statepass, bool skipmsgbox = false)
         {
-            AppSettings.Download_Save2ArtistsFolder = statepass;
+            AppSettings.Download_SkipSameFileNames = statepass;
             SettingsCheckBox_DownloadCreateBlankFiles.IsEnabled = statepass;
             if (statepass)
             {
