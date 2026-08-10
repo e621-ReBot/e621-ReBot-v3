@@ -116,7 +116,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             string Post_URL = WebAddress;
 
             DateTime Post_DateTime;
-            if (!DateTime.TryParseExact((string)BlueskyJSON["record"]["createdAt"],"MM/dd/yyyy HH:mm:ss",CultureInfo.InvariantCulture,DateTimeStyles.None, out Post_DateTime))
+            if (!DateTime.TryParseExact((string)BlueskyJSON["record"]["createdAt"], "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out Post_DateTime))
             {
                 Post_DateTime = DateTime.Parse((string)BlueskyJSON["record"]["createdAt"], CultureInfo.InvariantCulture); //Sometimes, formats are different
             }

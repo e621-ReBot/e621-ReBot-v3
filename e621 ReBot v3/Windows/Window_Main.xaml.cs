@@ -1,5 +1,4 @@
 ﻿using CefSharp;
-using CefSharp.DevTools.CacheStorage;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
 using e621_ReBot_v3.Modules.Converter;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -82,6 +82,7 @@ namespace e621_ReBot_v3
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ReBot_Title.Text = $"e621 ReBot v{Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version} Beta";
+            if (App.AppMutex != null) ReBot_Title.Text += " [Primary]";
 
             ReBot_Menu_ListBox.SelectionChanged += ReBot_Menu_SelectionChanged;
             GBU_Upload.IsEnabledChanged += GBU_Upload_IsEnabledChanged;
@@ -102,22 +103,17 @@ namespace e621_ReBot_v3
             }
             else
             {
-                Module_Updater.PreUpdateCheck();
-                if (string.IsNullOrEmpty(AppSettings.APIKey))
+                if (App.AppMutex != null)
                 {
-                    SB_APIKey.IsEnabled = true;
-                }
-                else
-                {
-                    SB_APIKey.Content = "Remove API key";
-                    Task.Run(() =>
+                    Module_Updater.PreUpdateCheck();
+                    if (string.IsNullOrEmpty(AppSettings.APIKey))
                     {
-                        Module_Credit.Credit_CheckAll();
-                        Dispatcher.BeginInvoke(() =>
-                        {
-                            Module_e621APIController.ToggleStatus();
-                        });
-                    });
+                        SB_APIKey.IsEnabled = true;
+                    }
+                    else
+                    {
+                        SB_APIKey.Content = "Remove API key";
+                    }
                 }
             }
 
@@ -137,6 +133,7 @@ namespace e621_ReBot_v3
         private void ModuleEnabler()
         {
             Module_e621APIController.StartTheController();
+            Module_e621APIController.ToggleStatus();
             Module_Grabber.Start(); //Make it load on main thread, bug fix.
             Module_Downloader.Start(); //Make it load on main thread, bug fix.
             if (!string.IsNullOrEmpty(AppSettings.APIKey))
@@ -144,6 +141,26 @@ namespace e621_ReBot_v3
                 Task.Run(() => Window_PoolWatcher.PoolWatcher_Check4New());
             }
             if (AppSettings.Download_SkipSameFileNames) SkipSameFilesWork(true, true);
+
+            //Disable stuff for secondary instances
+            if (App.AppMutex == null)
+            {
+                ListBoxItem_Browser.IsEnabled = false;
+                ListBoxItem_Browser.Visibility = Visibility.Collapsed;
+                Module_Uploader._UploadTimer.Stop();
+                Module_Uploader._UploadTimer = new DispatcherTimer(); //new timer, so like removing events from previous one
+                Upload_CheckBox.IsChecked = false;
+                Upload_CheckBox.IsEnabled = false;
+                SB_APIKey.IsEnabled = false;
+
+                ReBot_Menu_ListBox.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(AppSettings.APIKey))
+            {
+                Task.Run(() => Module_Credit.Credit_CheckAll());
+            }
         }
 
         private bool DeleteLogAfterCopy = false;
@@ -647,6 +664,8 @@ namespace e621_ReBot_v3
         internal int UploadCounter = 0;
         internal void UploadCounterChange(int byValue)
         {
+            if (App.AppMutex == null) return;
+
             UploadCounter += byValue;
             GBU_Upload.IsEnabled = UploadCounter > 0 && Module_e621APIController.APIEnabled;
         }
@@ -1442,6 +1461,12 @@ namespace e621_ReBot_v3
             AppSettings.MediaSaveManualInferiorRecord = ((CheckBox)sender).IsChecked ?? false;
         }
 
+        private void SettingsCheckBox_SingleInstanceApp_Click(object sender, RoutedEventArgs e)
+        {
+            AppSettings.SingleInstance = ((CheckBox)sender).IsChecked ?? false;
+            AppSettings.SaveSettings();
+        }
+
         // - - -
 
         private void SettingsCheckBox_GridSaveSession_Click(object sender, RoutedEventArgs e)
@@ -1606,6 +1631,8 @@ namespace e621_ReBot_v3
             SettingsButton_DLSuggestions.IsEnabled = false;
             Task.Run(() => Module_e621Data.DLSuggestions());
         }
+
+
 
         #endregion
 

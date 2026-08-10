@@ -31,7 +31,6 @@ namespace e621_ReBot_v3.Modules
             }
             else
             {
-                API_Timer.Stop();
                 Module_Uploader._UploadTimer.Stop();
                 Module_Uploader._UploadDisableTimer.Stop();
                 Window_Main._RefHolder.SB_APIKey.Content = "Add API key";
@@ -46,6 +45,8 @@ namespace e621_ReBot_v3.Modules
         internal static readonly Queue<Func<Task>> BackgroundTasks = new Queue<Func<Task>>();
         private static async void API_Timer_Tick(object? sender, EventArgs e)
         {
+            if (!APIEnabled) return;
+
             //Timer is on main thread, is it an issue?
             Task TaskTemp;
             Func<Task> Task2Run;

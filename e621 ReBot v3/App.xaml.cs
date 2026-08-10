@@ -16,7 +16,7 @@ namespace e621_ReBot_v3
     //https://stackoverflow.com/a/66221592/8810532
     public partial class App : Application
     {
-        private Mutex? AppMutex;
+        static internal Mutex? AppMutex;
         private KeyboardHotkeys? GlobalHotkeys;
 
         private bool onlyInstance;
@@ -25,9 +25,16 @@ namespace e621_ReBot_v3
             AppMutex = new Mutex(true, $"Local\\e621 ReBot v3 - e621126e", out onlyInstance);
             if (!onlyInstance)
             {
-                ShowExistingWindow();
-                Current.Shutdown();
-                return;
+                bool WantSingleInstance = AppSettings.CheckInstanceSettings();
+
+                if (WantSingleInstance)
+                {
+                    ShowExistingWindow();
+                    Current.Shutdown();
+                    return;
+                }
+
+                AppMutex = null; //clear mutex
             }
 
             //Load form Embedded Resources - This Function is not called if the Assembly is in the Application Folder
@@ -153,7 +160,7 @@ namespace e621_ReBot_v3
             Process[] processList = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
             foreach (Process process in processList)
             {
-                if (process.StartTime < CutoffTime)
+                if (process.StartTime < CutoffTime) //so it ignores self
                 {
                     ShowWindow(process.MainWindowHandle, 1);
                     SetForegroundWindow(process.MainWindowHandle);

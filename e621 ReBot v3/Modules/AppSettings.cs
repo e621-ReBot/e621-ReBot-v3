@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace e621_ReBot_v3
 {
@@ -18,6 +19,7 @@ namespace e621_ReBot_v3
     {
         internal static readonly string GlobalUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
         internal static bool DevMode = false;
+        internal static bool SingleInstance = true;
         internal static bool FirstRun = true;
         internal static bool FirstRunSession = true;
         internal static string AppName = "e621 ReBot";
@@ -62,8 +64,11 @@ namespace e621_ReBot_v3
 
         internal static void SaveSettings()
         {
+            if (App.AppMutex == null) return; //Save settings only for primary instance
+
             JObject JObjectTemp = new JObject
             {
+                { "SingleInstance",  SingleInstance },
                 { "FirstRun",  FirstRun },
                 { "UserName",  UserName },
                 { "UserID",  UserID },
@@ -143,9 +148,9 @@ namespace e621_ReBot_v3
                 {
                     switch (JTokenTemp.Path)
                     {
-                        case "DevMode":
+                        case "SingleInstance":
                             {
-                                DevMode = (bool)LoadSettingsJObject["DevMode"];
+                                SingleInstance = (bool)LoadSettingsJObject["SingleInstance"];
                                 break;
                             }
                         case "FirstRun":
@@ -403,11 +408,24 @@ namespace e621_ReBot_v3
             }
         }
 
+        internal static bool CheckInstanceSettings()
+        {
+            if (File.Exists("settings.json"))
+            {
+                string LoadSettingsString = File.ReadAllText("settings.json");
+                JObject LoadSettingsJObject = JObject.Parse(LoadSettingsString);
+
+                return (bool?)LoadSettingsJObject["SingleInstance"] ?? true;
+            }
+
+            return true;
+        }
+
         internal static void SetLoadedSettings()
         {
             // - - - Settings
 
-            ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
+            Window_Main._RefHolder.SettingsCheckBox_SingleInstanceApp.IsChecked = SingleInstance;
             Window_Main._RefHolder.SettingsCheckBox_BigMode.IsChecked = BigMode;
             Window_Main._RefHolder.SettingsCheckBox_BrowserClearCache.IsChecked = Browser_ClearCache;
             Window_Main._RefHolder.SettingsCheckBox_MediaSaveManualInferiorRecord.IsChecked = MediaSaveManualInferiorRecord;
@@ -420,6 +438,8 @@ namespace e621_ReBot_v3
             Window_Main._RefHolder.SettingsCheckBox_DownloadSave2ArtistsFolder.IsChecked = Download_Save2ArtistsFolder;
             Window_Main._RefHolder.SettingsCheckBox_DownloadSkipSameFileNames.IsChecked = Download_SkipSameFileNames;
             Window_Main._RefHolder.SettingsCheckBox_DownloadCreateBlankFiles.IsChecked = Download_CreateBlankFiles;
+
+            ((RadioButton)Window_Main._RefHolder.UpdateInterval_StackPanel.FindName("RadionButton_UI" + Update_Interval)).IsChecked = true;
 
             // - - - Jobs
 
