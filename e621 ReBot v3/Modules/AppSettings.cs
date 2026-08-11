@@ -148,6 +148,11 @@ namespace e621_ReBot_v3
                 {
                     switch (JTokenTemp.Path)
                     {
+                        case "DevMode":
+                            {
+                                DevMode = (bool)LoadSettingsJObject["DevMode"];
+                                break;
+                            }
                         case "SingleInstance":
                             {
                                 SingleInstance = (bool)LoadSettingsJObject["SingleInstance"];

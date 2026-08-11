@@ -82,7 +82,8 @@ namespace e621_ReBot_v3
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ReBot_Title.Text = $"e621 ReBot v{Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version} Beta";
-            if (App.AppMutex != null) ReBot_Title.Text += " [Primary]";
+            ReBot_Title.Tag = ReBot_Title.Text;
+            if (!AppSettings.SingleInstance && App.AppMutex != null) ReBot_Title.Text = $"{ReBot_Title.Tag} [Primary]";
 
             ReBot_Menu_ListBox.SelectionChanged += ReBot_Menu_SelectionChanged;
             GBU_Upload.IsEnabledChanged += GBU_Upload_IsEnabledChanged;
@@ -1465,6 +1466,8 @@ namespace e621_ReBot_v3
         {
             AppSettings.SingleInstance = ((CheckBox)sender).IsChecked ?? false;
             AppSettings.SaveSettings();
+
+            ReBot_Title.Text = $"{ReBot_Title.Tag}{((!AppSettings.SingleInstance && App.AppMutex != null) ? " [Primary]" : null )}";
         }
 
         // - - -
