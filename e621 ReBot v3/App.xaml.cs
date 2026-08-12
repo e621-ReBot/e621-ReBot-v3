@@ -22,12 +22,14 @@ namespace e621_ReBot_v3
         private bool onlyInstance;
         protected override void OnStartup(StartupEventArgs e)
         {
+            //Load form Embedded Resources - This Function is not called if the Assembly is in the Application Folder
+            AppDomain.CurrentDomain.AssemblyResolve += LoadMergedDLLs;
+            AppDomain.CurrentDomain.UnhandledException += Write2Log;
+
             AppMutex = new Mutex(true, $"Local\\e621 ReBot v3 - e621126e", out onlyInstance);
             if (!onlyInstance)
             {
-                bool WantSingleInstance = AppSettings.CheckInstanceSettings();
-
-                if (WantSingleInstance)
+                if (AppSettings.CheckInstanceSettings())
                 {
                     ShowExistingWindow();
                     Current.Shutdown();
@@ -36,10 +38,6 @@ namespace e621_ReBot_v3
 
                 AppMutex = null; //clear mutex
             }
-
-            //Load form Embedded Resources - This Function is not called if the Assembly is in the Application Folder
-            AppDomain.CurrentDomain.AssemblyResolve += LoadMergedDLLs;
-            AppDomain.CurrentDomain.UnhandledException += Write2Log;
 
             GlobalHotkeys = new KeyboardHotkeys();
             GlobalHotkeys.HookKeyboard();
