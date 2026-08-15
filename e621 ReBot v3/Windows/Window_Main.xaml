@@ -185,7 +185,7 @@
                     <DockPanel LastChildFill="False" Grid.Row="1" HorizontalAlignment="Center" Margin="0,1,0,0">
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBlock x:Name="GBD_Change" Text="+420" IsHitTestVisible="False" Width="32" VerticalAlignment="Center" Foreground="RoyalBlue" Margin="0,0,4,0"/>
+                            <TextBlock x:Name="GTBD_Change" Text="+420" IsHitTestVisible="False" Width="32" VerticalAlignment="Center" Foreground="RoyalBlue" Margin="0,0,4,0"/>
                             <Button x:Name="GBD_Download" Width="96" Content="▼ Download ▼" BorderThickness="1,0,1,0" Margin="-1,0,0,0" IsEnabled="False" ToolTip="Download all selected media.&#10;Shift+Click to download selected media on this page only.&#10;&#10;Media that is already downloaded will be skipped." Click="GBD_Download_Click">
                                 <Button.Style>
                                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
@@ -201,8 +201,9 @@
                             <Button x:Name="GBD_Inverse" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="✓ ⇄ ✘" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Inverse_Click" ToolTip="Inverse selections on current page.&#10;Ctrl+Click to inverse selections on all media." IsEnabled="False"/>
                             <Button x:Name="GBD_Unselect" Width="80" Style="{StaticResource ButtonStyle_Grid}" Content="▼ ✘" BorderThickness="1,0,1,0" Margin="-1,0,0,0" Click="GBD_Unselect_Click" ToolTip="Unselect media on current page.&#10;Ctrl+Click to unselect all media." IsEnabled="False"/>
                         </StackPanel>
+                        <Button x:Name="GB_Import" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="Import" BorderThickness="1,0,1,0" ToolTip="Remove all media.&#xA;Shift+Click to remove media on current page.&#xA;Ctrl+Click to remove only the media that is already uploaded." Click="GB_Import_Click" Margin="64,0,0,0"/>
 
-                        <Button x:Name="GB_Clear" Width="128" Content="☠   Clear   ☠" BorderThickness="1,0,1,0" Margin="96,0,96,0" ToolTip="Remove all media.&#10;Shift+Click to remove media on current page.&#10;Ctrl+Click to remove only the media that is already uploaded." IsEnabled="False" PreviewMouseLeftButtonDown="GB_Clear_PreviewMouseLeftButtonDown">
+                        <Button x:Name="GB_Clear" Width="128" Content="☠   Clear   ☠" BorderThickness="1,0,1,0" ToolTip="Remove all media.&#10;Shift+Click to remove media on current page.&#10;Ctrl+Click to remove only the media that is already uploaded." IsEnabled="False" PreviewMouseLeftButtonDown="GB_Clear_PreviewMouseLeftButtonDown" Margin="-1,0,-1,0">
                             <Button.Style>
                                 <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle_Grid}">
                                     <Style.Triggers>
@@ -213,6 +214,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
+                        <Button x:Name="GB_Export" Width="64" Style="{StaticResource ButtonStyle_Grid}" Content="Export" BorderThickness="1,0,1,0" ToolTip="Remove all media.&#xA;Shift+Click to remove media on current page.&#xA;Ctrl+Click to remove only the media that is already uploaded." Click="GB_Export_Click" Margin="0,0,64,0"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button x:Name="GBU_Unselect" Width="80" Style="{StaticResource ButtonStyle_Grid}" Content="▲ ✘" BorderThickness="1,0,1,0" Margin="0,0,-1,0" Click="GBU_Unselect_Click" ToolTip="Unselect media on current page.&#10;Ctrl+Click to unselect all media." IsEnabled="False"/>
@@ -229,7 +231,7 @@
                                     </Style>
                                 </Button.Style>
                             </Button>
-                            <TextBlock x:Name="GBU_Change" Text="+420" IsHitTestVisible="False" Width="32" Foreground="LimeGreen" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                            <TextBlock x:Name="GTBU_Change" Text="+420" IsHitTestVisible="False" Width="32" Foreground="LimeGreen" VerticalAlignment="Center" Margin="4,0,0,0"/>
                         </StackPanel>
 
                     </DockPanel>
@@ -419,7 +421,7 @@
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
 
                         <CheckBox x:Name="Grab_CheckBox" Style="{DynamicResource CheckBoxStyle_Large}" Grid.Row="0" Content="Grabber" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  IsTabStop="False" ClickMode="Press" VerticalContentAlignment="Center" Padding="4,0,0,0" IsChecked="True" ToolTip="Toggle grabbing status." HorizontalAlignment="Left"/>
-                        
+
                         <Grid IsHitTestVisible="False" Margin="128,0,0,0">
                             <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" BorderThickness="1,0,0,0">
                                 <TextBlock x:Name="Grab_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
@@ -475,7 +477,7 @@
                         <Border Grid.Row="0" BorderBrush="Black" HorizontalAlignment="Left" Margin="128,0,0,0" BorderThickness="1,0,0,0">
                             <TextBlock x:Name="Upload_StatusTextBlock" Text="Status: Sleeping." Foreground="{DynamicResource ThemeForeground}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Border>
-                        
+
                         <Canvas x:Name="Upload_ProgressCanvas" HorizontalAlignment="Right" Margin="0,8,64,0">
                             <Canvas.RenderTransform>
                                 <RotateTransform x:Name="CanvasTransformUpload" CenterX="8" CenterY="8"/>
@@ -493,7 +495,7 @@
                         </Canvas>
 
                         <Button x:Name="Upload_ReverseUploadQueue" Width="32" Height="NaN" Content="⮃" BorderThickness="1,0,1,0" ToolTip="Reverse upload queue order." HorizontalAlignment="Right" FontSize="16" Click="Upload_ReverseUploadQueue_Click" Cursor="Hand"/>
-                        
+
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>
 
                         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0,0,0,1">
@@ -563,7 +565,7 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1"/>
-                        
+
                         <TextBlock x:Name="Retry_TextBlock" TextWrapping="Wrap" Grid.Row="0" Text="Retry Queue" Foreground="{DynamicResource ThemeForeground}" Margin="8,0,0,0"  VerticalAlignment="Center" Padding="4,0,0,0"/>
 
                         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="0,0,0,1"/>

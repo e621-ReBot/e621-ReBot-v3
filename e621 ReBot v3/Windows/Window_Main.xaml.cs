@@ -5,11 +5,11 @@ using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Modules.Uploader;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,8 +50,8 @@ namespace e621_ReBot_v3
             GBTB_Center.Visibility = Visibility.Hidden;
             GBTB_Left.Visibility = Visibility.Hidden;
             GBTB_Right.Visibility = Visibility.Hidden;
-            GBD_Change.Opacity = 0;
-            GBU_Change.Opacity = 0;
+            GTBD_Change.Opacity = 0;
+            GTBU_Change.Opacity = 0;
             JobImport_TextBlock.Visibility = Visibility.Hidden;
             Upload_ProgressCanvas.Visibility = Visibility.Hidden;
             SB_APIKey.IsEnabled = false;
@@ -478,16 +478,37 @@ namespace e621_ReBot_v3
 
         internal void Grid_Paginator()
         {
-            int CurrentPage = Grid_ItemStartIndex / Grid_ItemLimit + 1;
-            int TotalPages = (int)Math.Ceiling((float)Module_Grabber._Grabbed_MediaItems.Count / Grid_ItemLimit);
-            GBTB_Center.Text = $"{CurrentPage} / {TotalPages}";
-            GBTB_Center.Visibility = TotalPages > 1 ? Visibility.Visible : Visibility.Hidden;
-            GBTB_Left.Text = (CurrentPage - 1).ToString();
-            GBTB_Right.Text = (CurrentPage + 1).ToString();
-            GB_Left.Visibility = CurrentPage > 1 ? Visibility.Visible : Visibility.Hidden;
-            GB_Right.Visibility = CurrentPage < TotalPages ? Visibility.Visible : Visibility.Hidden;
-            GB_Clear.IsEnabled = Grid_GridVEPanel.Children.Count != 0;
-            Grid_GridVEPanel.Opacity = Grid_GridVEPanel.Children.Count == 0 ? 0 : 1;
+            int itemCount = Module_Grabber._Grabbed_MediaItems.Count;
+            int childCount = Grid_GridVEPanel.Children.Count;
+            int totalPages = (int)Math.Ceiling((double)itemCount / Grid_ItemLimit);
+            int currentPage = Grid_ItemStartIndex / Grid_ItemLimit + 1;
+
+            bool hasItems = childCount > 0;
+            bool hasPrevious = currentPage > 1;
+            bool hasNext = currentPage < totalPages;
+
+            GBTB_Center.Text = $"{currentPage} / {totalPages}";
+            GBTB_Center.Visibility = totalPages > 1
+                ? Visibility.Visible
+                : Visibility.Hidden;
+
+            GBTB_Left.Text = (currentPage - 1).ToString();
+            GB_Left.Visibility = hasPrevious
+                ? Visibility.Visible
+                : Visibility.Hidden;
+
+            GBTB_Right.Text = (currentPage + 1).ToString();
+            GB_Right.Visibility = hasNext
+                ? Visibility.Visible
+                : Visibility.Hidden;
+
+            GB_Clear.IsEnabled = hasItems;
+
+            GB_Export.IsEnabled = hasItems;
+
+            Grid_GridVEPanel.Visibility = hasItems
+                ? Visibility.Visible
+                : Visibility.Hidden;
         }
 
         private void GB_Left_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -802,8 +823,8 @@ namespace e621_ReBot_v3
             });
 
             Module_Downloader.UpdateDownloadTreeView();
-            GBD_Change.Text = $"+{DownloadAdditionCounter}";
-            ((Storyboard)this.FindResource("FadeAnimation")).Begin(GBD_Change);
+            GTBD_Change.Text = $"+{DownloadAdditionCounter}";
+            ((Storyboard)this.FindResource("FadeAnimation")).Begin(GTBD_Change);
         }
 
         private void GBD_Download_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -871,6 +892,70 @@ namespace e621_ReBot_v3
                 }
                 DownloadCounter = 0;
                 GBD_Download.IsEnabled = false;
+            }
+        }
+
+        private void GB_Import_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog OpenFileDialogTemp = new OpenFileDialog
+            {
+                Title = "Import Grid Session",
+                InitialDirectory = AppContext.BaseDirectory,
+                Filter = "Grid Session files (*.GS)|*.GS"
+            };
+            if (OpenFileDialogTemp.ShowDialog() == false) return;
+
+            bool ClearGrid = false;
+            if (Module_Grabber._Grabbed_MediaItems.Count > 0)
+            {
+                MessageBoxResult MessageBoxResultTemp = MessageBox.Show("Do you want to append the imported items to the current grid session?\n\nYes = Append\nNo = Replace", "Import Grid Session", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, defaultResult: MessageBoxResult.Cancel);
+                if (MessageBoxResultTemp == MessageBoxResult.Cancel) return;
+            }
+
+            string ImportGridSession = File.ReadAllText(OpenFileDialogTemp.FileName);
+            List<MediaItem>? ImportedMediaItems;
+            try
+            {
+                ImportedMediaItems = JsonConvert.DeserializeObject<List<MediaItem>>(ImportGridSession);
+
+                if (ImportedMediaItems == null) return;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("The selected Grid Session file is invalid or corrupted.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            lock (Module_Grabber._Grabbed_MediaItems)
+            {
+                if (ClearGrid) Module_Grabber._Grabbed_MediaItems.Clear();
+                Module_Grabber._Grabbed_MediaItems.AddRange(ImportedMediaItems);
+            }
+
+            Grid_Populate(true);
+            Grid_Paginator();
+        }
+
+        private void GB_Export_Click(object sender, RoutedEventArgs e)
+        {
+            if (Module_Grabber._Grabbed_MediaItems.Count > 0)
+            {
+                SaveFileDialog SaveFileDialogTemp = new SaveFileDialog
+                {
+                    Title = "Export Grid Session",
+                    InitialDirectory = AppContext.BaseDirectory,
+                    FileName = $"Grid_Session_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.GS",
+                    DefaultExt = ".GS",
+                    Filter = "Grid Session files (*.GS)|*.GS"
+                };
+                if (SaveFileDialogTemp.ShowDialog() == false) return;
+
+                lock (Module_Grabber._Grabbed_MediaItems)
+                {
+                    using StreamWriter StreamWriterTemp = File.CreateText(SaveFileDialogTemp.FileName);
+                    Newtonsoft.Json.JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
+                    JsonSerializerTemp.Serialize(StreamWriterTemp, Module_Grabber._Grabbed_MediaItems);
+                }
             }
         }
 
@@ -1467,7 +1552,7 @@ namespace e621_ReBot_v3
             AppSettings.SingleInstance = ((CheckBox)sender).IsChecked ?? false;
             AppSettings.SaveSettings();
 
-            ReBot_Title.Text = $"{ReBot_Title.Tag}{((!AppSettings.SingleInstance && App.AppMutex != null) ? " [Primary]" : null )}";
+            ReBot_Title.Text = $"{ReBot_Title.Tag}{((!AppSettings.SingleInstance && App.AppMutex != null) ? " [Primary]" : null)}";
         }
 
         // - - -
@@ -1634,8 +1719,6 @@ namespace e621_ReBot_v3
             SettingsButton_DLSuggestions.IsEnabled = false;
             Task.Run(() => Module_e621Data.DLSuggestions());
         }
-
-
 
         #endregion
 

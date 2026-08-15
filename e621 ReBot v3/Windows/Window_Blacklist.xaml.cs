@@ -50,7 +50,7 @@ namespace e621_ReBot_v3
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            List<string> NewBlacklist = new List<string>();
+            HashSet<string> NewBlacklist = new HashSet<string>();
             Blacklist_TextBox.Text = Blacklist_TextBox.Text.Trim().ToLower();
             for (int i = 0; i < Blacklist_TextBox.LineCount; i++)
             {

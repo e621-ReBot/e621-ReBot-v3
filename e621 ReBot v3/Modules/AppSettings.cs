@@ -54,10 +54,10 @@ namespace e621_ReBot_v3
         // - - - - - - - - - - - - - - - -
         internal static OrderedDictionary Bookmarks = new OrderedDictionary();
         private static Dictionary<string, string> MediaRecords = new Dictionary<string, string>();
-        internal static List<string> MediaIgnoreList = new List<string>();
+        internal static HashSet<string> MediaIgnoreList = new HashSet<string>();
         private static Dictionary<string, string> ArtistAliases = new Dictionary<string, string>();
         internal static Dictionary<string, string> QuickTags = new Dictionary<string, string>();
-        internal static List<string> Blacklist = new List<string>();
+        internal static HashSet<string> Blacklist = new HashSet<string>();
         internal static List<PoolItem> PoolWatcher = new List<PoolItem>();
         // - - - - - - - - - - - - - - - -
         internal static string? Note;
@@ -106,31 +106,18 @@ namespace e621_ReBot_v3
             if (PoolWatcher.Any()) JObjectTemp.Add("PoolWatcher", JArray.FromObject(PoolWatcher));
 
             JsonSerializer JsonSerializerTemp = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
-            JArray? MediaJArray;
             if (Grid_SaveSession && Module_Grabber._Grabbed_MediaItems.Count > 0)
             {
                 lock (Module_Grabber._Grabbed_MediaItems)
                 {
-
-                    MediaJArray = new JArray();
-                    foreach (MediaItem MediaItemTemp in Module_Grabber._Grabbed_MediaItems)
-                    {
-                        MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
-                    }
-                    JObjectTemp.Add("Grid_Session", JArray.FromObject(MediaJArray));
+                    JObjectTemp.Add("Grid_Session", JArray.FromObject(Module_Grabber._Grabbed_MediaItems, JsonSerializerTemp));
                 }
             }
             if (Module_RetryQueue._2Retry_MediaItems.Count > 0)
             {
                 lock (Module_RetryQueue._2Retry_MediaItems)
                 {
-
-                    MediaJArray = new JArray();
-                    foreach (MediaItem MediaItemTemp in Module_RetryQueue._2Retry_MediaItems)
-                    {
-                        MediaJArray.Add(JObject.FromObject(MediaItemTemp, JsonSerializerTemp));
-                    }
-                    JObjectTemp.Add("RetryQueue", JArray.FromObject(MediaJArray));
+                    JObjectTemp.Add("RetryQueue", JArray.FromObject(Module_RetryQueue._2Retry_MediaItems, JsonSerializerTemp));
                 }
             }
 
@@ -345,7 +332,7 @@ namespace e621_ReBot_v3
                             }
                         case "MediaIgnoreList":
                             {
-                                MediaIgnoreList = LoadSettingsJObject["MediaIgnoreList"].ToObject<List<string>>();
+                                MediaIgnoreList = LoadSettingsJObject["MediaIgnoreList"].ToObject<HashSet<string>>();
                                 break;
                             }
                         case "ArtistAliases":
@@ -360,7 +347,7 @@ namespace e621_ReBot_v3
                             }
                         case "Blacklist":
                             {
-                                Blacklist = LoadSettingsJObject["Blacklist"].ToObject<List<string>>();
+                                Blacklist = LoadSettingsJObject["Blacklist"].ToObject<HashSet<string>>();
                                 break;
                             }
                         case "PoolWatcher":

@@ -121,8 +121,8 @@ namespace e621_ReBot_v3.Modules
                     }
                 }
             }
-            Window_Main._RefHolder.GBU_Change.Text = $"+{UploadAdditionCounter}";
-            ((Storyboard)Window_Main._RefHolder.FindResource("FadeAnimation")).Begin(Window_Main._RefHolder.GBU_Change);
+            Window_Main._RefHolder.GTBU_Change.Text = $"+{UploadAdditionCounter}";
+            ((Storyboard)Window_Main._RefHolder.FindResource("FadeAnimation")).Begin(Window_Main._RefHolder.GTBU_Change);
         }
 
         internal static void UploadTreeView_CreateJob(MediaItem MediaItemRef)
