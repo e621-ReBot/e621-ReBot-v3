@@ -1157,6 +1157,16 @@ namespace e621_ReBot_v3
             Module_Downloader.UpdateDownloadTreeView();
         }
 
+        private void DownloadTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
+        {
+            MenuItem MenuItemClicked = (MenuItem)sender;
+            ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
+            TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
+
+            string WebAddress = (string)TreeViewItemTarget.Header;
+            Clipboard.SetText(WebAddress);
+        }
+
         private async void DownloadTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
         {
             await Task.Run(() =>
@@ -1301,6 +1311,15 @@ namespace e621_ReBot_v3
             {
                 Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
             }
+        }
+        private void GrabTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
+        {
+            MenuItem MenuItemClicked = (MenuItem)sender;
+            ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
+            TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
+
+            string WebAddress = Encoding.UTF8.GetString(Convert.FromHexString(TreeViewItemTarget.Name.Substring(1)));
+            Clipboard.SetText(WebAddress);
         }
 
         private async void GrabTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)

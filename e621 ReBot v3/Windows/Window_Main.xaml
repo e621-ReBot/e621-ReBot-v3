@@ -323,6 +323,8 @@
                         <customcontrols:Custom_TreeView Grid.Row="2" x:Name="DownloadQueue_TreeView" Padding="4,0,4,0" Margin="0" ContextMenuOpening="DownloadTreeViewContextMenu_Opening">
                             <customcontrols:Custom_TreeView.Resources>
                                 <ContextMenu x:Key="DownloadTreeViewContextMenu" IsTabStop="False" Opened="DownloadTreeViewContextMenu_Opened" Closed="DownloadTreeViewContextMenu_Closed">
+                                    <MenuItem Header="Copy URL" Click="DownloadTreeViewContextMenu_CopyURL"/>
+                                    <Separator/>
                                     <MenuItem Header="Remove" Click="DownloadTreeViewContextMenu_Remove"/>
                                     <MenuItem Header="Remove Page" Click="DownloadTreeViewContextMenu_RemovePage"/>
                                     <MenuItem Header="Remove All" Click="DownloadTreeViewContextMenu_RemoveAll"/>
@@ -442,6 +444,8 @@
                             <customcontrols:Custom_TreeView.Resources>
                                 <!--https://stackoverflow.com/a/14625366/8810532-->
                                 <ContextMenu x:Key="GrabTreeViewContextMenu" x:Shared="False" IsTabStop="False">
+                                    <MenuItem Header="Copy URL" Click="GrabTreeViewContextMenu_CopyURL"/>
+                                    <Separator/>
                                     <MenuItem Header="Remove" Click="GrabTreeViewContextMenu_Remove"/>
                                     <MenuItem Header="Remove All" Click="GrabTreeViewContextMenu_RemoveAll"/>
                                     <Separator/>
