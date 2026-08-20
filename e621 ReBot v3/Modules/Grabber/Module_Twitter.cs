@@ -251,20 +251,36 @@ namespace e621_ReBot_v3.Modules.Grabber
             if (TwitterJSONHolder == null)
             {
                 TwitterJSONHolder = new JArray(TweetsContainer);
-                return true;
             }
-
-            lock (TwitterJSONHolder)
+            else
             {
-                HashSet<string?> ExistingIDs = TwitterJSONHolder.Select(tweet => (string)tweet["id_str"]).ToHashSet();
-
-                foreach (JToken tweet in TweetsContainer)
+                lock (TwitterJSONHolder)
                 {
-                    string TweetID = (string)tweet["id_str"];
-                    //Try to add to existing ids, if it fails it means it's duplicate
-                    if (ExistingIDs.Add(TweetID)) TwitterJSONHolder.Add(tweet);
+                    HashSet<string?> ExistingIDs = TwitterJSONHolder.Select(tweet => (string)tweet["id_str"]).ToHashSet();
+
+                    foreach (JToken tweet in TweetsContainer)
+                    {
+                        string TweetID = (string)tweet["id_str"];
+                        //Try to add to existing ids, if it fails it means it's duplicate
+                        if (ExistingIDs.Add(TweetID)) TwitterJSONHolder.Add(tweet);
+                    }
                 }
             }
+
+            //Exclude quoted tweets, turn this into an option maybe? otherwise do it earlier
+            HashSet<string> QuotedTweets = new HashSet<string>();
+            foreach (JToken tweet in TwitterJSONHolder)
+            {
+                string QuotedTweetID = (string)tweet["quoted_status_id_str"];
+                if (!string.IsNullOrEmpty(QuotedTweetID)) QuotedTweets.Add(QuotedTweetID);
+            }
+            for (int i = TwitterJSONHolder.Count - 1; i >= 0; i--)
+            {
+                string TweetID = (string)TwitterJSONHolder[i]["id_str"];
+                if (QuotedTweets.Contains(TweetID)) TwitterJSONHolder.RemoveAt(i);
+            }
+            //Alternatively go by userid
+
             return true;
         }
     }
