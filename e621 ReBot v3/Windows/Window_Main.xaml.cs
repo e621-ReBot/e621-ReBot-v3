@@ -165,31 +165,54 @@ namespace e621_ReBot_v3
         }
 
         private bool DeleteLogAfterCopy = false;
-        private void ErrorReporter()
+        private async void ErrorReporter()
         {
-            if (File.Exists("ReBotErrorLog.txt"))
-            {
-                MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "I found an error log! You should report it to my maker. Do you want me to copy it to your clipboard?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
-                if (MessageBoxResultTemp == MessageBoxResult.Yes)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        try
-                        {
-                            Clipboard.SetText(File.ReadAllText("ReBotErrorLog.txt"));
-                            DeleteLogAfterCopy = true;
-                            return;
-                        }
-                        catch (COMException)
-                        {
-                            //This is gonna freeze UI
-                            Thread.Sleep(1000);
-                        }
-                    }
+            if (!File.Exists("ReBotErrorLog.txt")) return;
 
-                    MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+            MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "I found an error log! You should report it to my maker. Do you want me to copy it to your clipboard?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
+            if (MessageBoxResultTemp == MessageBoxResult.Yes)
+            {
+                if (await TryCopyToClipboardAsync(File.ReadAllText("ReBotErrorLog.txt")))
+                {
+                    DeleteLogAfterCopy = true;
+                    return;
                 }
+                MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
             }
+        }
+
+        internal static async Task<bool> TryCopyToClipboardAsync(string text)
+        {
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            Thread thread = new Thread(() =>
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    try
+                    {
+                        Clipboard.SetDataObject(text); //SetText only on user action
+                        tcs.SetResult(true);
+                        return;
+                    }
+                    catch (ExternalException ex)
+                    {
+                        //want to handle it somehow?
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                        return;
+                    }
+                    Thread.Sleep(1000);
+                }
+                tcs.SetResult(false);
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+
+            return await tcs.Task;
         }
 
         private void MoverRectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -1157,14 +1180,18 @@ namespace e621_ReBot_v3
             Module_Downloader.UpdateDownloadTreeView();
         }
 
-        private void DownloadTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
+        private async void DownloadTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
         {
             MenuItem MenuItemClicked = (MenuItem)sender;
             ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
             TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
 
             string WebAddress = (string)TreeViewItemTarget.Header;
-            Clipboard.SetText(WebAddress);
+            if (await TryCopyToClipboardAsync(WebAddress))
+            {
+                return;
+            }
+            MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
         }
 
         private async void DownloadTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)
@@ -1312,14 +1339,18 @@ namespace e621_ReBot_v3
                 Upload_CheckBox.Content = $"Uploader{(Upload_TreeView.Items.Count > 0 ? $" ({Upload_TreeView.Items.Count})" : null)}";
             }
         }
-        private void GrabTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
+        private async void GrabTreeViewContextMenu_CopyURL(object sender, RoutedEventArgs e)
         {
             MenuItem MenuItemClicked = (MenuItem)sender;
             ContextMenu ContextMenuParent = (ContextMenu)MenuItemClicked.Parent;
             TreeViewItem TreeViewItemTarget = (TreeViewItem)ContextMenuParent.PlacementTarget;
 
             string WebAddress = Encoding.UTF8.GetString(Convert.FromHexString(TreeViewItemTarget.Name.Substring(1)));
-            Clipboard.SetText(WebAddress);
+            if (await TryCopyToClipboardAsync(WebAddress))
+            {
+                return;
+            }
+            MessageBox.Show(this, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
         }
 
         private async void GrabTreeViewContextMenu_Remove(object sender, RoutedEventArgs e)

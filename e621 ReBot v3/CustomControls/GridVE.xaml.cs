@@ -329,14 +329,22 @@ namespace e621_ReBot_v3.CustomControls
             RemoveRecord.IsEnabled = !string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
         }
 
-        private void MenuItem_Click_Source(object sender, RoutedEventArgs e)
+        private async void MenuItem_Click_Source(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(_MediaItemRef.Grab_PageURL);
+            if (await Window_Main.TryCopyToClipboardAsync(_MediaItemRef.Grab_PageURL))
+            {
+                return;
+            }
+            MessageBox.Show(Window_Main._RefHolder, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
         }
 
-        private void MenuItem_Click_Media(object sender, RoutedEventArgs e)
+        private async void MenuItem_Click_Media(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(_MediaItemRef.Grab_MediaURL);
+            if (await Window_Main.TryCopyToClipboardAsync(_MediaItemRef.Grab_MediaURL))
+            {
+                return;
+            }
+            MessageBox.Show(Window_Main._RefHolder, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
         }
 
         private void MenuItem_Click_AddSources(object sender, RoutedEventArgs e)

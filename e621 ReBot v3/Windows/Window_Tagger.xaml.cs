@@ -382,7 +382,7 @@ namespace e621_ReBot_v3
             }
         }
 
-        private void TB_Description_Click(object sender, RoutedEventArgs e)
+        private async void TB_Description_Click(object sender, RoutedEventArgs e)
         {
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
@@ -391,10 +391,16 @@ namespace e621_ReBot_v3
                 {
                     Description = $"[section={Description}]\n{MediaItemHolder.Grab_TextBody}\n[/section]";
                 }
-                Clipboard.SetText(Description);
-                MessageBox.Show(this, "Descripton has been copied to clipboard.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                if (await Window_Main.TryCopyToClipboardAsync(Description))
+                {
+                    MessageBox.Show(this, "Descripton has been copied to clipboard.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                MessageBox.Show(Window_Main._RefHolder, "Clipboard is locked.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                 return;
             }
+
             if (Description_TextBox.IsVisible)
             {
                 Description_TextBox.Visibility = Visibility.Hidden;
