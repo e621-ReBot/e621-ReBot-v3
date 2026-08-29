@@ -263,10 +263,13 @@ namespace e621_ReBot_v3.Modules.Grabber
                 PostsContainer = JObjectTemp.SelectTokens("$.feed[*].post").Where(token => AllowedTypes.Contains(token["record"]?["embed"]?["$type"]?.ToString() ?? string.Empty)); //multi posts page
                 if (PostsContainer == null || !PostsContainer.Any())
                 {
-                    //single post page
-                    JToken? FirstPost = JObjectTemp["thread"][0]["value"]["post"];
-                    string? EmbedType = FirstPost.SelectToken("record.embed.media.$type")?.ToString() ?? FirstPost.SelectToken("record.embed.$type")?.ToString();
-                    PostsContainer = AllowedTypes.Contains(EmbedType ?? string.Empty) ? new JToken[] { FirstPost } : null;
+                    //single post page test
+                    JToken? FirstPost = JObjectTemp["thread"];
+                    if (FirstPost != null)
+                    {
+                        string? EmbedType = FirstPost.SelectToken("record.embed.media.$type")?.ToString() ?? FirstPost.SelectToken("record.embed.$type")?.ToString();
+                        PostsContainer = AllowedTypes.Contains(EmbedType ?? string.Empty) ? new JToken[] { FirstPost } : null;
+                    }
                 }
             }
 

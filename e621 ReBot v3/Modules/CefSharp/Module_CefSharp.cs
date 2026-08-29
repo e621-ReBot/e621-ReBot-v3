@@ -34,6 +34,7 @@ namespace e621_ReBot_v3.Modules
             };
             CefSharpSettings.ShutdownOnExit = true;
 
+            //CefSharp_Settings.CefCommandLineArgs.Add("--js-flags", "--max_old_space_size=16384"); //doesn't do anything
             //if (Properties.Settings.Default.DisableGPU) CefSharp_Settings.CefCommandLineArgs.Add("disable-gpu", "1");
 
             CefCustomScheme MediaBrowserScheme = new CefCustomScheme
@@ -176,6 +177,14 @@ namespace e621_ReBot_v3.Modules
                 _browserControl.BB_PoolWatcher.Visibility = Visibility.Collapsed;
                 _browserControl.BB_Scroll.Visibility = Visibility.Collapsed;
                 _browserControl.BrowserQuickButtons.IsEnabled = false;
+                if (_browserControl.scrollCTS != null)
+                {
+                    _browserControl.scrollCTS.Cancel();
+                    _browserControl.scrollCTS.Dispose();
+                    _browserControl.scrollCTS = null;
+                    _browserControl.BB_Scroll.Content = "Scroll";
+                    return;
+                }
             });
         }
 

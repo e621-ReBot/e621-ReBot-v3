@@ -198,7 +198,7 @@ namespace e621_ReBot_v3.CustomControls
         }
 
         private bool scrollStoppedByUser;
-        private CancellationTokenSource? scrollCTS;
+        internal CancellationTokenSource? scrollCTS;
         private async void BB_Scroll_Click(object sender, RoutedEventArgs e)
         {
             // Stop
@@ -241,20 +241,27 @@ namespace e621_ReBot_v3.CustomControls
         private readonly Random scrollDelay = new();
         private async Task ScrollToBottomAsync(CancellationToken token)
         {
+            int lastScrollY = -1;
+            int lastScrollCount = -1;
             while (!token.IsCancellationRequested)
             {
-                await Module_CefSharp.CefSharpBrowser.EvaluateScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+                JavascriptResponse result = await Module_CefSharp.CefSharpBrowser.EvaluateScriptAsync(@"(() => {
+                    window.scrollBy({top: 65000, left: 0, behavior: 'instant'});
+                    return window.scrollY;})();");
+                if (!result.Success) break;
 
-                JavascriptResponse result = await Module_CefSharp.CefSharpBrowser.EvaluateScriptAsync(@"
-                new Promise(resolve => {
-                    const observer = new MutationObserver(() => { observer.disconnect(); resolve(true);});
-
-                    observer.observe(document.body, {childList: true, subtree: true});
-
-                    setTimeout(() => { observer.disconnect(); resolve(false);}, 5000);
-                });");
-
-                if (!result.Success || !Convert.ToBoolean(result.Result)) break;
+                int currentScrollY = Convert.ToInt32(result.Result);
+                if (currentScrollY == lastScrollY) // Scroll position changed, reset the timer
+                {
+                    lastScrollY = currentScrollY;
+                    lastScrollCount++;
+                }
+                else
+                {
+                    lastScrollY = currentScrollY;
+                    lastScrollCount = -1;
+                }
+                if (lastScrollCount > 4) break;
 
                 await Task.Delay(scrollDelay.Next(1000, 2000), token);
             }
