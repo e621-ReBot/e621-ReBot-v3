@@ -68,9 +68,8 @@ namespace e621_ReBot_v3.Modules.Converter
                     //Edit the input file to new .png images
                     string[] inputLines = File.ReadAllLines(inputTXTFile).Select(l => l.Replace(".gif", ".png")).ToArray();
                     File.WriteAllLines(inputTXTFile, inputLines);
-
-                    UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
                 }
+                UgoiraFileName = Path.GetFileNameWithoutExtension(UgoiraFileName);
 
                 // APNGs have bigger file size but are the only ones that are fully compatible with iOS.
                 FFMpeg.StartInfo.Arguments = $"-hide_banner -loglevel error -progress pipe:1 -nostats -y -f concat -i \"{inputTXTFile}\" -vsync vfr -c:v apng -pred mixed -plays 0 \"{FullFolderPath}\\{UgoiraFileName}.apng\"";

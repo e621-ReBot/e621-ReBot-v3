@@ -1208,6 +1208,5 @@ namespace e621_ReBot_v3.Modules
                 }
             }
         }
-
     }
 }
