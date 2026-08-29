@@ -308,8 +308,11 @@ namespace e621_ReBot_v3.CustomControls
 
             AddSources.IsEnabled = string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
 
-            if (_MediaItemRef.UP_OverrideByteUpload) OverrideByteUpload.Background = SolidColorBrushHolder;
             OverrideByteUpload.IsEnabled = string.IsNullOrEmpty(_MediaItemRef.UP_UploadedID);
+            if (_MediaItemRef.UP_OverrideByteUpload) OverrideByteUpload.Background = SolidColorBrushHolder;
+
+            UploadAsPending.IsEnabled = Module_Credit.Can_UploadWithoutApproval;
+            if (_MediaItemRef.UP_UploadAsPending) UploadAsPending.Background = SolidColorBrushHolder;
 
             MoveUp.IsEnabled = MediaItemIndex > 0;
             MoveDown.IsEnabled = MediaItemIndex < Module_Grabber._Grabbed_MediaItems.Count - 1;
@@ -361,6 +364,11 @@ namespace e621_ReBot_v3.CustomControls
             _MediaItemRef.UP_OverrideByteUpload = true;
         }
 
+        private void MenuItem_Click_UploadAsPending(object sender, RoutedEventArgs e)
+        {
+            _MediaItemRef.UP_UploadAsPending = true;
+        }
+
         private async void MenuItem_Click_Move(object sender, RoutedEventArgs e)
         {
             int RequestedindexChange = int.Parse(((MenuItem)sender).Tag.ToString());
@@ -379,6 +387,7 @@ namespace e621_ReBot_v3.CustomControls
             Window_Main._RefHolder.Grid_LastIndexCheck = -1;
             Window_Main._RefHolder.Grid_Populate(true);
         }
+
 
         private void MenuItem_Click_IgnoreMedia(object sender, RoutedEventArgs e)
         {
@@ -431,7 +440,5 @@ namespace e621_ReBot_v3.CustomControls
             ((Storyboard)FindResource("ScaleOut")).Begin(this);
             GettingDestroyed = true;
         }
-
-
     }
 }

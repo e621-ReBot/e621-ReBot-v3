@@ -51,6 +51,7 @@ namespace e621_ReBot_v3.CustomControls
         public bool UP_IsWhitelisted = true;
         public string? UP_AdditionalSources;
         [JsonIgnore] public bool UP_OverrideByteUpload = false;
+        [JsonIgnore] public bool UP_UploadAsPending = false;
 
         // = = = Download stuff
 

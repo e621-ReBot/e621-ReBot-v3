@@ -133,7 +133,7 @@ namespace e621_ReBot_v3.Modules
                 Tag = MediaItemRef,
             };
 
-            if (Module_Credit.CanReplace && MediaItemRef.UP_Inferior_ID != null)
+            if (Module_Credit.Can_Replace && MediaItemRef.UP_Inferior_ID != null)
             {
                 TreeViewItemParent.Items.Add(new TreeViewItem { Header = "Replace Inferior" });
             }
@@ -657,6 +657,11 @@ namespace e621_ReBot_v3.Modules
             }
 
             // - - - - - - - - - - - - - - - -
+
+            if (MediaItemRef.UP_UploadAsPending)
+            {
+                POST_Dictionary.Add("upload[as_pending]", "true");
+            }
 
             POST_Dictionary.Add("upload[source]", Upload_Sources);
             POST_Dictionary.Add("upload[rating]", MediaItemRef.UP_Rating.ToLower());

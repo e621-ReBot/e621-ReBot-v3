@@ -11,7 +11,8 @@ namespace e621_ReBot_v3.Modules
     {
 
         internal static ushort UserLevel = 20; //Member = 20; Privileged = 30; Contributor = 33; Janitor = 35; Moderator = 40; Admin = 50.
-        internal static bool CanReplace = false;
+        internal static bool Can_Replace = false;
+        internal static bool Can_UploadWithoutApproval = false;
 
         internal static ushort Credit_UploadHourly = 30;
         internal static ushort Credit_UploadTotal = 10;
@@ -92,9 +93,11 @@ namespace e621_ReBot_v3.Modules
                 JObject UserJObject = JObject.Parse(JSON_UserInfo);
                 UserLevel = (ushort)UserJObject["level"];
 
-                CanReplace = (bool)UserJObject["replacements_beta"];
+                Can_Replace = (bool)UserJObject["replacements_beta"];
 
                 Credit_UploadTotal = (ushort)UserJObject["upload_slots"];
+
+                Can_UploadWithoutApproval = (bool)UserJObject["upload_karma_free"];
 
                 AppSettings.UserName = (string)UserJObject["name"]; //In case user changes name
 

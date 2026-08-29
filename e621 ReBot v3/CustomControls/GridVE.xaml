@@ -94,6 +94,7 @@
             <MenuItem Header="Copy Media URL" Click="MenuItem_Click_Media"/>
             <MenuItem Name="AddSources"  Header="Add additional sources" Click="MenuItem_Click_AddSources"/>
             <MenuItem Name="OverrideByteUpload" Header="Upload bytes" Click="MenuItem_Click_OverrideByteUpload" ToolTip="Will upload media bytes instead of providing a link to source."/>
+            <MenuItem Name="UploadAsPending" Header="Upload as Pending" Click="MenuItem_Click_UploadAsPending" ToolTip="Upload as pending (when you are allowed to post without approval)."/>
             <MenuItem Name="RemoveRecord" Header="Remove Media Record" Click="MenuItem_Click_RemoveMediaRecord"/>
             <Separator/>
             <MenuItem Name="MoveUp" Header="Decrease Media's Index" Click="MenuItem_Click_Move" Tag="-1"/>

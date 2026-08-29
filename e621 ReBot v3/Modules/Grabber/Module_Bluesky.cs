@@ -208,7 +208,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         Grid_MediaFormat = ImageFormat,
                         Grid_MediaByteLength = (uint)MediaNode["image"]["size"],
                         UP_Tags = Post_DateTime.Year.ToString(),
-                        UP_IsWhitelisted = true //is giving errors so turn it into byte upload
+                        UP_IsWhitelisted = true
                     };
                     // Image info can be missing sometimes
                     JToken ImageInfo = MediaNode["aspectRatio"];
