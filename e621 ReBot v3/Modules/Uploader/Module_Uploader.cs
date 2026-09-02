@@ -579,22 +579,21 @@ namespace e621_ReBot_v3.Modules
                     case "mp4":
                     case "swf":
                         {
+                            //Check Download cache first
+                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
+                            {
+                                FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.DL_FilePath);
+                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
+                                break;
+                            }
+
+                            //Download if no local copy exists
                             if (MediaItemRef.UP_IsVideoWhitelisted)
                             {
                                 DownloadFile4Upload(MediaItemRef.Grab_MediaURL, out bytes2Send);
                             }
                             else
-                            {
-                                //Check Download cache first
-                                if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
-                                {
-                                    FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.DL_FilePath);
-                                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
-                                    UploadedURL4Report = $"{FileName}, converted from {MediaItemRef.Grab_PageURL}";
-                                    break;
-                                }
-
-                                //Download if no local copy exists
+                            {                
                                 Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
                                 if (bytes2Send == null)
                                 {
@@ -768,7 +767,14 @@ namespace e621_ReBot_v3.Modules
                 case "mp4":
                 case "swf":
                     {
-                        isByteUpload = true;
+                        if (MediaItemRef.UP_IsVideoWhitelisted)
+                        {
+                            POST_Dictionary.Add("post_replacement[replacement_url]", MediaItemRef.Grab_MediaURL);
+                        }
+                        else
+                        {
+                            isByteUpload = true;
+                        }
                         break;
                     }
 
@@ -829,13 +835,21 @@ namespace e621_ReBot_v3.Modules
                                 break;
                             }
 
+
                             //Download if no local copy exists
-                            Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
-                            if (bytes2Send == null)
+                            if (MediaItemRef.UP_IsVideoWhitelisted)
                             {
-                                Report_Error("0 bytes error @Upload Video", "e621 ReBot - Replace Inferior");
-                                FailedUploadTask = true;
-                                return;
+                                DownloadFile4Upload(MediaItemRef.Grab_MediaURL, out bytes2Send);
+                            }
+                            else
+                            {
+                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in ExtraSourceURL);
+                                if (bytes2Send == null)
+                                {
+                                    Report_Error("0 bytes error @Upload Video", "e621 ReBot - Replace Inferior");
+                                    FailedUploadTask = true;
+                                    return;
+                                }
                             }
                             break;
                         }
@@ -859,19 +873,7 @@ namespace e621_ReBot_v3.Modules
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            ushort RetryCount = 0;
-                            while (RetryCount < 3)
-                            {
-                                RetryCount++;
-                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
-                                if (bytes2Send != null && bytes2Send.Length > 0) break;
-                                Thread.Sleep(500);
-                            }
-                            if (bytes2Send == null || bytes2Send.Length == 0)
-                            {
-                                FailedUploadTask = true;
-                                return;
-                            }
+                            DownloadFile4Upload(MediaItemRef.Grab_MediaURL, out bytes2Send);
                             break;
                         }
                 }
