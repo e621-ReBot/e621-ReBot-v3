@@ -49,6 +49,7 @@ namespace e621_ReBot_v3.CustomControls
         public bool? UP_Inferior_HasNotes;
         public float UP_Inferior_NoteSizeRatio;
         public bool UP_IsWhitelisted = true;
+        public bool UP_IsVideoWhitelisted = false;
         public string? UP_AdditionalSources;
         [JsonIgnore] public bool UP_OverrideByteUpload = false;
         [JsonIgnore] public bool UP_UploadAsPending = false;

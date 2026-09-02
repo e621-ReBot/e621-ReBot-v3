@@ -506,9 +506,6 @@ namespace e621_ReBot_v3.Modules
                         }
 
                         POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
-                        string UgoiraFileName = MediaItemRef.Grab_MediaURL.Substring(MediaItemRef.Grab_MediaURL.LastIndexOf('/') + 1);
-                        UploadedURL4Report = $"{UgoiraFileName.Substring(0, UgoiraFileName.IndexOf("_ugoira0."))}_ugoira.png, converted from {MediaItemRef.Grab_PageURL}";
-                        //Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
                         isByteUpload = true;
                         break;
                     }
@@ -516,12 +513,15 @@ namespace e621_ReBot_v3.Modules
                 case "mp4":
                 case "swf":
                     {
-                        POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
-                        string VideoFileName = MediaItemRef.Grab_MediaURL.Remove(MediaItemRef.Grab_MediaURL.Length - 4);
-                        VideoFileName = $"{VideoFileName.Substring(VideoFileName.LastIndexOf('/') + 1)}.webm";
-                        UploadedURL4Report = $"{VideoFileName}, converted from {MediaItemRef.Grab_PageURL}";
-                        Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -c:a libopus -b:a 192k -cpu-used 2 -row-mt 1";
-                        isByteUpload = true;
+                        if (MediaItemRef.UP_IsVideoWhitelisted)
+                        {
+                            POST_Dictionary.Add("upload[direct_url]", MediaItemRef.Grab_MediaURL);
+                        }
+                        else
+                        {
+                            POST_Dictionary.Add("upload[file]", MediaItemRef.Grab_MediaURL);
+                            isByteUpload = true;
+                        }
                         break;
                     }
 
@@ -567,30 +567,44 @@ namespace e621_ReBot_v3.Modules
                                 Thread.Sleep(1000); //Delay so that message can be read
                                 Module_FFMpeg.UploadQueue_Ugoira2WebM(out bytes2Send, out FileName, FileName);
                                 Upload_Description += "\nConverted from Ugoira using FFmpeg: -framerate {avgFPS} -i {input} -r {avgFPS} -c:v libvpx-vp9 -g 1 -pix_fmt yuv420p -crf 8 -cpu-used 2 -an";
+                                UploadedURL4Report = $"{FileName.Substring(0, FileName.IndexOf("_ugoira0."))}_ugoira.webm, converted from {MediaItemRef.Grab_PageURL}";
                                 break;
                             }
+
                             Upload_Description += "\nConverted from Ugoira using FFmpeg: -vsync vfr -c:v apng -pred mixed -plays 0";
+                            UploadedURL4Report = $"{FileName.Substring(0, FileName.IndexOf("_ugoira0."))}_ugoira.png, converted from {MediaItemRef.Grab_PageURL}";
                             break;
                         }
 
                     case "mp4":
                     case "swf":
                         {
-                            //Check Download cache first
-                            if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
+                            if (MediaItemRef.UP_IsVideoWhitelisted)
                             {
-                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
-                                bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
-                                break;
+                                DownloadFile4Upload(MediaItemRef.Grab_MediaURL, out bytes2Send);
                             }
-
-                            //Download if no local copy exists
-                            Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
-                            if (bytes2Send == null)
+                            else
                             {
-                                Report_Error("0 bytes error @Upload Video", "e621 ReBot - Upload");
-                                FailedUploadTask = true;
-                                return;
+                                //Check Download cache first
+                                if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
+                                {
+                                    FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.DL_FilePath);
+                                    bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
+                                    UploadedURL4Report = $"{FileName}, converted from {MediaItemRef.Grab_PageURL}";
+                                    break;
+                                }
+
+                                //Download if no local copy exists
+                                Module_FFMpeg.UploadQueue_Videos2WebM(out bytes2Send, out FileName, in MediaItemRef.Grab_MediaURL);
+                                if (bytes2Send == null)
+                                {
+                                    Report_Error("0 bytes error @Upload Video", "e621 ReBot - Upload");
+                                    FailedUploadTask = true;
+                                    return;
+                                }
+
+                                Upload_Description += "\nConverted using FFmpeg: -c:v libvpx-vp9 -pix_fmt yuv420p -crf 24 -b:v 0 -c:a libopus -b:a 192k -cpu-used 2 -row-mt 1";
+                                UploadedURL4Report = $"{FileName}, converted from {MediaItemRef.Grab_PageURL}";
                             }
                             break;
                         }
@@ -608,25 +622,13 @@ namespace e621_ReBot_v3.Modules
                             //Check Download cache
                             if (MediaItemRef.DL_FilePath != null && File.Exists(MediaItemRef.DL_FilePath))
                             {
-                                FileName = MediaItemRef.DL_FilePath.Substring(MediaItemRef.DL_FilePath.LastIndexOf('\\') + 1);
+                                FileName = Module_Downloader.MediaFile_GetFileNameOnly(MediaItemRef.DL_FilePath);
                                 bytes2Send = File.ReadAllBytes(MediaItemRef.DL_FilePath);
                                 break;
                             }
 
                             //Go ahead and download from source now since there is no local copy
-                            ushort RetryCount = 0;
-                            while (RetryCount < 3)
-                            {
-                                RetryCount++;
-                                bytes2Send = Module_Downloader.DownloadFileBytes(MediaItemRef.Grab_MediaURL, ActionType.Upload).GetAwaiter().GetResult();
-                                if (bytes2Send != null && bytes2Send.Length > 0) break;
-                                Thread.Sleep(500);
-                            }
-                            if (bytes2Send == null || bytes2Send.Length == 0)
-                            {
-                                FailedUploadTask = true;
-                                return;
-                            }
+                            DownloadFile4Upload(MediaItemRef.Grab_MediaURL, out bytes2Send);
                             break;
                         }
                 }
@@ -1211,6 +1213,25 @@ namespace e621_ReBot_v3.Modules
                     }
                     _UploadDisableTimer.Start();
                 }
+            }
+        }
+
+        // - - - - - - - - - - - - - - - -
+
+        private static void DownloadFile4Upload(string DownloadURL, out byte[] bytes)
+        {
+            bytes = null;
+            ushort RetryCount = 0;
+            while (RetryCount < 3)
+            {
+                RetryCount++;
+                bytes = Module_Downloader.DownloadFileBytes(DownloadURL, ActionType.Upload).GetAwaiter().GetResult();
+                if (bytes != null && bytes.Length > 0) break;
+                Thread.Sleep(500);
+            }
+            if (bytes == null || bytes.Length == 0)
+            {
+                FailedUploadTask = true;
             }
         }
     }

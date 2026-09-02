@@ -160,7 +160,8 @@ namespace e621_ReBot_v3.Modules.Grabber
                         Grid_MediaByteLength = (uint)BlueskyJSON.SelectToken("record..video.size"),
                         Grid_ThumbnailFullInfo = true,
                         UP_Tags = Post_DateTime.Year.ToString(),
-                        UP_IsWhitelisted = true
+                        UP_IsWhitelisted = true,
+                        UP_IsVideoWhitelisted = true
                     };
                     // Video info can be missing sometimes
                     JToken VideoInfo = BlueskyJSON.SelectToken("record.embed..aspectRatio");
@@ -267,6 +268,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                     JToken? FirstPost = JObjectTemp["thread"];
                     if (FirstPost != null)
                     {
+                        FirstPost = FirstPost[0]["value"]["post"];
                         string? EmbedType = FirstPost.SelectToken("record.embed.media.$type")?.ToString() ?? FirstPost.SelectToken("record.embed.$type")?.ToString();
                         PostsContainer = AllowedTypes.Contains(EmbedType ?? string.Empty) ? new JToken[] { FirstPost } : null;
                     }
