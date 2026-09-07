@@ -399,8 +399,14 @@ namespace e621_ReBot_v3
                             {
                                 MediaItemHolder.Grid_Thumbnail = null; //set to null so it will be loaded in the following code automatically
                             }
-                        }
 
+                            //Reload thumb for Newgrounds as it is using a cropped or duplicate thumb
+                            if (MediaItemHolder.Grab_PageURL.Contains("www.newgrounds.com"))
+                            {
+                                MediaItemHolder.Grid_Thumbnail = null;
+                                MediaItemHolder.Grid_ThumbnailDLStart = false;
+                            }
+                        }
 
                         //Load image from cache to make a thumbnail if needed
                         if (MediaItemHolder.Grid_Thumbnail == null && MediaItemHolder.Grid_ThumbnailDLStart == false)

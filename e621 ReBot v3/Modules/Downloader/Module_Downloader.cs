@@ -872,8 +872,11 @@ namespace e621_ReBot_v3.Modules
             //WebClientSelected sometimes null?
             if (WebClientSelected == null) goto RetryWebClientSelect; //If this causes freezing problem due to infinite loop, will have to rewrite the invoke download parts.
 
-            WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-            WebClientSelected.Headers.Add(HttpRequestHeader.Referer, SiteReferer);
+            //Remove any old headers first
+            WebClientSelected.Headers.Remove(HttpRequestHeader.Referer);
+            WebClientSelected.Headers.Remove(HttpRequestHeader.Cookie);
+            WebClientSelected.Headers.Remove(HttpRequestHeader.UserAgent);
+
             switch (SiteReferer)
             {
                 case "https://e621.net":
@@ -882,10 +885,34 @@ namespace e621_ReBot_v3.Modules
                         break;
                     }
 
-                case "https://www.hiccears.com":
+                //case "www.furaffinity.net":
+                case "https://d.furaffinity.net":
                     {
-                        string BaseURL = "https://www.hiccears.com";
-                        List<CefSharp.Cookie> CookieList = Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true).Result;
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.furaffinity.net/");
+                        break;
+                    }
+
+                //case "inkbunny.net":
+                case string Inkbunny when Inkbunny.Contains("ib.metapix.net"):
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://inkbunny.net/");
+                        break;
+                    }
+
+                //case "www.pixiv.net":
+                case "https://i.pximg.net":
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.pixiv.net/");
+                        break;
+                    }
+
+                case "https://www.hiccears.com": //verify, after fixing hiccears first
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        List<CefSharp.Cookie> CookieList = Cef.GetGlobalCookieManager().VisitUrlCookiesAsync("https://www.hiccears.com", true).Result;
                         foreach (CefSharp.Cookie CookieHolder in CookieList)
                         {
                             if (CookieHolder.Name.Equals("hiccears"))
@@ -896,9 +923,61 @@ namespace e621_ReBot_v3.Modules
                         }
                         break;
                     }
-                case "https://i.pximg.net":
+
+                //case "x.com":
+                case "https://pbs.twimg.com":
                     {
-                        SiteReferer = "https://www.pixiv.net/";
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://x.com/");
+                        break;
+                    }
+
+                //case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
+                case "https://art.ngfiles.com": //images
+                case "https://uploads.ungrounded.net": //videos
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.newgrounds.com/");
+                        break;
+                    }
+
+
+                //case string SoFurry when SoFurry.Contains(".sofurry.com"):
+
+
+                //case "www.weasyl.com": //used from cache
+
+
+                //case "mastodon.social":
+                //case "baraag.net":
+                //case "pawoo.net":
+                case "https://pictures.hentai-foundry.com": //they only have pictures
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.hentai-foundry.com/");
+                        break;
+                    }
+
+
+                case "https://images.plurk.com":
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
+                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.plurk.com/");
+                        break;
+                    }
+
+
+                //case "bsky.app":
+
+
+                //case "derpibooru.org":
+
+
+                //case "itaku.ee":
+
+                default:
+                    {
+                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
                         break;
                     }
             }
@@ -1038,12 +1117,13 @@ namespace e621_ReBot_v3.Modules
                 string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
                 if (!ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
                 {
+                    Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
                     if (ErrorMsg.Contains("There is not enough space on the disk."))
                     {
                         if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true)
                         {
                             //Also stop downloads when disk is full
-                            Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                            //Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
                             //Show error just the first time
                             MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
                         }

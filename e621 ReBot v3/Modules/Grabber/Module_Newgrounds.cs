@@ -130,7 +130,7 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             string Post_URL = WebAddress;
 
-            string Post_DateTimeTemp = PostNode.SelectSingleNode(".//div[@id='sidestats']//dl[@class='sidestats' and not(@data-statistics)]/dd").InnerText.Trim();
+            string Post_DateTimeTemp = PostNode.SelectSingleNode(".//div[@id='sidestats']//dl[@class='sidestats' and not(@data-statistics)]/dd[@class='multivalue']/span").InnerText;
             DateTime Post_DateTime = DateTime.ParseExact(Post_DateTimeTemp, "MMM d, yyyy", CultureInfo.InvariantCulture);
 
             string Post_Title = PostNode.SelectSingleNode(".//div[@class='pod']//h2[@itemprop='name']").InnerText.Trim();
@@ -158,23 +158,10 @@ namespace e621_ReBot_v3.Modules.Grabber
                     {
                         if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
                     });
-                    if (ImageNodes.Count == 1 || MediaCounter == 1)
-                    {
-                        Post_MediaURL = ImageNode.Attributes["src"].Value;
-                        Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
-                    }
-                    else
-                    {
-                        if (ImageNode.Attributes["src"] != null && ImageNode.Attributes["src"].Value.Contains("thumbnails"))
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            Post_MediaURL = ImageNode.Attributes["data-smartload-src"].Value;
-                            //ThumbnailURLTemp = Post_MediaURL;
-                        }
-                    }
+
+                    //parent /a node has partial url as link so use that instead
+                    Post_MediaURL = ImageNode.ParentNode.Attributes["href"].Value;
+                    if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
 
                     if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {

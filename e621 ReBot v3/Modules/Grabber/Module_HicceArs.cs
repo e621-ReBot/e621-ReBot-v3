@@ -132,6 +132,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
             // - - - - - - - - - - - - - - - -
 
+            PostNode = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//div[@class='content-grid pt-0']");
+
             string Post_URL = WebAddress;
 
             string Post_DateTimeTemp = PostNode.SelectSingleNode(".//p[@class='information-line-title' and text()='Created at']").NextSibling.InnerText.Trim();

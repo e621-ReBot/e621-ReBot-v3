@@ -258,24 +258,30 @@ namespace CefSharp
                             {
                                 JToken JTokenTemp = JToken.Parse(Data2String);
                                 //[@something]makes it go two levels deep.
-                                IEnumerable<JToken> MastodonsContainer = Data2String.StartsWith("{") ? JTokenTemp : MastodonsContainer = JTokenTemp.SelectTokens("$[?(@.media_attachments[0] != null)]");
-                                if (MastodonsContainer.Any())
-                                {
-                                    bool SkipUnion = false;
-                                    JArray MastodonHolder = new JArray(MastodonsContainer);
-                                    if (Module_Mastodons.MastodonsJSONHolder == null)
-                                    {
-                                        Module_Mastodons.MastodonsJSONHolder = MastodonHolder;
-                                        SkipUnion = true;
-                                    }
+                                IEnumerable<JToken>? MastodonsContainer = Data2String.StartsWith('{') ? new JToken[] { JTokenTemp } : JTokenTemp.SelectTokens("$[*].media_attachments").Where(m => m.HasValues).Select(t => t.Parent?.Parent);
 
+                                // Exit if no valid posts
+                                if (MastodonsContainer == null || !MastodonsContainer.Any()) return;
+
+                                if (Module_Mastodons.MastodonsJSONHolder == null)
+                                {
+                                    Module_Mastodons.MastodonsJSONHolder = new JArray(MastodonsContainer);
+                                }
+                                else
+                                {
                                     lock (Module_Mastodons.MastodonsJSONHolder)
                                     {
-                                        if (!SkipUnion) Module_Mastodons.MastodonsJSONHolder.Merge(MastodonHolder, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union });
+                                        HashSet<string?> ExistingIDs = Module_Mastodons.MastodonsJSONHolder.Select(post => (string)post["id"]).ToHashSet();
+                                        foreach (JToken post in MastodonsContainer)
+                                        {
+                                            string postID = (string)post["id"];
+                                            //Try to add to existing ids, if it fails it means it's duplicate
+                                            if (ExistingIDs.Add(postID)) Module_Mastodons.MastodonsJSONHolder.Add(post);
+                                        }
                                     }
-                                    Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
-                                    Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
                                 }
+                                Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
+                                Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
                             }
                         }
                         break;
