@@ -134,9 +134,20 @@ namespace CefSharp
 
         protected override CefReturnValue OnBeforeResourceLoad(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IRequestCallback callback)
         {
-            if (request.Url.StartsWith("https://i.pximg.net/", StringComparison.OrdinalIgnoreCase))
+            Uri uri = new Uri(request.Url);
+            switch (uri.Host)
             {
-                request.SetReferrer("http://www.pixiv.net", ReferrerPolicy.Default);
+                case "i.pximg.net":
+                    {
+                        request.SetReferrer("https://www.pixiv.net", ReferrerPolicy.Default);
+                        break;
+                    }
+
+                case "inkbunny.net":
+                    {
+                        request.SetReferrer("https://inkbunny.net/", ReferrerPolicy.Default);
+                        break;
+                    }
             }
             return CefReturnValue.Continue;
         }

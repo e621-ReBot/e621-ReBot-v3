@@ -147,6 +147,7 @@ namespace e621_ReBot_v3.Modules.Downloader
             HttpWebRequest CheckExistsRequest = (HttpWebRequest)WebRequest.Create(Post_MediaURL);
             CheckExistsRequest.Method = "HEAD";
             CheckExistsRequest.UserAgent = AppSettings.GlobalUserAgent;
+            CheckExistsRequest.Referer = "https://inkbunny.net/";
             CheckExistsRequest.Timeout = 3000;
             try
             {

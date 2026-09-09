@@ -1,4 +1,5 @@
 ﻿using CefSharp;
+using CefSharp.DevTools.Network;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
@@ -12,6 +13,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -402,7 +404,90 @@ namespace e621_ReBot_v3.Modules
             try
             {
                 HttpClient ClientSelector = SelectClient(DownloadURL);
-                HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.GetAsync(DownloadURL, HttpCompletionOption.ResponseHeadersRead);
+
+                using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, DownloadURL);
+                HttpRequestMessageTemp.Headers.Add("User-Agent", AppSettings.GlobalUserAgent);
+                
+                Uri UriTemp = new Uri(DownloadURL);
+                switch (UriTemp.Host)
+                {
+                    case "d.furaffinity.net":
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://www.furaffinity.net/");
+                            break;
+                        }
+
+                    case "i.pximg.net":
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer","https://www.pixiv.net");
+                            break;
+                        }
+
+                    case "inkbunny.net":
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://inkbunny.net/");
+                            break;
+                        }
+
+                    //case "https://www.hiccears.com": //verify, after fixing hiccears first
+                    //    {
+                    //        List<CefSharp.Cookie> CookieList = Cef.GetGlobalCookieManager().VisitUrlCookiesAsync("https://www.hiccears.com", true).Result;
+                    //        foreach (CefSharp.Cookie CookieHolder in CookieList)
+                    //        {
+                    //            if (CookieHolder.Name.Equals("hiccears"))
+                    //            {
+                    //                HttpRequestMessageTemp.Headers.Add(CookieHolder.Name, CookieHolder.Value);
+                    //                break;
+                    //            }
+                    //        }
+                    //        break;
+                    //    }
+
+                    //case "x.com":
+                    case "pbs.twimg.com":
+                    case "video.twimg.com":
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://x.com/");
+                            break;
+                        }
+
+                    //case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
+                    case "art.ngfiles.com": //images
+                    case "uploads.ungrounded.net": //videos
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://www.newgrounds.com/");
+                            break;
+                        }
+
+
+                    //case string SoFurry when SoFurry.Contains(".sofurry.com"):
+
+
+                    //case "www.weasyl.com": //used from cache
+
+
+                    //case "mastodon.social":
+                    //case "baraag.net":
+                    //case "pawoo.net":
+
+
+                    case "pictures.hentai-foundry.com": //they only have pictures
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://www.hentai-foundry.com/");
+                            break;
+                        }
+
+                    case "images.plurk.com":
+                        {
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://www.plurk.com/");
+                            break;
+                        }
+                }
+
+
+
+
+                    HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead);
                 HttpResponseMessageTemp.EnsureSuccessStatusCode();
 
                 long? BytesInTotal = HttpResponseMessageTemp.Content.Headers.ContentLength;
@@ -926,6 +1011,7 @@ namespace e621_ReBot_v3.Modules
 
                 //case "x.com":
                 case "https://pbs.twimg.com":
+                case "https://video.twimg.com":
                     {
                         WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
                         WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://x.com/");
