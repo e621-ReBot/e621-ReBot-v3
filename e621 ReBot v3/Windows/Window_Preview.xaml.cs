@@ -2,7 +2,6 @@
 using CefSharp.Wpf;
 using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules;
-using e621_ReBot_v3.Modules.Converter;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -55,16 +52,6 @@ namespace e621_ReBot_v3
             Grid.SetRow(MediaBrowser, 2);
 
             ActionAfterDelayTimer.Tick += ActionAfterDelayTimer_Tick;
-
-            if (Module_CookieJar.Cookies_Pixiv == null) Module_CookieJar.GetCookies("https://www.pixiv.net/", ref Module_CookieJar.Cookies_Pixiv);
-            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
-            {
-                CookieContainer = Module_CookieJar.Cookies_Pixiv,
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            };
-            UgoiraHttpClient = new HttpClient(HttpClientHandlerTemp);
-            UgoiraHttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-            UgoiraHttpClient.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net/");
 
             AlreadyUploaded_Label.Text = string.Empty;
             MediaUgoiraPlayer.Visibility = Visibility.Hidden;
@@ -1138,14 +1125,21 @@ namespace e621_ReBot_v3
             PB_LoadAllMedia.Foreground = new SolidColorBrush(PB_LoadAllMedia.IsEnabled ? Colors.LightSteelBlue : Colors.Black);
         }
 
-        private readonly HttpClient UgoiraHttpClient;
         private async void PB_PlayUgoira_Click(object sender, RoutedEventArgs e)
         {
             PB_PlayUgoira.IsEnabled = false;
             panel_Navigation.IsEnabled = false;
 
             //Get Ugoira Data
-            string? UgoiraJSON = await Module_FFMpeg.UgoiraJSONResponse(MediaItemHolder.Grab_PageURL);
+            string WorkID = MediaItemHolder.Grab_PageURL.Substring(MediaItemHolder.Grab_PageURL.LastIndexOf('/') + 1);
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/illust/{WorkID}/ugoira_meta");
+            if (!DownloadResultTemp.IsSuccessStatusCode)
+            {
+                MessageBox.Show(this, "There was an error getting Pixiv Ugoira JSON.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string? UgoiraJSON = DownloadResultTemp.TextData;
             JToken UgoiraJObject = JObject.Parse(UgoiraJSON)["body"];
 
             //Extract JSON Data
@@ -1157,8 +1151,14 @@ namespace e621_ReBot_v3
             }
 
             //Get Images
-            byte[] UgoiraBytes = await UgoiraHttpClient.GetByteArrayAsync((string)UgoiraJObject["src"]); //originalSrc
-            using (MemoryStream bytes2Stream = new MemoryStream(UgoiraBytes))
+            DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync((string)UgoiraJObject["src"]);
+            if (!DownloadResultTemp.IsSuccessStatusCode)
+            {
+                MessageBox.Show(this, "There was an error getting Pixiv Ugoira bytes.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (MemoryStream bytes2Stream = new MemoryStream(DownloadResultTemp.Data))
             {
                 using (ZipArchive UgoiraZip = new ZipArchive(bytes2Stream, ZipArchiveMode.Read))
                 {

@@ -14,7 +14,6 @@ namespace e621_ReBot_v3.Modules.Grabber
     {
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Inkbunny);
             if (WebAddress.StartsWith("https://inkbunny.net/s/"))
             {
                 Queue_Single(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);
@@ -126,6 +125,11 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
+        //https://wiki.inkbunny.net/wiki/API#Search
+        //https://inkbunny.net/api_login.php?output_mode=xml&username=guest
+        //https://inkbunny.net/api_userrating.php?output_mode=json&sid={sid}&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes //To enable other ratings, besides general. HOWEVER, submissions could still be blocked to GUESTS.
+        //https://inkbunny.net/api_search.php?sid=sid={sid}&username={username}&submissions_per_page=100
+        //https://inkbunny.net/api_submissions.php?sid={sid}&submission_ids={id}
         internal static async Task Grab(string WebAddress, string HTMLSource)
         {
             HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Inkbunny) : HTMLSource;
@@ -163,8 +167,11 @@ namespace e621_ReBot_v3.Modules.Grabber
             string? Post_Text = Module_Html2Text.Html2Text_Inkbunny(Post_TextNode);
 
             string Post_MediaURL;
-            List<MediaItem> MediaItemList = new List<MediaItem>();
+            string Post_ThumbnailURL;
             ushort SkipCounter = 0;
+            List<MediaItem> MediaItemList = new List<MediaItem>();
+
+            //Check if single or multi post
             if (PostNode.SelectSingleNode(".//form[@id='changethumboriginal_form']") == null)
             {
                 if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
@@ -178,7 +185,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 if (Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                 {
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                    Post_ThumbnailURL = HtmlDocumentTemp.DocumentNode.SelectSingleNode(".//meta[@property='og:image']").Attributes["content"].Value;
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                 }
                 else
                 {
@@ -187,7 +195,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
-                List<string> MediaTypes = new List<string>() { ".jpg", ".png", ".gif", ".mp4", ".swf" };
+                HashSet<string> MediaTypes = new HashSet<string>() { ".jpg", ".png", ".gif", ".mp4", ".swf" };
                 HtmlNode ParentNode = PostNode.SelectSingleNode(".//div[@id='files_area']").ParentNode;
                 ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(ParentNode.SelectNodes(".//img").Count));
                 ushort MediaCounter = 0;
@@ -198,12 +206,12 @@ namespace e621_ReBot_v3.Modules.Grabber
                     {
                         if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
                     });
-                    Post_MediaURL = ImageNode.Attributes["src"].Value;
+
+                    Post_ThumbnailURL = ImageNode.Attributes["src"].Value;
+                    Post_MediaURL = Post_ThumbnailURL;
 
                     if (Post_MediaURL.Contains("overlays/writing")) //don't need writing thumb
-                    {
                         continue;
-                    }
 
                     if (Post_MediaURL.Contains("overlays/video")) //if video
                     {
@@ -225,27 +233,31 @@ namespace e621_ReBot_v3.Modules.Grabber
                             Post_MediaURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value;
                         }
                     }
+
                     Post_MediaURL = Post_MediaURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", null);
                     Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.Length - 4);
 
+                    bool DiscardThis = true; //It's json otherwise as it doesn't have /full/ of any of the above types
                     string MediaLinkFix;
                     foreach (string MediaType in MediaTypes)
                     {
                         MediaLinkFix = $"{Post_MediaURL}{MediaType}";
-                        if (CheckURLExists(MediaLinkFix))
+                        bool TypeFound = await CheckURLExists(MediaLinkFix);
+                        if (TypeFound)
                         {
                             Post_MediaURL = MediaLinkFix;
+                            DiscardThis = false;
                             break;
                         }
                     }
 
-                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
+                    if (DiscardThis || !Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                     {
                         SkipCounter++;
                         continue;
                     }
 
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
                     await Task.Delay(Module_Grabber.PauseBetweenImages);
                 }
                 Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
@@ -277,30 +289,29 @@ namespace e621_ReBot_v3.Modules.Grabber
             Module_Grabber.Report_Info(PrintText);
         }
 
-        private static MediaItem CreateMediaItem(string Post_URL, string Post_MediaURL, DateTime Post_DateTime, string ArtistName, string Post_Title, string? Post_Text)
+        private static MediaItem CreateMediaItem(string Post_URL, string Post_MediaURL, string Post_ThumbnailURL, DateTime Post_DateTime, string ArtistName, string Post_Title, string? Post_Text)
         {
-            string ThumbnailURLTemp;
+            Post_ThumbnailURL = Post_ThumbnailURL.Replace("thumbnails/medium", "thumbnails/large");
             switch (Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.')))
             {
                 case ".mp4":
                 case ".swf":
                     {
-                        ThumbnailURLTemp = Post_MediaURL.Substring(0, Post_MediaURL.Length - 4) + ".jpg";
-                        ThumbnailURLTemp = ThumbnailURLTemp.Replace("files/full", "thumbnails/large");
-                        ThumbnailURLTemp = CheckURLExists(ThumbnailURLTemp) ? ThumbnailURLTemp : "https://nl.ib.metapix.net/images80/overlays/video.png";
+                        if (CheckURLExists(Post_ThumbnailURL).Result == false)
+                            Post_ThumbnailURL = "https://nl.ib.metapix.net/images80/overlays/video.png";
+
                         break;
                     }
 
                 case ".gif":
                     {
-                        ThumbnailURLTemp = Post_MediaURL.Replace("files/full", "files/screen");
+                        //Post_ThumbnailURL = Post_MediaURL.Replace("files/full", "files/screen");
                         break;
                     }
 
                 default:
                     {
-                        ThumbnailURLTemp = Post_MediaURL.Replace("files/full", "thumbnails/large");
-                        ThumbnailURLTemp = ThumbnailURLTemp.Substring(0, ThumbnailURLTemp.Length - 4) + "_noncustom.jpg";
+                        //Post_ThumbnailURL = Post_MediaURL.Substring(0, Post_MediaURL.Length - 4) + "_noncustom.jpg";
                         break;
                     }
             }
@@ -309,43 +320,27 @@ namespace e621_ReBot_v3.Modules.Grabber
             {
                 Grab_PageURL = Post_URL,
                 Grab_MediaURL = Post_MediaURL,
-                Grab_ThumbnailURL = ThumbnailURLTemp,
+                Grab_ThumbnailURL = Post_ThumbnailURL,
                 Grab_DateTime = Post_DateTime,
                 Grab_Artist = ArtistName,
                 Grab_Title = $"⮚ {Post_Title} ⮘ by {ArtistName} on Inkbunny",
                 Grab_TextBody = Post_Text,
                 Grid_MediaFormat = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1),
-                Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL),
+                //Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL), it's not full data anyway, so don't make extra requests
                 UP_Tags = Post_DateTime.Year.ToString(),
                 UP_IsWhitelisted = true
             };
             return MediaItemTemp;
         }
 
-        private static bool CheckURLExists(string Post_MediaURL)
+        private static async Task<bool> CheckURLExists(string Post_MediaURL)
         {
-            HttpWebRequest CheckExistsRequest = (HttpWebRequest)WebRequest.Create(Post_MediaURL);
-            CheckExistsRequest.Method = "HEAD";
-            CheckExistsRequest.UserAgent = AppSettings.GlobalUserAgent;
-            CheckExistsRequest.Timeout = 3000;
-            try
-            {
-                using (HttpWebResponse GetSizeResponse = (HttpWebResponse)CheckExistsRequest.GetResponse())
-                {
-                    if (GetSizeResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.HeadRequestAsync(Post_MediaURL);
+
+            if (DownloadResultTemp.IsSuccessStatusCode)
+                return true;
+
+            return false;
         }
 
         internal static string MultiPageCheck()

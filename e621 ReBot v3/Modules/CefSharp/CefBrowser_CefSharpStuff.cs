@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -176,6 +177,8 @@ namespace CefSharp
 
         protected override void OnResourceLoadComplete(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response, UrlRequestStatus status, long receivedContentLength)
         {
+            string AdressToValidate = string.Empty;
+
             switch (request.Url)
             {
                 case string e621 when e621.StartsWith("https://e621.net/"):
@@ -183,8 +186,14 @@ namespace CefSharp
                         if (response.MimeType.Equals("text/html"))
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            Module_Downloader.DownloadEnabler(request.Url);
-                            Window_PoolWatcher.PoolWatcherEnabler(request.Url);
+                            //delay validation
+                            string AddresstoValidate = request.Url;
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(500);
+                                Module_Downloader.DownloadEnabler(AddresstoValidate);
+                                Window_PoolWatcher.PoolWatcherEnabler(AddresstoValidate);
+                            });
                         }
                         break;
                     }
@@ -199,8 +208,14 @@ namespace CefSharp
                         if (response.MimeType.Equals("text/html"))
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            Module_Grabber.GrabEnabler(request.Url);
-                            Module_Downloader.DownloadEnabler(request.Url);
+                            //delay validation
+                            string AddresstoValidate = request.Url;
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(500);
+                                Module_Grabber.GrabEnabler(AddresstoValidate);
+                                Module_Downloader.DownloadEnabler(AddresstoValidate);
+                            });
                         }
                         break;
                     }
@@ -292,7 +307,13 @@ namespace CefSharp
                         if (response.MimeType.Equals("text/html"))
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            Module_Grabber.GrabEnabler(request.Url);
+                            //delay validation
+                            string AddresstoValidate = request.Url;
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(500);
+                                Module_Grabber.GrabEnabler(AddresstoValidate);
+                            });
                         }
                         else //json
                         {
@@ -329,7 +350,13 @@ namespace CefSharp
                         if (response.MimeType.Equals("text/html"))
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            Module_Downloader.DownloadEnabler(request.Url);
+                            //delay validation
+                            string AddresstoValidate = request.Url;
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(500);
+                                Module_Downloader.DownloadEnabler(AddresstoValidate);
+                            });
                         }
                         break;
                     }

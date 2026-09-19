@@ -155,10 +155,11 @@ namespace e621_ReBot_v3.CustomControls
             BrowserQuickButtons.IsEnabled = false;
         }
 
-        private void BB_Grab_Click(object sender, RoutedEventArgs e)
+        private async void BB_Grab_Click(object sender, RoutedEventArgs e)
         {
             BB_Grab.Visibility = Visibility.Collapsed;
             //Worker_Sound();
+            await ReBot_HttpClient.GetCookies(BB_Grab.Tag.ToString());
             Module_Grabber.Grab_1Link(BB_Grab.Tag.ToString());
         }
 

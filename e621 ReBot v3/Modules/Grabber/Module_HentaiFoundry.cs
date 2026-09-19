@@ -19,7 +19,6 @@ namespace e621_ReBot_v3.Modules.Grabber
         private static partial Regex HF_Regex();
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_HentaiFoundry);
             if (HF_Regex().Match(WebAddress).Success)
             {
                 Queue_Single(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);

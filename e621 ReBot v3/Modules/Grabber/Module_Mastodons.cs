@@ -14,9 +14,8 @@ namespace e621_ReBot_v3.Modules.Grabber
     {
         internal static JArray? MastodonsJSONHolder;
 
-        internal static void Queue_Prepare(string WebAddress, ref CookieContainer CookieRef)
+        internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref CookieRef);
             string NumericPartCheck = WebAddress.Substring(WebAddress.LastIndexOf('/') + 1);
             if (NumericPartCheck.All(char.IsDigit))
             {

@@ -257,20 +257,10 @@ namespace e621_ReBot_v3.Modules
                     }
 
                 case "mastodon.social":
-                    {
-                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Mastodon));
-                        break;
-                    }
-
                 case "baraag.net":
-                    {
-                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Baraag));
-                        break;
-                    }
-
                 case "pawoo.net":
                     {
-                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress, ref Module_CookieJar.Cookies_Pawoo));
+                        Task.Run(() => Module_Mastodons.Queue_Prepare(WebAddress));
                         break;
                     }
 
@@ -589,56 +579,12 @@ namespace e621_ReBot_v3.Modules
 
         internal static uint? GetMediaSize(string MediaURL)
         {
-            HttpWebRequest GetSizeRequest = (HttpWebRequest)WebRequest.Create(MediaURL);
-            GetSizeRequest.Method = "HEAD";
-            GetSizeRequest.UserAgent = AppSettings.GlobalUserAgent;
-            GetSizeRequest.Timeout = 3000;
+            DownloadResult DownloadResultTemp = ReBot_HttpClient.HeadRequestAsync(MediaURL).Result;
 
-            Uri TempURI = new Uri(MediaURL);
-            switch (TempURI.Host)
-            {
-                case "i.pximg.net":
-                    {
-                        GetSizeRequest.Referer = "http://www.pixiv.net";
-                        break;
-                    }
+            if (DownloadResultTemp.IsSuccessStatusCode)
+                return (uint?)DownloadResultTemp.DataLength;
 
-                case "pbs.twimg.com": //Twitter sometimes not working otherwise
-                    {
-                        GetSizeRequest.CookieContainer = new CookieContainer();
-                        break;
-                    }
-
-                    //case "www.hiccears.com":
-                    //    {
-                    //        GetSizeRequest.CookieContainer = Module_CookieJar.Cookies_HicceArs;
-                    //        break;
-                    //    }
-                    //case "deviantart.com":
-                    //    {
-                    //        GetSizeRequest.CookieContainer = Module_CookieJar.Cookies_DeviantArt;
-                    //        break;
-                    //    }
-            }
-
-            try
-            {
-                using (HttpWebResponse GetSizeResponse = (HttpWebResponse)GetSizeRequest.GetResponse())
-                {
-                    if (GetSizeResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        return (GetSizeResponse.ContentLength < 0) ? null : (uint)GetSizeResponse.ContentLength;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }
-            catch (WebException)
-            {
-                return null;
-            }
+            return null;
         }
 
         internal static ProgressBar? GetProgressBar(int SetMaxValue)
@@ -728,86 +674,69 @@ namespace e621_ReBot_v3.Modules
             return null;
         }
 
-        private static readonly HttpClientHandler GrabberThumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
-        private static readonly HttpClient GrabberThumbnail_HttpClient = new HttpClient(GrabberThumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15), DefaultRequestVersion = HttpVersion.Version30 };
         internal static async Task Grab_Thumbnail(MediaItem MediaItemRef)
         {
             MediaItemRef.Grid_ThumbnailDLStart = true;
-            using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, MediaItemRef.Grab_ThumbnailURL))
+            GridVE? GridVERef = IsVisibleInGrid(MediaItemRef);
+            try
             {
-                HttpRequestMessageTemp.Headers.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                HttpRequestMessageTemp.Headers.Referrer = new Uri($"https://{new Uri(MediaItemRef.Grab_PageURL).Host}");
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync(MediaItemRef.Grab_ThumbnailURL);
 
-                GridVE GridVERef = IsVisibleInGrid(MediaItemRef);
-                try
+                //When item gets deleted before thumb is downloaded
+                if (!_Grabbed_MediaItems.Contains(MediaItemRef))
+                    return;
+
+                if (DownloadResultTemp.IsSuccessStatusCode)
                 {
-                    using (HttpResponseMessage HttpResponseMessageTemp = await GrabberThumbnail_HttpClient.SendAsync(HttpRequestMessageTemp))
+                    //Mastodons are returning Status OK but with no data as protection on thumbnails or maybe CDN error, since they do so on browser as well, but only some images and I don't see why
+                    if (DownloadResultTemp.Data.Length == 0)
                     {
-                        if (HttpResponseMessageTemp.IsSuccessStatusCode)
-                        {
-                            if (!_Grabbed_MediaItems.Contains(MediaItemRef)) return; //When item gets deleted before thumb is downloaded
+                        MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                        GridVERef?.SetErrorText("e:Mastodons");
+                        return;
+                    }
 
+                    using MemoryStream MemoryStreamTemp = new MemoryStream(DownloadResultTemp.Data);
+                    BitmapImage? DownloadedImage = new BitmapImage();
+                    DownloadedImage.BeginInit();
+                    DownloadedImage.CacheOption = BitmapCacheOption.OnLoad;
+                    DownloadedImage.StreamSource = MemoryStreamTemp;
+                    DownloadedImage.EndInit();
 
-                            using (MemoryStream MemoryStreamTemp = new MemoryStream())
-                            {
-                                await HttpResponseMessageTemp.Content.CopyToAsync(MemoryStreamTemp);
-                                await MemoryStreamTemp.FlushAsync(); //CopyToAsync does not guarantee flush completion before decode in some edge cases.
-                                MemoryStreamTemp.Seek(0, SeekOrigin.Begin);
-
-                                if (MemoryStreamTemp.Length == 0)
-                                {
-                                    //Mastodons are returning Status OK but with no data as protection on thumbnails or maybe CDN error, since they do so on browser as well, but only some images and I don't see why
-                                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
-                                    GridVERef?.SetErrorText("e:Mastodons");
-                                    return;
-                                }
-
-                                BitmapImage? DownloadedImage = new BitmapImage();
-                                DownloadedImage.BeginInit();
-                                DownloadedImage.CacheOption = BitmapCacheOption.OnLoad;
-                                DownloadedImage.StreamSource = MemoryStreamTemp;
-                                DownloadedImage.EndInit();
-
-                                MediaItemRef.Grid_Thumbnail = Grab_ResizeThumbnail(DownloadedImage, $".{MediaItemRef.Grid_MediaFormat}");
-                                Grab_MakeThumbnailInfoText(MediaItemRef);
-                                DownloadedImage.StreamSource = null;
-                                DownloadedImage.Freeze();
-                                DownloadedImage = null;
-
-                                GridVERef?.LoadImage();
-                            }
-                        }
-                        else
-                        {
-                            MediaItemRef.Grid_ThumbnailDLStart = false;
-                            //Show error text only if it's not uploaded already
-                            if (MediaItemRef.UP_UploadedID == null)
-                            {
-                                GridVERef?.SetErrorText($"e:{(int)HttpResponseMessageTemp.StatusCode}"); //Retry on next load
-                            }
-                        }
+                    MediaItemRef.Grid_Thumbnail = Grab_ResizeThumbnail(DownloadedImage, $".{MediaItemRef.Grid_MediaFormat}");
+                    Grab_MakeThumbnailInfoText(MediaItemRef);
+                    DownloadedImage.Freeze();
+                    GridVERef?.LoadImage();
+                }
+                else
+                {
+                    MediaItemRef.Grid_ThumbnailDLStart = false;
+                    //Show error text only if it's not uploaded already
+                    if (MediaItemRef.UP_UploadedID == null)
+                    {
+                        GridVERef?.SetErrorText($"e:{(int)DownloadResultTemp.StatusCode}"); //Retry on next load
                     }
                 }
-                catch (TaskCanceledException) //Timout that was manually set
-                {
-                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
-                    GridVERef?.SetErrorText("e:Timeout");
-                }
-                catch (Exception)
-                {
-                    MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
-                    GridVERef?.SetErrorText("e:Exception");
-                }
+            }
+            catch (TaskCanceledException) //Timout that was manually set
+            {
+                MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                GridVERef?.SetErrorText("e:Timeout");
+            }
+            catch (Exception)
+            {
+                MediaItemRef.Grid_ThumbnailDLStart = false; //Retry on next load
+                GridVERef?.SetErrorText("e:Exception");
             }
         }
 
         internal static ImageSource Grab_ResizeThumbnail(BitmapImage BitmapImageRef, string ThumbType)
         {
             float LargerSize = Math.Max(BitmapImageRef.PixelWidth, BitmapImageRef.PixelHeight);
-            float scale_factor = LargerSize > 200 ? 200 / LargerSize : 1;
-            int NewImageWidth = (int)(BitmapImageRef.PixelWidth * scale_factor);
-            int NewImageHeight = (int)(BitmapImageRef.PixelHeight * scale_factor);
-            TransformedBitmap ScaledBitmap = new TransformedBitmap(BitmapImageRef, new ScaleTransform(scale_factor, scale_factor));
+            float ScaleFactor = LargerSize > 200 ? 200 / LargerSize : 1;
+            int NewImageWidth = (int)(BitmapImageRef.PixelWidth * ScaleFactor);
+            int NewImageHeight = (int)(BitmapImageRef.PixelHeight * ScaleFactor);
+            TransformedBitmap ScaledBitmap = new TransformedBitmap(BitmapImageRef, new ScaleTransform(ScaleFactor, ScaleFactor));
 
             DrawingVisual DrawingVisualTemp = new DrawingVisual();
             //RenderOptions.SetBitmapScalingMode(DrawingVisualTemp, BitmapScalingMode.HighQuality);
@@ -817,19 +746,10 @@ namespace e621_ReBot_v3.Modules
                 Point ImageCenterPoint = new Point(100 - (NewImageWidth / 2), 100 - (NewImageHeight / 2));
                 DrawingContextTemp.DrawImage(ScaledBitmap, new Rect(ImageCenterPoint, new Size(NewImageWidth, NewImageHeight)));
 
-                FormattedText FormattedTextTemp = new FormattedText(ThumbType, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial Black"), 16, Brushes.LightSteelBlue, 96)
-                {
-                    TextAlignment = TextAlignment.Right
-                };
                 Point TextCenterPoint = new Point(176, 0);
-                DrawingContextTemp.DrawGeometry(Brushes.LightSteelBlue, new Pen(Brushes.Black, 3), FormattedTextTemp.BuildGeometry(TextCenterPoint));
-                DrawingContextTemp.DrawText(FormattedTextTemp, TextCenterPoint);
+                DrawOutlinedText(DrawingContextTemp, ThumbType, TextCenterPoint, 16, TextAlignment.Right);
             }
-            RenderTargetBitmap RenderTargetBitmapTemp = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Pbgra32);
-            RenderTargetBitmapTemp.Render(DrawingVisualTemp);
-            RenderTargetBitmapTemp.Freeze();
-
-            return RenderTargetBitmapTemp;
+            return RenderThumbnail(DrawingVisualTemp);
         }
 
         internal static void Grab_MakeThumbnailInfoText(MediaItem MediaItemRef)
@@ -843,32 +763,39 @@ namespace e621_ReBot_v3.Modules
                 DrawingContextTemp.DrawImage(MediaItemRef.Grid_Thumbnail, new Rect(new Point(0, 0), new Size(200, 200)));
                 if (MediaItemRef.Grid_MediaByteLength != null)
                 {
-                    FormattedText FormattedTextTemp = new FormattedText($"{MediaItemRef.Grid_MediaByteLength / 1024:N0} kB", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial Black"), 12, Brushes.LightSteelBlue, 96)
-                    {
-                        TextAlignment = TextAlignment.Center
-                    };
                     Point TextCenterPoint = new Point(100, 182);
-                    DrawingContextTemp.DrawGeometry(Brushes.LightSteelBlue, new Pen(Brushes.Black, 3), FormattedTextTemp.BuildGeometry(TextCenterPoint));
-                    DrawingContextTemp.DrawText(FormattedTextTemp, TextCenterPoint);
+                    DrawOutlinedText(DrawingContextTemp, $"{MediaItemRef.Grid_MediaByteLength / 1024:N0} kB", TextCenterPoint, 12, TextAlignment.Center);
                 }
                 if (MediaItemRef.Grid_MediaWidth != null)
                 {
-                    FormattedText FormattedTextTemp = new FormattedText($"{MediaItemRef.Grid_MediaWidth} x {MediaItemRef.Grid_MediaHeight}", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial Black"), 12, Brushes.LightSteelBlue, 96)
-                    {
-                        TextAlignment = TextAlignment.Left
-                    };
                     Point TextCenterPoint = new Point(20, 4);
-                    DrawingContextTemp.DrawGeometry(Brushes.LightSteelBlue, new Pen(Brushes.Black, 3), FormattedTextTemp.BuildGeometry(TextCenterPoint));
-                    DrawingContextTemp.DrawText(FormattedTextTemp, TextCenterPoint);
+                    DrawOutlinedText(DrawingContextTemp, $"{MediaItemRef.Grid_MediaWidth} x {MediaItemRef.Grid_MediaHeight}", TextCenterPoint, 12, TextAlignment.Left);
                 }
             }
+            MediaItemRef.Grid_Thumbnail = RenderThumbnail(DrawingVisualTemp);
+            MediaItemRef.Grid_ThumbnailFullInfo = null;
+        }
+
+        static readonly Brush TextBrush = Brushes.LightSteelBlue;
+        private static readonly Pen OutlinePen = new Pen(Brushes.Black, 3);
+        private static readonly Typeface TextTypeface = new Typeface("Arial Black");
+        private static void DrawOutlinedText(DrawingContext context, string text, Point position, double fontSize, TextAlignment alignment)
+        {
+            FormattedText formattedText = new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, TextTypeface, fontSize, TextBrush, 96)
+            {
+                TextAlignment = alignment
+            };
+            context.DrawGeometry(TextBrush, OutlinePen, formattedText.BuildGeometry(position));
+            context.DrawText(formattedText, position);
+        }
+
+        private static RenderTargetBitmap RenderThumbnail(DrawingVisual DrawingVisualTemp)
+        {
             RenderTargetBitmap RenderTargetBitmapTemp = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Pbgra32);
             RenderTargetBitmapTemp.Render(DrawingVisualTemp);
             if (RenderTargetBitmapTemp.CanFreeze && !RenderTargetBitmapTemp.IsFrozen) RenderTargetBitmapTemp.Freeze();
 
-            MediaItemRef.Grid_Thumbnail = null;
-            MediaItemRef.Grid_Thumbnail = RenderTargetBitmapTemp;
-            MediaItemRef.Grid_ThumbnailFullInfo = null;
+            return RenderTargetBitmapTemp;
         }
     }
 }

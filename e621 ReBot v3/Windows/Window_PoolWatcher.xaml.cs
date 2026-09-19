@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -81,7 +79,7 @@ namespace e621_ReBot_v3
             });
         }
 
-        internal static void PoolWatcher_AddPool2Watch()
+        internal static async void PoolWatcher_AddPool2Watch()
         {
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(Module_CefSharp.BrowserHTMLSource);
@@ -94,7 +92,7 @@ namespace e621_ReBot_v3
                 PoolItem? PoolItemTemp = AppSettings.PoolWatcher.Where(PoolItem => PoolItem.ID == int.Parse(PoolID)).SingleOrDefault();
                 if (PoolItemTemp != null)
                 {
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { MessageBox.Show(Window_Main._RefHolder, $"Pool with ID#{PoolID} is already being watched.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information); });
+                    Window_Main._RefHolder.Dispatcher.InvokeAsync(() => { MessageBox.Show(Window_Main._RefHolder, $"Pool with ID#{PoolID} is already being watched.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information); });
                     return;
                 }
             }
@@ -108,7 +106,13 @@ namespace e621_ReBot_v3
             {
                 AppSettings.PoolWatcher.Add(PoolItemRef);
             }
-            GetThumbnail(PoolItemRef);
+
+            //Get Thumbnail
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync(PoolItemRef.ThumbnailURL);
+            if (DownloadResultTemp.IsSuccessStatusCode)
+            {
+                PoolItemRef.Thumbnail = Convert.ToBase64String(DownloadResultTemp.Data);
+            }
             PoolWatcher_Check4New();
         }
 
@@ -234,31 +238,6 @@ namespace e621_ReBot_v3
             foreach (PoolItem PoolItemTemp in PoolItemsTemp)
             {
                 PoolWatcher_WrapPanel.Children.Add(new PoolVE() { _PoolItemRef = PoolItemTemp });
-            }
-        }
-
-        // - - - - - - - - - - - - - - - -
-
-        private static HttpClientHandler Thumbnail_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-        private static HttpClient Thumbnail_HttpClient = new HttpClient(Thumbnail_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
-        internal static async void GetThumbnail(PoolItem PoolItemRef)
-        {
-            using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, PoolItemRef.ThumbnailURL))
-            {
-                HttpRequestMessageTemp.Headers.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                using (HttpResponseMessage HttpResponseMessageTemp = await Thumbnail_HttpClient.SendAsync(HttpRequestMessageTemp))
-                {
-                    if (HttpResponseMessageTemp.IsSuccessStatusCode)
-                    {
-                        using (MemoryStream MemoryStreamTemp = new MemoryStream())
-                        {
-                            await HttpResponseMessageTemp.Content.CopyToAsync(MemoryStreamTemp);
-                            MemoryStreamTemp.Seek(0, SeekOrigin.Begin);
-
-                            PoolItemRef.Thumbnail = Convert.ToBase64String(MemoryStreamTemp.ToArray());
-                        }
-                    }
-                }
             }
         }
     }

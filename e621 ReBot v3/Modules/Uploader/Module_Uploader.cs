@@ -1220,21 +1220,31 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        private static void DownloadFile4Upload(string DownloadURL, out byte[] bytes)
+        private static void DownloadFile4Upload(string DownloadURL, out byte[]? bytes)
         {
             bytes = null;
             ushort RetryCount = 0;
             while (RetryCount < 3)
             {
                 RetryCount++;
-                bytes = Module_Downloader.DownloadFileBytes(DownloadURL, ActionType.Upload).GetAwaiter().GetResult();
-                if (bytes != null && bytes.Length > 0) break;
-                Thread.Sleep(500);
+
+                IProgress<DownloadProgress> DownloadProgressTracker = new Progress<DownloadProgress>(ProgressReport =>
+                {
+                    Report_Status($"Downloading Media...{ProgressReport.Percentage:F2}%");
+                });
+                DownloadResult DownloadResultTemp = ReBot_HttpClient.DownloadBytesAsync(DownloadURL, DownloadProgressTracker).Result;
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Thread.Sleep(500);
+                    continue;
+                }
+
+                bytes = DownloadResultTemp.Data;
+                break;
             }
+
             if (bytes == null || bytes.Length == 0)
-            {
                 FailedUploadTask = true;
-            }
         }
     }
 }

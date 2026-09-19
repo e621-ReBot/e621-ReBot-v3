@@ -1,8 +1,4 @@
-﻿using CefSharp;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 
 namespace e621_ReBot_v3.Modules
 {
@@ -22,56 +18,6 @@ namespace e621_ReBot_v3.Modules
         internal static CookieContainer? Cookies_HentaiFoundry;
         internal static CookieContainer? Cookies_Plurk;
 
-        internal static void GetCookies(string WebAddress, ref CookieContainer? WhichCookie)
-        {
-            string BaseURL = $"{new Uri(WebAddress).Scheme}://{new Uri(WebAddress).Host}";
-            WhichCookie = Task.Run(() => FindCookie(WebAddress)).GetAwaiter().GetResult();
-        }
-
-        private static async Task<CookieContainer> FindCookie(string BaseURL)
-        {
-            CookieContainer ReturnCookieContainer = new CookieContainer();
-            if (Cef.GetGlobalCookieManager() != null) //Is null if grid session is loaded but browser isn't used
-            {
-                //Must not be called on main thread (or maybe same thread Cef lives on or it will hang the browser)
-                List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true);
-
-                if (CefCookies != null)
-                {
-                    foreach (CefSharp.Cookie CookieHolder in CefCookies)
-                    {
-                        System.Net.Cookie TempCookie = new System.Net.Cookie()
-                        {
-                            Domain = CookieHolder.Domain,
-                            Expires = CookieHolder.Expires == null ? DateTime.Now.AddMonths(1) : (DateTime)CookieHolder.Expires,
-                            Name = CookieHolder.Name,
-                            Value = EscapeCookieValue(CookieHolder.Value),
-                            Secure = CookieHolder.Secure,
-                            HttpOnly = CookieHolder.HttpOnly,
-                            Path = CookieHolder.Path
-                        };
-                        ReturnCookieContainer.Add(TempCookie);
-                    }
-                }
-            }
-
-            return ReturnCookieContainer;
-        }
-
-        public static string EscapeCookieValue(string CookieValue)
-        {
-            if (string.IsNullOrEmpty(CookieValue)) return string.Empty;
-
-            foreach (char c in CookieValue)
-            {
-                if (c < 0x21 || c > 0x7E || c == ';' || c == ',' || c == '=' || c == '"' || c == '\\' || c == ' ' || c == '\t')
-                {
-                    return Uri.EscapeDataString(CookieValue);
-                }
-            }
-
-            return CookieValue;
-        }
 
         internal static bool PixivCookieCheck()
         {
@@ -79,7 +25,7 @@ namespace e621_ReBot_v3.Modules
             {
                 if (Cookies_Pixiv == null || Cookies_Pixiv.Count == 0) //Also try and get them
                 {
-                    GetCookies("https://www.pixiv.net", ref Cookies_Pixiv);
+                    //GetCookies("https://www.pixiv.net", ref Cookies_Pixiv);
                 }
                 if (Cookies_Pixiv.Count > 0)
                 {

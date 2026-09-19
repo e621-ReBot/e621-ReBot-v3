@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -61,53 +60,17 @@ namespace e621_ReBot_v3
         private static partial Regex VersionRegex();
         internal static async Task Check4Update()
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-            {
-                Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Visible;
-            });
+            Window_Main._RefHolder.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.Update_TextBlock.Visibility = Visibility.Visible; });
             await Task.Delay(1000); //To show update text
 
-            JObject? GithubJSON;
-
-            using HttpClient GithubClient = new HttpClient();
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync("https://api.github.com/repos/e621-ReBot/e621-ReBot-v3/releases/latest");
+            if (!DownloadResultTemp.IsSuccessStatusCode)
             {
-                GithubClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                try
-                {
-                    string JSONResponse = await GithubClient.GetStringAsync("https://api.github.com/repos/e621-ReBot/e621-ReBot-v3/releases/latest");
-
-                    if (string.IsNullOrEmpty(JSONResponse))
-                    {
-                        GitHubError();
-                        return;
-                    }
-
-                    GithubJSON = JObject.Parse(JSONResponse);
-                }
-                catch (HttpRequestException ex)
-                {
-                    // Network error, 404, 500, etc.
-                    //Console.WriteLine(ex.Message);
-                    GitHubError();
-                    return;
-                }
-                catch (TaskCanceledException ex)
-                {
-                    // Timeout
-                    //Console.WriteLine("Request timed out.");
-                    GitHubError();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    // Unexpected error
-                    //Console.WriteLine(ex);
-                    GitHubError();
-                    return;
-                }
+                GitHubError();
+                return;
             }
 
-            if (GithubJSON == null) return;
+            JObject? GithubJSON = JObject.Parse(DownloadResultTemp.TextData);
             Match MatchResult = VersionRegex().Match((string)GithubJSON["name"]);
             if (MatchResult.Success)
             {
@@ -136,14 +99,25 @@ namespace e621_ReBot_v3
                 return;
             }
 
+            byte[]? UpdateBytes = null;
             ushort RetryCount = 0;
-            byte[]? UpdateBytes = Array.Empty<byte>();
             while (RetryCount < 3)
             {
                 RetryCount++;
-                UpdateBytes = await Module_Downloader.DownloadFileBytes(ZipURL, ActionType.Update);
-                if (UpdateBytes != null && UpdateBytes.Length > 0) break;
-                await Task.Delay(500);
+
+                IProgress<DownloadProgress> DownloadProgressTracker = new Progress<DownloadProgress>(ProgressReport =>
+                {
+                    Window_Main._RefHolder.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.Update_TextBlock.Text = $"Downloading Update...{ProgressReport.Percentage:F2}%"; });
+                });
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync(ZipURL, DownloadProgressTracker);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    await Task.Delay(500);
+                    continue;
+                }
+
+                UpdateBytes = DownloadResultTemp.Data;
+                break;
             }
             if (UpdateBytes == null || UpdateBytes.Length == 0)
             {
@@ -154,7 +128,7 @@ namespace e621_ReBot_v3
             Directory.CreateDirectory("ReBotUpdate").Attributes = FileAttributes.Hidden;
             using (MemoryStream bytes2Stream = new MemoryStream(UpdateBytes))
             {
-                using (FileStream FileStreamTemp = new FileStream($"ReBotUpdate\\ReBotUpdate.zip", FileMode.Create))
+                using (FileStream FileStreamTemp = new FileStream("ReBotUpdate\\ReBotUpdate.zip", FileMode.Create))
                 {
                     bytes2Stream.WriteTo(FileStreamTemp);
                 }
@@ -163,7 +137,7 @@ namespace e621_ReBot_v3
             DeleteErrorLog();
 
             //AppSettings.Update_LastCheck = DateTime.UtcNow;
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
             {
                 MessageBoxResult MessageBoxResultTemp = MessageBox.Show(Window_Main._RefHolder, "Update is downloaded and ready, do you want to update now?", "e621 ReBot v3", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                 if (MessageBoxResultTemp == MessageBoxResult.Yes)

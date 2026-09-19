@@ -25,8 +25,6 @@ namespace e621_ReBot_v3.CustomControls
             return BitmapImageTemp;
         }
 
-        internal Custom_WebClient? ThumbClient;
-
         internal DownloadItem? _DownloadItemRef;
         internal bool _DownloadFinished = true;
         internal bool _AlreadyCopied = true;
@@ -62,7 +60,6 @@ namespace e621_ReBot_v3.CustomControls
             ConversionProgressHolder.Visibility = Visibility.Hidden;
             cThumbnail_Image.Source = null;
             _DownloadItemRef = null;
-            ThumbClient?.CancelAsync();
         }
     }
 }

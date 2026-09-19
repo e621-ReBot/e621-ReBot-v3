@@ -1,8 +1,6 @@
 ﻿using e621_ReBot_v3.Modules;
 using Newtonsoft.Json.Linq;
 using System;
-using System.IO;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,7 +20,7 @@ namespace e621_ReBot_v3
             App.SetWindow2Square(this);
         }
 
-        private void API_PasswordBox_KeyDown(object sender, KeyEventArgs e)
+        private async void API_PasswordBox_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -33,7 +31,8 @@ namespace e621_ReBot_v3
                             MessageBox.Show(this, "API key must be 24 characters long.", "e621 ReBot");
                             return;
                         }
-                        if (ValidateAPIKey())
+
+                        if (await ValidateAPIKey())
                         {
                             AppSettings.APIKey = Module_Cryptor.Encrypt(API_PasswordBox.Password);
                             Module_e621APIController.ToggleStatus();
@@ -50,62 +49,40 @@ namespace e621_ReBot_v3
             }
         }
 
-        private bool ValidateAPIKey()
+        private async Task<bool> ValidateAPIKey()
         {
-            HttpWebRequest e6APICheck = (HttpWebRequest)WebRequest.Create($"https://e621.net/users/{AppSettings.UserID}.json");
-            e6APICheck.UserAgent = AppSettings.GlobalUserAgent;
-            e6APICheck.Timeout = 5000;
-            e6APICheck.Headers.Add(HttpRequestHeader.Authorization, $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($"{AppSettings.UserName}:{API_PasswordBox.Password}"))}");
-            try
+            string base64Auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{AppSettings.UserName}:{API_PasswordBox.Password}"));
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://e621.net/users/{AppSettings.UserID}.json", AuthHeader: base64Auth);
+
+            if (!DownloadResultTemp.IsSuccessStatusCode)
             {
-                HttpWebResponse HttpWebResponseTemp = (HttpWebResponse)e6APICheck.GetResponse();
-                if (HttpWebResponseTemp.StatusCode == HttpStatusCode.OK)
-                {
-                    using (Stream StreamTemp = HttpWebResponseTemp.GetResponseStream())
-                    {
-                        using (StreamReader StreamReaderTemp = new StreamReader(StreamTemp))
-                        {
-                            string JSONReponse = StreamReaderTemp.ReadToEnd();
-                            JObject JObjectTemp = JObject.Parse(JSONReponse);
-                            if (JObjectTemp.Count > 32)
-                            {
-                                Module_Credit.UserLevel = (ushort)JObjectTemp["level"];
-                                AppSettings.AppName = $"e621 ReBot ({AppSettings.UserName})";
-                                Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
-                                return true;
-                            }
-                            else
-                            {
-                                MessageBox.Show(this, "API key is not valid.", "e621 ReBot");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show(this, $"Error!\n\nStatus Code: {HttpWebResponseTemp.StatusCode}", "e621 ReBot");
-                }
+                MessageBox.Show(this, $"Error!\n\nStatus Code: {DownloadResultTemp.StatusCode}", "e621 ReBot");
+                return false;
             }
-            catch (WebException ex)
+
+            JObject JObjectTemp = JObject.Parse(DownloadResultTemp.TextData);
+            if (JObjectTemp.Count < 32)
             {
-                using (HttpWebResponse HttpWebResponseTemp = (HttpWebResponse)ex.Response)
-                {
-                    MessageBox.Show(this, $"{ex.Message}\n\nStatus Code: {HttpWebResponseTemp.StatusCode}", "e621 ReBot");
-                }
+                MessageBox.Show(this, "API key is not valid.", "e621 ReBot");
+                return false;
             }
-            return false;
+
+            Module_Credit.UserLevel = (ushort)JObjectTemp["level"];
+            AppSettings.AppName = $"e621 ReBot ({AppSettings.UserName})";
+            Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
+            return true;
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+            Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
             {
                 if (!string.IsNullOrEmpty(AppSettings.APIKey))
                 {
                     Task.Run(() =>
                     {
                         Module_Credit.Credit_CheckAll();
-                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.Credit_StackPanel.Visibility = Visibility.Visible; });
+                        Window_Main._RefHolder.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.Credit_StackPanel.Visibility = Visibility.Visible; });
                     });
                 }
                 if (AppSettings.FirstRun && !string.IsNullOrEmpty(AppSettings.APIKey))

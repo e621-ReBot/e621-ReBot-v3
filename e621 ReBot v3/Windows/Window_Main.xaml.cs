@@ -113,7 +113,7 @@ namespace e621_ReBot_v3
                     }
                     else
                     {
-                        SB_APIKey.Content = "Remove API key";
+                        Module_e621APIController.ToggleStatus(); //Turns it on.
                     }
                 }
             }
@@ -122,8 +122,6 @@ namespace e621_ReBot_v3
             ErrorReporter();
 
             if (!string.IsNullOrEmpty(AppSettings.Note)) new Window_Notes().ShowDialog();
-            //ReBot_HttpClient.CreateClient();
-            //ReBot_HttpClient.CreateClient1();
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -134,7 +132,6 @@ namespace e621_ReBot_v3
         private void ModuleEnabler()
         {
             Module_e621APIController.StartTheController();
-            Module_e621APIController.ToggleStatus();
             Module_Grabber.Start(); //Make it load on main thread, bug fix.
             Module_Downloader.Start(); //Make it load on main thread, bug fix.
             if (!string.IsNullOrEmpty(AppSettings.APIKey))

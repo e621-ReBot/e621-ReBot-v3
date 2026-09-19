@@ -15,7 +15,6 @@ namespace e621_ReBot_v3.Modules.Grabber
     {
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_HicceArs);
             if (WebAddress.StartsWith("https://www.hiccears.com/p/"))
             {
                 Queue_Multi(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);

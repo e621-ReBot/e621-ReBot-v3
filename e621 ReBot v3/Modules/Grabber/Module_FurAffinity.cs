@@ -14,7 +14,6 @@ namespace e621_ReBot_v3.Modules.Grabber
     {
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_FurAffinity);
             if (WebAddress.StartsWith("https://www.furaffinity.net/view/") || WebAddress.Contains("https://www.furaffinity.net/full/"))
             {
                 Queue_Single(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);

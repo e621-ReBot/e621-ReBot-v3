@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -308,21 +307,15 @@ namespace e621_ReBot_v3.Modules.Converter
 
         // - - - - - - - - - - - - - - - - 
 
-        internal static async Task<string> UgoiraJSONResponse(string Grab_URL)
-        {
-            if (Module_Downloader._PixivClient == null) Module_Downloader.MakePixivClient();
-            string WorkID = Grab_URL.Substring(Grab_URL.LastIndexOf('/') + 1);
-            Module_CookieJar.GetCookies(Grab_URL, ref Module_CookieJar.Cookies_Pixiv);
-            using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, $"https://www.pixiv.net/ajax/illust/{WorkID}/ugoira_meta");
-            using HttpResponseMessage HttpResponseMessageTemp = await Module_Downloader._PixivClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead);
-            HttpResponseMessageTemp.EnsureSuccessStatusCode();
-            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
-        }
-
         private static readonly Random RngDelay = new Random();
         private static async Task<int> DownloadUgoira(string PageURL, string MediaURL, string TempFolderPath, ActionType ActionTypEnum, ProgressBar? ProgressBarRef = null)
         {
-            string JSONResponse = await UgoiraJSONResponse(PageURL);
+            string WorkID = PageURL.Substring(PageURL.LastIndexOf('/') + 1);
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/illust/{WorkID}/ugoira_meta");
+            if (!DownloadResultTemp.IsSuccessStatusCode)
+                return 0; //TODO BETTER ERROR HANDLING
+
+            string? JSONResponse = DownloadResultTemp.TextData;
             JToken UgoiraJObject = JObject.Parse(JSONResponse)["body"];
 
             //Do a head check to see if last image exists as original
@@ -333,9 +326,8 @@ namespace e621_ReBot_v3.Modules.Converter
             int FrameCount = UgoiraJObject["frames"].Count();
             StringBuilder UgoiraConcat = new StringBuilder();
 
-            using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Head, $"{URLBase}{FrameCount - 1}{MediaExtension}");
-            using HttpResponseMessage HttpResponseMessageTemp = await Module_Downloader._PixivClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead);
-            if (HttpResponseMessageTemp.IsSuccessStatusCode)
+            DownloadResultTemp = await ReBot_HttpClient.HeadRequestAsync($"{URLBase}{FrameCount - 1}{MediaExtension}");
+            if (DownloadResultTemp.IsSuccessStatusCode)
             {
                 float MultiDLFactor = 1f / FrameCount;
                 float MultiProgressBase = 0;
@@ -372,7 +364,7 @@ namespace e621_ReBot_v3.Modules.Converter
             }
             else
             {
-                if (HttpResponseMessageTemp.StatusCode == HttpStatusCode.NotFound)
+                if (DownloadResultTemp.StatusCode == HttpStatusCode.NotFound)
                 {
                     string NewURL = (string)UgoiraJObject["originalSrc"];
                     string FileName = Path.GetFileName(NewURL);

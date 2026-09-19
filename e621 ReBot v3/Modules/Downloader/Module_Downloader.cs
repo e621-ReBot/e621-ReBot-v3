@@ -1,6 +1,4 @@
-﻿using CefSharp;
-using CefSharp.DevTools.Network;
-using e621_ReBot_v3.CustomControls;
+﻿using e621_ReBot_v3.CustomControls;
 using e621_ReBot_v3.Modules.Converter;
 using e621_ReBot_v3.Modules.Downloader;
 using e621_ReBot_v3.Windows;
@@ -13,7 +11,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -75,17 +72,6 @@ namespace e621_ReBot_v3.Modules
                 new Regex(@".+itaku.ee/((images|posts)/\d+|profile/\w+/gallery)")
 
             };
-
-            for (int i = 0; i < 8; i++)
-            {
-                Custom_WebClient ThumbClient = new Custom_WebClient();
-                ThumbClient.DownloadDataCompleted += Download_ThumbnailDLFinished;
-                Holder_ThumbClient.Add(ThumbClient);
-                Custom_WebClient FileClient = new Custom_WebClient();
-                FileClient.DownloadProgressChanged += Download_FileDLProgressReport;
-                FileClient.DownloadFileCompleted += Download_FileDLFinished;
-                Holder_FileClient.Add(FileClient);
-            }
 
             HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
             {
@@ -259,143 +245,10 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-
-
-        //internal static byte[] DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null)
-        //{
-        //    HttpWebRequest FileDownloader = (HttpWebRequest)WebRequest.Create(DownloadURL);
-        //    FileDownloader.Timeout = 5000;
-        //    switch (DownloadURL)
-        //    {
-        //        case string Ugoira when Ugoira.Contains("ugoira"):
-        //            {
-        //                FileDownloader.Referer = "https://www.pixiv.net/";
-        //                break;
-        //            }
-        //        case string Ugoira when Ugoira.StartsWith("https://www.hiccears.com/file/"):
-        //            {
-        //                FileDownloader.CookieContainer = Module_CookieJar.Cookies_HicceArs;
-        //                break;
-        //            }
-        //    }
-
-        //    using (MemoryStream DownloadedBytes = new MemoryStream())
-        //    {
-        //        using (WebResponse DownloaderReponse = FileDownloader.GetResponse())
-        //        {
-        //            using (Stream DownloadStream = DownloaderReponse.GetResponseStream())
-        //            {
-        //                byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
-        //                while (DownloadedBytes.Length < DownloaderReponse.ContentLength)
-        //                {
-        //                    int DownloadStreamPartLength = DownloadStream.Read(DownloadBuffer, 0, DownloadBuffer.Length);
-        //                    if (DownloadStreamPartLength > 0)
-        //                    {
-        //                        DownloadedBytes.Write(DownloadBuffer, 0, DownloadStreamPartLength);
-        //                        float ReportPercentage = (float)DownloadedBytes.Length / DownloaderReponse.ContentLength;
-
-        //                        switch (ActionTypeEnum)
-        //                        {
-        //                            case ActionType.Upload:
-        //                                {
-        //                                    Module_Uploader.Report_Status($"Downloading Media...{ReportPercentage:P0}");
-        //                                    break;
-        //                                }
-        //                            case ActionType.Download:
-        //                                {
-        //                                    ProgressBarRef.Dispatcher.BeginInvoke(() => { ProgressBarRef.Value = (int)(ReportPercentage * 100); });
-        //                                    break;
-        //                                }
-
-        //                            case ActionType.Conversion:
-        //                                {
-
-        //                                    //string ReportType = isUgoira ? "CDU" : "CDV";
-        //                                    //Module_FFmpeg.ReportConversionProgress(ReportType, ReportPercentage, in DataRowRef);
-        //                                    break;
-        //                                }
-
-        //                            case ActionType.Manual:
-        //                                {
-        //                                    //if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated && ReferenceEquals(Form_Preview._FormReference.Preview_RowHolder, DataRowRef))
-        //                                    //{
-        //                                    //    Form_Preview._FormReference.BeginInvoke(new Action(() =>
-        //                                    //    {
-        //                                    //        if (Form_Preview._FormReference != null && Form_Preview._FormReference.IsHandleCreated)
-        //                                    //        {
-        //                                    //            Form_Preview._FormReference.Label_Download.Text = $"{ReportPercentage:P0}";
-        //                                    //            Form_Preview._FormReference.Label_Download.Visible = true;
-        //                                    //            Form_Preview._FormReference.PB_Download.Visible = false;
-        //                                    //            Form_Preview._FormReference.Label_DownloadWarning.Visible = false;
-        //                                    //        }
-        //                                    //    }));
-        //                                    //}
-        //                                    break;
-        //                                }
-
-        //                            case ActionType.Update:
-        //                                {
-
-        //                                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-        //                                    {
-        //                                        Window_Main._RefHolder.Update_TextBlock.Text = $"Downloading Update...{ReportPercentage:P0}";
-        //                                    });
-        //                                    break;
-        //                                }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        DownloadedBytes.Seek(0, SeekOrigin.Begin);
-        //        return DownloadedBytes.ToArray();
-        //    }
-        //}
-
         private static readonly HttpClient _DownloadClient;
-        internal static HttpClient _PixivClient;
-        private static HttpClient _HicceArsClient;
-
-        internal static void MakePixivClient()
-        {
-            if (Module_CookieJar.Cookies_Pixiv == null) Module_CookieJar.GetCookies("https://www.pixiv.net/", ref Module_CookieJar.Cookies_Pixiv);
-            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
-            {
-                CookieContainer = Module_CookieJar.Cookies_Pixiv,
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            };
-            _PixivClient = new HttpClient(HttpClientHandlerTemp);
-            _PixivClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-            _PixivClient.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net/");
-            _PixivClient.Timeout = TimeSpan.FromSeconds(5);
-        }
-
-        private static void MakeHicceArsClient()
-        {
-            if (Module_CookieJar.Cookies_HicceArs == null) Module_CookieJar.GetCookies("https://www.hiccears.com/", ref Module_CookieJar.Cookies_HicceArs);
-            HttpClientHandler HttpClientHandlerTemp = new HttpClientHandler
-            {
-                CookieContainer = Module_CookieJar.Cookies_Pixiv,
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            };
-            _HicceArsClient = new HttpClient(HttpClientHandlerTemp);
-            _HicceArsClient.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-            _HicceArsClient.Timeout = TimeSpan.FromSeconds(5);
-        }
 
         private static HttpClient SelectClient(string URL)
         {
-            if (URL.Contains("ugoira"))
-            {
-                if (_PixivClient == null) MakePixivClient();
-                return _PixivClient;
-            }
-            if (URL.StartsWith("https://www.hiccears.com/file/"))
-            {
-                if (_HicceArsClient == null) MakeHicceArsClient();
-                return _HicceArsClient;
-            }
             return _DownloadClient;
         }
 
@@ -407,7 +260,7 @@ namespace e621_ReBot_v3.Modules
 
                 using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, DownloadURL);
                 HttpRequestMessageTemp.Headers.Add("User-Agent", AppSettings.GlobalUserAgent);
-                
+
                 Uri UriTemp = new Uri(DownloadURL);
                 switch (UriTemp.Host)
                 {
@@ -419,7 +272,7 @@ namespace e621_ReBot_v3.Modules
 
                     case "i.pximg.net":
                         {
-                            HttpRequestMessageTemp.Headers.Add("Referer","https://www.pixiv.net");
+                            HttpRequestMessageTemp.Headers.Add("Referer", "https://www.pixiv.net");
                             break;
                         }
 
@@ -487,7 +340,7 @@ namespace e621_ReBot_v3.Modules
 
 
 
-                    HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessage HttpResponseMessageTemp = await ClientSelector.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead);
                 HttpResponseMessageTemp.EnsureSuccessStatusCode();
 
                 long? BytesInTotal = HttpResponseMessageTemp.Content.Headers.ContentLength;
@@ -938,190 +791,6 @@ namespace e621_ReBot_v3.Modules
 
         // - - - - - - - - - - - - - - - -
 
-        private static readonly List<Custom_WebClient> Holder_ThumbClient = new List<Custom_WebClient>();
-        private static readonly List<Custom_WebClient> Holder_FileClient = new List<Custom_WebClient>();
-        private static void Download_StartDLClient(DownloadVE DownloadVERef, string DowwnloadType)
-        {
-            string SiteReferer = $"https://{new Uri(DownloadVERef._DownloadItemRef.Grab_MediaURL).Host}";
-            Custom_WebClient? WebClientSelected = null;
-        RetryWebClientSelect:
-            foreach (Custom_WebClient WebClientTemp in (DowwnloadType.Equals("Thumb") ? Holder_ThumbClient : Holder_FileClient))
-            {
-                if (!WebClientTemp.IsBusy)
-                {
-                    WebClientSelected = WebClientTemp;
-                    break;
-                }
-            }
-
-            //WebClientSelected sometimes null?
-            if (WebClientSelected == null) goto RetryWebClientSelect; //If this causes freezing problem due to infinite loop, will have to rewrite the invoke download parts.
-
-            //Remove any old headers first
-            WebClientSelected.Headers.Remove(HttpRequestHeader.Referer);
-            WebClientSelected.Headers.Remove(HttpRequestHeader.Cookie);
-            WebClientSelected.Headers.Remove(HttpRequestHeader.UserAgent);
-
-            switch (SiteReferer)
-            {
-                case "https://e621.net":
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.AppName);
-                        break;
-                    }
-
-                //case "www.furaffinity.net":
-                case "https://d.furaffinity.net":
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.furaffinity.net/");
-                        break;
-                    }
-
-                //case "inkbunny.net":
-                case string Inkbunny when Inkbunny.Contains("ib.metapix.net"):
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://inkbunny.net/");
-                        break;
-                    }
-
-                //case "www.pixiv.net":
-                case "https://i.pximg.net":
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.pixiv.net/");
-                        break;
-                    }
-
-                case "https://www.hiccears.com": //verify, after fixing hiccears first
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        List<CefSharp.Cookie> CookieList = Cef.GetGlobalCookieManager().VisitUrlCookiesAsync("https://www.hiccears.com", true).Result;
-                        foreach (CefSharp.Cookie CookieHolder in CookieList)
-                        {
-                            if (CookieHolder.Name.Equals("hiccears"))
-                            {
-                                WebClientSelected.Headers.Add(HttpRequestHeader.Cookie, $"{CookieHolder.Name}={CookieHolder.Value}");
-                                break;
-                            }
-                        }
-                        break;
-                    }
-
-                //case "x.com":
-                case "https://pbs.twimg.com":
-                case "https://video.twimg.com":
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://x.com/");
-                        break;
-                    }
-
-                //case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
-                case "https://art.ngfiles.com": //images
-                case "https://uploads.ungrounded.net": //videos
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.newgrounds.com/");
-                        break;
-                    }
-
-
-                //case string SoFurry when SoFurry.Contains(".sofurry.com"):
-
-
-                //case "www.weasyl.com": //used from cache
-
-
-                //case "mastodon.social":
-                //case "baraag.net":
-                //case "pawoo.net":
-                case "https://pictures.hentai-foundry.com": //they only have pictures
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.hentai-foundry.com/");
-                        break;
-                    }
-
-
-                case "https://images.plurk.com":
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        WebClientSelected.Headers.Add(HttpRequestHeader.Referer, "https://www.plurk.com/");
-                        break;
-                    }
-
-
-                //case "bsky.app":
-
-
-                //case "derpibooru.org":
-
-
-                //case "itaku.ee":
-
-                default:
-                    {
-                        WebClientSelected.Headers.Add(HttpRequestHeader.UserAgent, AppSettings.GlobalUserAgent);
-                        break;
-                    }
-            }
-
-            if (DowwnloadType.Equals("Thumb"))
-            {
-                WebClientSelected.DownloadDataAsync(new Uri(DownloadVERef._DownloadItemRef.Grab_ThumbnailURL), DownloadVERef);
-            }
-            else
-            {
-                //DownloadVERef.ToolTip = (DownloadVERef._DownloadItemRef.Grab_MediaURL);
-                WebClientSelected.DownloadFileAsync(new Uri(DownloadVERef._DownloadItemRef.Grab_MediaURL), $"{DownloadVERef.FolderIcon.Tag}.dlpart", DownloadVERef);
-            }
-        }
-
-        private static void Download_ThumbnailDLFinished(object sender, DownloadDataCompletedEventArgs e)
-        {
-            DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
-            if (DownloadVETemp._DownloadItemRef == null) return; //file download finished before thumb?
-            if (e.Error != null)
-            {
-                Report_Info($"Thumb DL Error @{DownloadVETemp._DownloadItemRef.Grab_ThumbnailURL}, Msg: {e.Error.Message}");
-                return;
-            }
-            if (e.Result == null) return; // same?
-
-            using (MemoryStream MemoryStreamTemp = new MemoryStream(e.Result))
-            {
-                MemoryStreamTemp.Seek(0, SeekOrigin.Begin);
-
-                BitmapImage? DownloadedImage = new BitmapImage();
-                DownloadedImage.BeginInit();
-                DownloadedImage.CacheOption = BitmapCacheOption.OnLoad;
-                DownloadedImage.StreamSource = MemoryStreamTemp;
-                DownloadedImage.EndInit();
-                DownloadedImage.StreamSource = null;
-
-                if (DownloadVETemp._DownloadItemRef.MediaItemRef == null)
-                {
-                    DownloadVETemp.cThumbnail_Image.Source = DownloadedImage;
-                    DownloadedImage.Freeze();
-                }
-                else
-                {
-                    DownloadVETemp._DownloadItemRef.MediaItemRef.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(DownloadedImage, $".{DownloadVETemp._DownloadItemRef.Grab_MediaFormat}");
-                    Module_Grabber.Grab_MakeThumbnailInfoText(DownloadVETemp._DownloadItemRef.MediaItemRef);
-                    DownloadVETemp.cThumbnail_Image.Source = DownloadVETemp._DownloadItemRef.MediaItemRef.Grid_Thumbnail;
-                    DownloadedImage.Freeze();
-                    DownloadedImage = null;
-                }
-            }
-        }
-
-        private static void Download_FileDLProgressReport(object sender, DownloadProgressChangedEventArgs e)
-        {
-            ((DownloadVE)e.UserState).DownloadProgress.Value = e.ProgressPercentage;
-        }
-
         internal static uint SessionDownloads = 0;
         private static readonly HashSet<string> ErrorSkipList = new HashSet<string>
             {
@@ -1132,6 +801,122 @@ namespace e621_ReBot_v3.Modules
 
         internal static readonly SolidColorBrush CompletedWorkBrush = new SolidColorBrush(Colors.LimeGreen);
         internal static readonly SolidColorBrush FailedWorkBrush = new SolidColorBrush(Colors.Maroon);
+        private static async void Download_StartDLClient(DownloadVE DownloadVERef, string DowwnloadType)
+        {
+            if (DowwnloadType.Equals("Thumb"))
+            {
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync(DownloadVERef._DownloadItemRef.Grab_ThumbnailURL);
+                if (DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    if (DownloadVERef._DownloadItemRef == null)
+                        return;  //file download finished before thumb?
+
+                    //Mastodons are returning Status OK but with no data as protection on thumbnails or maybe CDN error, since they do so on browser as well, but only some images and I don't see why
+                    if (DownloadResultTemp.Data.Length == 0)
+                        return;
+
+                    using (MemoryStream MemoryStreamTemp = new MemoryStream(DownloadResultTemp.Data))
+                    {
+                        BitmapImage? DownloadedImage = new BitmapImage();
+                        DownloadedImage.BeginInit();
+                        DownloadedImage.CacheOption = BitmapCacheOption.OnLoad;
+                        DownloadedImage.StreamSource = MemoryStreamTemp;
+                        DownloadedImage.EndInit();
+
+                        if (DownloadVERef._DownloadItemRef.MediaItemRef == null)
+                        {
+                            DownloadVERef.cThumbnail_Image.Source = DownloadedImage;
+                        }
+                        else
+                        {
+                            DownloadVERef._DownloadItemRef.MediaItemRef.Grid_Thumbnail = Module_Grabber.Grab_ResizeThumbnail(DownloadedImage, $".{DownloadVERef._DownloadItemRef.Grab_MediaFormat}");
+                            Module_Grabber.Grab_MakeThumbnailInfoText(DownloadVERef._DownloadItemRef.MediaItemRef);
+                            DownloadVERef.cThumbnail_Image.Source = DownloadVERef._DownloadItemRef.MediaItemRef.Grid_Thumbnail;
+                        }
+                        DownloadedImage.Freeze();
+                    }
+                }
+                else
+                {
+                    Report_Info($"Thumb DL Error @{DownloadVERef._DownloadItemRef.Grab_ThumbnailURL}, Msg: {DownloadResultTemp.Message}");
+                    return;
+                }
+            }
+            else //file
+            {
+                IProgress<DownloadProgress> DownloadProgressTracker = new Progress<DownloadProgress>(ProgressReport =>
+                {
+                    DownloadVERef.DownloadProgress.Value = ProgressReport.Percentage ?? 0;
+                });
+
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadFileAsync(DownloadVERef._DownloadItemRef.Grab_MediaURL, $"{DownloadVERef.FolderIcon.Tag}.dlpart", DownloadProgressTracker);
+                if (DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    string TempFilePath = $"{DownloadVERef.FolderIcon.Tag}.dlpart";
+                    FileInfo FileInfoTemp = new FileInfo(TempFilePath);
+                    if (FileInfoTemp.Exists)
+                    {
+                        //try for 5 seconds
+                        for (int i = 0; i <= 10; i++)
+                        {
+                            try
+                            {
+                                //Double check if such file exists and try to replace it
+                                string NewNamePath = TempFilePath.Substring(0, TempFilePath.LastIndexOf('.'));
+                                if (File.Exists(NewNamePath)) File.Delete(NewNamePath);
+
+                                //Rename the the download to proper name
+                                if (!File.Exists(NewNamePath)) FileInfoTemp.MoveTo(NewNamePath); //Change back to normal name
+
+                                break;
+                            }
+                            catch (IOException)
+                            {
+                                if (i == 10)
+                                {
+                                    Report_Info($"{FileInfoTemp.Name} was locked and could not be renamed.");
+                                }
+
+                                await Task.Delay(500);
+                            }
+                        }
+
+                        //Save tags if needed
+                        if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVERef._DownloadItemRef.e6_Tags))
+                        {
+                            File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVERef._DownloadItemRef.e6_Tags);
+                        }
+
+                        if (AppSettings.Download_SkipSameFileNames)
+                        {
+                            if (SkipFileNamesList == null) SkipFileNamesList = new HashSet<string>();
+                            SkipFileNamesList.Add(Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
+                            if (AppSettings.Download_CreateBlankFiles)
+                            {
+                                string BlankFileName = Path.Combine(FileInfoTemp.DirectoryName, Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
+                                using (File.Create($"{BlankFileName}.blank"))
+                                {
+                                    //nothing, just blank file
+                                }
+                            }
+                        }
+                    }
+
+                    SessionDownloads++;
+
+                    DownloadVERef.DownloadProgress.Foreground = CompletedWorkBrush;
+                    DownloadVERef._DownloadFinished = true;
+                    _DownloadVEFinisherTimer.Stop();
+                    _DownloadVEFinisherTimer.Start();
+                }
+                else
+                {
+                    // Server returned an HTTP error
+                    Report_Info(DownloadResultTemp.Message);
+                }
+            }
+        }
+
         private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
         {
             DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
@@ -1221,65 +1006,9 @@ namespace e621_ReBot_v3.Modules
             }
 
             //Passed cancel and error check so it should be finished
-            string TempFilePath = $"{DownloadVETemp.FolderIcon.Tag}.dlpart";
-            FileInfo FileInfoTemp = new FileInfo(TempFilePath);
-            if (FileInfoTemp.Exists)
-            {
-                //try for 5 seconds
-                for (int i = 0; i <= 10; i++)
-                {
-                    try
-                    {
-                        //Double check if such file exists and try to replace it
-                        string NewNamePath = TempFilePath.Substring(0, TempFilePath.LastIndexOf('.'));
-                        if (File.Exists(NewNamePath)) File.Delete(NewNamePath);
-
-                        //Rename the the download to proper name
-                        if (!File.Exists(NewNamePath)) FileInfoTemp.MoveTo(NewNamePath); //Change back to normal name
-
-                        break;
-                    }
-                    catch (IOException)
-                    {
-                        if (i == 10)
-                        {
-                            Report_Info($"{FileInfoTemp.Name} was locked and could not be renamed.");
-                        }
-
-                        await Task.Delay(500);
-                    }
-                }
-
-                //Save tags if needed
-                if (AppSettings.Download_SaveTags && !string.IsNullOrEmpty(DownloadVETemp._DownloadItemRef.e6_Tags))
-                {
-                    File.WriteAllText($"{FileInfoTemp.FullName}.txt", DownloadVETemp._DownloadItemRef.e6_Tags);
-                }
-
-                if (AppSettings.Download_SkipSameFileNames)
-                {
-                    if (SkipFileNamesList == null) SkipFileNamesList = new HashSet<string>();
-                    SkipFileNamesList.Add(Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
-                    if (AppSettings.Download_CreateBlankFiles)
-                    {
-                        string BlankFileName = Path.Combine(FileInfoTemp.DirectoryName, Path.GetFileNameWithoutExtension(FileInfoTemp.Name));
-                        using (File.Create($"{BlankFileName}.blank"))
-                        {
-                            //nothing, just blank file
-                        }
-                    }
-                }
-            }
-
-            SessionDownloads++;
-
-            DownloadVETemp.DownloadProgress.Foreground = CompletedWorkBrush;
-            DownloadVETemp._DownloadFinished = true;
-            _DownloadVEFinisherTimer.Stop();
-            _DownloadVEFinisherTimer.Start();
         }
 
-        internal static DispatcherTimer _DownloadVEFinisherTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        internal static DispatcherTimer _DownloadVEFinisherTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         private static void DownloadVEFinisherTimer_Tick(object? sender, EventArgs e)
         {
             _DownloadVEFinisherTimer.Stop();

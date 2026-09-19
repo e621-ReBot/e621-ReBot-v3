@@ -143,7 +143,8 @@ namespace CefSharp
                         break;
                     }
 
-                case "inkbunny.net":
+                //case "inkbunny.net":
+                case string Inkbunny when Inkbunny.Contains("ib.metapix.net"):
                     {
                         request.SetReferrer("https://inkbunny.net/", ReferrerPolicy.Default);
                         break;

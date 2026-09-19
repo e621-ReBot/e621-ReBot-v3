@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -83,7 +82,6 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckUpload()
         {
-            Debug.WriteLine("Credit_CheckUpload");
             Timestamps_Upload.Clear();
             if (UserLevel < 30)
             {
@@ -143,7 +141,6 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckFlags()
         {
-            Debug.WriteLine("Credit_CheckFlags");
             Timestamps_Flags.Clear();
             if (UserLevel < 30)
             {
@@ -170,7 +167,6 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task Credit_CheckNotes()
         {
-            Debug.WriteLine("Credit_CheckNotes");
             Timestamps_Notes.Clear();
             if (UserLevel < 30)
             {

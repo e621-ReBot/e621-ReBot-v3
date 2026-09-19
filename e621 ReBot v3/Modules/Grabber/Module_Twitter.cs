@@ -16,7 +16,6 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static void Queue_Prepare(string WebAddress)
         {
-            //Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Twitter);
             if (WebAddress.Contains("/status/"))
             {
                 Queue_Single(WebAddress);

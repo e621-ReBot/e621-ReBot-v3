@@ -1,6 +1,6 @@
 ﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace e621_ReBot_v3.Modules.Downloader
@@ -21,16 +21,12 @@ namespace e621_ReBot_v3.Modules.Downloader
                 return;
             }
 
-            string? PicURL;
-            string? ThumbURL;
-            string? Media_Format;
-            if (WebAddress.Contains("/s/")) //single
+            HashSet<string> MediaList = new HashSet<string>();
+            if (WebAddress.Contains("/s/"))
             {
-                List<string> MediaList = new List<string>();
-
-                if (PostNode.SelectSingleNode(".//form[@id='changethumboriginal_form']") == null)
+                if (PostNode.SelectSingleNode(".//form[@id='changethumboriginal_form']") == null) //single
                 {
-                    if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", System.StringComparison.OrdinalIgnoreCase))
+                    if (PostNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                     {
                         MediaList.Add(PostNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value);
                     }
@@ -41,18 +37,16 @@ namespace e621_ReBot_v3.Modules.Downloader
                 }
                 else
                 {
-                    List<string> MediaTypes = new List<string>() { ".jpg", ".png", ".gif", ".mp4", ".swf" };
+                    HashSet<string> MediaTypes = new HashSet<string>() { ".jpg", ".png", ".gif", ".mp4", ".swf" };
                     HtmlNode ParentNode = PostNode.SelectSingleNode(".//div[@id='files_area']").ParentNode;
                     ushort MediaCounter = 0;
                     foreach (HtmlNode ImageNode in ParentNode.SelectNodes(".//img"))
                     {
                         MediaCounter++;
-                        PicURL = ImageNode.Attributes["src"].Value;
+                        string PicURL = ImageNode.Attributes["src"].Value;
 
                         if (PicURL.Contains("overlays/writing")) //don't need writing thumb
-                        {
                             continue;
-                        }
 
                         if (PicURL.Contains("overlays/video")) //if video
                         {
@@ -65,7 +59,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                             HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
                             HtmlDocumentTemp2.LoadHtml(HTMLSource);
-                            if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", System.StringComparison.OrdinalIgnoreCase))
+                            if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                             {
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;
                             }
@@ -74,6 +68,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@class='content magicboxParent']//img[@class='shadowedimage']").Attributes["src"].Value;
                             }
                         }
+
                         PicURL = PicURL.Replace("thumbnails/medium", "files/full").Replace("_noncustom", null);
                         PicURL = PicURL.Substring(0, PicURL.Length - 4);
 
@@ -81,7 +76,8 @@ namespace e621_ReBot_v3.Modules.Downloader
                         foreach (string MediaType in MediaTypes)
                         {
                             MediaLinkFix = $"{PicURL}{MediaType}";
-                            if (CheckURLExists(MediaLinkFix))
+                            bool TypeFound = await CheckURLExists(MediaLinkFix);
+                            if (TypeFound)
                             {
                                 PicURL = MediaLinkFix;
                                 break;
@@ -96,6 +92,7 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 string ArtistName = PostNode.SelectSingleNode(".//div[@class='elephant elephant_555753']/div[@class='content' and not(@id)]//a[text()]").Attributes["href"].Value;
 
+
                 //lock should already be in background thread as the task is done in background
                 lock (Module_Downloader._2Download_DownloadItems)
                 {
@@ -103,28 +100,31 @@ namespace e621_ReBot_v3.Modules.Downloader
                     {
                         if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) continue;
 
-                        Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
-
-                        switch (MediaURL.Substring(MediaURL.LastIndexOf('.')))
+                        string ThumbURL = MediaURL;
+                        string Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
+                        switch (Media_Format)
                         {
-                            case ".mp4":
-                            case ".swf":
+                            case "mp4":
+                            case "swf":
                                 {
-                                    ThumbURL = MediaURL.Substring(0, MediaURL.Length - 4) + ".jpg";
+                                    ThumbURL = ThumbURL.Substring(0, ThumbURL.Length - 4) + ".jpg";
                                     ThumbURL = ThumbURL.Replace("files/full", "thumbnails/large");
-                                    ThumbURL = CheckURLExists(ThumbURL) ? ThumbURL : "https://nl.ib.metapix.net/images80/overlays/video.png";
+
+                                    if (CheckURLExists(ThumbURL).Result == false)
+                                        ThumbURL = "https://nl.ib.metapix.net/images80/overlays/video.png";
+
                                     break;
                                 }
 
-                            case ".gif":
+                            case "gif":
                                 {
-                                    ThumbURL = MediaURL.Replace("files/full", "files/screen");
+                                    ThumbURL = ThumbURL.Replace("files/full", "files/screen");
                                     break;
                                 }
 
                             default:
                                 {
-                                    ThumbURL = MediaURL.Replace("files/full", "thumbnails/large");
+                                    ThumbURL = ThumbURL.Replace("files/full", "thumbnails/large");
                                     ThumbURL = ThumbURL.Substring(0, ThumbURL.Length - 4) + "_noncustom.jpg";
                                     break;
                                 }
@@ -142,31 +142,14 @@ namespace e621_ReBot_v3.Modules.Downloader
             }
         }
 
-        private static bool CheckURLExists(string Post_MediaURL)
+        private static async Task<bool> CheckURLExists(string Post_MediaURL)
         {
-            HttpWebRequest CheckExistsRequest = (HttpWebRequest)WebRequest.Create(Post_MediaURL);
-            CheckExistsRequest.Method = "HEAD";
-            CheckExistsRequest.UserAgent = AppSettings.GlobalUserAgent;
-            CheckExistsRequest.Referer = "https://inkbunny.net/";
-            CheckExistsRequest.Timeout = 3000;
-            try
-            {
-                using (HttpWebResponse GetSizeResponse = (HttpWebResponse)CheckExistsRequest.GetResponse())
-                {
-                    if (GetSizeResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.HeadRequestAsync(Post_MediaURL);
+
+            if (DownloadResultTemp.IsSuccessStatusCode)
+                return true;
+
+            return false;
         }
     }
 }

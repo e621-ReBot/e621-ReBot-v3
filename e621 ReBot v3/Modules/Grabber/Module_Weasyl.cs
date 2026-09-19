@@ -19,7 +19,6 @@ namespace e621_ReBot_v3.Modules.Grabber
         private static partial Regex Weasyl_Regex();
         internal static void Queue_Prepare(string WebAddress)
         {
-            Module_CookieJar.GetCookies(WebAddress, ref Module_CookieJar.Cookies_Weasyl);
             if (Weasyl_Regex().Match(WebAddress).Success)
             {
                 Queue_Single(WebAddress, Module_CefSharp.BrowserHTMLSource ?? string.Empty);

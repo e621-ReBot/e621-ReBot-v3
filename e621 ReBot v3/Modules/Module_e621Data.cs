@@ -4,101 +4,52 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules
 {
     internal static class Module_e621Data
     {
-        private static readonly HttpClientHandler e621_HttpClientHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-        private static readonly HttpClient e621_HttpClient = new HttpClient(e621_HttpClientHandler) { Timeout = TimeSpan.FromSeconds(15) };
         internal static async Task<string?> DataDownload(string Address, bool Authentication = false)
         {
-            using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, Address))
-            {
-                HttpRequestMessageTemp.Headers.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                if (Authentication) HttpRequestMessageTemp.Headers.Authorization = new AuthenticationHeaderValue("Basic", $"{Convert.ToBase64String(Encoding.ASCII.GetBytes($"{AppSettings.UserName}:{Module_Cryptor.Decrypt(AppSettings.APIKey)}"))}");
+            string? base64Auth = Authentication ? Convert.ToBase64String(Encoding.ASCII.GetBytes($"{AppSettings.UserName}:{Module_Cryptor.Decrypt(AppSettings.APIKey)}")) : null;
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(Address, AuthHeader: base64Auth);
 
-                try
-                {
-                    using (HttpResponseMessage HttpResponseMessageTemp = await e621_HttpClient.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseContentRead))
-                    {
-                        if (Address.Contains("?md5=") || HttpResponseMessageTemp.IsSuccessStatusCode)
-                        {
-                            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
-                        }
-                    }
-                }
-                catch (Exception e) //Timeout most often
-                {
-                    return $"ⓔ{e.Message}";
-                }
+            if (!DownloadResultTemp.IsSuccessStatusCode)
+                return $"ⓔ{DownloadResultTemp.Message}";
 
-            }
-            return null;
+            return DownloadResultTemp.TextData;
         }
 
-        internal static MemoryStream? DownloadDBExport(string Address, Button? ButtonRef = null)
+        internal static async Task<byte[]?> DownloadDBExport(string Address)
         {
-            MemoryStream DownloadedBytes = new MemoryStream();
-            DateTime DateTimeTempUTC = DateTime.UtcNow;
-
-            ushort RetryCount = 0;
-            while (RetryCount < 3)
+            IProgress<DownloadProgress> DownloadProgressTracker = new Progress<DownloadProgress>(ProgressReport =>
             {
-                try
-                {
-                    HttpWebRequest DBExportDownloader = (HttpWebRequest)WebRequest.Create(Address);
-                    DBExportDownloader.Timeout = 5000;
-                    using (HttpWebResponse DownloaderReponse = (HttpWebResponse)DBExportDownloader.GetResponse())
-                    {
-                        using (Stream DownloadStream = DownloaderReponse.GetResponseStream())
-                        {
-                            byte[] DownloadBuffer = new byte[65536]; // 64 kB buffer
-                            while (DownloadedBytes.Length < DownloaderReponse.ContentLength)
-                            {
-                                int DownloadStreamPartLength = DownloadStream.Read(DownloadBuffer, 0, DownloadBuffer.Length);
-                                if (DownloadStreamPartLength > 0)
-                                {
-                                    DownloadedBytes.Write(DownloadBuffer, 0, DownloadStreamPartLength);
-                                    double ReportPercentage = DownloadedBytes.Length / (double)DownloaderReponse.ContentLength;
-                                    ButtonRef.Dispatcher.BeginInvoke(() => { ButtonRef.Content = $"Downloading: {ReportPercentage:P2}"; });
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    return DownloadedBytes;
-                }
-                catch
-                {
-                    RetryCount++;
-                    DateTimeTempUTC = DateTimeTempUTC.AddDays(-1);
-                }
-            }
+                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = $"Downloading: {ProgressReport.Percentage:F2}%"; });
+            });
+
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadBytesAsync(Address, DownloadProgressTracker);
+            if (DownloadResultTemp.IsSuccessStatusCode)
+                return DownloadResultTemp.Data;
+
             return null;
         }
 
-        internal static void DLSuggestions()
+        internal static async void DLSuggestions()
         {
             ushort SuccessCount = 0;
 
-            MemoryStream? AliasStream = DownloadDBExport("https://static1.e621.net/data/db_export/tag_aliases.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            byte[]? AliasBytes = await DownloadDBExport("https://static1.e621.net/data/db_export/tag_aliases.csv.gz");
+            if (AliasBytes == null)
+                return;
+
             //Process Aliases for later use
             Dictionary<string, List<string>> aliases = new Dictionary<string, List<string>>();
-            if (AliasStream != null)
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Aliases..."; });
+            using (MemoryStream AliasStream = new MemoryStream(AliasBytes))
             {
-                AliasStream.Position = 0;
-                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Aliases..."; });
                 using (GZipStream TagsZip = new GZipStream(AliasStream, CompressionMode.Decompress))
                 {
                     using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
@@ -122,16 +73,18 @@ namespace e621_ReBot_v3.Modules
                         }
                     }
                 }
-                AliasStream.Dispose();
             }
+            AliasBytes = null;
 
-            MemoryStream? ImplicationStream = DownloadDBExport("https://static1.e621.net/data/db_export/tag_implications.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            byte[]? ImplicationBytes = await DownloadDBExport("https://static1.e621.net/data/db_export/tag_implications.csv.gz");
+            if (ImplicationBytes == null)
+                return;
+
             //Process Implications for later use
             Dictionary<string, List<string>> implications = new Dictionary<string, List<string>>();
-            if (ImplicationStream != null)
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Implications..."; });
+            using (MemoryStream? ImplicationStream = new MemoryStream(ImplicationBytes))
             {
-                ImplicationStream.Position = 0;
-                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Implications..."; });
                 using (GZipStream TagsZip = new GZipStream(ImplicationStream, CompressionMode.Decompress))
                 {
                     using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
@@ -159,19 +112,21 @@ namespace e621_ReBot_v3.Modules
                         }
                     }
                 }
-                ImplicationStream.Dispose();
             }
+            ImplicationBytes = null;
 
-            MemoryStream? TagStream = DownloadDBExport("https://static1.e621.net/data/db_export/tags.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            byte[]? TagBytes = await DownloadDBExport("https://static1.e621.net/data/db_export/tags.csv.gz");
+            if (TagBytes == null)
+                return;
+
             //Do tags and artists and DNPs
             List<string> TagList = new List<string>();
             Dictionary<string, List<string>> TagAliases = new Dictionary<string, List<string>>();
             HashSet<string> ArtistList = new HashSet<string>();
             HashSet<string> DNPList = new HashSet<string>();
-            if (TagStream != null)
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Tags..."; });
+            using (MemoryStream? TagStream = new MemoryStream(TagBytes))
             {
-                TagStream.Position = 0;
-                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Tags..."; });
                 using (GZipStream TagsZip = new GZipStream(TagStream, CompressionMode.Decompress))
                 {
                     using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
@@ -240,10 +195,10 @@ namespace e621_ReBot_v3.Modules
                         }
                         TagList = TagListTemp.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
                     }
-                    TagStream.Dispose();
                 }
                 SuccessCount++;
             }
+            TagBytes = null;
 
             //Do Genders
             HashSet<string> GendersList = new HashSet<string>() { "ambiguous_gender", "male", "female", "intersex" };
@@ -269,14 +224,16 @@ namespace e621_ReBot_v3.Modules
                 }
             }
 
-            MemoryStream? PoolStream = DownloadDBExport("https://static1.e621.net/data/db_export/pools.csv.gz", Window_Main._RefHolder.SettingsButton_DLSuggestions);
+            byte[]? PoolBytes = await DownloadDBExport("https://static1.e621.net/data/db_export/pools.csv.gz");
+            if (PoolBytes == null)
+                return;
+
+
             //Do Pools
             List<string> PoolList = new List<string>();
-            if (PoolStream != null)
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Pools..."; });
+            using (MemoryStream? PoolStream = new MemoryStream(PoolBytes))
             {
-                PoolStream.Position = 0;
-                Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Processing Pools..."; });
-
                 using (GZipStream TagsZip = new GZipStream(PoolStream, CompressionMode.Decompress))
                 {
                     using (TextFieldParser CSVParser = new TextFieldParser(TagsZip))
@@ -294,14 +251,15 @@ namespace e621_ReBot_v3.Modules
                         }
                     }
                 }
-                PoolStream.Dispose();
 
                 PoolList = PoolList.Distinct().ToList();
                 PoolList.Reverse();
                 SuccessCount++;
             }
+            PoolBytes = null;
 
-            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.BeginInvoke(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Writting Files..."; });
+
+            Window_Main._RefHolder.SettingsButton_DLSuggestions.Dispatcher.InvokeAsync(() => { Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "Writting Files..."; });
             if (TagList.Count > 0)
             {
                 StringBuilder StringBuilderTemp = new StringBuilder();
@@ -337,12 +295,15 @@ namespace e621_ReBot_v3.Modules
 
             if (SuccessCount == 2)
             {
-                Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                 {
-                    if (Window_Tagger.SuggestionPopup != null) Window_Tagger.SuggestionPopup.LoadSuggestionBox();
+                    if (Window_Tagger.SuggestionPopup != null)
+                        Window_Tagger.SuggestionPopup.LoadSuggestionBox();
+
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.Content = "DL Suggestions";
                     Window_Main._RefHolder.SettingsButton_DLSuggestions.IsEnabled = true;
                     MessageBox.Show(Window_Main._RefHolder, "Downloaded all Tags and Pools for tag suggestions in addition to Artists for DNPs check.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
+
                     GC.WaitForPendingFinalizers();
                     GC.Collect();
                 });
