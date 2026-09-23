@@ -51,7 +51,6 @@ namespace e621_ReBot_v3.Modules.Grabber
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
             HtmlDocumentTemp.LoadHtml(HTMLSource);
 
-
             HtmlNodeCollection ThumbNodeSelector = HtmlDocumentTemp.DocumentNode.SelectNodes(".//div[@class='userpage-browse-content']//div[@class='span-1 align-center' and not(@id)]");
             if (ThumbNodeSelector.Count == 0)
             {
@@ -107,11 +106,15 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Newgrounds) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Newgrounds.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Newgrounds.Grab [@{WebAddress}]");
+                    return;
+                }
+                HTMLSource = DownloadResultTemp.TextData;
             }
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
@@ -146,54 +149,106 @@ namespace e621_ReBot_v3.Modules.Grabber
             List<MediaItem> MediaItemList = new List<MediaItem>();
             ushort SkipCounter = 0;
             ushort MediaCounter = 0;
-            HtmlNodeCollection ImageNodes = PostNode.SelectNodes(".//div[@itemtype='https://schema.org/MediaObject']/div[@class='pod-body']//img");
-            if (ImageNodes != null)
+
+            HtmlNode ContainerNode = PostNode.SelectSingleNode(".//div[@itemtype='https://schema.org/MediaObject']/div[@class='pod-body']");
+            if (ContainerNode != null) //Images
             {
-                ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(ImageNodes.Count));
-                foreach (HtmlNode ImageNode in ImageNodes)
+                if (ContainerNode.SelectSingleNode(".//div[@class='art-view-gallery-nav']") != null) //clickable gallery navigation
                 {
-                    MediaCounter++;
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
-                    {
-                        if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter;
-                    });
+                    //string ScriptWithData = HTMLSource.Substring(HTMLSource.IndexOf("ngImageViewer.addToGallery"));
+                    //ScriptWithData = ScriptWithData.Substring(0, ScriptWithData.IndexOf("</script>"));
+                    //string[] ImageNodes = ScriptWithData.Split("ngImageViewer.addToGallery(", StringSplitOptions.RemoveEmptyEntries);
+                    string ScriptWithData = HTMLSource.Substring(HTMLSource.IndexOf("let imageData = ") + 16);
+                    ScriptWithData = ScriptWithData.Substring(0, ScriptWithData.IndexOf("new ngImageGallery(")).Trim();
+                    ScriptWithData = ScriptWithData.Remove(ScriptWithData.Length - 1);
 
-                    //parent /a node has partial url as link so use that instead
-                    Post_MediaURL = ImageNode.ParentNode.Attributes["href"].Value;
-                    if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
+                    JArray ImageData = JArray.Parse(ScriptWithData);
 
-                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
+                    if (ImageData.Count == 0)
                     {
-                        SkipCounter++;
-                        continue;
+                        Module_Grabber.Report_Info($"Error encountered in Module_Newgrounds.Grab GalleryNav [@{WebAddress}]");
+                        return;
                     }
 
-                    MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
-                    if (MediaCounter == 1)
+                    ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(ImageData.Count));
+
+                    foreach (JToken ImageNode in ImageData)
                     {
-                        HtmlNode ResolutionNodeHolder = PostNode.SelectSingleNode(".//div[@id='sidestats']//dl[@class='sidestats' and not(@data-statistics)]/dd[4]");
-                        if (ResolutionNodeHolder != null)
+                        MediaCounter++;
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter; });
+
+                        Post_MediaURL = (string)ImageNode["image"];
+                        if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
+
+                        if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
                         {
-                            string ResolutionStringHolder = ResolutionNodeHolder.InnerText.Trim();
-                            ResolutionStringHolder = ResolutionStringHolder.Substring(0, ResolutionStringHolder.Length - 3);
-                            string[] ResolutionHolder = ResolutionStringHolder.Split(" x ", StringSplitOptions.RemoveEmptyEntries);
-                            MediaItem MediaItemTemp = MediaItemList.Last();
-                            MediaItemTemp.Grid_MediaWidth = uint.Parse(ResolutionHolder[0]);
-                            MediaItemTemp.Grid_MediaHeight = uint.Parse(ResolutionHolder[1]);
-                            MediaItemTemp.Grid_ThumbnailFullInfo = true;
-                            //if (ThumbnailURLTemp.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-                            //{
-                            //    Module_Grabber.WriteImageInfo(TempDataRow); //do it here so data shown on image properly due to custom handling of webp
-                            //}
+                            SkipCounter++;
+                            continue;
                         }
+
+                        Post_ThumbnailURL = (string)ImageNode["icon"];
+                        if (Post_ThumbnailURL.Contains('?')) Post_ThumbnailURL = Post_ThumbnailURL.Substring(0, Post_ThumbnailURL.IndexOf('?'));
+
+                        MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                        MediaItem MediaItemTemp = MediaItemList.Last();
+                        MediaItemTemp.Grid_MediaWidth = (uint)ImageNode["width"];
+                        MediaItemTemp.Grid_MediaHeight = (uint)ImageNode["height"];
+                        MediaItemTemp.Grid_ThumbnailFullInfo = true;
+
+                        await Task.Delay(Module_Grabber.PauseBetweenImages);
                     }
-                    await Task.Delay(Module_Grabber.PauseBetweenImages);
+                    Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
+                    var breaker = 0;
                 }
-                Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
+                else
+                {
+                    HtmlNodeCollection ImageNodes = ContainerNode.SelectNodes(".//img[@itemprop='image']");
+                    ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(ImageNodes.Count));
+
+                    foreach (HtmlNode ImageNode in ImageNodes)
+                    {
+                        MediaCounter++;
+                        Window_Main._RefHolder.Dispatcher.BeginInvoke(() => { if (ProgressBarTemp != null) ProgressBarTemp.Value = MediaCounter; });
+
+                        //parent /a node has partial url as link so use that instead
+                        Post_MediaURL = ImageNode.ParentNode.Attributes["href"].Value;
+                        if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
+
+                        if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
+                        {
+                            SkipCounter++;
+                            continue;
+                        }
+
+                        MediaItemList.Add(CreateMediaItem(Post_URL, Post_MediaURL, Post_ThumbnailURL, Post_DateTime, ArtistName, Post_Title, Post_Text));
+                        if (MediaCounter == 1)
+                        {
+                            HtmlNode ResolutionNodeHolder = PostNode.SelectSingleNode(".//div[@id='sidestats']//dl[@class='sidestats' and not(@data-statistics)]/dd[4]");
+                            if (ResolutionNodeHolder != null)
+                            {
+                                string ResolutionStringHolder = ResolutionNodeHolder.InnerText.Trim();
+                                ResolutionStringHolder = ResolutionStringHolder.Substring(0, ResolutionStringHolder.Length - 3);
+                                string[] ResolutionHolder = ResolutionStringHolder.Split(" x ", StringSplitOptions.RemoveEmptyEntries);
+                                MediaItem MediaItemTemp = MediaItemList.Last();
+                                MediaItemTemp.Grid_MediaWidth = uint.Parse(ResolutionHolder[0]);
+                                MediaItemTemp.Grid_MediaHeight = uint.Parse(ResolutionHolder[1]);
+                                MediaItemTemp.Grid_ThumbnailFullInfo = true;
+                            }
+                        }
+                        await Task.Delay(Module_Grabber.PauseBetweenImages);
+                    }
+                    Window_Main._RefHolder.Dispatcher.Invoke(() => ProgressBarTemp.Visibility = Visibility.Hidden);
+                }
             }
-            else
+            else //Video, maybe
             {
-                string VideoJSONString = await Module_Grabber.GetPageSource(Post_URL.Replace("/view/", "/video/"), Module_CookieJar.Cookies_Newgrounds, true);
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(Post_URL.Replace("/view/", "/video/"));
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Newgrounds.Grab [@{WebAddress}]");
+                    return;
+                }
+                string VideoJSONString = DownloadResultTemp.TextData;
                 if (string.IsNullOrEmpty(VideoJSONString))
                 {
                     Module_Grabber.Report_Info($"Grabbing skipped - No media container found [@{Post_URL}]");
@@ -218,7 +273,6 @@ namespace e621_ReBot_v3.Modules.Grabber
                     Module_Grabber.Report_Info($"Grabbing skipped - Media already grabbed or ignored [@{Post_URL}]");
                     return;
                 }
-
             }
 
             // - - - - - - - - - - - - - - - -

@@ -105,7 +105,7 @@ namespace CefSharp
                 new Regex(@"^\w+://\w+\.newgrounds\.com/(movies|portal|art)"),
                 new Regex(@"^\w+://\w+\.sofurry\.com/(view|artwork|browse)"),
                 new Regex(@"^\w+://www\.weasyl\.com/((~.+/)?submissions|search)"),
-                new Regex(@"^\w+://\w+\.\w+/api/v1/(accounts/\d+/)?statuses(/\d+/?|\?\w+=)"), //Mastodons
+                new Regex(@"^\w+://\w+\.\w+/api/v1/(accounts/\d+/)?statuses(/\d+/?$|\?\w+=)"), //Mastodons
                 //new Regex(@"^\w+://pawoo\.net/@.+/(\d+|media)"),
                 new Regex(@"^\w+://www\.hentai-foundry\.com/(pictures|user)"),
                 new Regex(@"^\w+://www\.plurk\.com/(p/|TimeLine/|(?!portal|login|signup|search)\w+)"),
@@ -209,12 +209,12 @@ namespace CefSharp
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
                             //delay validation
-                            string AddresstoValidate = request.Url;
+                            string Address2Validate = request.Url;
                             Task.Run(async () =>
                             {
                                 await Task.Delay(500);
-                                Module_Grabber.GrabEnabler(AddresstoValidate);
-                                Module_Downloader.DownloadEnabler(AddresstoValidate);
+                                Module_Grabber.GrabEnabler(Address2Validate);
+                                Module_Downloader.DownloadEnabler(Address2Validate);
                             });
                         }
                         break;
@@ -308,11 +308,11 @@ namespace CefSharp
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
                             //delay validation
-                            string AddresstoValidate = request.Url;
+                            string Address2Validate = request.Url;
                             Task.Run(async () =>
                             {
                                 await Task.Delay(500);
-                                Module_Grabber.GrabEnabler(AddresstoValidate);
+                                Module_Grabber.GrabEnabler(Address2Validate);
                             });
                         }
                         else //json
@@ -351,11 +351,11 @@ namespace CefSharp
                         {
                             Module_CefSharp.BrowserHTMLSource = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
                             //delay validation
-                            string AddresstoValidate = request.Url;
+                            string Address2Validate = request.Url;
                             Task.Run(async () =>
                             {
                                 await Task.Delay(500);
-                                Module_Downloader.DownloadEnabler(AddresstoValidate);
+                                Module_Downloader.DownloadEnabler(Address2Validate);
                             });
                         }
                         break;

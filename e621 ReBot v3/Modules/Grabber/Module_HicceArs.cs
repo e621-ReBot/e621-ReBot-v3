@@ -104,11 +104,15 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_HicceArs) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_HicceArs.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_HicceArs.Grab [@{WebAddress}]");
+                    return;
+                }
+                HTMLSource = DownloadResultTemp.TextData;
             }
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
@@ -254,36 +258,36 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         private static void CheckHicceArsMedia(ref MediaItem MediaItemRef)
         {
-            HttpWebRequest HicceArsMediaCheck = (HttpWebRequest)WebRequest.Create(MediaItemRef.Grab_MediaURL);
-            HicceArsMediaCheck.CookieContainer = Module_CookieJar.Cookies_HicceArs;
-            HicceArsMediaCheck.Method = "HEAD";
-            try
-            {
-                using (HttpWebResponse HicceArsMediaCheckHead = (HttpWebResponse)HicceArsMediaCheck.GetResponse())
-                {
-                    if (HicceArsMediaCheckHead.StatusCode == HttpStatusCode.OK)
-                    {
-                        string contentType = HicceArsMediaCheckHead.ContentType;
-                        if (contentType.Equals("text/html"))
-                        {
-                            //CookieError = true;
-                            //TempDataRow = null;
-                            //var breaker = 0;
-                        }
-                        else
-                        {
-                            contentType = contentType.Substring(contentType.IndexOf('.') + 1).Replace("jpeg", "jpg");
-                            MediaItemRef.Grid_MediaFormat = contentType;
-                            MediaItemRef.Grid_MediaByteLength = (uint)HicceArsMediaCheckHead.ContentLength;
-                        }
-                    }
-                    return;
-                }
-            }
-            catch
-            {
-                return;
-            }
+            //HttpWebRequest HicceArsMediaCheck = (HttpWebRequest)WebRequest.Create(MediaItemRef.Grab_MediaURL);
+            //HicceArsMediaCheck.CookieContainer = Module_CookieJar.Cookies_HicceArs;
+            //HicceArsMediaCheck.Method = "HEAD";
+            //try
+            //{
+            //    using (HttpWebResponse HicceArsMediaCheckHead = (HttpWebResponse)HicceArsMediaCheck.GetResponse())
+            //    {
+            //        if (HicceArsMediaCheckHead.StatusCode == HttpStatusCode.OK)
+            //        {
+            //            string contentType = HicceArsMediaCheckHead.ContentType;
+            //            if (contentType.Equals("text/html"))
+            //            {
+            //                //CookieError = true;
+            //                //TempDataRow = null;
+            //                //var breaker = 0;
+            //            }
+            //            else
+            //            {
+            //                contentType = contentType.Substring(contentType.IndexOf('.') + 1).Replace("jpeg", "jpg");
+            //                MediaItemRef.Grid_MediaFormat = contentType;
+            //                MediaItemRef.Grid_MediaByteLength = (uint)HicceArsMediaCheckHead.ContentLength;
+            //            }
+            //        }
+            //        return;
+            //    }
+            //}
+            //catch
+            //{
+            //    return;
+            //}
         }
     }
 }

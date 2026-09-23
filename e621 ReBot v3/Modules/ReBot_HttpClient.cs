@@ -269,6 +269,24 @@ namespace e621_ReBot_v3.Modules
 
             return CookieValue;
         }
+
+        internal static async Task<bool> CheckCookies(string WebAddress)
+        {
+            string BaseURL = $"{new Uri(WebAddress).Scheme}://{new Uri(WebAddress).Host}";
+            Uri uri = new Uri(BaseURL);
+
+            //Is null if grid session is loaded but browser isn't used
+            if (Cef.GetGlobalCookieManager() == null)
+                return false;
+
+            //Must not be called on main thread (or maybe same thread Cef lives on or it will hang the browser)
+            List<CefSharp.Cookie> CefCookies = await Cef.GetGlobalCookieManager().VisitUrlCookiesAsync(BaseURL, true);
+
+            if (CefCookies == null)
+                return false;
+
+            return true;
+        }
     }
 
     internal sealed class DownloadProgress

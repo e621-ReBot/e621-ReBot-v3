@@ -101,11 +101,15 @@ namespace e621_ReBot_v3.Modules.Grabber
 
         internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Plurk) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Plurk.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Plurk.Grab [@{WebAddress}]");
+                    return;
+                }
+                HTMLSource = DownloadResultTemp.TextData;
             }
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();

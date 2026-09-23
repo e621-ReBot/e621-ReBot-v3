@@ -50,15 +50,15 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                         if (PicURL.Contains("overlays/video")) //if video
                         {
-                            string? HTMLSource = await Module_Grabber.GetPageSource($"{PicURL}-p{MediaCounter}", Module_CookieJar.Cookies_Inkbunny);
-                            if (string.IsNullOrEmpty(HTMLSource))
+                            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"{PicURL}-p{MediaCounter}");
+                            if (!DownloadResultTemp.IsSuccessStatusCode)
                             {
                                 Module_Downloader.Report_Info($"Error encountered in Module_Inkbunny.Download [@{WebAddress}]");
                                 return;
                             }
 
                             HtmlDocument HtmlDocumentTemp2 = new HtmlDocument();
-                            HtmlDocumentTemp2.LoadHtml(HTMLSource);
+                            HtmlDocumentTemp2.LoadHtml(DownloadResultTemp.TextData);
                             if (HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']").InnerText.Contains("download", StringComparison.OrdinalIgnoreCase))
                             {
                                 PicURL = HtmlDocumentTemp2.DocumentNode.SelectSingleNode(".//div[@id='size_container']/a").Attributes["href"].Value;

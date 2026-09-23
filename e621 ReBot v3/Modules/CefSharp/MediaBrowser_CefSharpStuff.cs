@@ -4,7 +4,6 @@ using e621_ReBot_v3.Modules;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 
 namespace CefSharp
 {
@@ -29,34 +28,34 @@ namespace CefSharp
     {
         public override CefReturnValue ProcessRequestAsync(IRequest request, ICallback callback)
         {
-            using (callback)
-            {
-                HttpWebRequest HicceArsMediaRequest = (HttpWebRequest)WebRequest.Create(request.Url);
-                HicceArsMediaRequest.CookieContainer = Module_CookieJar.Cookies_HicceArs;
-                MemoryStream MemoryStreamTemp = new MemoryStream();
-                using (HttpWebResponse HicceArsMediaRequestData = (HttpWebResponse)HicceArsMediaRequest.GetResponse())
-                {
-                    StatusCode = (int)HicceArsMediaRequestData.StatusCode;
-                    if (HicceArsMediaRequestData.StatusCode == HttpStatusCode.OK)
-                    {
-                        HicceArsMediaRequestData.GetResponseStream().CopyTo(MemoryStreamTemp);
-                        MemoryStreamTemp.Position = 0;
-                        ResponseLength = MemoryStreamTemp.Length;
-                        Stream = MemoryStreamTemp;
-                        MimeType = HicceArsMediaRequestData.ContentType;
-                        Headers.Add("content-disposition", HicceArsMediaRequestData.Headers["content-disposition"].Replace("attachment;", "inline;"));
-                    }
-                }
-                //MemoryStreamTemp.Dispose();
-                if (Stream == null)
-                {
-                    callback.Cancel();
-                }
-                else
-                {
-                    callback.Continue();
-                }
-            }
+            //using (callback)
+            //{
+            //    HttpWebRequest HicceArsMediaRequest = (HttpWebRequest)WebRequest.Create(request.Url);
+            //    HicceArsMediaRequest.CookieContainer = Module_CookieJar.Cookies_HicceArs;
+            //    MemoryStream MemoryStreamTemp = new MemoryStream();
+            //    using (HttpWebResponse HicceArsMediaRequestData = (HttpWebResponse)HicceArsMediaRequest.GetResponse())
+            //    {
+            //        StatusCode = (int)HicceArsMediaRequestData.StatusCode;
+            //        if (HicceArsMediaRequestData.StatusCode == HttpStatusCode.OK)
+            //        {
+            //            HicceArsMediaRequestData.GetResponseStream().CopyTo(MemoryStreamTemp);
+            //            MemoryStreamTemp.Position = 0;
+            //            ResponseLength = MemoryStreamTemp.Length;
+            //            Stream = MemoryStreamTemp;
+            //            MimeType = HicceArsMediaRequestData.ContentType;
+            //            Headers.Add("content-disposition", HicceArsMediaRequestData.Headers["content-disposition"].Replace("attachment;", "inline;"));
+            //        }
+            //    }
+            //    //MemoryStreamTemp.Dispose();
+            //    if (Stream == null)
+            //    {
+            //        callback.Cancel();
+            //    }
+            //    else
+            //    {
+            //        callback.Continue();
+            //    }
+            //}
             return CefReturnValue.Continue;
         }
 

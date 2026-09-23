@@ -121,13 +121,14 @@ namespace e621_ReBot_v3.Modules.Grabber
         {
             string UserID = Pixiv_Regex().Match(WebAddress).Value;
 
-            string? JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/user/{UserID}/profile/all", Module_CookieJar.Cookies_Pixiv);
-            if (string.IsNullOrEmpty(JSONSource))
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/user/{UserID}/profile/all");
+            if (!DownloadResultTemp.IsSuccessStatusCode)
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
+                Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Queue_All [@{WebAddress}]");
                 return;
             }
 
+            string JSONSource = DownloadResultTemp.TextData;
             JObject JSONDictionary = JObject.Parse(JSONSource);
 
             List<string> WorkList = new List<string>();
@@ -191,13 +192,14 @@ namespace e621_ReBot_v3.Modules.Grabber
         {
             string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
 
-            string? JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}", Module_CookieJar.Cookies_Pixiv);
-            if (string.IsNullOrEmpty(JSONSource))
+            DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/illust/{Post_ID}");
+            if (!DownloadResultTemp.IsSuccessStatusCode)
             {
                 Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
                 return;
             }
 
+            string JSONSource = DownloadResultTemp.TextData;
             JObject PixivJSON = JObject.Parse(JSONSource);
 
             if ((bool)PixivJSON["error"])
@@ -255,13 +257,14 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
             else
             {
-                JSONSource = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
-                if (string.IsNullOrEmpty(JSONSource))
+                DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages");
+                if (!DownloadResultTemp.IsSuccessStatusCode)
                 {
                     Module_Grabber.Report_Info($"Error encountered in Module_Pixiv.Grab [@{WebAddress}]");
                     return;
                 }
 
+                JSONSource = DownloadResultTemp.TextData;
                 JObject JSONPages = JObject.Parse(JSONSource);
 
                 ProgressBar ProgressBarTemp = Window_Main._RefHolder.Dispatcher.Invoke(() => Module_Grabber.GetProgressBar(PicCount));

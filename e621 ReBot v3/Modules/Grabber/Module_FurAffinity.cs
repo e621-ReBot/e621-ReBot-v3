@@ -104,11 +104,15 @@ namespace e621_ReBot_v3.Modules.Grabber
         private static partial Regex FA_Regex2();
         internal static async Task Grab(string WebAddress, string? HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_FurAffinity) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_FurAffinitty.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_FurAffinitty.Grab [@{WebAddress}]");
+                    return;
+                }
+                HTMLSource = DownloadResultTemp.TextData;
             }
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();

@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -88,13 +87,18 @@ namespace e621_ReBot_v3.Modules.Grabber
             }
         }
 
-        internal static async Task Grab(string WebAddress, string JSONSource, CookieContainer CookieRef)
+        internal static async Task Grab(string WebAddress, string JSONSource)
         {
-            JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, CookieRef) : JSONSource; //Why source? I don't remember.
+            //JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, CookieRef) : JSONSource; //Why source? I don't remember.
             if (string.IsNullOrEmpty(JSONSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Mastodons.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Mastodons.Grab [@{WebAddress}]");
+                    return;
+                }
+                JSONSource = DownloadResultTemp.TextData;
             }
 
             JObject MastodonsJSON = JObject.Parse(JSONSource);
@@ -152,8 +156,14 @@ namespace e621_ReBot_v3.Modules.Grabber
                 if (MediaNode["meta"] != null && MediaNode["meta"].HasValues)
                 {
                     //Sometimes meta types don't exist
-                    MediaItemTemp.Grid_MediaWidth = (uint)(MediaNode["meta"]["original"] == null ? MediaNode["meta"]["width"] : MediaNode["meta"]["original"]["width"]);
-                    MediaItemTemp.Grid_MediaHeight = (uint)(MediaNode["meta"]["original"] == null ? MediaNode["meta"]["height"] : MediaNode["meta"]["original"]["height"]);
+                    uint MWidth = (uint?)(MediaNode["meta"]["original"]?["width"] ?? MediaNode["meta"]["width"]) ?? 0;
+                    uint MHeight = (uint?)(MediaNode["meta"]["original"]?["height"] ?? MediaNode["meta"]["height"]) ?? 0;
+                    if (MWidth > 0 && MHeight > 0)
+                    {
+                        MediaItemTemp.Grid_MediaWidth = MWidth;
+                        MediaItemTemp.Grid_MediaHeight = MHeight;
+                    }
+
                 }
 
                 Module_Uploader.Media2BigCheck(MediaItemTemp);

@@ -132,11 +132,15 @@ namespace e621_ReBot_v3.Modules.Grabber
         //https://inkbunny.net/api_submissions.php?sid={sid}&submission_ids={id}
         internal static async Task Grab(string WebAddress, string HTMLSource)
         {
-            HTMLSource = string.IsNullOrEmpty(HTMLSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Inkbunny) : HTMLSource;
             if (string.IsNullOrEmpty(HTMLSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");
-                return;
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync(WebAddress);
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");
+                    return;
+                }
+                HTMLSource = DownloadResultTemp.TextData;
             }
 
             HtmlDocument HtmlDocumentTemp = new HtmlDocument();
@@ -215,7 +219,14 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                     if (Post_MediaURL.Contains("overlays/video")) //if video
                     {
-                        HTMLSource = await Module_Grabber.GetPageSource($"{Post_URL}-p{MediaCounter}", Module_CookieJar.Cookies_Inkbunny);
+                        DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"{Post_URL}-p{MediaCounter}");
+                        if (!DownloadResultTemp.IsSuccessStatusCode)
+                        {
+                            Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");
+                            return;
+                        }
+                        HTMLSource = DownloadResultTemp.TextData;
+
                         if (string.IsNullOrEmpty(HTMLSource))
                         {
                             Module_Grabber.Report_Info($"Error encountered in Module_Inkbunny.Grab [@{WebAddress}]");

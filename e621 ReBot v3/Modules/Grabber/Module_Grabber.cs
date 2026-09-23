@@ -6,8 +6,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -470,19 +468,19 @@ namespace e621_ReBot_v3.Modules
 
                 case "mastodon.social":
                     {
-                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Mastodon);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "baraag.net":
                     {
-                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Baraag);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
                 case "pawoo.net":
                     {
-                        await Module_Mastodons.Grab(WebAddress, (string)NeededData, Module_CookieJar.Cookies_Pawoo);
+                        await Module_Mastodons.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 
@@ -511,70 +509,6 @@ namespace e621_ReBot_v3.Modules
                 _GrabQueue_URLs.Remove(WebAddress);
             }
             Grab_3Finish();
-        }
-
-        private static readonly Dictionary<CookieContainer, HttpClient> ClientList = new Dictionary<CookieContainer, HttpClient>();
-        private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
-        internal static async Task<string?> GetPageSource(string WebAddress, CookieContainer CookieRef, bool NewgroundsSpecialRequest = false)
-        {
-            HttpClientHandler? HandlerFinder;
-            HttpClient? ClientFinder;
-            if (ClientList.ContainsKey(CookieRef))
-            {
-                ClientFinder = ClientList[CookieRef];
-            }
-            else
-            {
-                HandlerFinder = new HttpClientHandler
-                {
-                    CookieContainer = CookieRef,
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                };
-                ClientFinder = new HttpClient(HandlerFinder);
-                ClientFinder.DefaultRequestHeaders.UserAgent.ParseAdd(AppSettings.GlobalUserAgent);
-                ClientList.Add(CookieRef, ClientFinder);
-            }
-
-            int TryCount = 0;
-            do
-            {
-                using (HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, WebAddress))
-                {
-                    if (NewgroundsSpecialRequest) HttpRequestMessageTemp.Headers.Add("X-Requested-With", "XMLHttpRequest");
-
-                    //Might need to handle timeout here, https://thomaslevesque.com/2018/02/25/better-timeout-handling-with-httpclient/
-                    using (CancellationTokenSource CancellationTokenSourceTemp = new CancellationTokenSource(RequestTimeout))
-                    {
-                        try
-                        {
-                            HttpResponseMessage HttpResponseMessageTemp = await ClientFinder.SendAsync(HttpRequestMessageTemp, CancellationTokenSourceTemp.Token);
-
-                            return await HttpResponseMessageTemp.Content.ReadAsStringAsync();
-                        }
-                        catch (TaskCanceledException) //handle timeout
-                        {
-                            ClientFinder.CancelPendingRequests();
-                            TryCount++;
-                            await Task.Delay(500);
-                        }
-                        catch (HttpRequestException)
-                        {
-                            // Connection errors, DNS errors, TLS errors, etc
-                            // log ex if needed
-                            TryCount++;
-                        }
-                        catch (Exception)
-                        {
-                            // Anything else unexpected
-                            // log ex if needed
-                            return null;
-                        }
-                    }
-                }
-            }
-            while (TryCount < 3);
-
-            return null;
         }
 
         internal static uint? GetMediaSize(string MediaURL)

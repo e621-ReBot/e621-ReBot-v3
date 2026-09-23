@@ -35,7 +35,14 @@ namespace e621_ReBot_v3.Modules.Downloader
 
                 string Post_ID = Pixiv_Regex().Match(WebAddress).Value;
 
-                string JSONSourceTest = await Module_Grabber.GetPageSource($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages", Module_CookieJar.Cookies_Pixiv);
+                DownloadResult DownloadResultTemp = await ReBot_HttpClient.DownloadStringAsync($"https://www.pixiv.net/ajax/illust/{Post_ID}/pages");
+                if (!DownloadResultTemp.IsSuccessStatusCode)
+                {
+                    Module_Grabber.Report_Info($"Error encountered in Module_HicceArs.Grab [@{WebAddress}]");
+                    return;
+                }
+
+                string JSONSourceTest = DownloadResultTemp.TextData;
                 JObject PixivJSON = JObject.Parse(JSONSourceTest);
 
                 //lock should already be in background thread as the task is done in background
