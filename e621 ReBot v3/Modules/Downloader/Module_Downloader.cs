@@ -247,16 +247,11 @@ namespace e621_ReBot_v3.Modules
 
         private static readonly HttpClient _DownloadClient;
 
-        private static HttpClient SelectClient(string URL)
-        {
-            return _DownloadClient;
-        }
-
         internal static async Task<byte[]?> DownloadFileBytes(string DownloadURL, ActionType ActionTypeEnum, ProgressBar? ProgressBarRef = null, float PercentageMod = 1, float MultiProgressBase = 0)
         {
             try
             {
-                HttpClient ClientSelector = SelectClient(DownloadURL);
+                HttpClient ClientSelector = _DownloadClient;
 
                 using HttpRequestMessage HttpRequestMessageTemp = new HttpRequestMessage(HttpMethod.Get, DownloadURL);
                 HttpRequestMessageTemp.Headers.Add("User-Agent", AppSettings.GlobalUserAgent);
@@ -801,6 +796,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static readonly SolidColorBrush CompletedWorkBrush = new SolidColorBrush(Colors.LimeGreen);
         internal static readonly SolidColorBrush FailedWorkBrush = new SolidColorBrush(Colors.Maroon);
+        private static readonly HashSet<string> FileDownloadInProgress = new HashSet<string>();
         private static async void Download_StartDLClient(DownloadVE DownloadVERef, string DowwnloadType)
         {
             if (DowwnloadType.Equals("Thumb"))
@@ -908,6 +904,11 @@ namespace e621_ReBot_v3.Modules
                     DownloadVERef._DownloadFinished = true;
                     _DownloadVEFinisherTimer.Stop();
                     _DownloadVEFinisherTimer.Start();
+
+                    lock (FileDownloadInProgress)
+                    {
+                        FileDownloadInProgress.Remove((string)DownloadVERef.FolderIcon.Tag);
+                    }
                 }
                 else
                 {
@@ -1117,7 +1118,7 @@ namespace e621_ReBot_v3.Modules
                 }
                 else
                 {
-                    Window_Main._RefHolder.Dispatcher.BeginInvoke(() =>
+                    Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                     {
                         //Should throw messagebox for user?
                         Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
@@ -1206,6 +1207,13 @@ namespace e621_ReBot_v3.Modules
             }
 
             string FilePath = Path.Combine(DownloadPath, GetFileNameOnly);
+            if (FileDownloadInProgress.Contains(FilePath))
+            {
+                DLThreadsWaiting++;
+                return true;
+           
+            }
+
             if (File.Exists(FilePath))
             {
                 if (DownloadItemRef.DL_Size != null && DownloadItemRef.DL_Size > 0)
@@ -1234,11 +1242,17 @@ namespace e621_ReBot_v3.Modules
                 return false;
             }
 
+            lock (FileDownloadInProgress)
+            {
+                FileDownloadInProgress.Add(FilePath);
+            }
+
             await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
             {
                 DownloadVETemp._DownloadItemRef = DownloadItemRef;
                 DownloadVETemp.FolderIcon.Tag = FilePath;
                 DownloadVETemp.DownloadStartup();
+
                 if (DownloadItemRef.Grab_MediaFormat.Equals("swf"))
                 {
                     DownloadVETemp.cThumbnail_Image.Source = new ImageSourceConverter().ConvertFrom(Properties.Resources.E6Image_Flash) as ImageSource;
@@ -1351,6 +1365,12 @@ namespace e621_ReBot_v3.Modules
                         string ImageRename = MediaFile_RenameFileName(WebMName, DownloadItemRef);
 
                         string FilePath = Path.Combine(FolderPath, ImageRename);
+                        if (FileDownloadInProgress.Contains(FilePath))
+                        {
+                            DLThreadsWaiting++;
+                            return true;
+                        }
+
                         if (File.Exists(FilePath))
                         {
                             Report_Info($"Ugoira WebM already exists, skipped downloading {DownloadItemRef.Grab_PageURL}");
@@ -1371,6 +1391,11 @@ namespace e621_ReBot_v3.Modules
                         {
                             DLThreadsWaiting++;
                             return false;
+                        }
+
+                        lock (FileDownloadInProgress)
+                        {
+                            FileDownloadInProgress.Add(FilePath);
                         }
 
                         await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
@@ -1409,7 +1434,7 @@ namespace e621_ReBot_v3.Modules
                         string ImageRename = MediaFile_RenameFileName(GetFileNameOnly, DownloadItemRef);
 
                         string FilePath = Path.Combine(FolderPath, ImageRename);
-                        if (File.Exists(FilePath) || (MediaBrowser_MediaCache.ContainsKey(GetFileNameOnly) && ReSaveMedia(DownloadItemRef)))
+                        if (File.Exists(FilePath) || (MediaBrowser_MediaCache.ContainsKey(GetFileNameOnly) && ReSaveMedia(DownloadItemRef)) || FileDownloadInProgress.Contains(FilePath))
                         {
                             DLThreadsWaiting++;
                             return true;
@@ -1430,7 +1455,12 @@ namespace e621_ReBot_v3.Modules
                             return false;
                         }
 
-                        Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
+                        lock (FileDownloadInProgress)
+                        {
+                            FileDownloadInProgress.Add(FilePath);
+                        }
+
+                        await Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>
                         {
                             DownloadVETemp._DownloadItemRef = DownloadItemRef;
                             DownloadVETemp.FolderIcon.Tag = FilePath;
@@ -1486,7 +1516,7 @@ namespace e621_ReBot_v3.Modules
                                         break;
                                     }
                             }
-                        }).Task.Wait();
+                        });
 
                         break;
                     }
