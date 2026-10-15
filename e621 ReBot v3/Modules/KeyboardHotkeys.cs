@@ -147,7 +147,7 @@ namespace e621_ReBot_v3
                                     }
                                 }
                             }
-                            if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.AlreadyUploaded_Label.Cursor = Cursor_BrowserNav;
+                            if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.AlreadyUploaded_LabelGrid.Cursor = Cursor_BrowserNav;
                             if (Window_MediaSelect._RefHolder != null && Window_MediaSelect._RefHolder.Title.Contains("Similar Search"))
                             {
                                 foreach (MediaSelectItem MediaSelectItemTemp in Window_MediaSelect._RefHolder.ItemPanel.Children)
@@ -197,7 +197,7 @@ namespace e621_ReBot_v3
                                 }
                             }
                         }
-                        if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.AlreadyUploaded_Label.Cursor = Cursor_ReBotNav;
+                        if (Window_Preview._RefHolder != null) Window_Preview._RefHolder.AlreadyUploaded_LabelGrid.Cursor = Cursor_ReBotNav;
                         if (Window_MediaSelect._RefHolder != null && Window_MediaSelect._RefHolder.Title.Contains("Similar Search"))
                         {
                             foreach (MediaSelectItem MediaSelectItemTemp in Window_MediaSelect._RefHolder.ItemPanel.Children)

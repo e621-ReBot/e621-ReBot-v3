@@ -18,7 +18,7 @@ using System.Windows.Threading;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_MediaSelect : Window
+    public partial class Window_MediaSelect : Custom_Window
     {
         internal static Window_MediaSelect? _RefHolder;
         public Window_MediaSelect()

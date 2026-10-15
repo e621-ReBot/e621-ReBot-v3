@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using e621_ReBot_v3.CustomControls;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Windows
 {
-    public partial class Window_SelectArtist : Window
+    public partial class Window_SelectArtist : Custom_Window
     {
         internal string? SelectedArtist { get; private set; }
         public Window_SelectArtist(List<string> ArtistList)

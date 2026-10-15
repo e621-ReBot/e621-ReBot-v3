@@ -102,11 +102,11 @@ namespace CefSharp
             switch (RequestUrlCut)
             {
                 //Don't do anything with videos
-                case string VideoFormat1 when VideoFormat1.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase):
-                case string VideoFormat2 when VideoFormat2.EndsWith(".swf", StringComparison.OrdinalIgnoreCase):
-                    {
-                        return null;
-                    }
+                //case string VideoFormat1 when VideoFormat1.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase):
+                //case string VideoFormat2 when VideoFormat2.EndsWith(".swf", StringComparison.OrdinalIgnoreCase):
+                //    {
+                //        return null;
+                //    }
                 default:
                     {
                         //Also don't do anything if it's already cached

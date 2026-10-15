@@ -14,7 +14,7 @@ using System.Windows.Threading;
 namespace e621_ReBot_v3
 {
 
-    public partial class Window_Tagger : Window
+    public partial class Window_Tagger : Custom_Window
     {
         internal static Window_Tagger? _RefHolder;
         internal MediaItem? MediaItemHolder;

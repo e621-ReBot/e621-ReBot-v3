@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_PoolWatcher : Window
+    public partial class Window_PoolWatcher : Custom_Window
     {
         internal static Window_PoolWatcher? _RefHolder;
         public Window_PoolWatcher()

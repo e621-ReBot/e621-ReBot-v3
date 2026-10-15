@@ -1,9 +1,8 @@
-﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<CustomControls:Custom_Window xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_PoolWatcher"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls"
-        x:Class="e621_ReBot_v3.Window_PoolWatcher"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"      
         mc:Ignorable="d"
         Title="Pool Watcher" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinHeight="210" MaxHeight="810" MinWidth="172" MaxWidth="648" Loaded="Window_Loaded" SizeToContent="WidthAndHeight" Closed="Window_Closed" ShowInTaskbar="False" KeyDown="Window_KeyDown">
 
@@ -26,4 +25,4 @@
             <WrapPanel x:Name="PoolWatcher_WrapPanel" Margin="2,2,0,0"/>
         </ScrollViewer>
     </Grid>
-</Window>
+</CustomControls:Custom_Window>

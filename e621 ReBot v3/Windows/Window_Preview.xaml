@@ -1,9 +1,8 @@
-﻿<Window
+﻿<CustomControls:Custom_Window xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_Preview"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_Preview"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"    
         mc:Ignorable="d"
         Title="Preview" Width="1280" Height="720" Background="DimGray" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Icon="/Resources/ReBot_Icon.ico" Cursor="{StaticResource Cursor_Default}" MinWidth="720" MinHeight="320" Closed="Window_Closed" KeyDown="Window_KeyDown">
@@ -56,7 +55,10 @@
             <Border BorderBrush="Black" BorderThickness="1,0,0,0" Margin="8,0,8,0"/>
             <Button x:Name="PB_PlayUgoira" Style="{StaticResource ButtonStyle_Window_Preview}" Content="▶ U" HorizontalContentAlignment="Center" FontSize="20" Cursor="Hand" ToolTip="Play Ugoira" Click="PB_PlayUgoira_Click" Margin="0,0,8,0"/>
 
-            <CustomControls:Custom_TextWithOutline x:Name="AlreadyUploaded_Label" Fill="Orange" Text="#0123456789" FontWeight="Bold" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="20" Cursor="{StaticResource Cursor_ReBotNav}" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser." MouseLeftButtonDown="AlreadyUploaded_Label_MouseLeftButtonDown"/>
+            <Grid x:Name="AlreadyUploaded_LabelGrid" MouseLeftButtonDown="AlreadyUploaded_LabelGrid_MouseLeftButtonDown" ToolTip="Click to navigate to post.&#xA;Alt+Click to open in your default browser." Cursor="{StaticResource Cursor_ReBotNav}" Height="18" Background="Transparent" >
+                <CustomControls:Custom_TextWithOutline x:Name="AlreadyUploaded_Label" Fill="Orange" Text="#0123456789" FontWeight="Bold" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="20" Height="28" IsHitTestVisible="False" TextChanged="AlreadyUploaded_Label_TextChanged"/>
+            </Grid>
+            
 
         </DockPanel>
         
@@ -73,4 +75,4 @@
         </StackPanel>
 
     </Grid>
-</Window>
+</CustomControls:Custom_Window>

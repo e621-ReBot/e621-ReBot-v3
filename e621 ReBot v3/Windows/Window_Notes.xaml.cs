@@ -1,10 +1,11 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using System;
 using System.Windows;
 using System.Windows.Input;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_Notes : Window
+    public partial class Window_Notes : Custom_Window
     {
         internal static Window_Notes? _RefHolder;
         public Window_Notes()

@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace e621_ReBot_v3.CustomControls
 {
-    public partial class Custom_IDBox : Window
+    public partial class Custom_IDBox : Custom_Window
     {
         public Custom_IDBox()
         {

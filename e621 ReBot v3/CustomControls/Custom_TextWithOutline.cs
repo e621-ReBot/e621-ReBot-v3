@@ -193,6 +193,8 @@ namespace e621_ReBot_v3.CustomControls
 
             OutlineTextControl.InvalidateMeasure();
             OutlineTextControl.InvalidateVisual();
+
+            OutlineTextControl.TextChanged?.Invoke(OutlineTextControl, EventArgs.Empty);
         }
 
         private static void OnFormattedTextUpdated(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
@@ -253,5 +255,7 @@ namespace e621_ReBot_v3.CustomControls
             EnsureFormattedText();
             _TextGeometry = _FormattedText.BuildGeometry(new Point(0, 0));
         }
+
+        public event EventHandler? TextChanged;
     }
 }

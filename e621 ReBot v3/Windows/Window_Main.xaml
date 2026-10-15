@@ -1,4 +1,4 @@
-﻿<Window x:Class="e621_ReBot_v3.Window_Main"
+﻿<customcontrols:Custom_Window x:Class="e621_ReBot_v3.Window_Main"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,12 +6,12 @@
         mc:Ignorable="av" 
         Title="e621 ReBot v3" Width="1280" Height="720" Icon="/Resources/ReBot_Icon.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" Background="{DynamicResource ThemeBackground}" BorderThickness="1" BorderBrush="Black" UseLayoutRounding="True" SnapsToDevicePixels="True" KeyboardNavigation.AcceptsReturn="False" Cursor="{StaticResource Cursor_Default}" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" Activated="Window_Activated" KeyDown="Window_KeyDown" Closing="Window_Closing">
 
-    <Window.Resources>
+    <customcontrols:Custom_Window.Resources>
         <Storyboard x:Key="FadeAnimation">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.1"/>
             <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
         </Storyboard>
-    </Window.Resources>
+    </customcontrols:Custom_Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -681,7 +681,7 @@
 
             <TabItem x:Name="ReBot_SettingsTab" Background="Transparent">
                 <Grid>
-                    <Grid x:Name="Grid4AppName" HorizontalAlignment="Left" VerticalAlignment="Top" Width="512" Height="32" Margin="16,16,0,0">
+                    <Grid x:Name="Grid4AppName" HorizontalAlignment="Left" VerticalAlignment="Top" Width="512" Height="32" Margin="16,16,0,0" av:IsHidden="True">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
@@ -871,4 +871,4 @@
         </Canvas>
 
     </Grid>
-</Window>
+</customcontrols:Custom_Window>

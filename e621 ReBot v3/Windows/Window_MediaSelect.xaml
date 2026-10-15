@@ -1,4 +1,4 @@
-﻿<Window x:Class="e621_ReBot_v3.Window_MediaSelect"
+﻿<CustomControls:Custom_Window xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_MediaSelect"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,4 +12,4 @@
         </ScrollViewer>
         <TextBlock x:Name="SearchStatus" TextWrapping="Wrap" Text="Checking Site status..." Margin="0,8,0,8"/>
     </Grid>
-</Window>
+</CustomControls:Custom_Window>

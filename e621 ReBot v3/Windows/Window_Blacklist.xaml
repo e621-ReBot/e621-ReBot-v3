@@ -1,4 +1,4 @@
-﻿<Window x:Class="e621_ReBot_v3.Window_Blacklist"
+﻿<CustomControls:Custom_Window xmlns:CustomControls="clr-namespace:e621_ReBot_v3.CustomControls" x:Class="e621_ReBot_v3.Window_Blacklist"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,4 +9,4 @@
     <Grid>
         <TextBox x:Name="Blacklist_TextBox" Background="Silver" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Margin="2" TabIndex="1" ToolTip="Tags can be combined by entering them on the same line, separated by a space.&#10;Each line is regarded separately.&#10;Use shortened terms 'e', 'q', 's' for ratings.&#10;&#10;Blacklist applies to downloads from e621 via API (pool downloads ignore it)." AcceptsReturn="True" PreviewKeyDown="Blacklist_TextBox_PreviewKeyDown"/>
     </Grid>
-</Window>
+</CustomControls:Custom_Window>

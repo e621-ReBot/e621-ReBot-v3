@@ -27,7 +27,7 @@ using System.Windows.Threading;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_Main : Window
+    public partial class Window_Main : Custom_Window
     {
         internal static Window_Main? _RefHolder;
         public Window_Main()
@@ -593,28 +593,12 @@ namespace e621_ReBot_v3
 
         private async void GB_Clear_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            bool ClearAll = true;
-
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            if (AppSettings.GridAltClear_DoubleClick)
             {
-                await Task.Run(() =>
-                {
-                    lock (Module_Grabber._Grabbed_MediaItems)
-                    {
-                        for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
-                        {
-                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
-                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
-                            if (MediaItemTemp.UP_UploadedID != null)
-                            {
-                                Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
-                            }
-                        }
-                    }
-                });
-                ClearAll = false;
+                if (e.ClickCount != 2) return;
             }
 
+            bool ClearAll = true;
             if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
                 await Task.Run(() =>
@@ -634,13 +618,28 @@ namespace e621_ReBot_v3
                 ClearAll = false;
             }
 
+            if (ClearAll && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                await Task.Run(() =>
+                {
+                    lock (Module_Grabber._Grabbed_MediaItems)
+                    {
+                        for (int i = Module_Grabber._Grabbed_MediaItems.Count - 1; i >= 0; i--)
+                        {
+                            MediaItem? MediaItemTemp = Module_Grabber._Grabbed_MediaItems[i];
+                            DownloadCounter += MediaItemTemp.DL_Queued ? -1 : 0;
+                            if (MediaItemTemp.UP_UploadedID != null)
+                            {
+                                Module_Grabber._Grabbed_MediaItems.RemoveAt(i);
+                            }
+                        }
+                    }
+                });
+                ClearAll = false;
+            }
+
             if (ClearAll)
             {
-                if (AppSettings.GridAltClear_DoubleClick)
-                {
-                    if (e.ClickCount != 2) return;
-                }
-
                 if (AppSettings.GridAltClear_Confirmation)
                 {
                     MessageBoxResult MessageBoxResultTemp = MessageBox.Show(this, "Are you sure you want to clear the grid?", "e621 ReBot", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
@@ -1550,7 +1549,11 @@ namespace e621_ReBot_v3
                 }
                 else
                 {
-                    if (Window_APIKey._RefHolder == null) new Window_APIKey().Show();
+                    if (Window_APIKey._RefHolder == null)
+                    {
+                        Window_APIKey Window_APIKeyTemp = new Window_APIKey();
+                        Window_APIKeyTemp.Show();
+                    }
                 }
             }
             else

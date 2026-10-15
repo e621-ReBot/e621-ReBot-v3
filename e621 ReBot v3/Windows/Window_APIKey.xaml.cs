@@ -1,4 +1,5 @@
-﻿using e621_ReBot_v3.Modules;
+﻿using e621_ReBot_v3.CustomControls;
+using e621_ReBot_v3.Modules;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Text;
@@ -9,7 +10,7 @@ using System.Windows.Input;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_APIKey : Window
+    public partial class Window_APIKey : Custom_Window
     {
         internal static Window_APIKey? _RefHolder;
         public Window_APIKey()
@@ -72,7 +73,17 @@ namespace e621_ReBot_v3
             Window_Main._RefHolder.STB_AppName.Text = AppSettings.AppName;
             return true;
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            API_PasswordBox.Focus();
+            API_PasswordBox.SelectAll();
+        }
 
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            API_PasswordBox.Focus();
+            API_PasswordBox.SelectAll();
+        }
         private void Window_Closed(object sender, EventArgs e)
         {
             Window_Main._RefHolder.Dispatcher.InvokeAsync(() =>

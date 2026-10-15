@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_QuickTags : Window
+    public partial class Window_QuickTags : Custom_Window
     {
         private readonly bool RestorePoolMode = false;
         public Window_QuickTags()

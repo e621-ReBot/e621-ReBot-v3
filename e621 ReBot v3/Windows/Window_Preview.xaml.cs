@@ -24,7 +24,7 @@ using DownloadItem = e621_ReBot_v3.CustomControls.DownloadItem;
 namespace e621_ReBot_v3
 {
 
-    public partial class Window_Preview : Window
+    public partial class Window_Preview : Custom_Window
     {
         internal static Window_Preview? _RefHolder;
         private readonly ChromiumWebBrowser MediaBrowser;
@@ -357,7 +357,7 @@ namespace e621_ReBot_v3
                             GetCachedMedia(MediaItemHolder.DL_FilePath);
                         }
                         AutoTags();
-                        Title = string.Format("Preview ({0}) - .{1} ({2:N2} kB)   ", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength / 1024f);
+                        Title = string.Format("Preview ({0}) - .{1}{2}   ", MediaItemIndexHolder + 1, MediaItemHolder.Grid_MediaFormat, MediaItemHolder.Grid_MediaByteLength == null ? null : $" ({MediaItemHolder.Grid_MediaByteLength / 1024f:N2} kB)");
 
                         if (MediaItemHolder.Grid_MediaMD5Checked == false && MediaItemHolder.UP_UploadedID == null) await Check4MD5On621(MediaItemHolder);
                         break;
@@ -1191,7 +1191,7 @@ namespace e621_ReBot_v3
             panel_Navigation.IsEnabled = true;
         }
 
-        private void AlreadyUploaded_Label_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void AlreadyUploaded_LabelGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             string e6Post = $"https://e621.net/post/show/{MediaItemHolder.UP_UploadedID}";
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
@@ -1202,8 +1202,14 @@ namespace e621_ReBot_v3
             {
                 Window_Main._RefHolder.Activate();
                 Window_Main._RefHolder.ReBot_Menu_ListBox.SelectedIndex = 1;
-                if (Module_CefSharp.BrowserAddress != null && !Module_CefSharp.BrowserAddress.Equals(e6Post)) Module_CefSharp.LoadURL(e6Post);
+                if (Module_CefSharp.CefSharpBrowser.IsInitialized && Module_CefSharp.BrowserAddress != null && !Module_CefSharp.BrowserAddress.Equals(e6Post)) Module_CefSharp.LoadURL(e6Post);
             }
+        }
+
+        private void AlreadyUploaded_Label_TextChanged(object sender, EventArgs e)
+        {
+            //Hide the cursor on 0px width
+            AlreadyUploaded_LabelGrid.IsHitTestVisible = !string.IsNullOrEmpty(AlreadyUploaded_Label.Text);
         }
     }
 }

@@ -303,10 +303,12 @@ namespace e621_ReBot_v3.Modules.Grabber
         private static MediaItem CreateMediaItem(string Post_URL, string Post_MediaURL, string Post_ThumbnailURL, DateTime Post_DateTime, string ArtistName, string Post_Title, string? Post_Text)
         {
             Post_ThumbnailURL = Post_ThumbnailURL.Replace("thumbnails/medium", "thumbnails/large");
-            switch (Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.')))
+
+            string Post_Format = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1);
+            switch (Post_Format)
             {
-                case ".mp4":
-                case ".swf":
+                case "mp4":
+                case "swf":
                     {
                         if (CheckURLExists(Post_ThumbnailURL).Result == false)
                             Post_ThumbnailURL = "https://nl.ib.metapix.net/images80/overlays/video.png";
@@ -314,7 +316,7 @@ namespace e621_ReBot_v3.Modules.Grabber
                         break;
                     }
 
-                case ".gif":
+                case "gif":
                     {
                         //Post_ThumbnailURL = Post_MediaURL.Replace("files/full", "files/screen");
                         break;
@@ -322,7 +324,8 @@ namespace e621_ReBot_v3.Modules.Grabber
 
                 default:
                     {
-                        //Post_ThumbnailURL = Post_MediaURL.Substring(0, Post_MediaURL.Length - 4) + "_noncustom.jpg";
+                        if (!Post_ThumbnailURL.Contains("_noncustom."))
+                            Post_ThumbnailURL = Post_ThumbnailURL.Substring(0, Post_ThumbnailURL.Length - 4) + "_noncustom.jpg";
                         break;
                     }
             }
@@ -336,10 +339,11 @@ namespace e621_ReBot_v3.Modules.Grabber
                 Grab_Artist = ArtistName,
                 Grab_Title = $"⮚ {Post_Title} ⮘ by {ArtistName} on Inkbunny",
                 Grab_TextBody = Post_Text,
-                Grid_MediaFormat = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1),
+                Grid_MediaFormat = Post_Format,
                 //Grid_MediaByteLength = Module_Grabber.GetMediaSize(Post_MediaURL), it's not full data anyway, so don't make extra requests
                 UP_Tags = Post_DateTime.Year.ToString(),
-                UP_IsWhitelisted = true
+                UP_IsWhitelisted = true,
+                UP_IsVideoWhitelisted = true
             };
             return MediaItemTemp;
         }

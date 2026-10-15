@@ -1,4 +1,5 @@
-﻿using System;
+﻿using e621_ReBot_v3.CustomControls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Windows.Input;
 
 namespace e621_ReBot_v3
 {
-    public partial class Window_Blacklist : Window
+    public partial class Window_Blacklist : Custom_Window
     {
         internal static Window_Blacklist? _RefHolder;
         public Window_Blacklist()

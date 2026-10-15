@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace e621_ReBot_v3.CustomControls
 {
-    public partial class Custom_InputBox : Window
+    public partial class Custom_InputBox : Custom_Window
     {
         public Custom_InputBox(Window OwnerRef)
         {

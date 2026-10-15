@@ -1,4 +1,4 @@
-﻿<Window
+﻿<CustomControls:Custom_Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Tagger" Height="240" Width="420" SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" ResizeMode="NoResize" Cursor="{StaticResource Cursor_Default}" Closing="Window_Closing" Closed="Window_Closed" Loaded="Window_Loaded" Activated="Window_Activated">
 
-    <Window.Resources>
+    <CustomControls:Custom_Window.Resources>
         <Style x:Key="ButtonTaggerStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
@@ -19,7 +19,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-    </Window.Resources>
+    </CustomControls:Custom_Window.Resources>
 
     <Grid>
         <TextBox x:Name="Title_TextBox" Height="24" Background="Transparent" VerticalAlignment="Top" Margin="1,1,48,1" BorderBrush="Black" VerticalContentAlignment="Center" Text="Title" AllowDrop="False" IsTabStop="False" KeyDown="Title_TextBox_KeyDown" ToolTip="This is Media's title"/>
@@ -35,4 +35,4 @@
         <TextBox x:Name="Tags_TextBox" Background="Transparent" Margin="1,51,1,1" BorderBrush="Black" Text="Tags Tags Tags" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" KeyDown="Tags_TextBox_KeyDown" PreviewKeyDown="Tags_TextBox_PreviewKeyDown" ToolTip="Add tags for media here" SelectionChanged="Tags_TextBox_SelectionChanged" PreviewMouseLeftButtonDown="Tags_TextBox_PreviewMouseLeftButtonDown"/>
         <TextBox x:Name="Description_TextBox" Background="#3F000000" Margin="1,51,1,1" BorderBrush="Black" Text="Description" AllowDrop="False" IsTabStop="False" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True" IsReadOnlyCaretVisible="True" Visibility="Hidden"/>
     </Grid>
-</Window>
+</CustomControls:Custom_Window>
