@@ -33,7 +33,3 @@ Features:
 - Download archive from https://github.com/e621-ReBot/e621-ReBot-v3/releases/tag/v3.0.0.217-full
 - Extract archive, run the ReBot.exe
 - For manual updates, just overwrite older files
-
----
-### Discord:
-https://discord.gg/7ncEzah
