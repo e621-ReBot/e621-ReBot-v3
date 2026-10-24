@@ -119,6 +119,7 @@ namespace e621_ReBot_Updater
                             }
                             else //file
                             {
+                                if (ZipEntry.FullName.Contains("e621 ReBot Updater")) continue; //skip self
                                 ZipEntry.ExtractToFile(Path.Combine("./", ZipEntry.FullName), true);
                             }
                         }
