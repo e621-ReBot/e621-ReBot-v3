@@ -7,6 +7,7 @@ using HtmlAgilityPack;
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 
@@ -17,7 +18,7 @@ namespace e621_ReBot_v3.Modules
         internal static ChromiumWebBrowser? CefSharpBrowser;
 
         private static readonly BrowserControl _browserControl = BrowserControl._RefHolder;
-        internal static void InitializeBrowser()
+        internal static async Task InitializeBrowser()
         {
             string BasePath = AppDomain.CurrentDomain.BaseDirectory;
             string CefPath = Path.Combine(BasePath, "CefSharp Browser");

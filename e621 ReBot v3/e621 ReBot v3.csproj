@@ -11,7 +11,7 @@
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
-		<FileVersion>3.0.0.216</FileVersion>
+		<FileVersion>3.0.0.217</FileVersion>
 		<StartupObject>e621_ReBot_v3.App</StartupObject>
 		<ApplicationIcon>Resources\ReBot_Icon.ico</ApplicationIcon>
 		<RepositoryUrl>https://github.com/e621-ReBot/e621-ReBot-v3</RepositoryUrl>
@@ -179,10 +179,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CefSharp.Wpf.NETCore" Version="147.0.100" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+		<PackageReference Include="CefSharp.Wpf.NETCore" Version="154.0.340" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="154.0.34" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="154.0.34" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="154.0.34" />
 	</ItemGroup>
 </Project>
 

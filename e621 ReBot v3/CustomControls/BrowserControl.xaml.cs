@@ -32,27 +32,23 @@ namespace e621_ReBot_v3.CustomControls
             BB_Scroll.Visibility = Visibility.Collapsed;
         }
 
-        internal void InitilizeBrowser()
+        internal async void InitilizeBrowser()
         {
             if (Module_CefSharp.CefSharpBrowser == null)
             {
                 Window_Main._RefHolder.ReBot_Menu_ListBox.IsEnabled = false;
                 Window_Main._RefHolder.ReBot_Menu_ListBox.SelectedIndex = 1;
-                DispatcherTimer DispatcherTimerTemp = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-                DispatcherTimerTemp.Tick += (sender, args) =>
-                {
-                    DispatcherTimerTemp.Stop();
 
-                    Module_CefSharp.InitializeBrowser();
-                    BrowserGrid.Children.Add(Module_CefSharp.CefSharpBrowser);
-                    Grid.SetRow(Module_CefSharp.CefSharpBrowser, 1);
+                await Task.Delay(1000);
 
-                    Visibility = Visibility.Visible;
-                    Window_Main._RefHolder.ReBot_e6Button.Cursor = KeyboardHotkeys.Cursor_ReBotNav;
-                    Window_Main._RefHolder.ReBot_Menu_ListBox.IsEnabled = true;
-                    if (AppSettings.DevMode) BB_DevTools.Visibility = Visibility.Visible;
-                };
-                DispatcherTimerTemp.Start();
+                await Module_CefSharp.InitializeBrowser();
+                BrowserGrid.Children.Add(Module_CefSharp.CefSharpBrowser);
+                Grid.SetRow(Module_CefSharp.CefSharpBrowser, 1);
+
+                Visibility = Visibility.Visible;
+                Window_Main._RefHolder.ReBot_e6Button.Cursor = KeyboardHotkeys.Cursor_ReBotNav;
+                Window_Main._RefHolder.ReBot_Menu_ListBox.IsEnabled = true;
+                if (AppSettings.DevMode) BB_DevTools.Visibility = Visibility.Visible;
             }
         }
 
