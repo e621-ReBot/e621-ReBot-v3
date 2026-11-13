@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +26,8 @@ namespace e621_ReBot_v3.Modules
         private static readonly HttpClient _Client = new HttpClient(_Handler)
         {
             Timeout = TimeSpan.FromSeconds(30),
-            DefaultRequestVersion = HttpVersion.Version30
+            DefaultRequestVersion = HttpVersion.Version30,
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower
         };
 
         internal static async Task<DownloadResult> DownloadBytesAsync(string URL, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -50,11 +52,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task<DownloadResult> DownloadStringAsync(string URL, CancellationToken cancellationToken = default, string? AuthHeader = null)
         {
-            using HttpRequestMessage HttpRequestMessageTemp = CreateRequest(URL, HttpMethod.Get);
-            if (!string.IsNullOrEmpty(AuthHeader))
-                HttpRequestMessageTemp.Headers.Authorization = new AuthenticationHeaderValue("Basic", AuthHeader);
-
-            using HttpResponseMessage HttpResponseMessageTemp = await _Client.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using HttpResponseMessage HttpResponseMessageTemp = await SendAsync(URL, cancellationToken, AuthHeader);
 
             string Content = await HttpResponseMessageTemp.Content.ReadAsStringAsync(cancellationToken);
             return new DownloadResult
@@ -67,9 +65,7 @@ namespace e621_ReBot_v3.Modules
 
         private static async Task<DownloadResult> DownloadStreamAsync(string URL, Stream destination, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage HttpRequestMessageTemp = CreateRequest(URL, HttpMethod.Get);
-            using HttpResponseMessage HttpResponseMessageTemp = await _Client.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
+            using HttpResponseMessage HttpResponseMessageTemp = await SendAsync(URL, cancellationToken);
             if (HttpResponseMessageTemp.IsSuccessStatusCode)
             {
                 long? totalBytes = HttpResponseMessageTemp.Content.Headers.ContentLength;
@@ -81,7 +77,30 @@ namespace e621_ReBot_v3.Modules
 
                 while (true)
                 {
-                    int BytesRead = await DownloadStream.ReadAsync(DownloadBuffer.AsMemory(), cancellationToken);
+                    using CancellationTokenSource ReadTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    ReadTimeout.CancelAfter(TimeSpan.FromSeconds(30));
+
+                    int BytesRead;
+                    try
+                    {
+                        BytesRead = await DownloadStream.ReadAsync(DownloadBuffer.AsMemory(), ReadTimeout.Token);
+                    }
+                    catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                    {
+                        return new DownloadResult
+                        {
+                            StatusCode = HttpStatusCode.GatewayTimeout,
+                            Message = "Download timed out: no data received for 30 seconds."
+                        };
+                    }
+                    catch (IOException)
+                    {
+                        return new DownloadResult
+                        {
+                            StatusCode = HttpStatusCode.InternalServerError,
+                            Message = "Download error: connection interrupted."
+                        };
+                    }
 
                     if (BytesRead == 0)
                         break;
@@ -107,8 +126,7 @@ namespace e621_ReBot_v3.Modules
 
         internal static async Task<DownloadResult> HeadRequestAsync(string URL, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage HttpRequestMessageTemp = CreateRequest(URL, HttpMethod.Head);
-            using HttpResponseMessage HttpResponseMessageTemp = await _Client.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using HttpResponseMessage HttpResponseMessageTemp = await SendAsync(URL, cancellationToken, HeadRequest: true);
 
             return new DownloadResult
             {
@@ -117,6 +135,63 @@ namespace e621_ReBot_v3.Modules
                 Message = HttpResponseMessageTemp.ReasonPhrase
             };
         }
+
+
+        private static async Task<HttpResponseMessage> SendAsync(string URL, CancellationToken cancellationToken = default, string? AuthHeader = null, bool HeadRequest = false)
+        {
+            HttpResponseMessage ReturnResponse = new HttpResponseMessage();
+            for (int Attempt = 0; Attempt < 4; Attempt++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    using HttpRequestMessage HttpRequestMessageTemp = CreateRequest(URL, HeadRequest ? HttpMethod.Head : HttpMethod.Get);
+                    HttpRequestMessageTemp.Version = HttpVersion.Version30;
+                    HttpRequestMessageTemp.VersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
+                    if (!string.IsNullOrEmpty(AuthHeader))
+                        HttpRequestMessageTemp.Headers.Authorization = new AuthenticationHeaderValue("Basic", AuthHeader);
+
+                    HttpResponseMessage HttpResponseMessageTemp = await _Client.SendAsync(HttpRequestMessageTemp, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+                    int StatusCode = (int)HttpResponseMessageTemp.StatusCode;
+                    bool ShouldRetry = StatusCode is
+                        408 or  // Request Timeout
+                        425 or  // Too Early
+                        429 or  // Too Many Requests
+                        500 or  // Internal Server Error
+                        502 or  // Bad Gateway
+                        503 or  // Service Unavailable
+                        504;    // Gateway Timeout
+
+                    if (!ShouldRetry)
+                    {
+                        ReturnResponse.Dispose();
+                        return HttpResponseMessageTemp;
+                    }
+
+                    //Got to read header first
+                    TimeSpan Delay = HttpResponseMessageTemp.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(Math.Pow(2, Attempt + 1));
+
+                    HttpResponseMessageTemp.Dispose();
+
+                    if (Delay < TimeSpan.Zero) Delay = TimeSpan.Zero;
+                    if (Delay > TimeSpan.FromSeconds(30)) Delay = TimeSpan.FromSeconds(30);
+
+                    await Task.Delay(Delay, cancellationToken);
+                }
+                catch (Exception ex) when ((ex is HttpRequestException or IOException or SocketException or OperationCanceledException) && !cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, Attempt + 1)), cancellationToken);
+
+                    ReturnResponse.StatusCode = HttpStatusCode.InternalServerError;
+                    ReturnResponse.ReasonPhrase = ex.Message;
+                }
+            }
+
+            return ReturnResponse;
+        }
+
 
         //Handle headers
         private static HttpRequestMessage CreateRequest(string URL, HttpMethod HttpMethodRef)

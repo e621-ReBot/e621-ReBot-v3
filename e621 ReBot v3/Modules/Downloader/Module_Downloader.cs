@@ -787,13 +787,6 @@ namespace e621_ReBot_v3.Modules
         // - - - - - - - - - - - - - - - -
 
         internal static uint SessionDownloads = 0;
-        private static readonly HashSet<string> ErrorSkipList = new HashSet<string>
-            {
-                "An existing connection was forcibly closed by the remote host.",
-                "An error occurred while sending the request.",
-                "A connection attempt failed because the connected party did not properly respond after a period of time,"
-            };
-
         internal static readonly SolidColorBrush CompletedWorkBrush = new SolidColorBrush(Colors.LimeGreen);
         internal static readonly SolidColorBrush FailedWorkBrush = new SolidColorBrush(Colors.Maroon);
         private static readonly HashSet<string> FileDownloadInProgress = new HashSet<string>();
@@ -914,101 +907,68 @@ namespace e621_ReBot_v3.Modules
                 {
                     // Server returned an HTTP error
                     Report_Info(DownloadResultTemp.Message);
-                }
-            }
-        }
 
-        private static async void Download_FileDLFinished(object? sender, AsyncCompletedEventArgs e)
-        {
-            DownloadVE DownloadVETemp = (DownloadVE)e.UserState;
-            string MediaURL = DownloadVETemp._DownloadItemRef.Grab_MediaURL;
+                    //decide how to handle errors here.
+                    //decide how to handle errors here.
+                    //decide how to handle errors here.
 
-            if (e.Cancelled) //timeout detected, cancelled it;
-            {
-                if (AppSettings.Download_IgnoreErrors)
-                {
-                    if (!CheckDownloadQueue4Duplicate(MediaURL))
+                    lock (FileDownloadInProgress)
                     {
-                        await Task.Run(() =>
-                        {
-                            lock (_2Download_DownloadItems)
-                            {
-                                //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                                _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                            }
-                        });
+                        FileDownloadInProgress.Remove((string)DownloadVERef.FolderIcon.Tag);
                     }
-                    DLThreadsWaiting++;
-                    DownloadVETemp.DownloadFinish();
-                    DownloadVETemp._DownloadFinished = true;
-                    UpdateDownloadTreeView();
-                    return;
-                }
 
-                Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
-                MessageBox.Show(Window_Main._RefHolder, "Timeout has been detected, further downloads have been paused!", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                if (!CheckDownloadQueue4Duplicate(MediaURL))
-                {
-                    await Task.Run(() =>
+                    if (AppSettings.Download_IgnoreErrors)
                     {
-                        lock (_2Download_DownloadItems)
+                        if (!CheckDownloadQueue4Duplicate(DownloadVERef._DownloadItemRef.Grab_MediaURL))
                         {
-                            _2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                            await Task.Run(() =>
+                            {
+                                lock (_2Download_DownloadItems)
+                                {
+                                    //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
+                                    _2Download_DownloadItems.Add(DownloadVERef._DownloadItemRef);
+                                }
+                            });
                         }
-                    });
-                }
-                DLThreadsWaiting++;
-                DownloadVETemp.DownloadFinish();
-                DownloadVETemp._DownloadFinished = true;
-                UpdateDownloadTreeView();
-                return;
-            }
+                        DLThreadsWaiting++;
+                        DownloadVERef.DownloadFinish();
+                        DownloadVERef._DownloadFinished = true;
 
-            if (e.Error != null)
-            {
-                if (!CheckDownloadQueue4Duplicate(MediaURL))
-                {
-                    await Task.Run(() =>
-                    {
-                        lock (_2Download_DownloadItems)
-                        {
-                            //_2Download_DownloadItems.Insert(0, DownloadVETemp._DownloadItemRef);
-                            _2Download_DownloadItems.Add(DownloadVETemp._DownloadItemRef);
-                        }
-                    });
-                }
-                DLThreadsWaiting++;
-                DownloadVETemp.DownloadFinish();
-                DownloadVETemp._DownloadFinished = true;
-                UpdateDownloadTreeView();
-
-                if (AppSettings.Download_IgnoreErrors) return;
-
-                //Just report other errors.
-                string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
-                if (!ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
-                {
-                    Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
-                    if (ErrorMsg.Contains("There is not enough space on the disk."))
-                    {
-                        if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true)
-                        {
-                            //Also stop downloads when disk is full
-                            //Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
-                            //Show error just the first time
-                            MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        UpdateDownloadTreeView();
                         return;
                     }
-                    MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                    string MediaURL = DownloadVERef._DownloadItemRef.Grab_MediaURL;
+                    DLThreadsWaiting++;
+                    DownloadVERef.DownloadFinish();
+                    DownloadVERef._DownloadFinished = true;
+
+                    MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{DownloadResultTemp.Message}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
+
+                    ////Just report other errors.
+                    //string ErrorMsg = e.Error.InnerException == null ? e.Error.Message : e.Error.InnerException.Message;
+                    //if (!ErrorSkipList.Any(Error2Skip => ErrorMsg.Contains(Error2Skip)))
+                    //{
+                    //    Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                    //    if (ErrorMsg.Contains("There is not enough space on the disk."))
+                    //    {
+                    //        if (Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked == true)
+                    //        {
+                    //            //Also stop downloads when disk is full
+                    //            //Window_Main._RefHolder.DownloadQueue_CheckBox.IsChecked = false;
+                    //            //Show error just the first time
+                    //            MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //        }
+                    //        return;
+                    //    }
+                    //    MessageBox.Show(Window_Main._RefHolder, $"{MediaURL}\n{ErrorMsg}", "e621 ReBot Downloader", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //}
                 }
-                return;
             }
-
-            //Passed cancel and error check so it should be finished
         }
-
         internal static DispatcherTimer _DownloadVEFinisherTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         private static void DownloadVEFinisherTimer_Tick(object? sender, EventArgs e)
         {
