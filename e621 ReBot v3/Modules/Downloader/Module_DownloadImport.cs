@@ -53,7 +53,7 @@ namespace e621_ReBot_v3.Modules.Downloader
                 int lastQuoteStart = FirstTask.LastIndexOf('"', lastQuoteEnd - 1);
 
                 char[] invalidChars = Path.GetInvalidFileNameChars();
-                folderName = FirstTask.Substring(lastQuoteStart + 1, lastQuoteEnd - lastQuoteStart - 1);
+                folderName = FirstTask.Substring(lastQuoteStart + 1, lastQuoteEnd - lastQuoteStart - 1).Trim();
                 folderName = string.Concat(folderName.Where(c => !invalidChars.Contains(c)));
 
                 string[] tagHolder = FirstTask.Substring(0, lastQuoteStart).Split(' ', StringSplitOptions.RemoveEmptyEntries);

@@ -928,7 +928,7 @@ namespace e621_ReBot_v3
 
         private async void InferiorSub(string PostID)
         {
-            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json?v2=true&mode=thumbnails"));
+            string? PostTest = await Module_e621APIController.EnqueuePriorityWork(() => Module_e621Data.DataDownload($"https://e621.net/posts/{PostID}.json?mode=thumbnails"));
             if (string.IsNullOrEmpty(PostTest) || PostTest.Length < 16 || PostTest.StartsWith('ⓔ'))
             {
                 MessageBox.Show(this, $"Post with ID#{PostID} does not exist.", "e621 ReBot", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -940,7 +940,7 @@ namespace e621_ReBot_v3
                 return;
             }
 
-            JToken PostData = JObject.Parse(PostTest)["post"];
+            JToken PostData = JObject.Parse(PostTest);
             MediaItemHolder.UP_Rating = ((string)PostData["rating"]).ToUpper();
             MediaItemHolder.UP_UploadedID = PostID;
 
@@ -980,31 +980,21 @@ namespace e621_ReBot_v3
                 return;
             }
 
-            JToken PostData = JObject.Parse(PostTest)["post"];
+            JToken PostData = JObject.Parse(PostTest);
             _RefHolder.MediaItemHolder.UP_Rating = ((string)PostData["rating"]).ToUpper();
-            List<string> SortTags = new List<string>();
-            foreach (JProperty pTag in PostData["tags"].Children())
+
+            //Tags
+            HashSet<string> TagList = PostData["tags"].Values<string>().ToHashSet();
+            //Pools
+            TagList.UnionWith(PostData["pools"].Values<string>());
+            //Parent
+            if ((bool)PostData["has"]["parent"])
             {
-                foreach (JToken cTag in pTag.First)
-                {
-                    SortTags.Add((string)cTag);
-                }
-            }
-            SortTags.Sort();
-            if (PostData["pools"].Children().Any())
-            {
-                foreach (JToken pPool in PostData["pools"].Children())
-                {
-                    SortTags.Add($"pool:{(string)pPool}");
-                }
-            }
-            string InferiorParentID = (string)PostData["relationships"]["parent_id"];
-            if (InferiorParentID != null)
-            {
-                SortTags.Add($"parent:{InferiorParentID}");
+                string InferiorParentID = (string)PostData["relationships"]["parent_id"];
+                TagList.Add($"parent:{InferiorParentID}");
                 MediaItemRef.UP_Inferior_ParentID = InferiorParentID;
             }
-            MediaItemRef.UP_Tags = string.Join(' ', SortTags);
+            MediaItemRef.UP_Tags = string.Join(' ', TagList);
 
             MediaItemRef.UP_Inferior_ID = PostID;
             string InferiorDescription = (string)PostData["description"];
@@ -1016,25 +1006,15 @@ namespace e621_ReBot_v3
 
             if (PostData["sources"].Children().Any())
             {
-                List<string> SourceList = new List<string>();
-                foreach (JToken cChild in PostData["sources"])
-                {
-                    SourceList.Add((string)cChild);
-                }
-                MediaItemRef.UP_Inferior_Sources = SourceList;
+                MediaItemRef.UP_Inferior_Sources = PostData["sources"].Values<string>().ToList();
             }
 
-            if ((bool)PostData["relationships"]["has_children"])
+            if ((bool)PostData["has"]["children"])
             {
-                List<string> ChildList = new List<string>();
-                foreach (JToken cChild in PostData["relationships"]["children"])
-                {
-                    ChildList.Add((string)cChild);
-                }
-                MediaItemRef.UP_Inferior_Children = ChildList;
+                MediaItemRef.UP_Inferior_Children = PostData["relationships"]["children"].Values<string>().ToList();
             }
 
-            if ((bool)PostData["has_notes"])
+            if ((bool)PostData["has"]["notes"])
             {
                 // when they fix api this should no longer take 2 requests to get notes
                 //should I bump it to top of list?
@@ -1042,7 +1022,7 @@ namespace e621_ReBot_v3
                 if (!string.IsNullOrEmpty(PostTest) && !PostTest.StartsWith('ⓔ') && !PostTest.StartsWith('{'))
                 {
                     MediaItemRef.UP_Inferior_HasNotes = true;
-                    float NewNoteSizeRatio = Math.Max((float)MediaItemRef.Grid_MediaWidth, (float)MediaItemRef.Grid_MediaHeight) / Math.Max((uint)PostData["file"]["width"], (uint)PostData["file"]["height"]);
+                    float NewNoteSizeRatio = Math.Max((float)MediaItemRef.Grid_MediaWidth, (float)MediaItemRef.Grid_MediaHeight) / Math.Max((uint)PostData["files"]["original"]["width"], (uint)PostData["files"]["original"]["height"]);
                     MediaItemRef.UP_Inferior_NoteSizeRatio = NewNoteSizeRatio;
                 }
             }

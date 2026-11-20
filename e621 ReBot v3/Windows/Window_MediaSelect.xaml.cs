@@ -396,11 +396,11 @@ namespace e621_ReBot_v3
                 JArray e6SimilarData = JArray.Parse(JSON_SimilarData);
                 foreach (JObject e6Post in e6SimilarData)
                 {
-                    JToken PostHolder = e6Post["post"]["posts"];
+                    JToken PostHolder = e6Post["post"];
                     MediaSelectItem MediaSelectItemTemp = new MediaSelectItem
                     {
                         PostID = (string)PostHolder["id"],
-                        Tag = (string)PostHolder["tag_string"],
+                        Tag = string.Join(' ', PostHolder["tags"].Values<string>()),
                         Cursor = Cursors.No,
                     };
                     MediaSelectItemTemp.cIsUploaded_TextBlock.FontSize = 14;
@@ -410,17 +410,17 @@ namespace e621_ReBot_v3
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Margin = new Thickness(4, 4, 0, 0);
                     MediaSelectItemTemp.ChangeRating(((string)PostHolder["rating"]).ToUpper());
                     string PostID = $"#{(string)PostHolder["id"]}";
-                    string MediaSize = $"{(ushort)PostHolder["image_width"]} x {(ushort)PostHolder["image_height"]}";
+                    string MediaSize = $"{(ushort)PostHolder["files"]["original"]["width"]} x {(ushort)PostHolder["files"]["original"]["height"]}";
                     string? MediaFormat = null;
-                    string ByteSize = $"{(uint)((uint)PostHolder["file_size"] / 1024f)} kB";
-                    if ((bool)PostHolder["is_deleted"])
+                    string ByteSize = $"{(uint)((uint)PostHolder["files"]["meta"]["size"] / 1024f)} kB";
+                    if ((bool)PostHolder["flags"]["deleted"])
                     {
                         MediaSelectItemTemp.cThumbnail_Image.Source = MediaDeletedThumb;
                     }
                     else
                     {
-                        MediaFormat = $".{(string)PostHolder["file_ext"]}";
-                        MediaSelectItemTemp.cThumbnail_Image.Source = new BitmapImage(new Uri((string)PostHolder["preview_file_url"], UriKind.Absolute));
+                        MediaFormat = $".{(string)PostHolder["files"]["meta"]["ext"]}";
+                        MediaSelectItemTemp.cThumbnail_Image.Source = new BitmapImage(new Uri((string)PostHolder["files"]["preview"]["jpg"], UriKind.Absolute));
                     }
                     MediaSelectItemTemp.cIsUploaded_TextBlock.Text = $"{PostID} - {MediaSize}{(MediaFormat == null ? null : $" {MediaFormat}")}\n{ByteSize}";
 
