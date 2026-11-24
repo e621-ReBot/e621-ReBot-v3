@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace e621_ReBot_v3.Modules.Grabber
 {
-    internal static partial class Module_Twitter
+    internal static partial class Module_Twitter_G
     {
         internal static JArray? TwitterJSONHolder;
 
@@ -108,7 +108,7 @@ namespace e621_ReBot_v3.Modules.Grabber
             //JSONSource = string.IsNullOrEmpty(JSONSource) ? await Module_Grabber.GetPageSource(WebAddress, Module_CookieJar.Cookies_Twitter) : JSONSource;
             if (string.IsNullOrEmpty(JSONSource))
             {
-                Module_Grabber.Report_Info($"Error encountered in Module_Twitter.Grab [@{WebAddress}]");
+                Module_Grabber.Report_Info($"Error encountered in Module_Twitter_G.Grab [@{WebAddress}]");
                 return;
             }
 
@@ -157,27 +157,21 @@ namespace e621_ReBot_v3.Modules.Grabber
                     }
                     Post_MediaURL = (string?)BestVideo["url"];
                     if (Post_MediaURL.Contains('?')) Post_MediaURL = Post_MediaURL.Substring(0, Post_MediaURL.IndexOf('?'));
-
-                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
-                    {
-                        SkipCounter += 1;
-                        continue;
-                    }
                 }
                 else
                 {
                     Post_MediaURL = (string)MediaNode["media_url_https"];
-                    string TempMediaURL = $"{Post_MediaURL}{(Post_MediaURL.EndsWith(".mp4") ? null : ":orig")}";
-
-                    if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
-                    {
-                        SkipCounter += 1;
-                        continue;
-                    }
                 }
-                Post_ThumbnailURL = (string)MediaNode["media_url_https"];
-                string FormatHolder = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1);
+                string FormatHolder = Post_MediaURL.Substring(Post_MediaURL.LastIndexOf('.') + 1); //Take it before :orig
                 Post_MediaURL = $"{Post_MediaURL}{(Post_MediaURL.EndsWith(".mp4") ? null : ":orig")}";
+
+                if (!Module_Grabber.CheckShouldGrabConditions(Post_MediaURL))
+                {
+                    SkipCounter += 1;
+                    continue;
+                }
+
+                Post_ThumbnailURL = (string)MediaNode["media_url_https"];
 
                 MediaItem MediaItemTemp = new MediaItem
                 {

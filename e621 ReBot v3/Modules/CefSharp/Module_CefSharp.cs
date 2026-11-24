@@ -164,7 +164,7 @@ namespace e621_ReBot_v3.Modules
         private static void CefSharpBrowser_AddressChanged(object? sender, DependencyPropertyChangedEventArgs e)
         {
             BrowserAddress = e.NewValue.ToString();
-            Module_Twitter.TwitterJSONHolder = null;
+            Module_Twitter_G.TwitterJSONHolder = null;
             Module_Mastodons.MastodonsJSONHolder = null;
             Module_Itaku.ItakuSingleJSONHolder = null;
             Module_Itaku.ItakuMultiJSONHolder = null;

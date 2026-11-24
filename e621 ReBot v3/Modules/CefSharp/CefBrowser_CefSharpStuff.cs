@@ -231,10 +231,11 @@ namespace CefSharp
                         if (response.MimeType.Equals("application/json"))
                         {
                             string Data2String = Encoding.UTF8.GetString(MemoryStreamHolder.ToArray());
-                            if (Data2String.Length > 64 && Module_Twitter.VerifyJSONValid(Twitter, Data2String))
+                            if (Data2String.Length > 64 && Module_Twitter_G.VerifyJSONValid(Twitter, Data2String))
                             {
                                 Module_Grabber.GrabEnabler(Module_CefSharp.BrowserAddress);
                                 Module_Grabber.ScrollEnabler(Module_CefSharp.BrowserAddress);
+                                Module_Downloader.DownloadEnabler(Module_CefSharp.BrowserAddress);
                             }
                         }
                         break;

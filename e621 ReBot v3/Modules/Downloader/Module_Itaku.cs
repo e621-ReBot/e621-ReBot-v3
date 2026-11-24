@@ -35,8 +35,6 @@ namespace e621_ReBot_v3.Modules.Downloader
 
             if (Module_Downloader.CheckDownloadQueue4Duplicate(MediaURL)) return;
 
-            string? Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
-
             //https://itaku.ee/api/media/gallery_imgs/xyz/sm_REFLb27.png //small
             //https://itaku.ee/api/media/gallery_imgs/xyz/lg_i96zjR1.png //large
             //https://itaku.ee/api/media/gallery_imgs/xyz/xl_GoYCeeW.png //extra large
@@ -46,6 +44,8 @@ namespace e621_ReBot_v3.Modules.Downloader
             {
                 ThumbURL = ThumbURL.Replace("/xl", "/sm");
             }
+
+            string Media_Format = MediaURL.Substring(MediaURL.LastIndexOf('.') + 1);
 
             Module_Downloader.AddDownloadItem2Queue(
                 PageURL: WebAddress,

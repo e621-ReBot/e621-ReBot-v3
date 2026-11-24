@@ -232,7 +232,7 @@ namespace e621_ReBot_v3.Modules
 
                 case "x.com": //was twitter.com before
                     {
-                        Task.Run(() => Module_Twitter.Queue_Prepare(WebAddress));
+                        Task.Run(() => Module_Twitter_G.Queue_Prepare(WebAddress));
                         break;
                     }
 
@@ -444,7 +444,7 @@ namespace e621_ReBot_v3.Modules
 
                 case "x.com":
                     {
-                        await Module_Twitter.Grab(WebAddress, (string)NeededData);
+                        await Module_Twitter_G.Grab(WebAddress, (string)NeededData);
                         break;
                     }
 

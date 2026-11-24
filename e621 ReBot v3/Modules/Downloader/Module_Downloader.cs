@@ -65,6 +65,7 @@ namespace e621_ReBot_v3.Modules
                 //new Regex(@".+www.plurk.com/(p/)?\w+"),
                 //new Regex(@".+mastodon.social/@.+/(\d+|media)"),
                 //new Regex(@".+baraag.net/@.+(\d+|media)"),
+                new Regex(@"^\w+://x\.com/.+/status/\d+/?(photo/\d+)?"),
 
                 //- - - Download only
 
@@ -698,11 +699,11 @@ namespace e621_ReBot_v3.Modules
                 //        break;
                 //    }
 
-                //case "x.com":
-                //    {
-                //        Module_Twitter.Grab(WebAddress, (string)NeededData);
-                //        break;
-                //    }
+                case "x.com":
+                    {
+                        Module_Twitter_D.GrabMediaLinks(WebAddress);
+                        break;
+                    }
 
                 //case string Newgrounds when Newgrounds.Contains(".newgrounds.com"):
                 //    {
